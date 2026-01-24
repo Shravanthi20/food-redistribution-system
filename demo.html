@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FreshSave | Authentication Demo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #006644;
+            --primary-hover: #004d33;
+            --secondary-color: #e8f5e9;
+            --text-dark: #2d3436;
+            --text-light: #636e72;
+            --background: #f8faf9;
+            --white: #ffffff;
+            --error: #d63031;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            --border-radius: 20px;
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--background);
+            color: var(--text-dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .auth-container {
+            background: var(--white);
+            padding: 40px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            animation: slideUp 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .auth-logo {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .auth-title {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .auth-subtitle {
+            color: var(--text-light);
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+        }
+
+        .social-auth {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .social-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 12px;
+            border: 1.5px solid #eee;
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            color: var(--text-dark);
+            width: 100%;
+        }
+
+        .social-button:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            background: #fdfdfd;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 25px 0;
+            color: #ccc;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #eee;
+        }
+
+        .divider span {
+            margin: 0 10px;
+            font-size: 0.85rem;
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .input-group {
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid #eee;
+            border-radius: 12px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input:focus {
+            border-color: var(--primary-color);
+        }
+
+        .submit-button {
+            background: var(--primary-color);
+            color: white;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-button:hover {
+            background: var(--primary-hover);
+        }
+
+        .toggle-auth {
+            margin-top: 25px;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .toggle-auth span {
+            color: var(--primary-color);
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        /* Background elements */
+        .blob {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: rgba(0, 102, 68, 0.05);
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: 0;
+        }
+
+        .blob-1 {
+            top: -50px;
+            left: -50px;
+        }
+
+        .blob-2 {
+            bottom: -50px;
+            right: -50px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <div class="auth-container">
+        <div class="auth-logo">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8a8 8 0 0 1-8 8Z"></path>
+                <path d="M19 10c0 1.2-1.2 2-2 2s-2-1.2-2-2"></path>
+                <path d="M11 20c-1.7 0-3-1.3-3-3s1.3-3 3-3 3 1.3 3 3-1.3 3-3 3Z"></path>
+            </svg>
+            <span>FreshSave</span>
+        </div>
+
+        <h1 id="auth-title" class="auth-title">Welcome Back</h1>
+        <p id="auth-subtitle" class="auth-subtitle">Log in to save delicious food from going to waste.</p>
+
+        <div class="social-auth">
+            <button class="social-button" onclick="alert('Google Auth Triggered')">
+                <img src="https://www.google.com/favicon.ico" alt="Google" width="20">
+                Continue with Google
+            </button>
+            <button class="social-button" onclick="alert('Apple Auth Triggered')">
+                <img src="https://www.apple.com/favicon.ico" alt="Apple" width="20">
+                Continue with Apple
+            </button>
+        </div>
+
+        <div class="divider"><span>or</span></div>
+
+        <form class="auth-form"
+            onsubmit="event.preventDefault(); alert('Form submitted: ' + document.getElementById('email').value)">
+            <div class="input-group">
+                <label>Email Address</label>
+                <input type="email" id="email" placeholder="name@example.com" required>
+            </div>
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" id="password" placeholder="••••••••" required>
+            </div>
+            <button class="submit-button" id="submit-btn">Log In</button>
+        </form>
+
+        <p class="toggle-auth">
+            <span id="toggle-text">Don't have an account?</span>
+            <span id="toggle-link" onclick="toggleAuth()">Register Now</span>
+        </p>
+    </div>
+
+    <script>
+        let isLogin = true;
+        function toggleAuth() {
+            isLogin = !isLogin;
+            const title = document.getElementById('auth-title');
+            const subtitle = document.getElementById('auth-subtitle');
+            const submitBtn = document.getElementById('submit-btn');
+            const toggleText = document.getElementById('toggle-text');
+            const toggleLink = document.getElementById('toggle-link');
+
+            if (isLogin) {
+                title.innerText = 'Welcome Back';
+                subtitle.innerText = 'Log in to save delicious food from going to waste.';
+                submitBtn.innerText = 'Log In';
+                toggleText.innerText = "Don't have an account?";
+                toggleLink.innerText = 'Register Now';
+            } else {
+                title.innerText = 'Join the Movement';
+                subtitle.innerText = 'Sign up to start rescuing food today.';
+                submitBtn.innerText = 'Register Now';
+                toggleText.innerText = "Already have an account?";
+                toggleLink.innerText = 'Log In';
+            }
+        }
+    </script>
+</body>
+
+</html>
