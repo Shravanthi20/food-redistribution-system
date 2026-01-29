@@ -9,7 +9,7 @@ echo Starting FreshSave Backend Server
 echo ========================================
 echo.
 
-cd /d "c:\software_eval\backend"
+cd /d "%~dp0backend"
 
 REM Check for Firebase service account key
 if not exist "serviceAccountKey.json" (

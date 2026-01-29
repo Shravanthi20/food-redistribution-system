@@ -22,7 +22,7 @@ A professional multi-user registration system for a food rescue platform, built 
 
 1. **Clone or navigate to the project**
    ```bash
-   cd c:\software_eval
+   cd /d "%~dp0"
    ```
 
 2. **Setup Backend**

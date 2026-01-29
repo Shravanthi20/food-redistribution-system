@@ -5,7 +5,7 @@ REM Add Node.js to PATH for this session
 set "PATH=%PATH%;C:\Program Files\nodejs"
 
 REM Navigate to frontend
-cd /d "c:\software_eval\frontend"
+cd /d "%~dp0frontend"
 
 REM Install dependencies
 echo Installing frontend dependencies...

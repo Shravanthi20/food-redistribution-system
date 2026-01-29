@@ -1,74 +1,45 @@
 const mongoose = require('mongoose');
 
-const userSchema = new mongoose.Schema({
+const UserSchema = new mongoose.Schema({
+    // Firebase Auth Integration
     firebaseUid: {
         type: String,
         required: true,
-        unique: true,
+        unique: true
+    },
+
+    // Basic Info
+    name: {
+        type: String,
+        required: true
     },
     email: {
         type: String,
-        required: true,
         unique: true,
+        required: true
     },
-    userType: {
+    phone: String,
+
+    // Role & Permissions
+    role: {
         type: String,
-        enum: ['volunteer', 'ngo', 'donor'],
-        required: true,
-    },
-    displayName: {
-        type: String,
-    },
-    photoURL: {
-        type: String,
-    },
-    authProvider: {
-        type: String,
-        enum: ['password', 'google.com', 'apple.com'],
-        required: true,
+        enum: ["donor", "ngo", "volunteer", "admin"],
+        required: true
     },
 
-    // Volunteer-specific fields
-    volunteerData: {
-        fullName: String,
-        phone: String,
-        city: String,
-        availability: [String],
-        hasTransportation: String,
-        emergencyContact: String,
-        emergencyPhone: String,
-    },
+    // Profile Data
+    address: String,
+    photoURL: String, // Kept from original schema for Firebase photo
 
-    // NGO-specific fields
-    ngoData: {
-        organizationName: String,
-        registrationNumber: String,
-        phone: String,
-        address: String,
-        city: String,
-        organizationType: String,
-        capacity: Number,
-        operatingHours: String,
-        contactPersonName: String,
-        website: String,
+    // Account Status
+    status: {
+        type: String,
+        default: "active"
     },
-
-    // Donor-specific fields
-    donorData: {
-        donorType: String,
-        businessName: String,
-        phone: String,
-        address: String,
-        city: String,
-        foodTypes: [String],
-        pickupDelivery: String,
-        operatingHours: String,
-    },
-
     createdAt: {
         type: Date,
-        default: Date.now,
-    },
+        default: Date.now
+    }
 });
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model('User', UserSchema);
