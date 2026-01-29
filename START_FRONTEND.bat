@@ -9,7 +9,7 @@ echo Starting FreshSave Frontend
 echo ========================================
 echo.
 
-cd /d "c:\software_eval\frontend"
+cd /d "%~dp0frontend"
 
 echo Starting development server...
 echo.
