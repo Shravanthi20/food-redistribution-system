@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Welcome from './pages/Welcome';
+import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
 import VolunteerRegistration from './pages/VolunteerRegistration';
 import NGORegistration from './pages/NGORegistration';
@@ -10,7 +10,7 @@ function App() {
     return (
         <Router>
             <Routes>
-                <Route path="/" element={<Welcome />} />
+                <Route path="/" element={<LandingPage />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register/volunteer" element={<VolunteerRegistration />} />
                 <Route path="/register/ngo" element={<NGORegistration />} />
