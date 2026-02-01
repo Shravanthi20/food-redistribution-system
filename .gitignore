@@ -1,67 +1,42 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
 
-# Flutter/Dart specific
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
 .dart_tool/
-.packages
-build/
 .flutter-plugins
 .flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
 
-# IDE - IntelliJ
-.idea/
-*.iml
-*.iws
+# Symbolication related
+app.*.symbols
 
-# IDE - VSCode
-.vscode/
+# Obfuscation related
+app.*.map.json
 
-# System Files
-.DS_Store
-Thumbs.db
-
-# Local env files
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# Firebase
-firebase-debug.log
-.firebase/
-serviceAccountKey.json
-
-# Dependencies
-node_modules/
-.pnp/
-.pnp.js
-
-# Testing
-coverage/
-
-# Production builds
-dist/
-out/
-
-# Runtime data
-pids/
-*.pid
-*.seed
-*.log
-
-# Old project files (React/Node.js) - keep for reference but ignore
-frontend/
-backend/
-*.bat
-demo.html
-multi-user-demo.html
-INSTALL_*.md
-SETUP_GUIDE.md
-START_*.bat
-setup-*.bat
-install-*.bat
-
-# Keep Flutter app and important docs
-!food_redistribution_app/**
-!README.md
-!.gitignore
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+lib/firebase_options.dart
+android/app/google-services.json
