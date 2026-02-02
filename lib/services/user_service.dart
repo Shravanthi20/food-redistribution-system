@@ -410,6 +410,76 @@ class UserService {
     }
   }
 
+  // Get user statistics for admin dashboard
+  Future<Map<String, dynamic>> getUserStatistics() async {
+    try {
+      final now = DateTime.now();
+      final startOfMonth = DateTime(now.year, now.month, 1);
+
+      // We can use multiple queries to get the counts
+      // Note: In a production app with many users, we should use aggregation queries or maintain counters.
+      final allUsers = await _firestore.collection('users').get();
+      final docs = allUsers.docs;
+
+      int donors = 0;
+      int ngos = 0;
+      int volunteers = 0;
+      int verified = 0;
+      int suspended = 0;
+      int newUsers = 0;
+
+      for (var doc in docs) {
+        final data = doc.data();
+        final role = data['role'] as String?;
+        final status = data['status'] as String?;
+        final createdAt = data['createdAt'];
+
+        if (role == 'donor') donors++;
+        else if (role == 'ngo') ngos++;
+        else if (role == 'volunteer') volunteers++;
+
+        if (status == UserStatus.verified.name) verified++;
+        if (status == UserStatus.suspended.name) suspended++;
+
+        if (createdAt != null) {
+           DateTime createdDate;
+           if (createdAt is Timestamp) {
+             createdDate = createdAt.toDate();
+           } else if (createdAt is String) {
+             createdDate = DateTime.parse(createdAt);
+           } else {
+             createdDate = DateTime.now(); // Fallback
+           }
+           
+           if (createdDate.isAfter(startOfMonth)) {
+             newUsers++;
+           }
+        }
+      }
+
+      return {
+        'totalUsers': docs.length,
+        'donors': donors,
+        'ngos': ngos,
+        'volunteers': volunteers,
+        'verified': verified,
+        'suspended': suspended,
+        'newUsersThisMonth': newUsers,
+      };
+    } catch (e) {
+      print('Error getting user statistics: $e');
+      return {
+        'totalUsers': 0,
+        'donors': 0,
+        'ngos': 0,
+        'volunteers': 0,
+        'verified': 0,
+        'suspended': 0,
+        'newUsersThisMonth': 0,
+      };
+    }
+  }
+
   // Private helper methods
   List<String> _getRolePermissions(UserRole role) {
     switch (role) {

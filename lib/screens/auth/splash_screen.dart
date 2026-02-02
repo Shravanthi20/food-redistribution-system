@@ -38,9 +38,11 @@ class _SplashScreenState extends State<SplashScreen> {
 
   void _navigateToAppropriateScreen(AuthProvider authProvider) {
     if (authProvider.isAuthenticated) {
-      if (!authProvider.isEmailVerified) {
-        Navigator.pushReplacementNamed(context, AppRouter.emailVerification);
-      } else if (authProvider.appUser != null) {
+// Bypass email verification for testing
+      // if (!authProvider.isEmailVerified) {
+      //   Navigator.pushReplacementNamed(context, AppRouter.emailVerification);
+      // } else 
+      if (authProvider.appUser != null) {
         _navigateBasedOnUserState(authProvider.appUser!);
       } else {
         Navigator.pushReplacementNamed(context, AppRouter.login);
