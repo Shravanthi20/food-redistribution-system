@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import '../services/audit_service.dart';
-import '../services/security_service.dart';
-import '../services/user_service.dart';
-import '../services/verification_service.dart';
-import '../models/user.dart';
+import 'package:provider/provider.dart';
+import '../../services/audit_service.dart';
+import '../../services/security_service.dart';
+import '../../services/user_service.dart';
+import '../../services/verification_service.dart';
+import '../../models/user.dart';
+import '../../providers/theme_provider.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({Key? key}) : super(key: key);
@@ -71,8 +73,24 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> with Single
     return Scaffold(
       appBar: AppBar(
         title: const Text('Admin Dashboard'),
-        backgroundColor: Colors.blue.shade700,
-        foregroundColor: Colors.white,
+        actions: [
+          Consumer<ThemeProvider>(
+            builder: (context, themeProvider, child) {
+              return IconButton(
+                icon: Icon(themeProvider.isDarkMode ? Icons.light_mode : Icons.dark_mode),
+                onPressed: () {
+                  themeProvider.toggleTheme();
+                },
+                tooltip: 'Toggle Theme',
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _loadDashboardData,
+            tooltip: 'Refresh Data',
+          ),
+        ],
         bottom: TabBar(
           controller: _tabController,
           labelColor: Colors.white,
@@ -111,13 +129,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> with Single
             children: [
               Expanded(child: _buildStatCard('Total Users', '${userStats['totalUsers'] ?? 0}', Icons.people, Colors.blue)),
               const SizedBox(width: 16),
-              Expanded(child: _buildStatCard('Pending Verifications', '${verificationStats['pendingCount'] ?? 0}', Icons.pending, Colors.orange)),
+              Expanded(child: _buildStatCard('Pending', '${verificationStats['pendingCount'] ?? 0}', Icons.pending_actions, Colors.orange)),
             ],
           ),
           const SizedBox(height: 16),
           Row(
             children: [
-              Expanded(child: _buildStatCard('Security Alerts', '${securityStats['currentlyLockedAccounts'] ?? 0}', Icons.security, Colors.red)),
+              Expanded(child: _buildStatCard('Security Alerts', '${securityStats['currentlyLockedAccounts'] ?? 0}', Icons.warning_amber, Colors.red)),
               const SizedBox(width: 16),
               Expanded(child: _buildStatCard('New Users (30d)', '${userStats['newUsersThisMonth'] ?? 0}', Icons.trending_up, Colors.green)),
             ],
@@ -218,7 +236,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> with Single
                 ListTile(
                   leading: const Icon(Icons.block),
                   title: const Text('Manage Suspensions'),
-                  subtitle: const Text('Review and manage suspended accounts'),
+                  subtitle: const Text('Review suspended accounts'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => Navigator.pushNamed(context, '/admin/suspensions'),
                 ),
@@ -282,7 +300,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> with Single
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Pending Verifications',
+                      'Pending Requests',
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     TextButton(
@@ -297,7 +315,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> with Single
                   const ListTile(
                     leading: Icon(Icons.check_circle_outline),
                     title: Text('No pending verifications'),
-                    subtitle: Text('All verification requests have been processed'),
+                    subtitle: Text('All requests processsed'),
                   ),
               ],
             ),
@@ -365,7 +383,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> with Single
                   onTap: () => Navigator.pushNamed(context, '/admin/unlock-accounts'),
                 ),
                 ListTile(
-                  leading: const Icon(Icons.warning),
+                  leading: const Icon(Icons.warning_amber),
                   title: const Text('Security Alerts'),
                   subtitle: const Text('Review security incidents'),
                   trailing: const Icon(Icons.chevron_right),
@@ -373,7 +391,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> with Single
                 ),
               ],
             ),
-          ),
+          ), 
         ),
       ],
     );
@@ -404,7 +422,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> with Single
             Text(
               title,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey.shade600,
+                color: Theme.of(context).textTheme.bodySmall?.color,
               ),
             ),
           ],
@@ -424,7 +442,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> with Single
             color: color,
           ),
         ),
-        Text(role, style: const TextStyle(color: Colors.grey)),
+        Text(role, style: TextStyle(color: Theme.of(context).textTheme.bodySmall?.color)),
       ],
     );
   }
@@ -440,7 +458,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> with Single
             color: color,
           ),
         ),
-        Text(status, style: const TextStyle(color: Colors.grey)),
+        Text(status, style: TextStyle(color: Theme.of(context).textTheme.bodySmall?.color)),
       ],
     );
   }
@@ -456,7 +474,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> with Single
             color: color,
           ),
         ),
-        Text(status, style: const TextStyle(color: Colors.grey)),
+        Text(status, style: TextStyle(color: Theme.of(context).textTheme.bodySmall?.color)),
       ],
     );
   }
@@ -541,7 +559,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> with Single
     return ListTile(
       leading: CircleAvatar(
         backgroundColor: Colors.orange.shade100,
-        child: Icon(Icons.pending, color: Colors.orange.shade700),
+        child: Icon(Icons.pending_actions, color: Colors.orange.shade700),
       ),
       title: Text(user['email'] ?? 'Unknown User'),
       subtitle: Text('${submission['userRole']} • ${_formatTimestamp(submission['submittedAt'])}'),
@@ -610,9 +628,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> with Single
   }
 
   void _showCreateAdminDialog() {
-    // TODO: Implement create admin user dialog
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Create admin user feature coming soon')),
+      const SnackBar(content: Text('Feature coming soon')),
     );
   }
 }
