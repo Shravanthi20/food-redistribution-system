@@ -39,30 +39,31 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'your-web-api-key',
-    appId: '1:123456789:web:abcdef123456789',
-    messagingSenderId: '123456789',
-    projectId: 'food-redistribution-platform',
-    authDomain: 'food-redistribution-platform.firebaseapp.com',
-    storageBucket: 'food-redistribution-platform.appspot.com',
+    apiKey: 'AIzaSyD0vmNqHCbF9C6hxiCG0d8HoT92qzJMs50',
+    appId: '1:185924884011:web:184ea2c162490c34313c6e',
+    messagingSenderId: '185924884011',
+    projectId: 'food-redistribution-plat-86785',
+    authDomain: 'food-redistribution-plat-86785.firebaseapp.com',
+    storageBucket: 'food-redistribution-plat-86785.firebasestorage.app',
+    measurementId: 'G-2WW9VTMLVX',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'your-android-api-key',
-    appId: '1:123456789:android:abcdef123456789',
-    messagingSenderId: '123456789',
-    projectId: 'food-redistribution-platform',
-    storageBucket: 'food-redistribution-platform.appspot.com',
+    apiKey: 'AIzaSyBrKdTev_A8Fug6yQAH-Ph9ZK7ECTo1qto',
+    appId: '1:185924884011:android:b4bfb376fbc84fb8313c6e',
+    messagingSenderId: '185924884011',
+    projectId: 'food-redistribution-plat-86785',
+    storageBucket: 'food-redistribution-plat-86785.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'your-ios-api-key',
-    appId: '1:123456789:ios:abcdef123456789',
-    messagingSenderId: '123456789',
-    projectId: 'food-redistribution-platform',
-    authDomain: 'food-redistribution-platform.firebaseapp.com',
-    storageBucket: 'food-redistribution-platform.appspot.com',
-    iosBundleId: 'com.example.foodRedistribution',
+    apiKey: 'AIzaSyBTofOryKspNxoDqOctL0j1w8wTrgciMdc',
+    appId: '1:185924884011:ios:3d1a4576739990ec313c6e',
+    messagingSenderId: '185924884011',
+    projectId: 'food-redistribution-plat-86785',
+    storageBucket: 'food-redistribution-plat-86785.firebasestorage.app',
+    iosClientId: '185924884011-mt32rlagnq9n62vt0sm5odoeftbua114.apps.googleusercontent.com',
+    iosBundleId: 'com.example.foodRedistributionApp',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
@@ -76,11 +77,13 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'your-windows-api-key',
-    appId: '1:123456789:windows:abcdef123456789',
-    messagingSenderId: '123456789',
-    projectId: 'food-redistribution-platform',
-    authDomain: 'food-redistribution-platform.firebaseapp.com',
-    storageBucket: 'food-redistribution-platform.appspot.bucket',
+    apiKey: 'AIzaSyD0vmNqHCbF9C6hxiCG0d8HoT92qzJMs50',
+    appId: '1:185924884011:web:785e7d60ed457faf313c6e',
+    messagingSenderId: '185924884011',
+    projectId: 'food-redistribution-plat-86785',
+    authDomain: 'food-redistribution-plat-86785.firebaseapp.com',
+    storageBucket: 'food-redistribution-plat-86785.firebasestorage.app',
+    measurementId: 'G-B9M42F5CMX',
   );
+
 }

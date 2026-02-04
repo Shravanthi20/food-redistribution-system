@@ -63,13 +63,6 @@ void main() {
       expect(volunteerUser.canManageNGO(), isFalse);
       expect(volunteerUser.canVolunteer(), isTrue);
       expect(volunteerUser.canCoordinate(), isFalse);
-
-      // Test coordinator role
-      final coordinatorUser = testUser.copyWith(role: UserRole.coordinator);
-      expect(coordinatorUser.canCreateDonation(), isTrue);
-      expect(coordinatorUser.canManageNGO(), isTrue);
-      expect(coordinatorUser.canVolunteer(), isTrue);
-      expect(coordinatorUser.canCoordinate(), isTrue);
     });
 
     test('should calculate distance between users', () {

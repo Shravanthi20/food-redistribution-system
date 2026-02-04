@@ -56,8 +56,8 @@ class AuthService {
     if (_currentUser == null) return false;
     
     switch (_currentUser!.role) {
-      case UserRole.coordinator:
-        return true; // Coordinators have all permissions
+      case UserRole.admin:
+        return true; // Admins have all permissions
       case UserRole.donor:
         return [
           'create_donation',

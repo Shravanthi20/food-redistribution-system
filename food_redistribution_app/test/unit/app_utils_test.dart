@@ -220,7 +220,6 @@ void main() {
       expect(AppUtils.getRoleColor(UserRole.donor), equals(AppColors.donorPrimary));
       expect(AppUtils.getRoleColor(UserRole.ngo), equals(AppColors.ngoPrimary));
       expect(AppUtils.getRoleColor(UserRole.volunteer), equals(AppColors.volunteerPrimary));
-      expect(AppUtils.getRoleColor(UserRole.coordinator), equals(AppColors.coordinatorPrimary));
     });
   });
 

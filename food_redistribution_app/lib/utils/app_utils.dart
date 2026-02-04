@@ -88,8 +88,6 @@ class AppUtils {
         return AppColors.ngoColor;
       case UserRole.volunteer:
         return AppColors.volunteerColor;
-      case UserRole.coordinator:
-        return AppColors.coordinatorColor;
       default:
         return AppColors.primary;
     }
