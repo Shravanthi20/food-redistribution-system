@@ -1,9 +1,11 @@
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dart_geohash/dart_geohash.dart';
 
 class LocationService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final GeoHasher _geoHasher = GeoHasher();
 
   // Get current location
   Future<Position?> getCurrentLocation() async {
@@ -38,10 +40,12 @@ class LocationService {
       List<Location> locations = await locationFromAddress(address);
       if (locations.isNotEmpty) {
         final location = locations.first;
+        final geohash = _geoHasher.encode(location.latitude, location.longitude);
         return {
           'latitude': location.latitude,
           'longitude': location.longitude,
           'geopoint': GeoPoint(location.latitude, location.longitude),
+          'geohash': geohash,
         };
       }
       return null;
@@ -88,8 +92,7 @@ class LocationService {
     required double radiusKm,
   }) async {
     try {
-      // Firestore doesn't support radius queries directly
-      // This is a simplified implementation
+      // NOTE: Client-side finding is limited. Use Cloud Functions for scalable Geo-queries.
       final donations = await _firestore
           .collection('food_donations')
           .where('status', isEqualTo: 'listed')
@@ -133,13 +136,17 @@ class LocationService {
   // Update user location
   Future<void> updateUserLocation(String userId, Position position) async {
     try {
+      final geohash = _geoHasher.encode(position.latitude, position.longitude);
+      
       await _firestore.collection('user_locations').doc(userId).set({
         'latitude': position.latitude,
         'longitude': position.longitude,
         'geopoint': GeoPoint(position.latitude, position.longitude),
+        'geohash': geohash,
         'accuracy': position.accuracy,
         'timestamp': Timestamp.now(),
       });
+      
     } catch (e) {
       print('Error updating user location: $e');
     }

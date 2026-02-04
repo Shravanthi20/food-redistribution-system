@@ -20,7 +20,7 @@ class NGOProfile {
   final String city;
   final String state;
   final String zipCode;
-  final Map<String, dynamic> location; // GeoPoint data
+  final Map<String, dynamic> location; // GeoPoint data + geohash
   final int capacity;
   final List<String> servingPopulation;
   final String operatingHours;
