@@ -5,6 +5,10 @@ gradle-wrapper.jar
 /gradlew.bat
 /local.properties
 GeneratedPluginRegistrant.java
+<<<<<<< HEAD:android/.gitignore
+=======
+.cxx/
+>>>>>>> feature/flutter-migration-complete:food_redistribution_app/android/.gitignore
 
 # Remember to never publicly share your keystore.
 # See https://flutter.dev/to/reference-keystore
