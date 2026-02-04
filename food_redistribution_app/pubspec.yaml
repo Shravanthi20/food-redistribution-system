@@ -25,7 +25,6 @@ dependencies:
   cupertino_icons: ^1.0.6
   material_design_icons_flutter: ^7.0.7296
   google_fonts: ^6.2.1
-  intl: ^0.19.0
   
   # Navigation
   go_router: ^14.6.1
@@ -56,6 +55,8 @@ dependencies:
   permission_handler: ^11.3.1
   path_provider: ^2.1.4
   shared_preferences: ^2.3.2
+  file_picker: ^10.3.10
+  firebase_storage: ^12.4.10
 
 dev_dependencies:
   flutter_test:
