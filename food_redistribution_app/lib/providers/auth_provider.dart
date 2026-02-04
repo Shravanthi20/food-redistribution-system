@@ -1,7 +1,10 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/auth_service.dart';
 import '../models/user.dart';
+import '../models/ngo_profile.dart';
 
 class AuthProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();
@@ -101,7 +104,8 @@ class AuthProvider extends ChangeNotifier {
   Future<bool> registerNGO({
     required String email,
     required String password,
-    required dynamic ngoProfile,
+    required NGOProfile ngoProfile,
+    PlatformFile? verificationFile,
   }) async {
     try {
       _isLoading = true;
@@ -115,6 +119,25 @@ class AuthProvider extends ChangeNotifier {
       );
 
       if (credential != null) {
+        // Upload Certificate if provided
+        if (verificationFile != null) {
+          try {
+            final url = await _authService.uploadVerificationCertificate(
+              credential.user!.uid,
+              verificationFile,
+            );
+            
+            if (url != null) {
+               await FirebaseFirestore.instance
+                  .collection('ngo_profiles')
+                  .doc(credential.user!.uid)
+                  .update({'verificationCertificateUrl': url});
+            }
+          } catch (e) {
+             print('Certificate upload failed: $e');
+             // Proceed regardless of upload failure
+          }
+        }
         return true;
       }
       return false;
