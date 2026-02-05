@@ -4,7 +4,11 @@
 # This file should be version controlled and should not be manually edited.
 
 version:
+<<<<<<< HEAD:.metadata
   revision: "17025dd88227cd9532c33fa78f5250d548d87e9a"
+=======
+  revision: "f6ff1529fd6d8af5f706051d9251ac9231c83407"
+>>>>>>> feature/flutter-migration-complete:food_redistribution_app/.metadata
   channel: "stable"
 
 project_type: app
@@ -13,6 +17,7 @@ project_type: app
 migration:
   platforms:
     - platform: root
+<<<<<<< HEAD:.metadata
       create_revision: 17025dd88227cd9532c33fa78f5250d548d87e9a
       base_revision: 17025dd88227cd9532c33fa78f5250d548d87e9a
     - platform: android
@@ -33,6 +38,22 @@ migration:
     - platform: windows
       create_revision: 17025dd88227cd9532c33fa78f5250d548d87e9a
       base_revision: 17025dd88227cd9532c33fa78f5250d548d87e9a
+=======
+      create_revision: f6ff1529fd6d8af5f706051d9251ac9231c83407
+      base_revision: f6ff1529fd6d8af5f706051d9251ac9231c83407
+    - platform: android
+      create_revision: f6ff1529fd6d8af5f706051d9251ac9231c83407
+      base_revision: f6ff1529fd6d8af5f706051d9251ac9231c83407
+    - platform: ios
+      create_revision: f6ff1529fd6d8af5f706051d9251ac9231c83407
+      base_revision: f6ff1529fd6d8af5f706051d9251ac9231c83407
+    - platform: web
+      create_revision: f6ff1529fd6d8af5f706051d9251ac9231c83407
+      base_revision: f6ff1529fd6d8af5f706051d9251ac9231c83407
+    - platform: windows
+      create_revision: f6ff1529fd6d8af5f706051d9251ac9231c83407
+      base_revision: f6ff1529fd6d8af5f706051d9251ac9231c83407
+>>>>>>> feature/flutter-migration-complete:food_redistribution_app/.metadata
 
   # User provided section
 

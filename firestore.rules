@@ -55,6 +55,23 @@ service cloud.firestore {
       allow read: if isAuthenticated(); // Should be admin only in prod
     }
 
+    // Food Donations
+    match /food_donations/{donationId} {
+      allow create: if isAuthenticated(); // Donors create
+      allow read: if isAuthenticated(); // NGOs/Volunteers need to see
+      allow update: if isAuthenticated() && (resource.data.donorId == request.auth.uid || resource.data.assignedNGOId == request.auth.uid);
+    }
+
+    // Matching & Assignments (Managed mainly by Cloud Functions, but read by users)
+    match /donation_assignments/{assignmentId} {
+      allow read: if isAuthenticated() && (resource.data.assigneeId == request.auth.uid);
+      allow update: if isAuthenticated() && (resource.data.assigneeId == request.auth.uid); // To accept/reject
+    }
+
+    match /donation_acceptances/{acceptanceId} {
+      allow read, create: if isAuthenticated();
+    }
+
     // Default deny
     match /{document=**} {
       allow read, write: if false;

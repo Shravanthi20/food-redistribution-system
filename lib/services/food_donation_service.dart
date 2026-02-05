@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uuid/uuid.dart';
 import '../models/food_donation.dart';
 import '../models/ngo_profile.dart';
+import '../models/user.dart';
 import 'user_service.dart';
 
 class FoodDonationService {
@@ -15,14 +16,11 @@ class FoodDonationService {
     required FoodDonation donation,
   }) async {
     try {
-      // Validate donor permissions
-      final hasPermission = await _userService.hasPermission(
-        userId: donorId,
-        permission: 'create_donation',
-      );
+      // Validate donor permissions (check if user is a donor)
+      final hasRole = await _userService.hasAnyRole(donorId, [UserRole.donor, UserRole.admin]);
       
-      if (!hasPermission) {
-        throw Exception('Insufficient permissions to create donation');
+      if (!hasRole) {
+        throw Exception('Only donors can create donations');
       }
 
       // Validate safety time window
@@ -207,13 +205,10 @@ class FoodDonationService {
     required Map<String, dynamic> requirements,
   }) async {
     try {
-      final hasPermission = await _userService.hasPermission(
-        userId: ngoId,
-        permission: 'manage_food_requests',
-      );
+      final hasRole = await _userService.hasAnyRole(ngoId, [UserRole.ngo, UserRole.admin]);
       
-      if (!hasPermission) {
-        throw Exception('Insufficient permissions to create food request');
+      if (!hasRole) {
+        throw Exception('Only NGOs can create food requests');
       }
 
       await _firestore.collection('food_requests').add({
@@ -245,13 +240,10 @@ class FoodDonationService {
     Map<String, dynamic>? hygieneChecklist,
   }) async {
     try {
-      final hasPermission = await _userService.hasPermission(
-        userId: ngoId,
-        permission: 'request_donations',
-      );
+      final hasPermission = await _userService.hasAnyRole(ngoId, [UserRole.ngo, UserRole.admin]);
       
       if (!hasPermission) {
-        throw Exception('Insufficient permissions to review donations');
+        throw Exception('Only NGOs can review donations');
       }
 
       final donationDoc = await _firestore
@@ -454,6 +446,38 @@ class FoodDonationService {
           .toList();
     } catch (e) {
       print('Error getting donor donations: $e');
+      return [];
+    }
+  }
+
+  // Get available donations with optional filters
+  Future<List<FoodDonation>> getAvailableDonations({
+    Map<String, dynamic>? filters,
+  }) async {
+    try {
+      Query query = _firestore
+          .collection('food_donations')
+          .where('status', isEqualTo: DonationStatus.listed.name);
+
+      // Apply filters if provided
+      if (filters != null) {
+        if (filters['foodTypes'] != null && (filters['foodTypes'] as List).isNotEmpty) {
+          query = query.where('foodTypes', arrayContainsAny: filters['foodTypes']);
+        }
+        
+        if (filters['isUrgent'] != null) {
+          query = query.where('isUrgent', isEqualTo: filters['isUrgent']);
+        }
+      }
+
+      final result = await query.orderBy('createdAt', descending: true).limit(50).get();
+      
+      return result.docs
+          .map((doc) => FoodDonation.fromFirestore(doc))
+          .where((donation) => donation.isAvailable)
+          .toList();
+    } catch (e) {
+      print('Error getting available donations: $e');
       return [];
     }
   }

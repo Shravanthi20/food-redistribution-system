@@ -1,6 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:file_picker/file_picker.dart';
+import 'dart:io';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import '../models/user.dart';
 import '../models/donor_profile.dart';
 import '../models/ngo_profile.dart';
@@ -135,6 +139,27 @@ class AuthService {
       rethrow;
     }
     return null;
+  }
+
+  // Upload Verification Certificate
+  Future<String?> uploadVerificationCertificate(String userId, PlatformFile file) async {
+    try {
+      final ref = FirebaseStorage.instance
+          .ref()
+          .child('verification_certificates')
+          .child('$userId.${file.extension}');
+
+      if (kIsWeb) {
+        await ref.putData(file.bytes!);
+      } else {
+        await ref.putFile(File(file.path!));
+      }
+
+      return await ref.getDownloadURL();
+    } catch (e) {
+      print('Error uploading certificate: $e');
+      return null; // Don't block registration if upload fails, but prefer to handle it
+    }
   }
 
   // US3: Volunteer Account Creation
