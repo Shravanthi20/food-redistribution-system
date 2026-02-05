@@ -13,7 +13,7 @@ class UserService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirestoreService _firestoreService = FirestoreService();
   final auth.FirebaseAuth _auth = auth.FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   final AuditService _auditService = AuditService();
   final NotificationService _notificationService = NotificationService();
 
