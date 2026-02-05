@@ -9,16 +9,18 @@ class DocumentVerificationScreen extends StatefulWidget {
   const DocumentVerificationScreen({Key? key}) : super(key: key);
 
   @override
-  State<DocumentVerificationScreen> createState() => _DocumentVerificationScreenState();
+  State<DocumentVerificationScreen> createState() =>
+      _DocumentVerificationScreenState();
 }
 
-class _DocumentVerificationScreenState extends State<DocumentVerificationScreen> {
+class _DocumentVerificationScreenState
+    extends State<DocumentVerificationScreen> {
   final _formKey = GlobalKey<FormBuilderState>();
   final VerificationService _verificationService = VerificationService();
   final AuthService _authService = AuthService();
-  
+
   bool _isSubmitting = false;
-  User? _currentUser;
+  AppUser? _currentUser;
 
   @override
   void initState() {
@@ -27,7 +29,7 @@ class _DocumentVerificationScreenState extends State<DocumentVerificationScreen>
   }
 
   Future<void> _loadCurrentUser() async {
-    final user = await _authService.getCurrentUser();
+    final user = await _authService.getCurrentAppUser();
     setState(() {
       _currentUser = user;
     });
@@ -93,8 +95,8 @@ class _DocumentVerificationScreenState extends State<DocumentVerificationScreen>
                       Text(
                         'Provide your document information below for verification',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.grey.shade600,
-                        ),
+                              color: Colors.grey.shade600,
+                            ),
                       ),
                     ],
                   ),
@@ -122,8 +124,8 @@ class _DocumentVerificationScreenState extends State<DocumentVerificationScreen>
             Text(
               'Enter document details below (no file uploads required):',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey.shade600,
-              ),
+                    color: Colors.grey.shade600,
+                  ),
             ),
             const SizedBox(height: 24),
             ..._buildRoleSpecificFields(),
@@ -175,7 +177,7 @@ class _DocumentVerificationScreenState extends State<DocumentVerificationScreen>
             ]),
           ),
         ];
-      
+
       case UserRole.ngo:
         return [
           FormBuilderTextField(
@@ -227,7 +229,7 @@ class _DocumentVerificationScreenState extends State<DocumentVerificationScreen>
             ]),
           ),
         ];
-      
+
       case UserRole.volunteer:
         return [
           FormBuilderTextField(
@@ -280,7 +282,7 @@ class _DocumentVerificationScreenState extends State<DocumentVerificationScreen>
             ]),
           ),
         ];
-      
+
       default:
         return [
           FormBuilderTextField(
@@ -338,7 +340,7 @@ class _DocumentVerificationScreenState extends State<DocumentVerificationScreen>
 
     try {
       final formData = _formKey.currentState!.value;
-      
+
       // Convert form data to document info map
       Map<String, String> documentInfo = {};
       formData.forEach((key, value) {
@@ -348,7 +350,7 @@ class _DocumentVerificationScreenState extends State<DocumentVerificationScreen>
       });
 
       await _verificationService.submitVerificationInfo(
-        userId: _currentUser!.id,
+        userId: _currentUser!.uid,
         userRole: _currentUser!.role,
         documentInfo: documentInfo,
       );
@@ -356,11 +358,12 @@ class _DocumentVerificationScreenState extends State<DocumentVerificationScreen>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Verification information submitted successfully!'),
+            content:
+                const Text('Verification information submitted successfully!'),
             backgroundColor: Colors.green.shade600,
           ),
         );
-        
+
         Navigator.pushReplacementNamed(context, '/verification-pending');
       }
     } catch (e) {
