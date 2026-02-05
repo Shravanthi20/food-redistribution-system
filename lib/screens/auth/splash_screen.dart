@@ -22,7 +22,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   void _checkAuthState() {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    
+
     // Listen to auth state changes
     authProvider.addListener(() {
       if (!authProvider.isLoading && mounted) {
@@ -41,7 +41,7 @@ class _SplashScreenState extends State<SplashScreen> {
 // Bypass email verification for testing
       // if (!authProvider.isEmailVerified) {
       //   Navigator.pushReplacementNamed(context, AppRouter.emailVerification);
-      // } else 
+      // } else
       if (authProvider.appUser != null) {
         _navigateBasedOnUserState(authProvider.appUser!);
       } else {
@@ -120,24 +120,24 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
             ),
             const SizedBox(height: 30),
-            
+
             // App Title
             Text(
               'Food Redistribution',
               style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 8),
             Text(
               'Reducing waste, feeding hope',
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Colors.white70,
-              ),
+                    color: Colors.white70,
+                  ),
             ),
             const SizedBox(height: 50),
-            
+
             // Loading indicator
             const CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
