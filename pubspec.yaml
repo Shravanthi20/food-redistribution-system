@@ -69,15 +69,4 @@ flutter:
   
   assets:
     - assets/images/
-<<<<<<< HEAD:pubspec.yaml
     - assets/icons/
-    
-#   fonts:
-#     - family: Roboto
-#       fonts:
-#         - asset: fonts/Roboto-Regular.ttf
-#         - asset: fonts/Roboto-Bold.ttf
-#           weight: 700
-=======
-    - assets/icons/
->>>>>>> feature/flutter-migration-complete:food_redistribution_app/pubspec.yaml

@@ -26,10 +26,7 @@
       buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
-<<<<<<< HEAD:ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme
-=======
       customLLDBInitFile = "$(SRCROOT)/Flutter/ephemeral/flutter_lldbinit"
->>>>>>> feature/flutter-migration-complete:food_redistribution_app/ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme
       shouldUseLaunchSchemeArgsEnv = "YES">
       <MacroExpansion>
          <BuildableReference
@@ -58,19 +55,13 @@
       buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
-<<<<<<< HEAD:ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme
-=======
       customLLDBInitFile = "$(SRCROOT)/Flutter/ephemeral/flutter_lldbinit"
->>>>>>> feature/flutter-migration-complete:food_redistribution_app/ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme
       launchStyle = "0"
       useCustomWorkingDirectory = "NO"
       ignoresPersistentStateOnLaunch = "NO"
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
-<<<<<<< HEAD:ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme
-=======
       enableGPUValidationMode = "1"
->>>>>>> feature/flutter-migration-complete:food_redistribution_app/ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme
       allowLocationSimulation = "YES">
       <BuildableProductRunnable
          runnableDebuggingMode = "0">

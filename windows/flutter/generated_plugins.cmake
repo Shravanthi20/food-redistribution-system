@@ -6,10 +6,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   cloud_firestore
   firebase_auth
   firebase_core
-<<<<<<< HEAD:windows/flutter/generated_plugins.cmake
-=======
   firebase_storage
->>>>>>> feature/flutter-migration-complete:food_redistribution_app/windows/flutter/generated_plugins.cmake
   flutter_secure_storage_windows
   geolocator_windows
   permission_handler_windows
