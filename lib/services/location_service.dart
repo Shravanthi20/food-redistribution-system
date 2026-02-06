@@ -151,4 +151,56 @@ class LocationService {
       print('Error updating user location: $e');
     }
   }
+  // LIVE TRACKING
+
+  final Map<String, StreamSubscription<Position>> _trackingSubscriptions = {};
+
+  // Start tracking user location
+  Future<void> startLocationTracking(String userId) async {
+    try {
+      // check/request permission again just in case
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) return;
+      }
+
+      const LocationSettings locationSettings = LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 10, // Update every 10 meters
+      );
+
+      final stream = Geolocator.getPositionStream(locationSettings: locationSettings);
+      
+      _trackingSubscriptions[userId]?.cancel(); // Cancel existing if any
+
+      _trackingSubscriptions[userId] = stream.listen((Position position) {
+        updateUserLocation(userId, position);
+      });
+      
+      print('Started location tracking for $userId');
+
+    } catch (e) {
+      print('Error starting location tracking: $e');
+    }
+  }
+
+  // Stop tracking
+  void stopLocationTracking(String userId) {
+    _trackingSubscriptions[userId]?.cancel();
+    _trackingSubscriptions.remove(userId);
+    print('Stopped location tracking for $userId');
+  }
+
+  // Stream of specific user's location
+  Stream<Map<String, dynamic>> getUserLocationStream(String userId) {
+    return _firestore
+        .collection('user_locations')
+        .doc(userId)
+        .snapshots()
+        .map((doc) {
+          if (!doc.exists) return {};
+          return doc.data() as Map<String, dynamic>;
+        });
+  }
 }

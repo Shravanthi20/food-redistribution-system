@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../models/food_donation.dart';
 import '../services/food_donation_service.dart';
+import '../services/connectivity_service.dart';
+import 'dart:async';
+
 
 class DonationProvider extends ChangeNotifier {
   final FoodDonationService _donationService = FoodDonationService();
@@ -14,9 +17,23 @@ class DonationProvider extends ChangeNotifier {
   List<FoodDonation> get donations => _donations;
   List<FoodDonation> get myDonations => _myDonations;
   bool get isLoading => _isLoading;
+  List<FoodDonation> get donations => _donations;
+  List<FoodDonation> get myDonations => _myDonations;
+  bool get isLoading => _isLoading;
+  final ConnectivityService _connectivityService = ConnectivityService();
+
+  // Getters
+  List<FoodDonation> get donations => _donations;
+  List<FoodDonation> get myDonations => _myDonations;
+  bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
-  
-  // Get donations by status
+  FoodDonationService get foodDonationService => _donationService;
+  Stream<bool> get connectionStatus => _connectivityService.connectionStatus;
+
+  // Stream access
+  Stream<FoodDonation?> getDonationStream(String donationId) => 
+      _donationService.getDonationStream(donationId);
+
   List<FoodDonation> getDonationsByStatus(DonationStatus status) {
     return _myDonations.where((d) => d.status == status).toList();
   }

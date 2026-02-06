@@ -313,6 +313,24 @@ async function createAssignment(donationId, candidate, type) {
     await db.collection("food_donations").doc(donationId).update({
         matchingStatus: type === "NGO_OFFER" ? "pending_ngo" : "pending_volunteer"
     });
+
+    // Notify Assignee
+    let title = "New Assignment";
+    let body = "You have a new donation assignment.";
+
+    if (type === "NGO_OFFER") {
+        title = "New Donation Match";
+        body = "We found a donation that matches your needs.";
+    } else if (type === "VOLUNTEER_TASK") {
+        title = "New Delivery Task";
+        body = "You have been assigned to pick up a donation.";
+    }
+
+    await sendPushNotification(candidate.id, title, body, {
+        donationId,
+        type: "assignment",
+        assignmentType: type
+    });
 }
 
 async function reassignNGO(donationId) {

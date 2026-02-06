@@ -76,6 +76,36 @@ class NotificationService {
             .toList());
   }
 
+  // Save FCM Token to User Profile
+  Future<void> saveTokenToUser(String userId) async {
+    try {
+      String?token = await _messaging.getToken();
+      if (token != null) {
+        await _saveToken(userId, token);
+      }
+      
+      // Listen for token refreshes
+      _messaging.onTokenRefresh.listen((newToken) {
+        _saveToken(userId, newToken);
+      });
+    } catch (e) {
+      print('Error saving FCM token: $e');
+    }
+  }
+
+  Future<void> _saveToken(String userId, String token) async {
+    await _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('tokens')
+        .doc(token)
+        .set({
+          'token': token,
+          'createdAt': FieldValue.serverTimestamp(),
+          'platform': 'flutter',
+        });
+  }
+
   // Mark notification as read
   Future<void> markAsRead(String notificationId) async {
     try {

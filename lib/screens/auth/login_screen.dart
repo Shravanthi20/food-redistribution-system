@@ -56,23 +56,8 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  void _showForgotPasswordModal() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-          left: 24,
-          right: 24,
-          top: 24,
-        ),
-        child: _ForgotPasswordForm(),
-      ),
-    );
+  void _navigateToForgotPassword() {
+    Navigator.pushNamed(context, AppRouter.forgotPassword);
   }
 
   @override
@@ -165,7 +150,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 Align(
                                   alignment: Alignment.centerRight,
                                   child: TextButton(
-                                    onPressed: _showForgotPasswordModal,
+                                    onPressed: _navigateToForgotPassword,
                                     child: const Text('Forgot Password?'),
                                   ),
                                 ),
