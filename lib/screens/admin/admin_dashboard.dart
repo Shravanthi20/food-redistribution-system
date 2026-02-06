@@ -46,6 +46,11 @@ class _AdminDashboardState extends State<AdminDashboard> with SingleTickerProvid
             onPressed: () => provider.loadDashboardData(),
           ),
           IconButton(
+            icon: const Icon(Icons.report_problem, color: Colors.amber), // Warning color
+            tooltip: 'Manage Issues',
+            onPressed: () => Navigator.pushNamed(context, AppRouter.adminIssues),
+          ),
+          IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
               await authProvider.signOut();

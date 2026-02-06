@@ -11,6 +11,13 @@
 .svn/
 .swiftpm/
 migrate_working_dir/
+# Node
+node_modules/
+functions/node_modules/
+
+# Firebase
+.firebase/
+.env
 
 # IntelliJ related
 *.iml

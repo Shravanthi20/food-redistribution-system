@@ -9,6 +9,7 @@ import '../screens/auth/ngo_registration_screen.dart';
 import '../screens/auth/volunteer_registration_screen.dart';
 import '../screens/auth/email_verification_screen.dart';
 import '../screens/auth/onboarding_screen.dart';
+import '../screens/auth/forgot_password_screen.dart'; // [NEW] Import
 import '../screens/donor/donor_dashboard.dart';
 import '../screens/donor/create_donation_screen.dart';
 import '../screens/donor/donation_list_screen.dart';
@@ -26,12 +27,17 @@ import '../screens/ngo/update_demand_screen.dart';
 
 import '../screens/volunteer/volunteer_dashboard.dart';
 import '../screens/admin/admin_dashboard.dart';
+import '../screens/admin/admin_issues_screen.dart';
+import '../screens/ngo/document_submission_screen.dart';
+import '../screens/ngo/verification_pending_screen.dart';
+import '../screens/ngo/verification_rejected_screen.dart';
 
 import '../models/food_donation.dart';
 // Donor flow
 import '../screens/volunteer/accept_task_screen.dart';
 import '../screens/volunteer/reject_task_screen.dart';
 import '../screens/volunteer/task_execution_screen.dart';
+import '../screens/coordination/issue_reporting_screen.dart';
 
 class AppRouter {
   static const String splash = '/';
@@ -43,10 +49,13 @@ class AppRouter {
   static const String emailVerification = '/email-verification';
   static const String onboarding = '/onboarding';
 
+  static const String forgotPassword = '/forgot-password'; // [NEW] Route
+
   static const String donorDashboard = '/donor-dashboard';
   static const String ngoDashboard = '/ngo-dashboard';
   static const String volunteerDashboard = '/volunteer-dashboard';
   static const String adminDashboard = '/admin-dashboard';
+  static const String adminIssues = '/admin-issues';
 
   static const String createDonation = '/create-donation';
   static const String donationList = '/donation-list';
@@ -63,6 +72,11 @@ class AppRouter {
   static const String rejectTask = '/reject-task';
   static const String taskExecution = '/task-execution';
 
+  // NGO Onboarding
+  static const String documentSubmission = '/document-submission';
+  static const String verificationPending = '/verification-pending';
+  static const String verificationRejected = '/verification-rejected';
+
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case splash:
@@ -70,6 +84,10 @@ class AppRouter {
 
       case login:
         return MaterialPageRoute(builder: (_) => const LoginScreen());
+
+      // [NEW] Forgot Password Route
+      case forgotPassword:
+        return MaterialPageRoute(builder: (_) => const ForgotPasswordScreen());
 
       case roleSelection:
         return MaterialPageRoute(builder: (_) => const RoleSelectionScreen());
@@ -134,10 +152,19 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const RejectTaskScreen());
 
       case taskExecution:
-        return MaterialPageRoute(builder: (_) => const TaskExecutionScreen());
+        final args = settings.arguments as Map<String, dynamic>?;
+        if (args != null && args.containsKey('donationId')) {
+           return MaterialPageRoute(
+              builder: (_) => TaskExecutionScreen(donationId: args['donationId']!),
+           );
+        }
+        return _errorRoute();
 
       case adminDashboard:
         return MaterialPageRoute(builder: (_) => const AdminDashboard());
+
+      case adminIssues:
+         return MaterialPageRoute(builder: (_) => const AdminIssuesScreen());
 
       case createDonation:
         return MaterialPageRoute(builder: (_) => const CreateDonationScreen());
@@ -152,6 +179,12 @@ class AppRouter {
 
       case impactReports:
         return MaterialPageRoute(builder: (_) => const ImpactReportsScreen());
+
+      case issueReporting:
+        final args = settings.arguments as Map<String, dynamic>;
+        return MaterialPageRoute(
+            builder: (_) => IssueReportingScreen(donationId: args['donationId']));
+      
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(

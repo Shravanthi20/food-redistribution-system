@@ -53,7 +53,27 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void _navigateBasedOnUserState(AppUser user) {
-    // Navigate based on onboarding state
+    if (user.role == UserRole.ngo) {
+       switch(user.onboardingState) {
+         case OnboardingState.registered:
+           Navigator.pushReplacementNamed(context, AppRouter.documentSubmission);
+           return;
+         case OnboardingState.documentSubmitted:
+           Navigator.pushReplacementNamed(context, AppRouter.verificationPending);
+           return;
+         // If we had a rejected state in enum, handle it. Assuming it might be handled via status or re-purposed state.
+         // For now, if active/verified:
+         case OnboardingState.verified:
+         case OnboardingState.active:
+           _navigateToRoleDashboard(user.role);
+           return;
+         default:
+           // If profile not complete etc
+           break;
+       }
+    }
+
+    // Default existing logic for others
     switch (user.onboardingState) {
       case OnboardingState.registered:
       case OnboardingState.documentSubmitted:

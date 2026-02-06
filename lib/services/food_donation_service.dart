@@ -231,6 +231,68 @@ class FoodDonationService {
     }
   }
 
+  // Admin: Force assign NGO
+  Future<void> forceAssignNGO({
+    required String donationId,
+    required String adminId,
+    required String ngoId,
+    String? reason,
+  }) async {
+    try {
+      // Check admin role
+      final isAdmin = await _userService.hasAnyRole(adminId, [UserRole.admin]);
+      if (!isAdmin) throw Exception('Unauthorized: Only admins can force assignment');
+
+      await _firestore.collection('food_donations').doc(donationId).update({
+        'assignedNGOId': ngoId,
+        'status': DonationStatus.matched.name,
+        'matchingStatus': 'forced_admin',
+        'updatedAt': Timestamp.now(),
+      });
+
+      await _logDonationAction('admin_force_assign_ngo', donationId, adminId, additionalData: {
+        'assignedNGOId': ngoId,
+        'reason': reason,
+      });
+
+      // Notify stakeholders
+      await _notifyStakeholders(donationId, 'admin_forced_match');
+    } catch (e) {
+      print('Error forcing NGO assignment: $e');
+      rethrow;
+    }
+  }
+
+  // Admin: Force assign Volunteer
+  Future<void> forceAssignVolunteer({
+    required String donationId,
+    required String adminId,
+    required String volunteerId,
+    String? reason,
+  }) async {
+    try {
+      // Check admin role
+      final isAdmin = await _userService.hasAnyRole(adminId, [UserRole.admin]);
+      if (!isAdmin) throw Exception('Unauthorized: Only admins can force assignment');
+      
+      await _firestore.collection('food_donations').doc(donationId).update({
+        'assignedVolunteerId': volunteerId,
+        'updatedAt': Timestamp.now(),
+      });
+
+       await _logDonationAction('admin_force_assign_volunteer', donationId, adminId, additionalData: {
+        'assignedVolunteerId': volunteerId,
+        'reason': reason,
+      });
+
+      // Notify stakeholders
+      await _notifyStakeholders(donationId, 'admin_forced_volunteer');
+    } catch (e) {
+      print('Error forcing volunteer assignment: $e');
+      rethrow;
+    }
+  }
+
   // US12: NGO Review and Accept Donations
   Future<void> reviewDonation({
     required String donationId,
@@ -570,5 +632,29 @@ class FoodDonationService {
       'timestamp': Timestamp.now(),
       ...?additionalData,
     });
+  }
+  // Real-time Streams
+  Stream<FoodDonation?> getDonationStream(String donationId) {
+    return _firestore
+        .collection('food_donations')
+        .doc(donationId)
+        .snapshots()
+        .map((doc) {
+          if (!doc.exists) return null;
+          return FoodDonation.fromFirestore(doc);
+        });
+  }
+
+  Stream<List<FoodDonation>> getDonationStreamByStatus(String donorId, DonationStatus status) {
+     return _firestore
+        .collection('food_donations')
+        .where('donorId', isEqualTo: donorId)
+        .where('status', isEqualTo: status.name)
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs
+              .map((doc) => FoodDonation.fromFirestore(doc))
+              .toList();
+        });
   }
 }

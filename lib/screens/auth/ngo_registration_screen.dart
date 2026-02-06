@@ -37,20 +37,7 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
   bool _refrigerationAvailable = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
-  PlatformFile? _selectedVerificationFile;
 
-  Future<void> _pickVerificationFile() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
-    );
-
-    if (result != null) {
-      setState(() {
-        _selectedVerificationFile = result.files.first;
-      });
-    }
-  }
 
   final List<String> _servingPopulationOptions = [
     'Orphans',
@@ -116,15 +103,6 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
       return;
     }
 
-    if (_selectedVerificationFile == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please upload a verification certificate'),
-          backgroundColor: Colors.orange,
-        ),
-      );
-      return;
-    }
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
@@ -153,11 +131,10 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
       email: _emailController.text.trim(),
       password: _passwordController.text,
       ngoProfile: ngoProfile,
-      verificationFile: _selectedVerificationFile,
     );
 
     if (success && mounted) {
-      Navigator.pushReplacementNamed(context, AppRouter.emailVerification);
+      Navigator.pushReplacementNamed(context, AppRouter.documentSubmission);
     } else if (mounted && authProvider.errorMessage != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -397,61 +374,7 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
                     const SizedBox(height: 32),
 
                     // Verification Documents
-                     Text(
-                      'Verification Documents',
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                    const SizedBox(height: 16),
-                    Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey.shade400),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                             'Upload Food Safety / Registration Certificate',
-                             style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: 4),
-                          const Text(
-                            'Required for verification. PDF, JPG, or PNG.',
-                            style: TextStyle(fontSize: 12, color: Colors.grey),
-                          ),
-                          const SizedBox(height: 12),
-                          Row(
-                            children: [
-                              ElevatedButton.icon(
-                                onPressed: _pickVerificationFile,
-                                icon: const Icon(Icons.upload_file),
-                                label: const Text('Choose File'),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.grey[200],
-                                  foregroundColor: Colors.black87,
-                                  elevation: 0,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  _selectedVerificationFile != null
-                                      ? _selectedVerificationFile!.name
-                                      : 'No file selected',
-                                  style: TextStyle(
-                                    color: _selectedVerificationFile != null
-                                        ? Colors.green
-                                        : Colors.grey,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
+
                     
                     const SizedBox(height: 32),
 

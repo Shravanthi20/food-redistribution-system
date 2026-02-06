@@ -105,7 +105,6 @@ class AuthProvider extends ChangeNotifier {
     required String email,
     required String password,
     required NGOProfile ngoProfile,
-    PlatformFile? verificationFile,
   }) async {
     try {
       _isLoading = true;
@@ -119,25 +118,6 @@ class AuthProvider extends ChangeNotifier {
       );
 
       if (credential != null) {
-        // Upload Certificate if provided
-        if (verificationFile != null) {
-          try {
-            final url = await _authService.uploadVerificationCertificate(
-              credential.user!.uid,
-              verificationFile,
-            );
-            
-            if (url != null) {
-               await FirebaseFirestore.instance
-                  .collection('ngo_profiles')
-                  .doc(credential.user!.uid)
-                  .update({'verificationCertificateUrl': url});
-            }
-          } catch (e) {
-             print('Certificate upload failed: $e');
-             // Proceed regardless of upload failure
-          }
-        }
         return true;
       }
       return false;
@@ -195,7 +175,51 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  // Submit Verification Document (For NGO onboarding flow)
+  Future<void> uploadVerificationDocument(String userId, PlatformFile file) async {
+    _setLoading(true);
+    try {
+      // 1. Upload file to Storage
+      // Ideally use a storage service, but calling directly for brevity as per previous implementation patterns here
+      // Assuming 'verification_docs' folder exists or is automatically created
+      // NOTE: Since I don't have the Storage instance exposed here clearly, I'll rely on a putative StorageService or similar logic. 
+      // Actually, I will check if Storage is initialized. 
+      // Re-using the logic from registerNGO but isolated.
+      
+      final ref = FirebaseStorage.instance
+          .ref()
+          .child('verification_docs')
+          .child('$userId.${file.extension}');
+          
+      if (kIsWeb) {
+        await ref.putData(file.bytes!);
+      } else {
+        await ref.putFile(File(file.path!));
+      }
+      
+      final url = await ref.getDownloadURL();
+
+      // 2. Update User Verification Status
+      await _firestore.collection('users').doc(userId).update({
+        'verificationDocUrl': url,
+        'onboardingState': OnboardingState.documentSubmitted.name,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      
+      // Update local user model
+      await _fetchUser(userId);
+
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+      throw e;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
   Future<void> signOut() async {
+
     try {
       _isLoading = true;
       notifyListeners();
