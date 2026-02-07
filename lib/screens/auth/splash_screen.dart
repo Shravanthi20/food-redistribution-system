@@ -22,7 +22,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   void _checkAuthState() {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-
+    
     // Listen to auth state changes
     authProvider.addListener(() {
       if (!authProvider.isLoading && mounted) {
@@ -41,7 +41,7 @@ class _SplashScreenState extends State<SplashScreen> {
 // Bypass email verification for testing
       // if (!authProvider.isEmailVerified) {
       //   Navigator.pushReplacementNamed(context, AppRouter.emailVerification);
-      // } else
+      // } else 
       if (authProvider.appUser != null) {
         _navigateBasedOnUserState(authProvider.appUser!);
       } else {
@@ -53,27 +53,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void _navigateBasedOnUserState(AppUser user) {
-    if (user.role == UserRole.ngo) {
-       switch(user.onboardingState) {
-         case OnboardingState.registered:
-           Navigator.pushReplacementNamed(context, AppRouter.documentSubmission);
-           return;
-         case OnboardingState.documentSubmitted:
-           Navigator.pushReplacementNamed(context, AppRouter.verificationPending);
-           return;
-         // If we had a rejected state in enum, handle it. Assuming it might be handled via status or re-purposed state.
-         // For now, if active/verified:
-         case OnboardingState.verified:
-         case OnboardingState.active:
-           _navigateToRoleDashboard(user.role);
-           return;
-         default:
-           // If profile not complete etc
-           break;
-       }
-    }
-
-    // Default existing logic for others
+    // Navigate based on onboarding state
     switch (user.onboardingState) {
       case OnboardingState.registered:
       case OnboardingState.documentSubmitted:
@@ -112,55 +92,65 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.primary,
+      backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFFFFFFF),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // App Icon
+            // App Icon with smooth shadow and premium look
             Container(
-              width: 120,
-              height: 120,
+              width: 140,
+              height: 140,
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(60),
+                color: isDark ? const Color(0xFF1C1C1E) : const Color(0xFFF2F2F7),
+                borderRadius: BorderRadius.circular(32),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
+                    color: Colors.black.withOpacity(isDark ? 0.4 : 0.1),
+                    blurRadius: 30,
+                    offset: const Offset(0, 15),
                   ),
                 ],
               ),
               child: Icon(
-                Icons.restaurant,
-                size: 60,
+                Icons.restaurant_rounded,
+                size: 70,
                 color: Theme.of(context).colorScheme.primary,
               ),
             ),
-            const SizedBox(height: 30),
-
-            // App Title
+            const SizedBox(height: 48),
+            
+            // App Title - Premium Typography
             Text(
-              'Food Redistribution',
+              'ShareFood',
               style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
+                fontWeight: FontWeight.w800,
+                letterSpacing: -1.0,
+              ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             Text(
               'Reducing waste, feeding hope',
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.white70,
-                  ),
+                color: isDark ? Colors.white54 : Colors.black54,
+                fontWeight: FontWeight.w500,
+              ),
             ),
-            const SizedBox(height: 50),
-
-            // Loading indicator
-            const CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            const SizedBox(height: 80),
+            
+            // Minimalist loading
+            SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.5,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                ),
+              ),
             ),
           ],
         ),
