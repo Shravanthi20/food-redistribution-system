@@ -4,18 +4,17 @@ import '../models/user.dart';
 import '../models/donor_profile.dart';
 import '../models/ngo_profile.dart';
 import '../models/volunteer_profile.dart';
-import '../utils/result_utils.dart';
-import 'base_service.dart';
+import 'audit_service.dart';
 import 'notification_service.dart';
+import 'firestore_service.dart';
+import '../config/firestore_schema.dart';
 
-class UserService extends BaseService {
+class UserService {
+  final FirestoreService _firestoreService = FirestoreService();
   final auth.FirebaseAuth _auth = auth.FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final AuditService _auditService = AuditService();
   final NotificationService _notificationService = NotificationService();
-
-  // Simple local cache for permissions to avoid excessive Firestore reads
-  static final Map<String, _PermissionCacheEntry> _permissionCache = {};
-  static const _cacheDuration = Duration(minutes: 5);
 
   // RBAC Middleware - Check if user has required role
   Future<bool> hasRole(String userId, UserRole requiredRole) async {
@@ -108,18 +107,153 @@ class UserService extends BaseService {
     }
   }
 
-  // US7: Role-Based Access Control (Cached & Effective)
+  // US6: Admin - Verify NGO and Donor Certificates
+  Future<void> verifyUser({
+    required String userId,
+    required bool approved,
+    required String adminId,
+    String? reason,
+  }) async {
+    try {
+      final batch = _firestore.batch();
+
+      // Update user status
+      final userRef = _firestore.collection('users').doc(userId);
+      batch.update(userRef, {
+        'status': approved ? UserStatus.verified.name : UserStatus.pending.name,
+        'onboardingState': approved 
+            ? OnboardingState.verified.name 
+            : OnboardingState.registered.name,
+        'updatedAt': Timestamp.now(),
+      });
+
+      // Update profile verification status
+      final userDoc = await userRef.get();
+      if (userDoc.exists) {
+        final userData = userDoc.data() as Map<String, dynamic>;
+        final role = userData['role'];
+        
+        if (role == UserRole.donor.name) {
+          final profileRef = _firestore.collection('donor_profiles').doc(userId);
+          batch.update(profileRef, {
+            'isVerified': approved,
+            'updatedAt': Timestamp.now(),
+          });
+        } else if (role == UserRole.ngo.name) {
+          final profileRef = _firestore.collection('ngo_profiles').doc(userId);
+          batch.update(profileRef, {
+            'isVerified': approved,
+            'updatedAt': Timestamp.now(),
+          });
+        } else if (role == UserRole.volunteer.name) {
+          final profileRef = _firestore.collection('volunteer_profiles').doc(userId);
+          batch.update(profileRef, {
+            'isVerified': approved,
+            'updatedAt': Timestamp.now(),
+          });
+        }
+      }
+
+      // Update review queue
+      final reviewQuery = await _firestore
+          .collection('review_queue')
+          .where('userId', isEqualTo: userId)
+          .where('status', isEqualTo: 'pending')
+          .get();
+
+      for (var doc in reviewQuery.docs) {
+        batch.update(doc.reference, {
+          'status': approved ? 'approved' : 'rejected',
+          'reviewedBy': adminId,
+          'reviewedAt': Timestamp.now(),
+          'reason': reason,
+        });
+      }
+
+      // Log verification action
+      final logRef = _firestore.collection('audit_logs').doc();
+      batch.set(logRef, {
+        'action': 'user_verification',
+        'adminId': adminId,
+        'userId': userId,
+        'approved': approved,
+        'reason': reason,
+        'timestamp': Timestamp.now(),
+      });
+
+      await batch.commit();
+    } catch (e) {
+      print('Error verifying user: $e');
+      rethrow;
+    }
+  }
+
+  // US9: Temporary Role Restriction
+  Future<void> restrictUser({
+    required String userId,
+    required String adminId,
+    required Map<String, dynamic> restrictions,
+    required DateTime endDate,
+    String? reason,
+  }) async {
+    try {
+      await _firestore.collection('users').doc(userId).update({
+        'status': UserStatus.restricted.name,
+        'restrictions': restrictions,
+        'restrictionEndDate': Timestamp.fromDate(endDate),
+        'updatedAt': Timestamp.now(),
+      });
+
+      // Log restriction action
+      await _firestore.collection('audit_logs').add({
+        'action': 'user_restriction',
+        'adminId': adminId,
+        'userId': userId,
+        'restrictions': restrictions,
+        'endDate': Timestamp.fromDate(endDate),
+        'reason': reason,
+        'timestamp': Timestamp.now(),
+      });
+
+      // Schedule automatic restoration (in real implementation, use Cloud Functions)
+      await _scheduleRestrictionEnd(userId, endDate);
+    } catch (e) {
+      print('Error restricting user: $e');
+      rethrow;
+    }
+  }
+
+  // Remove restriction
+  Future<void> removeRestriction({
+    required String userId,
+    required String adminId,
+  }) async {
+    try {
+      await _firestore.collection('users').doc(userId).update({
+        'status': UserStatus.active.name,
+        'restrictions': FieldValue.delete(),
+        'restrictionEndDate': FieldValue.delete(),
+        'updatedAt': Timestamp.now(),
+      });
+
+      // Log restriction removal
+      await _firestore.collection('audit_logs').add({
+        'action': 'restriction_removed',
+        'adminId': adminId,
+        'userId': userId,
+        'timestamp': Timestamp.now(),
+      });
+    } catch (e) {
+      print('Error removing restriction: $e');
+      rethrow;
+    }
+  }
+
+  // US7: Role-Based Access Control
   Future<bool> hasPermission({
     required String userId,
     required String permission,
   }) async {
-    // 1. Check Cache
-    final cached = _permissionCache[userId];
-    if (cached != null && DateTime.now().isBefore(cached.expiry)) {
-      return _evaluatePermissions(cached.role, cached.status, cached.restrictions, permission);
-    }
-
-    // 2. Fetch from Firestore if not cached or expired
     try {
       final userDoc = await _firestore.collection('users').doc(userId).get();
       if (!userDoc.exists) return false;
@@ -133,96 +267,25 @@ class UserService extends BaseService {
         (e) => e.name == userData['status'],
         orElse: () => UserStatus.pending,
       );
-      final restrictions = userData['restrictions'] as Map<String, dynamic>?;
 
-      // Update Cache
-      _permissionCache[userId] = _PermissionCacheEntry(
-        role: role,
-        status: status,
-        restrictions: restrictions,
-        expiry: DateTime.now().add(_cacheDuration),
-      );
+      // Check if user is restricted
+      if (status == UserStatus.restricted) {
+        final restrictions = userData['restrictions'] as Map<String, dynamic>?;
+        final restrictionEndDate = userData['restrictionEndDate'] as Timestamp?;
+        
+        if (restrictions != null && restrictionEndDate != null) {
+          if (DateTime.now().isBefore(restrictionEndDate.toDate())) {
+            return !restrictions.containsKey(permission);
+          }
+        }
+      }
 
-      return _evaluatePermissions(role, status, restrictions, permission);
+      // Check role-based permissions
+      return _getRolePermissions(role).contains(permission);
     } catch (e) {
-      debugPrint('Error checking permission: $e');
+      print('Error checking permission: $e');
       return false;
     }
-  }
-
-  bool _evaluatePermissions(UserRole role, UserStatus status, Map<String, dynamic>? restrictions, String permission) {
-    // Admin bypass
-    if (role == UserRole.admin) return true;
-
-    // Check if user is restricted
-    if (status == UserStatus.restricted && restrictions != null) {
-      if (restrictions.containsKey(permission)) return false;
-    }
-
-    // Check base role permissions
-    return _getRolePermissions(role).contains(permission);
-  }
-
-  // NGO/Donor Verification (Effective Transactional Logic)
-  Future<Result<void>> verifyUser({
-    required String userId,
-    required bool approved,
-    required String adminId,
-    String? reason,
-  }) async {
-    return safeExecute(() async {
-      await _firestore.runTransaction((transaction) async {
-        final userRef = _firestore.collection('users').doc(userId);
-        final userDoc = await transaction.get(userRef);
-        
-        if (!userDoc.exists) throw Exception('User not found');
-        final userData = userDoc.data() as Map<String, dynamic>;
-        final role = userData['role'];
-
-        // 1. Update User Document
-        transaction.update(userRef, {
-          'status': approved ? UserStatus.verified.name : UserStatus.pending.name,
-          'onboardingState': approved ? OnboardingState.verified.name : OnboardingState.registered.name,
-          'updatedAt': FieldValue.serverTimestamp(),
-        });
-
-        // 2. Update Profile Document
-        final profileCollection = _getProfileCollectionForRole(role);
-        if (profileCollection != null) {
-          final profileRef = _firestore.collection(profileCollection).doc(userId);
-          transaction.update(profileRef, {
-            'isVerified': approved,
-            'updatedAt': FieldValue.serverTimestamp(),
-          });
-        }
-
-        // 3. Update Review Queue
-        final reviewQuery = await _firestore
-            .collection('review_queue')
-            .where('userId', isEqualTo: userId)
-            .where('status', isEqualTo: 'pending')
-            .get();
-
-        for (var doc in reviewQuery.docs) {
-          transaction.update(doc.reference, {
-            'status': approved ? 'approved' : 'rejected',
-            'reviewedBy': adminId,
-            'reviewedAt': FieldValue.serverTimestamp(),
-            'reason': reason,
-          });
-        }
-        
-        // Clear permission cache for this user since status changed
-        _permissionCache.remove(userId);
-      });
-    }, auditAction: 'user_verification', auditUserId: adminId, auditData: {'targetUserId': userId, 'approved': approved});
-  }
-
-  String? _getProfileCollectionForRole(String? role) {
-    if (role == UserRole.donor.name) return 'donor_profiles';
-    if (role == UserRole.ngo.name) return 'ngo_profiles';
-    if (role == UserRole.volunteer.name) return 'volunteer_profiles';
-    return null;
   }
 
   // Get user profile based on role
@@ -488,19 +551,4 @@ class UserService extends BaseService {
       'createdAt': Timestamp.now(),
     });
   }
-}
-
-/// Internal helper for permission caching
-class _PermissionCacheEntry {
-  final UserRole role;
-  final UserStatus status;
-  final Map<String, dynamic>? restrictions;
-  final DateTime expiry;
-
-  _PermissionCacheEntry({
-    required this.role,
-    required this.status,
-    this.restrictions,
-    required this.expiry,
-  });
 }
