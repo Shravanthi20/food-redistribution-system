@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../utils/app_router.dart';
-import '../../models/user.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../widgets/loading_overlay.dart';
 
@@ -31,300 +30,45 @@ class _LoginScreenState extends State<LoginScreen> {
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     
-    // Hide keyboard
-    FocusScope.of(context).unfocus();
-
     final success = await authProvider.signIn(
       email: _emailController.text.trim(),
       password: _passwordController.text,
     );
 
     if (success && mounted) {
-      if (authProvider.appUser != null) {
-        _navigateBasedOnUser(authProvider.appUser!);
-      }
+      // Navigation will be handled by auth state listener in splash screen
+      Navigator.pushReplacementNamed(context, AppRouter.splash);
     } else if (mounted && authProvider.errorMessage != null) {
-      _showErrorSnackBar(authProvider.errorMessage!);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(authProvider.errorMessage!),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
-  void _navigateBasedOnUser(dynamic user) {
-     // Use dynamic to avoid import issues if AppUser isn't perfectly visible, 
-     // though it should be available via auth_provider import.
-     // Better to cast if we can, or just access fields if we trust the object.
-     // Re-importing models/user.dart might be needed if not already there, 
-     // but AuthProvider exports it usually or it's imported at top.
-     // Top imports show: import '../../providers/auth_provider.dart'; which imports User/AppUser.
-     // But explicit import in this file is missing. I will add it if needed, 
-     // or just rely on the provider's user object.
-     
-     // Actually, let's look at the imports. 
-     // It imports auth_provider.dart. 
-     // It DOES NOT import properties of AppUser directly unless we import user.dart.
-     // I'll assume I need to handle logic here.
-     
-     // Quick logic based on role strings if we want to be safe, or just use the same logic as SplashScreen.
-     // Since I can't easily see the AppUser class definition from here without scrolling up (it was imported in splash), 
-     // I should check if LoginScreen has the import. 
-     // It does NOT have `import '../../models/user.dart';`. I need to add that too.
-     
-     // For now, I'll implement the logic assuming I add the import.
-     
-    if (user.role == UserRole.ngo) {
-       switch(user.onboardingState) {
-         case OnboardingState.registered:
-           Navigator.pushReplacementNamed(context, AppRouter.documentSubmission);
-           return;
-         case OnboardingState.documentSubmitted:
-           Navigator.pushReplacementNamed(context, AppRouter.verificationPending);
-           return;
-         case OnboardingState.verified:
-         case OnboardingState.active:
-           _navigateToRoleDashboard(user.role);
-           return;
-         default:
-           break;
-       }
+  Future<void> _forgotPassword() async {
+    final email = _emailController.text.trim();
+    if (email.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter your email address first'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
     }
-
-    // Default existing logic for others (Donor, Volunteer, Admin)
-    switch (user.onboardingState) {
-      case OnboardingState.registered:
-        // Donors are now active by default, so they won't hit this unless logic matches.
-        // Volunteers might still hit this.
-         Navigator.pushReplacementNamed(
-          context,
-          AppRouter.onboarding,
-          arguments: {'userRole': user.role},
-        );
-        break;
-      case OnboardingState.documentSubmitted:
-         Navigator.pushReplacementNamed(
-          context,
-          AppRouter.onboarding,
-          arguments: {'userRole': user.role},
-        );
-        break;
-      case OnboardingState.verified:
-      case OnboardingState.profileComplete:
-      case OnboardingState.active:
-        _navigateToRoleDashboard(user.role);
-        break;
-      default:
-        // Fallback
-        _navigateToRoleDashboard(user.role);
-    }
-  }
-
-  void _navigateToRoleDashboard(UserRole role) {
-    switch (role) {
-      case UserRole.donor:
-        Navigator.pushReplacementNamed(context, AppRouter.donorDashboard);
-        break;
-      case UserRole.ngo:
-        Navigator.pushReplacementNamed(context, AppRouter.ngoDashboard);
-        break;
-      case UserRole.volunteer:
-        Navigator.pushReplacementNamed(context, AppRouter.volunteerDashboard);
-        break;
-      case UserRole.admin:
-        Navigator.pushReplacementNamed(context, AppRouter.adminDashboard);
-        break;
-    }
-  }
-
-  void _showErrorSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red.shade600,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-
-  void _navigateToForgotPassword() {
-    Navigator.pushNamed(context, AppRouter.forgotPassword);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    
-    return Scaffold(
-      backgroundColor: Colors.grey[50],
-      body: Consumer<AuthProvider>(
-        builder: (context, authProvider, child) {
-          return LoadingOverlay(
-            isLoading: authProvider.isLoading,
-            child: SafeArea(
-              child: Center(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Logo/Icon
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.primaryContainer,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.local_dining,
-                          size: 64,
-                          color: theme.colorScheme.primary,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      
-                      Text(
-                        'Welcome Back',
-                        style: theme.textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Sign in to access your dashboard',
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                      const SizedBox(height: 48),
-
-                      // Login Card
-                      Card(
-                        elevation: 2,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(24.0),
-                          child: Form(
-                            key: _formKey,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                CustomTextField(
-                                  controller: _emailController,
-                                  label: 'Email',
-                                  hintText: 'hello@example.com',
-                                  prefixIcon: const Icon(Icons.email_outlined),
-                                  keyboardType: TextInputType.emailAddress,
-                                  validator: (v) {
-                                    if (v == null || v.isEmpty) return 'Required';
-                                    if (!v.contains('@')) return 'Invalid email';
-                                    return null;
-                                  },
-                                ),
-                                const SizedBox(height: 16),
-                                CustomTextField(
-                                  controller: _passwordController,
-                                  label: 'Password',
-                                  hintText: '••••••••',
-                                  prefixIcon: const Icon(Icons.lock_outline),
-                                  obscureText: _obscurePassword,
-                                  suffixIcon: IconButton(
-                                    icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
-                                    onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-                                  ),
-                                  validator: (v) => v!.isEmpty ? 'Required' : null,
-                                ),
-                                const SizedBox(height: 12),
-                                Align(
-                                  alignment: Alignment.centerRight,
-                                  child: TextButton(
-                                    onPressed: _navigateToForgotPassword,
-                                    child: const Text('Forgot Password?'),
-                                  ),
-                                ),
-                                const SizedBox(height: 24),
-                                SizedBox(
-                                  height: 50,
-                                  child: ElevatedButton(
-                                    onPressed: _signIn,
-                                    style: ElevatedButton.styleFrom(
-                                      elevation: 2,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                    ),
-                                    child: const Text(
-                                      'Sign In',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      
-                      const SizedBox(height: 24),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "Don't have an account? ",
-                            style: TextStyle(color: Colors.grey[600]),
-                          ),
-                          TextButton(
-                            onPressed: () => Navigator.pushNamed(context, AppRouter.roleSelection),
-                            child: const Text('Create Account'),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _ForgotPasswordForm extends StatefulWidget {
-  @override
-  State<_ForgotPasswordForm> createState() => _ForgotPasswordFormState();
-}
-
-class _ForgotPasswordFormState extends State<_ForgotPasswordForm> {
-  final _emailResetController = TextEditingController();
-  final _resetFormKey = GlobalKey<FormState>();
-  bool _isLoading = false;
-
-  @override
-  void dispose() {
-    _emailResetController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _sendResetLink() async {
-    if (!_resetFormKey.currentState!.validate()) return;
-
-    setState(() => _isLoading = true);
 
     try {
-      await Provider.of<AuthProvider>(context, listen: false)
-          .sendPasswordResetEmail(_emailResetController.text.trim());
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      await authProvider.sendPasswordResetEmail(email);
       
       if (mounted) {
-        Navigator.pop(context); // Close modal
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Reset link sent! Check your email.'),
+            content: Text('Password reset email sent successfully'),
             backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
           ),
         );
       }
@@ -334,69 +78,149 @@ class _ForgotPasswordFormState extends State<_ForgotPasswordForm> {
           SnackBar(
             content: Text('Error: $e'),
             backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
           ),
         );
       }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Reset Password',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Enter your email to receive a password reset link.',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Colors.grey[600],
-          ),
-        ),
-        const SizedBox(height: 24),
-        Form(
-          key: _resetFormKey,
-          child: CustomTextField(
-            controller: _emailResetController,
-            label: 'Email Address',
-            prefixIcon: const Icon(Icons.email_outlined),
-            keyboardType: TextInputType.emailAddress,
-            validator: (v) {
-              if (v == null || v.isEmpty) return 'Required';
-              if (!v.contains('@')) return 'Invalid email';
-              return null;
-            },
-          ),
-        ),
-        const SizedBox(height: 24),
-        SizedBox(
-          width: double.infinity,
-          height: 50,
-          child: ElevatedButton(
-            onPressed: _isLoading ? null : _sendResetLink,
-            style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.background,
+      body: Consumer<AuthProvider>(
+        builder: (context, authProvider, child) {
+          return LoadingOverlay(
+            isLoading: authProvider.isLoading,
+            child: SafeArea(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 40.0),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const SizedBox(height: 20),
+                        // Premium Icon Container
+                        Center(
+                          child: Container(
+                            padding: const EdgeInsets.all(24),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(32),
+                            ),
+                            child: Icon(
+                              Icons.restaurant_rounded,
+                              size: 64,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 40),
+                        Text(
+                          'Welcome Back',
+                          style: Theme.of(context).textTheme.displayMedium,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Sign in to continue your impact',
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: Colors.grey[600],
+                            fontWeight: FontWeight.w500,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 56),
+
+                        // Email Field
+                        CustomTextField(
+                          controller: _emailController,
+                          label: 'Email',
+                          hintText: 'name@example.com',
+                          keyboardType: TextInputType.emailAddress,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your email';
+                            }
+                            if (!RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(value)) {
+                              return 'Please enter a valid email address';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 24),
+
+                        // Password Field
+                        CustomTextField(
+                          controller: _passwordController,
+                          label: 'Password',
+                          hintText: 'Enter your password',
+                          obscureText: _obscurePassword,
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword ? Icons.visibility_rounded : Icons.visibility_off_rounded,
+                              color: Colors.grey,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
+                            },
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your password';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 12),
+
+                        // Forgot Password
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: _forgotPassword,
+                            child: const Text('Forgot Password?'),
+                          ),
+                        ),
+                        const SizedBox(height: 40),
+
+                        // Sign In Button
+                        ElevatedButton(
+                          onPressed: _signIn,
+                          child: const Text('Sign In'),
+                        ),
+                        const SizedBox(height: 32),
+
+                        // Register Link
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'New to ShareFood? ',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pushNamed(context, AppRouter.roleSelection);
+                              },
+                              child: const Text('Join Now'),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ),
-            child: _isLoading 
-                ? const SizedBox(
-                    width: 20, 
-                    height: 20, 
-                    child: CircularProgressIndicator(strokeWidth: 2)
-                  )
-                : const Text('Send Reset Link'),
-          ),
-        ),
-        const SizedBox(height: 24),
-      ],
+          );
+        },
+      ),
     );
   }
 }
