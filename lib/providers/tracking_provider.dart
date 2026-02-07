@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/tracking/location_tracking_model.dart';
+import '../models/enums.dart';
 import '../services/tracking/offline_tracking_service.dart';
 import '../services/tracking/notification_handler.dart';
 import '../services/tracking/delay_detection_service.dart';
@@ -22,7 +23,7 @@ class TrackingProvider extends ChangeNotifier {
   late TrackingState _trackingState = TrackingState(
     isTracking: false,
     isOnline: true,
-    currentStatus: 'idle',
+    currentStatus: TrackingStatus.idle,
     pendingUpdates: 0,
   );
 
@@ -40,7 +41,7 @@ class TrackingProvider extends ChangeNotifier {
   bool get isTracking => _trackingState.isTracking;
   bool get isOnline => _trackingState.isOnline;
   LocationUpdate? get currentLocation => _trackingState.currentLocation;
-  String? get currentStatus => _trackingState.currentStatus;
+  TrackingStatus? get currentStatus => _trackingState.currentStatus;
   int get pendingUpdates => _trackingState.pendingUpdates;
   DateTime? get lastSync => _trackingState.lastSync;
   int get activeTasksCount => _delayAlerts.length;
@@ -79,7 +80,7 @@ class TrackingProvider extends ChangeNotifier {
   // Update what stage the donation is at
   Future<bool> updateDonationStatus({
     required String donationId,
-    required String newStatus,
+    required TrackingStatus newStatus,
     required String userId,
     Map<String, dynamic>? locationData,
     String? notes,
@@ -123,7 +124,7 @@ class TrackingProvider extends ChangeNotifier {
         latitude: latitude,
         longitude: longitude,
         timestamp: DateTime.now(),
-        status: _trackingState.currentStatus ?? 'enRoute',
+        status: _trackingState.currentStatus ?? TrackingStatus.enRoute,
       );
 
       // Save to Firestore

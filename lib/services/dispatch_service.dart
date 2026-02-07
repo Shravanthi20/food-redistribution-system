@@ -1,131 +1,17 @@
+import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geolocator/geolocator.dart';
 import '../models/volunteer_profile.dart';
 import '../models/food_donation.dart';
+import '../models/dispatch.dart';
+import '../models/enums.dart';
 import '../services/firestore_service.dart';
 import '../services/location_service.dart';
 import '../services/notification_service.dart';
 import '../services/audit_service.dart';
 
-enum DispatchPriority {
-  immediate,   // < 30 minutes
-  urgent,      // < 2 hours
-  scheduled,   // > 2 hours
-  flexible,    // No specific time
-}
-
-enum VolunteerStatus {
-  available,
-  busy,
-  offline,
-  onBreak,
-}
-
-class DispatchCriteria {
-  final double maxDistance;
-  final List<TransportMethod> allowedTransport;
-  final int minRating;
-  final bool requiresExperience;
-  final DispatchPriority priority;
-  final DateTime? requiredBy;
-  
-  const DispatchCriteria({
-    this.maxDistance = 25.0,
-    this.allowedTransport = const [TransportMethod.car, TransportMethod.bike],
-    this.minRating = 3,
-    this.requiresExperience = false,
-    this.priority = DispatchPriority.scheduled,
-    this.requiredBy,
-  });
-}
-
-class DispatchResult {
-  final String volunteerId;
-  final String taskId;
-  final double score;
-  final double distance;
-  final double estimatedDuration;
-  final VolunteerProfile volunteer;
-  final String reasoning;
-  final DateTime estimatedArrival;
-  final Map<String, dynamic> metadata;
-  
-  DispatchResult({
-    required this.volunteerId,
-    required this.taskId,
-    required this.score,
-    required this.distance,
-    required this.estimatedDuration,
-    required this.volunteer,
-    required this.reasoning,
-    required this.estimatedArrival,
-    required this.metadata,
-  });
-  
-  Map<String, dynamic> toMap() {
-    return {
-      'volunteerId': volunteerId,
-      'taskId': taskId,
-      'score': score,
-      'distance': distance,
-      'estimatedDuration': estimatedDuration,
-      'reasoning': reasoning,
-      'estimatedArrival': estimatedArrival,
-      'metadata': metadata,
-      'timestamp': DateTime.now(),
-    };
-  }
-}
-
-class DeliveryTask {
-  final String id;
-  final String donationId;
-  final String pickupAddress;
-  final String deliveryAddress;
-  final Map<String, double> pickupLocation;
-  final Map<String, double> deliveryLocation;
-  final DateTime scheduledTime;
-  final DispatchPriority priority;
-  final String? specialInstructions;
-  final List<String> requiredSkills;
-  final double estimatedWeight;
-  final int estimatedVolume;
-  
-  DeliveryTask({
-    required this.id,
-    required this.donationId,
-    required this.pickupAddress,
-    required this.deliveryAddress,
-    required this.pickupLocation,
-    required this.deliveryLocation,
-    required this.scheduledTime,
-    required this.priority,
-    this.specialInstructions,
-    this.requiredSkills = const [],
-    required this.estimatedWeight,
-    required this.estimatedVolume,
-  });
-  
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'donationId': donationId,
-      'pickupAddress': pickupAddress,
-      'deliveryAddress': deliveryAddress,
-      'pickupLocation': pickupLocation,
-      'deliveryLocation': deliveryLocation,
-      'scheduledTime': scheduledTime,
-      'priority': priority.toString(),
-      'specialInstructions': specialInstructions,
-      'requiredSkills': requiredSkills,
-      'estimatedWeight': estimatedWeight,
-      'estimatedVolume': estimatedVolume,
-      'status': 'pending',
-      'createdAt': DateTime.now(),
-    };
-  }
-}
-
+export '../models/dispatch.dart';
+export '../models/enums.dart' show DispatchPriority, VolunteerStatus, VehicleType;
 class VolunteerDispatchService {
   final FirestoreService _firestoreService;
   final LocationService _locationService;
@@ -157,10 +43,11 @@ class VolunteerDispatchService {
       
       if (volunteers.isEmpty) {
         await _auditService.logEvent(
-          'dispatch_no_volunteers',
-          'No volunteers found for task ${task.id}',
-          riskLevel: RiskLevel.high,
-          metadata: {
+          eventType: AuditEventType.securityAlert,
+          userId: 'system',
+          riskLevel: AuditRiskLevel.high,
+          additionalData: {
+            'action': 'dispatch_no_volunteers',
             'taskId': task.id,
             'donationId': task.donationId,
             'maxDistance': criteria.maxDistance,
@@ -192,10 +79,11 @@ class VolunteerDispatchService {
       await _storeDispatchAnalysis(task.id, criteria, topResults);
       
       await _auditService.logEvent(
-        'volunteer_dispatch_completed',
-        'Found ${topResults.length} volunteer candidates for task ${task.id}',
-        riskLevel: RiskLevel.low,
-        metadata: {
+        eventType: AuditEventType.adminAction,
+        userId: 'system',
+        riskLevel: AuditRiskLevel.low,
+        additionalData: {
+          'action': 'volunteer_dispatch_completed',
           'taskId': task.id,
           'candidateCount': topResults.length,
           'topScore': topResults.isNotEmpty ? topResults.first.score : 0,
@@ -205,10 +93,14 @@ class VolunteerDispatchService {
       return topResults;
     } catch (e) {
       await _auditService.logEvent(
-        'dispatch_error',
-        'Error finding volunteers for task ${task.id}: $e',
-        riskLevel: RiskLevel.high,
-        metadata: {'taskId': task.id, 'error': e.toString()},
+        eventType: AuditEventType.securityAlert,
+        userId: 'system',
+        riskLevel: AuditRiskLevel.high,
+        additionalData: {
+          'action': 'dispatch_error',
+          'taskId': task.id, 
+          'error': e.toString()
+        },
       );
       rethrow;
     }
@@ -256,10 +148,11 @@ class VolunteerDispatchService {
     await _firestoreService.addDocument('delivery_tasks', task.toMap());
     
     await _auditService.logEvent(
-      'delivery_task_created',
-      'Created delivery task ${task.id} for donation $donationId',
-      riskLevel: RiskLevel.low,
-      metadata: {
+      eventType: AuditEventType.dataModification,
+      userId: 'system',
+      riskLevel: AuditRiskLevel.low,
+      additionalData: {
+        'action': 'delivery_task_created',
         'taskId': task.id,
         'donationId': donationId,
         'priority': calculatedPriority.toString(),
@@ -324,10 +217,11 @@ class VolunteerDispatchService {
       }
       
       await _auditService.logEvent(
-        'task_assignment_completed',
-        'Assigned task $taskId to volunteer $volunteerId',
-        riskLevel: RiskLevel.low,
-        metadata: {
+        eventType: AuditEventType.dataModification,
+        userId: 'system',
+        riskLevel: AuditRiskLevel.low,
+        additionalData: {
+          'action': 'task_assignment_completed',
           'taskId': taskId,
           'volunteerId': volunteerId,
           'assignmentMetadata': assignmentMetadata,
@@ -337,10 +231,11 @@ class VolunteerDispatchService {
       return true;
     } catch (e) {
       await _auditService.logEvent(
-        'task_assignment_failed',
-        'Failed to assign task $taskId to volunteer $volunteerId: $e',
-        riskLevel: RiskLevel.high,
-        metadata: {
+        eventType: AuditEventType.securityAlert,
+        userId: 'system',
+        riskLevel: AuditRiskLevel.high,
+        additionalData: {
+          'action': 'task_assignment_failed',
           'taskId': taskId,
           'volunteerId': volunteerId,
           'error': e.toString(),
@@ -358,9 +253,16 @@ class VolunteerDispatchService {
   }) async {
     try {
       // Calculate distance to pickup location
-      final distance = await _locationService.calculateDistance(
-        volunteer.currentLocation ?? volunteer.baseLocation,
-        task.pickupLocation,
+      final startLat = volunteer.currentLocation?['latitude'] ?? volunteer.baseLocation['latitude']!;
+      final startLon = volunteer.currentLocation?['longitude'] ?? volunteer.baseLocation['longitude']!;
+      final endLat = task.pickupLocation['latitude']!;
+      final endLon = task.pickupLocation['longitude']!;
+
+      final distance = _locationService.calculateDistance(
+        startLat,
+        startLon,
+        endLat,
+        endLon,
       );
       
       if (distance > criteria.maxDistance) return null;
@@ -417,10 +319,11 @@ class VolunteerDispatchService {
       );
     } catch (e) {
       await _auditService.logEvent(
-        'dispatch_score_error',
-        'Error calculating dispatch score for volunteer ${volunteer.id}: $e',
-        riskLevel: RiskLevel.medium,
-        metadata: {
+        eventType: AuditEventType.securityAlert,
+        userId: 'system',
+        riskLevel: AuditRiskLevel.medium,
+        additionalData: {
+          'action': 'dispatch_score_error',
           'volunteerId': volunteer.id,
           'taskId': task.id,
           'error': e.toString(),
@@ -452,7 +355,7 @@ class VolunteerDispatchService {
       
       // Check basic criteria
       if ((volunteer.rating ?? 0) >= criteria.minRating &&
-          criteria.allowedTransport.contains(volunteer.transportMethod)) {
+          criteria.allowedTransport.contains(volunteer.VehicleType)) {
         volunteers.add(volunteer);
       }
     }
@@ -497,15 +400,15 @@ class VolunteerDispatchService {
     return 0.2;
   }
   
-  double _calculateTransportScore(VolunteerProfile volunteer, List<TransportMethod> allowed) {
-    if (allowed.contains(volunteer.transportMethod)) {
+  double _calculateTransportScore(VolunteerProfile volunteer, List<VehicleType> allowed) {
+    if (allowed.contains(volunteer.VehicleType)) {
       // Bonus for better transport methods
-      switch (volunteer.transportMethod) {
-        case TransportMethod.car: return 1.0;
-        case TransportMethod.bike: return 0.8;
-        case TransportMethod.scooter: return 0.6;
-        case TransportMethod.public: return 0.4;
-        case TransportMethod.walking: return 0.2;
+      switch (volunteer.VehicleType) {
+        case VehicleType.car: return 1.0;
+        case VehicleType.bike: return 0.8;
+        case VehicleType.scooter: return 0.6;
+        case VehicleType.public: return 0.4;
+        case VehicleType.walking: return 0.2;
         default: return 0.5;
       }
     }
@@ -530,12 +433,12 @@ class VolunteerDispatchService {
   double _estimateTaskDuration(double distance, DeliveryTask task, VolunteerProfile volunteer) {
     // Base time on transport method and distance
     double baseSpeed; // km/hour
-    switch (volunteer.transportMethod) {
-      case TransportMethod.car: baseSpeed = 30; break;
-      case TransportMethod.bike: baseSpeed = 15; break;
-      case TransportMethod.scooter: baseSpeed = 25; break;
-      case TransportMethod.public: baseSpeed = 12; break;
-      case TransportMethod.walking: baseSpeed = 5; break;
+    switch (volunteer.VehicleType) {
+      case VehicleType.car: baseSpeed = 30; break;
+      case VehicleType.bike: baseSpeed = 15; break;
+      case VehicleType.scooter: baseSpeed = 25; break;
+      case VehicleType.public: baseSpeed = 12; break;
+      case VehicleType.walking: baseSpeed = 5; break;
       default: baseSpeed = 20; break;
     }
     

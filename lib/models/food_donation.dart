@@ -1,35 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'enums.dart';
+import 'location.dart';
 
-enum FoodType {
-  cooked,
-  raw,
-  packaged,
-  dairy,
-  fruits,
-  vegetables,
-  grains,
-  meat,
-  seafood,
-  bakery,
-  beverages,
-  other
-}
-
-enum DonationStatus {
-  listed,
-  matched,
-  pickedUp,
-  inTransit,
-  delivered,
-  cancelled,
-  expired
-}
-
-enum FoodSafetyLevel {
-  high,
-  medium,
-  low
-}
+export 'enums.dart';
 
 class FoodDonation {
   final String id;
@@ -109,10 +82,12 @@ class FoodDonation {
   });
 
   factory FoodDonation.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
-    
+    return FoodDonation.fromMap(doc.data() as Map<String, dynamic>, id: doc.id);
+  }
+
+  factory FoodDonation.fromMap(Map<String, dynamic> data, {String? id}) {
     return FoodDonation(
-      id: doc.id,
+      id: id ?? data['id'] ?? '',
       donorId: data['donorId'] ?? '',
       title: data['title'] ?? '',
       description: data['description'] ?? '',
@@ -125,10 +100,26 @@ class FoodDonation {
           [],
       quantity: data['quantity'] ?? 0,
       unit: data['unit'] ?? '',
-      preparedAt: (data['preparedAt'] as Timestamp).toDate(),
-      expiresAt: (data['expiresAt'] as Timestamp).toDate(),
-      availableFrom: (data['availableFrom'] as Timestamp).toDate(),
-      availableUntil: (data['availableUntil'] as Timestamp).toDate(),
+      preparedAt: data['preparedAt'] != null 
+          ? (data['preparedAt'] is Timestamp 
+              ? (data['preparedAt'] as Timestamp).toDate() 
+              : DateTime.parse(data['preparedAt'].toString()))
+          : DateTime.now(),
+      expiresAt: data['expiresAt'] != null 
+          ? (data['expiresAt'] is Timestamp 
+              ? (data['expiresAt'] as Timestamp).toDate() 
+              : DateTime.parse(data['expiresAt'].toString()))
+          : DateTime.now(),
+      availableFrom: data['availableFrom'] != null 
+          ? (data['availableFrom'] is Timestamp 
+              ? (data['availableFrom'] as Timestamp).toDate() 
+              : DateTime.parse(data['availableFrom'].toString()))
+          : DateTime.now(),
+      availableUntil: data['availableUntil'] != null 
+          ? (data['availableUntil'] is Timestamp 
+              ? (data['availableUntil'] as Timestamp).toDate() 
+              : DateTime.parse(data['availableUntil'].toString()))
+          : DateTime.now(),
       safetyLevel: FoodSafetyLevel.values.firstWhere(
         (e) => e.name == data['safetyLevel'],
         orElse: () => FoodSafetyLevel.medium,
@@ -149,22 +140,33 @@ class FoodDonation {
       ),
       assignedVolunteerId: data['assignedVolunteerId'],
       assignedNGOId: data['assignedNGOId'],
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
+      createdAt: data['createdAt'] != null 
+          ? (data['createdAt'] is Timestamp 
+              ? (data['createdAt'] as Timestamp).toDate() 
+              : DateTime.parse(data['createdAt'].toString()))
+          : DateTime.now(),
       updatedAt: data['updatedAt'] != null
-          ? (data['updatedAt'] as Timestamp).toDate()
+          ? (data['updatedAt'] is Timestamp 
+              ? (data['updatedAt'] as Timestamp).toDate() 
+              : DateTime.parse(data['updatedAt'].toString()))
           : null,
       hygieneCertification: data['hygieneCertification'],
       isUrgent: data['isUrgent'] ?? false,
       estimatedMeals: data['estimatedMeals'] ?? 0,
       estimatedPeopleServed: data['estimatedPeopleServed'] ?? 0,
       deliveredAt: data['deliveredAt'] != null
-          ? (data['deliveredAt'] as Timestamp).toDate()
+          ? (data['deliveredAt'] is Timestamp 
+              ? (data['deliveredAt'] as Timestamp).toDate() 
+              : DateTime.parse(data['deliveredAt'].toString()))
           : null,
       claimedByNGO: data['claimedByNGO'],
       ngoName: data['ngoName'],
       volunteerName: data['volunteerName'],
     );
   }
+
+  // Alias for compatibility
+  DateTime get expiryDateTime => expiresAt;
 
   Map<String, dynamic> toFirestore() {
     return {

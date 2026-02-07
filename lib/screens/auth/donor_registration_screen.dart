@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../models/enums.dart';
 import '../../providers/auth_provider.dart';
 import '../../models/donor_profile.dart';
 import '../../widgets/custom_text_field.dart';
@@ -500,11 +501,12 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
   String _getDonorTypeDisplayName(DonorType type) {
     switch (type) {
       case DonorType.restaurant: return 'Restaurant';
-      case DonorType.groceryStore: return 'Grocery Store';
+      case DonorType.supermarket: return 'Grocery Store';
       case DonorType.catering: return 'Catering Service';
       case DonorType.hotel: return 'Hotel';
       case DonorType.institutional: return 'Institutional Kitchen';
       case DonorType.bakery: return 'Bakery';
+      case DonorType.individual: return 'Individual';
       case DonorType.other: return 'Other';
     }
   }

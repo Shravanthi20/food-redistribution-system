@@ -4,33 +4,9 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'dart:io';
 import 'firestore_service.dart';
 import '../config/firestore_schema.dart';
+import '../models/enums.dart';
 
-enum AuditEventType {
-  userLogin,
-  userLogout,
-  userRegistration,
-  passwordChange,
-  roleChange,
-  accountLocked,
-  accountUnlocked,
-  verificationSubmitted,
-  verificationApproved,
-  verificationRejected,
-  userSuspended,
-  userReactivated,
-  dataAccess,
-  dataModification,
-  dataExport,
-  adminAction,
-  securityAlert
-}
-
-enum AuditRiskLevel {
-  low,
-  medium,
-  high,
-  critical
-}
+export '../models/enums.dart' show AuditEventType, AuditRiskLevel;
 
 class AuditService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

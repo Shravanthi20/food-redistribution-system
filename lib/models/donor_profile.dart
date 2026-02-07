@@ -1,14 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-enum DonorType {
-  restaurant,
-  groceryStore,
-  catering,
-  hotel,
-  institutional,
-  bakery,
-  other
-}
+import 'enums.dart';
 
 class DonorProfile {
   final String userId;

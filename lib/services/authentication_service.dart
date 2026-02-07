@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:food_redistribution_app/models/app_user.dart';
-import 'package:food_redistribution_app/constants/app_constants.dart';
-import 'package:food_redistribution_app/utils/app_utils.dart';
+import '../models/user.dart';
+import '../constants/app_constants.dart';
+import '../utils/app_utils.dart';
+import '../models/food_donation.dart'; // [NEW] Added for DonationStatus
 
 /// Comprehensive authentication service for the Food Redistribution Platform
 /// 
@@ -118,15 +119,14 @@ class AuthService {
       final now = DateTime.now();
       
       final user = AppUser(
-        id: userId,
+        uid: userId,
         email: email,
-        displayName: displayName,
+        firstName: displayName.split(' ').first,
+        lastName: displayName.contains(' ') ? displayName.split(' ').skip(1).join(' ') : '',
         role: role,
-        location: location,
-        isActive: true,
+        status: UserStatus.pending,
+        onboardingState: OnboardingState.registered,
         createdAt: now,
-        lastLoginAt: now,
-        preferences: additionalData ?? {},
       );
 
       // Store user in database (Firestore simulation)
@@ -281,13 +281,15 @@ class AuthService {
     
     // Return mock user for demo
     return AppUser(
-      id: 'demo-user-123',
+      uid: 'demo-user-123',
       email: email,
-      displayName: 'Demo User',
+      firstName: 'Demo',
+      lastName: 'User',
       role: UserRole.donor,
-      isActive: true,
+      status: UserStatus.active,
+      onboardingState: OnboardingState.active,
       createdAt: DateTime.now().subtract(const Duration(days: 30)),
-      lastLoginAt: DateTime.now(),
+      updatedAt: DateTime.now(),
     );
   }
 

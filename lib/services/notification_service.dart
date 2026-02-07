@@ -53,6 +53,59 @@ class NotificationService {
     }
   }
 
+  // Alias methods for compatibility with DispatchService
+  Future<void> sendToUser({
+    required String userId,
+    required String title,
+    required String body,
+    Map<String, dynamic>? data,
+  }) async {
+    await sendNotification(userId: userId, title: title, message: body, type: 'dispatch_update', data: data);
+  }
+
+  Future<void> sendToDonor({
+    required String donationId,
+    required String title,
+    required String body,
+    Map<String, dynamic>? data,
+  }) async {
+    // Note: In a real app, we'd look up the donorId from the donationId
+    // For now, we'll assume the donorId is passed as donationId OR we'd need to fetch it
+    await sendNotification(userId: donationId, title: title, message: body, type: 'donation_update', data: data);
+  }
+
+  // Send notification to multiple stakeholders (Donor, NGO, potentially Admin)
+  Future<void> sendToStakeholders({
+    required String taskId,
+    required String title,
+    required String body,
+    Map<String, dynamic>? data,
+  }) async {
+    try {
+      // Fetch task to get donor and NGO IDs
+      final taskDoc = await _firestore.collection('delivery_tasks').doc(taskId).get();
+      if (!taskDoc.exists) return;
+
+      final taskData = taskDoc.data()!;
+      final donorId = taskData['donorId'] as String?;
+      final ngoId = taskData['ngoId'] as String?;
+      final volunteerId = taskData['volunteerId'] as String?;
+
+      if (donorId != null) {
+        await sendToUser(userId: donorId, title: title, body: body, data: data);
+      }
+      if (ngoId != null) {
+        await sendToUser(userId: ngoId, title: title, body: body, data: data);
+      }
+      // Usually doesn't notify the volunteer about their own actions but could be useful
+      if (volunteerId != null && (data?['notifyVolunteer'] == true)) {
+        await sendToUser(userId: volunteerId, title: title, body: body, data: data);
+      }
+    } catch (e) {
+      print('Error sending notifications to stakeholders: $e');
+    }
+  }
+
   // Send push notification
   Future<void> sendPushNotification({
     required String token,

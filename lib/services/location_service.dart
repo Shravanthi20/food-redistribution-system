@@ -35,6 +35,20 @@ class LocationService {
     }
   }
 
+  // Request location permission
+  Future<bool> requestPermission() async {
+    try {
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+      return permission == LocationPermission.always || permission == LocationPermission.whileInUse;
+    } catch (e) {
+      print('Error requesting location permission: $e');
+      return false;
+    }
+  }
+
   // Convert address to coordinates
   Future<Map<String, dynamic>?> geocodeAddress(String address) async {
     try {

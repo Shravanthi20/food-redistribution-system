@@ -33,10 +33,10 @@ class CustomTextField extends StatelessWidget {
       children: [
         Text(
           label,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
         ),
         const SizedBox(height: 8),
         TextFormField(
@@ -47,9 +47,10 @@ class CustomTextField extends StatelessWidget {
           maxLines: maxLines,
           enabled: enabled,
           decoration: InputDecoration(
-            hintText: hintText ?? label,
-            suffixIcon: suffixIcon,
+            labelText: label,
+            hintText: hintText,
             prefixIcon: prefixIcon,
+            suffixIcon: suffixIcon,
             errorMaxLines: 2,
           ),
         ),

@@ -88,7 +88,7 @@ class OptimizedRoute {
       'pointCount': points.length,
       'totalDistance': totalDistance,
       'estimatedDuration': estimatedDuration.inMinutes,
-      'strategy': strategy.toString(),
+      'strategy': strategy.name,
       'optimizationScore': optimizationScore,
       'metrics': metrics,
       'calculatedAt': calculatedAt,
@@ -130,12 +130,14 @@ class RouteOptimizationEngine {
       }
       
       await _auditService.logEvent(
-        'route_optimization_started',
-        'Starting route optimization for ${points.length} points',
-        riskLevel: RiskLevel.low,
-        metadata: {
+        eventType: AuditEventType.adminAction,
+        userId: 'system',
+        riskLevel: AuditRiskLevel.low,
+        additionalData: {
+          'action': 'route_optimization_started',
+          'message': 'Starting route optimization for ${points.length} points',
           'pointCount': points.length,
-          'strategy': strategy.toString(),
+          'strategy': strategy.name,
           'hasConstraints': constraints?.isNotEmpty ?? false,
         },
       );
@@ -164,10 +166,12 @@ class RouteOptimizationEngine {
       await _storeOptimizationResult(optimizedRoute);
       
       await _auditService.logEvent(
-        'route_optimization_completed',
-        'Route optimization completed with score ${optimizedRoute.optimizationScore.toStringAsFixed(2)}',
-        riskLevel: RiskLevel.low,
-        metadata: {
+        eventType: AuditEventType.adminAction,
+        userId: 'system',
+        riskLevel: AuditRiskLevel.low,
+        additionalData: {
+          'action': 'route_optimization_completed',
+          'message': 'Route optimization completed with score ${optimizedRoute.optimizationScore.toStringAsFixed(2)}',
           'routeId': optimizedRoute.id,
           'totalDistance': optimizedRoute.totalDistance,
           'estimatedDuration': optimizedRoute.estimatedDuration.inMinutes,
@@ -178,12 +182,13 @@ class RouteOptimizationEngine {
       return optimizedRoute;
     } catch (e) {
       await _auditService.logEvent(
-        'route_optimization_error',
-        'Route optimization failed: $e',
-        riskLevel: RiskLevel.high,
-        metadata: {
+        eventType: AuditEventType.systemError,
+        userId: 'system',
+        riskLevel: AuditRiskLevel.high,
+        additionalData: {
+          'action': 'route_optimization_error',
           'pointCount': points.length,
-          'strategy': strategy.toString(),
+          'strategy': strategy.name,
           'error': e.toString(),
         },
       );
