@@ -26,8 +26,9 @@ import '../screens/ngo/update_demand_screen.dart';
 // Dashboards
 
 import '../screens/volunteer/volunteer_dashboard.dart';
-import '../screens/admin/admin_dashboard.dart';
+import '../screens/admin/admin_dashboard_screen.dart';
 import '../screens/admin/admin_issues_screen.dart';
+import '../screens/admin/verify_user_screen.dart';
 import '../screens/ngo/document_submission_screen.dart';
 import '../screens/ngo/verification_pending_screen.dart';
 import '../screens/ngo/verification_rejected_screen.dart';
@@ -78,6 +79,7 @@ class AppRouter {
   static const String verificationRejected = '/verification-rejected';
   
   static const String issueReporting = '/issue-reporting'; // [NEW]
+  static const String verifyUser = '/admin/verify-user';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -176,10 +178,16 @@ class AppRouter {
         return _errorRoute();
 
       case adminDashboard:
-        return MaterialPageRoute(builder: (_) => const AdminDashboard());
+        return MaterialPageRoute(builder: (_) => const AdminDashboardScreen());
 
       case adminIssues:
          return MaterialPageRoute(builder: (_) => const AdminIssuesScreen());
+
+      case verifyUser:
+        final args = settings.arguments as Map<String, dynamic>;
+        return MaterialPageRoute(
+          builder: (_) => VerifyUserScreen(verificationData: args),
+        );
 
       case createDonation:
         return MaterialPageRoute(builder: (_) => const CreateDonationScreen());

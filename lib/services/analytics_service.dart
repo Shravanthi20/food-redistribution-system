@@ -127,4 +127,61 @@ class AnalyticsService {
     }
     return totalWeight;
   }
+
+  // Get Regional Activity (Donations by District/Area approximated from Address)
+  Future<Map<String, double>> getRegionalAnalytics() async {
+    try {
+      final donations = await _firestore.collection('food_donations').get();
+      Map<String, int> counts = {};
+      
+      for (var doc in donations.docs) {
+        final address = (doc.data()['pickupAddress'] as String? ?? 'Unknown').toLowerCase();
+        String region = 'Other';
+        if (address.contains('downtown')) region = 'Downtown';
+        else if (address.contains('uptown')) region = 'Uptown';
+        else if (address.contains('north')) region = 'North Side';
+        else if (address.contains('south')) region = 'South Side';
+        
+        counts[region] = (counts[region] ?? 0) + 1;
+      }
+
+      int total = donations.docs.length;
+      if (total == 0) return {};
+
+      return counts.map((key, value) => MapEntry(key, value / total));
+    } catch (e) {
+      print('Error getting regional analytics: $e');
+      return {};
+    }
+  }
+
+  // Get Delivery Performance
+  Future<Map<String, dynamic>> getDeliveryPerformance() async {
+    try {
+      final snapshot = await _firestore.collection('food_donations').get();
+      int success = 0;
+      int failed = 0;
+      int total = 0;
+
+      for (var doc in snapshot.docs) {
+        final status = doc.data()['status'];
+        if (status == 'delivered') {
+          success++;
+          total++;
+        } else if (status == 'cancelled' || status == 'expired') {
+          failed++;
+          total++;
+        }
+      }
+
+      return {
+        'successRate': total > 0 ? (success / total) * 100 : 0.0,
+        'failureRate': total > 0 ? (failed / total) * 100 : 0.0,
+        'totalCompleted': total,
+      };
+    } catch (e) {
+      print('Error getting delivery performance: $e');
+      return {};
+    }
+  }
 }

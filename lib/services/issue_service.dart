@@ -22,13 +22,26 @@ class IssueService {
     });
   }
 
-  // Get issues for Admin
+  // Get issues for Admin (Stream)
   Stream<QuerySnapshot> getOpenIssues() {
     return _firestore
         .collection('issues')
         .where('status', isEqualTo: 'open')
         .orderBy('createdAt', descending: true)
         .snapshots();
+  }
+
+  // Get issues for Admin (Future)
+  Future<List<Map<String, dynamic>>> getFutureOpenIssues() async {
+    final query = await _firestore
+        .collection('issues')
+        .where('status', isEqualTo: 'open')
+        .orderBy('createdAt', descending: true)
+        .get();
+    
+    return query.docs
+        .map((doc) => {'id': doc.id, ...doc.data() as Map<String, dynamic>})
+        .toList();
   }
 
   // Resolve an issue
