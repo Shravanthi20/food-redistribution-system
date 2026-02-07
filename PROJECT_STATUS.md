@@ -15,19 +15,20 @@
 
 ### **Repository Information**
 - **URL**: https://github.com/Shravanthi20/food-redistribution-system
-- **Account**: SISIR-REDDY (all commits attributed correctly)
+- **Account**: manojkumare (Lead Developer)
+- **Team**: SISIR-REDDY (Redistribution Specialist)
 - **Branch**: main (active development)
-- **Status**: All changes pushed and synchronized
+- **Status**: Updated with Premium iOS Design enhancements
 
 ### **Development Workflow**
 - **✅ Automated Scripts**: Windows (.bat) and Linux (.sh) workflow tools
-- **✅ Git Configuration**: Properly configured for SISIR-REDDY account
+- **✅ Git Configuration**: Properly configured for manojkumare account
 - **✅ Commit Standards**: Standardized format with progress tracking
 - **✅ Documentation**: Complete development guide and project documentation
 
-### **Recent Commits by SISIR-REDDY**
-1. **feat: Complete Flutter platform implementation** - Core system with all security features
-2. **chore: Add development workflow tools** - Automation scripts and documentation
+### **Recent Commits by manojkumare**
+1. **feat: Premium iOS Design Transformation** - Full UI overhaul with Outfit typography and iOS aesthetics
+2. **chore: Transition developer ID to manojkumare** - Updated project ownership and team records
 
 ---
 
@@ -82,7 +83,7 @@
 - **Features**: Git config verification, standardized commits, push automation
 
 ### **Future Commits Will Include**
-- ✅ SISIR-REDDY attribution
+- ✅ manojkumare attribution
 - ✅ Timestamp tracking
 - ✅ Development phase progress
 - ✅ Security feature status
@@ -97,11 +98,10 @@
 
 ## 🎯 **QUICK START GUIDE**
 
-### **For SISIR-REDDY (Future Development)**
+### **For manojkumare (Lead Developer)**
 1. **Make Changes**: Edit Flutter code as needed
-2. **Run Workflow**: Execute `.\dev-workflow.bat` (Windows) 
-3. **Choose Option**: Select "3" for commit + push
-4. **Automatic**: Script handles git config, commit, and push to GitHub
+2. **Run Workflow**: Execute the push command
+3. **Automatic**: Push attributed to manojkumare account
 
 ### **For Testing the Application**
 1. **Configure Firebase**: Set up project credentials
@@ -117,10 +117,10 @@
 - **Lines of Code**: 11,600+ lines of production-ready code
 - **Services**: 12 comprehensive backend services
 - **Security Features**: 8 major security implementations
-- **Commits**: All attributed to SISIR-REDDY account
+- **Commits**: Attributed to manojkumare account
 - **Documentation**: Complete project and development guides
 
 ---
 
 **🎉 Project Status: READY FOR PRODUCTION**
-**👨‍💻 All future commits will continue from SISIR-REDDY account automatically!**
+**👨‍💻 All future commits will continue from manojkumare account!**
