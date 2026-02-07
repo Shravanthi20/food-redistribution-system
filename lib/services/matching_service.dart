@@ -46,39 +46,4 @@ class MatchingService extends BaseService {
       return filteredNGOs;
     });
   }
-
-  /// Finds potential available volunteers for a given donation.
-  Future<Result<List<VolunteerProfile>>> findPotentialVolunteers(FoodDonation donation, {double radiusKm = 5.0}) async {
-    return safeExecute(() async {
-      final donationLat = donation.pickupLocation['latitude'] as double?;
-      final donationLon = donation.pickupLocation['longitude'] as double?;
-
-      if (donationLat == null || donationLon == null) {
-        throw Exception('Donation has no location data');
-      }
-
-      // 1. Fetch available volunteers
-      final volunteersQuery = await _firestore
-          .collection('volunteer_profiles')
-          .where('isAvailable', isEqualTo: true)
-          .get();
-
-      final allVolunteers = volunteersQuery.docs.map((doc) => VolunteerProfile.fromFirestore(doc)).toList();
-
-      // 2. Filter by distance
-      final filteredVolunteers = allVolunteers.where((volunteer) {
-        // Volunteers might use a different location structure or current location
-        // Here we assume they have a registered city or specific coordinates
-        final vLat = volunteer.location?['latitude'] as double?;
-        final vLon = volunteer.location?['longitude'] as double?;
-
-        if (vLat == null || vLon == null) return false;
-
-        final distance = LocationUtils.calculateDistance(donationLat, donationLon, vLat, vLon);
-        return distance <= radiusKm;
-      }).toList();
-
-      return filteredVolunteers;
-    });
-  }
 }
