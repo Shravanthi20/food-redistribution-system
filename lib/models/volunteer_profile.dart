@@ -1,4 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'enums.dart';
 
 class VolunteerProfile {
   final String userId;
@@ -11,7 +13,6 @@ class VolunteerProfile {
   final String zipCode;
   final Map<String, dynamic> location;
   final bool hasVehicle;
-  final String? vehicleType;
   final String? drivingLicense;
   final DateTime? licenseExpiryDate;
   final List<String> availabilityHours;
@@ -21,7 +22,14 @@ class VolunteerProfile {
   final String? emergencyContact;
   final String? emergencyPhone;
   final String? profileImageUrl;
+  final bool isAvailable;
   final bool isVerified;
+  final VehicleType vehicleType;
+  final double? rating;
+  final int? completedTasks;
+  final List<Map<String, dynamic>>? availability;
+  final Map<String, double>? currentLocation;
+  final Map<String, double> baseLocation;
   final DateTime createdAt;
   final DateTime? updatedAt;
 
@@ -30,32 +38,40 @@ class VolunteerProfile {
     required this.firstName,
     required this.lastName,
     required this.phone,
-    required this.address,
-    required this.city,
-    required this.state,
-    required this.zipCode,
-    required this.location,
+    this.address = '',
+    this.city = '',
+    this.state = '',
+    this.zipCode = '',
+    this.location = const {},
     required this.hasVehicle,
-    this.vehicleType,
+    required this.vehicleType,
     this.drivingLicense,
     this.licenseExpiryDate,
-    required this.availabilityHours,
-    required this.workingDays,
-    required this.maxRadius,
-    required this.preferredTasks,
+    this.availabilityHours = const [],
+    this.workingDays = const [],
+    this.maxRadius = 10,
+    this.preferredTasks = const [],
     this.emergencyContact,
     this.emergencyPhone,
     this.profileImageUrl,
+    this.isAvailable = true,
     this.isVerified = false,
+    this.rating,
+    this.completedTasks,
+    this.availability,
+    this.currentLocation,
+    this.baseLocation = const {},
     required this.createdAt,
     this.updatedAt,
   });
 
   factory VolunteerProfile.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
-    
+    return VolunteerProfile.fromMap(doc.data() as Map<String, dynamic>, id: doc.id);
+  }
+
+  factory VolunteerProfile.fromMap(Map<String, dynamic> data, {String? id}) {
     return VolunteerProfile(
-      userId: doc.id,
+      userId: id ?? data['userId'] ?? '',
       firstName: data['firstName'] ?? '',
       lastName: data['lastName'] ?? '',
       phone: data['phone'] ?? '',
@@ -65,10 +81,11 @@ class VolunteerProfile {
       zipCode: data['zipCode'] ?? '',
       location: data['location'] ?? {},
       hasVehicle: data['hasVehicle'] ?? false,
-      vehicleType: data['vehicleType'],
       drivingLicense: data['drivingLicense'],
       licenseExpiryDate: data['licenseExpiryDate'] != null
-          ? (data['licenseExpiryDate'] as Timestamp).toDate()
+          ? (data['licenseExpiryDate'] is Timestamp 
+              ? (data['licenseExpiryDate'] as Timestamp).toDate() 
+              : DateTime.parse(data['licenseExpiryDate'].toString()))
           : null,
       availabilityHours: List<String>.from(data['availabilityHours'] ?? []),
       workingDays: List<String>.from(data['workingDays'] ?? []),
@@ -77,10 +94,31 @@ class VolunteerProfile {
       emergencyContact: data['emergencyContact'],
       emergencyPhone: data['emergencyPhone'],
       profileImageUrl: data['profileImageUrl'],
+      isAvailable: data['isAvailable'] ?? true,
       isVerified: data['isVerified'] ?? false,
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
+      vehicleType: VehicleType.values.firstWhere(
+        (e) => e.name == (data['vehicleType'] ?? 'none'),
+        orElse: () => VehicleType.none,
+      ),
+      rating: (data['rating'] as num?)?.toDouble(),
+      completedTasks: data['completedTasks'] as int?,
+      availability: (data['availability'] as List<dynamic>?)
+          ?.map((e) => e as Map<String, dynamic>)
+          .toList(),
+      currentLocation: (data['currentLocation'] as Map<dynamic, dynamic>?)
+          ?.map((k, v) => MapEntry(k.toString(), (v as num).toDouble())),
+      baseLocation: (data['location'] as Map<dynamic, dynamic>?)
+              ?.map((k, v) => MapEntry(k.toString(), (v as num).toDouble())) ??
+          const {},
+      createdAt: data['createdAt'] != null 
+          ? (data['createdAt'] is Timestamp 
+              ? (data['createdAt'] as Timestamp).toDate() 
+              : DateTime.parse(data['createdAt'].toString()))
+          : DateTime.now(),
       updatedAt: data['updatedAt'] != null
-          ? (data['updatedAt'] as Timestamp).toDate()
+          ? (data['updatedAt'] is Timestamp 
+              ? (data['updatedAt'] as Timestamp).toDate() 
+              : DateTime.parse(data['updatedAt'].toString()))
           : null,
     );
   }
@@ -88,6 +126,7 @@ class VolunteerProfile {
   Map<String, dynamic> toFirestore() {
     return {
       'firstName': firstName,
+      'isAvailable': isAvailable,
       'lastName': lastName,
       'phone': phone,
       'address': address,
@@ -115,4 +154,5 @@ class VolunteerProfile {
   }
 
   String get fullName => '$firstName $lastName';
+  String get id => userId;
 }

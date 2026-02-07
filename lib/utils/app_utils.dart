@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../constants/app_constants.dart';
+import '../models/enums.dart';
 
 class AppUtils {
   
@@ -326,6 +327,13 @@ class AppUtils {
   
   static void logWarning(String message) {
     debugPrint('[WARNING] $message');
+  }
+
+  static String generateRandomId({int length = 20}) {
+    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    final rnd = Random();
+    return String.fromCharCodes(Iterable.generate(
+        length, (_) => chars.codeUnitAt(rnd.nextInt(chars.length))));
   }
 }
 

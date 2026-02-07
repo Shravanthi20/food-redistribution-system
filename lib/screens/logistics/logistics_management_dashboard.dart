@@ -267,15 +267,15 @@ class _LogisticsManagementDashboardState extends State<LogisticsManagementDashbo
                 maxY: 100,
                 gridData: FlGridData(show: false),
                 titlesData: FlTitlesData(
-                  leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  leftTitles: AxisTitles(sideTitles: const SideTitles(showTitles: false)),
                   bottomTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
                       getTitlesWidget: (value, meta) => Text(['Mon', 'Tue', 'Wed', 'Thu', 'Fri'][value.toInt()]),
                     ),
                   ),
-                  topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  topTitles: AxisTitles(sideTitles: const SideTitles(showTitles: false)),
+                  rightTitles: AxisTitles(sideTitles: const SideTitles(showTitles: false)),
                 ),
                 borderData: FlBorderData(show: false),
                 barGroups: [

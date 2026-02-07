@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../models/enums.dart';
 import '../../providers/auth_provider.dart';
 import '../../models/volunteer_profile.dart';
 import '../../widgets/custom_text_field.dart';
@@ -130,7 +131,12 @@ class _VolunteerRegistrationScreenState extends State<VolunteerRegistrationScree
       zipCode: _zipCodeController.text.trim(),
       location: {}, // Will be set later with geocoding
       hasVehicle: _hasVehicle,
-      vehicleType: _hasVehicle ? _vehicleTypeController.text.trim() : null,
+      vehicleType: _hasVehicle 
+          ? VehicleType.values.firstWhere(
+              (e) => e.name == _vehicleTypeController.text.trim().toLowerCase(),
+              orElse: () => VehicleType.car,
+            )
+          : VehicleType.none,
       drivingLicense: _hasVehicle ? _drivingLicenseController.text.trim() : null,
       availabilityHours: _selectedAvailabilityHours,
       workingDays: _selectedWorkingDays,

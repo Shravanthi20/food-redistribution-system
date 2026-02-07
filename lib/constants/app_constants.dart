@@ -110,52 +110,7 @@ class AppAnimations {
   static const Duration slow = Duration(milliseconds: 500);
 }
 
-// User Roles
-enum UserRole {
-  donor,
-  ngo,
-  volunteer,
-  admin,
-}
-
-// Food Categories
-enum FoodCategory {
-  fruits,
-  vegetables,
-  grains,
-  dairy,
-  meat,
-  prepared,
-  beverages,
-  other,
-}
-
-// Donation Status
-enum DonationStatus {
-  available,
-  reserved,
-  collected,
-  delivered,
-  expired,
-  cancelled,
-}
-
-// Delivery Status
-enum DeliveryStatus {
-  pending,
-  assigned,
-  inProgress,
-  completed,
-  failed,
-}
-
-// Priority Levels
-enum Priority {
-  low,
-  medium,
-  high,
-  urgent,
-}
+// Food categories are handled by FoodType in food_donation.dart
 
 // App Assets (when actual assets are added)
 class AppAssets {

@@ -5,155 +5,11 @@ import '../services/firestore_service.dart';
 import '../services/location_service.dart';
 import '../services/notification_service.dart';
 import '../services/audit_service.dart';
+import '../models/enums.dart';
+import '../models/tracking/location_tracking_model.dart';
 
-enum TrackingStatus {
-  idle,
-  enRoute,
-  atPickup,
-  collected,
-  inTransit,
-  nearDelivery,
-  delivered,
-  completed,
-}
-
-enum GeofenceType {
-  pickup,
-  delivery,
-  checkpoint,
-}
-
-class LocationUpdate {
-  final String volunteerId;
-  final String taskId;
-  final double latitude;
-  final double longitude;
-  final double? accuracy;
-  final double? speed;
-  final double? heading;
-  final DateTime timestamp;
-  final TrackingStatus status;
-  final Map<String, dynamic>? metadata;
-  
-  LocationUpdate({
-    required this.volunteerId,
-    required this.taskId,
-    required this.latitude,
-    required this.longitude,
-    this.accuracy,
-    this.speed,
-    this.heading,
-    required this.timestamp,
-    required this.status,
-    this.metadata,
-  });
-  
-  Map<String, dynamic> toMap() {
-    return {
-      'volunteerId': volunteerId,
-      'taskId': taskId,
-      'location': GeoPoint(latitude, longitude),
-      'latitude': latitude,
-      'longitude': longitude,
-      'accuracy': accuracy,
-      'speed': speed,
-      'heading': heading,
-      'timestamp': timestamp,
-      'status': status.toString(),
-      'metadata': metadata,
-    };
-  }
-  
-  factory LocationUpdate.fromMap(Map<String, dynamic> map) {
-    final geoPoint = map['location'] as GeoPoint?;
-    return LocationUpdate(
-      volunteerId: map['volunteerId'],
-      taskId: map['taskId'],
-      latitude: geoPoint?.latitude ?? map['latitude'],
-      longitude: geoPoint?.longitude ?? map['longitude'],
-      accuracy: map['accuracy']?.toDouble(),
-      speed: map['speed']?.toDouble(),
-      heading: map['heading']?.toDouble(),
-      timestamp: (map['timestamp'] as Timestamp).toDate(),
-      status: TrackingStatus.values.firstWhere(
-        (s) => s.toString() == map['status'],
-        orElse: () => TrackingStatus.idle,
-      ),
-      metadata: map['metadata'],
-    );
-  }
-}
-
-class Geofence {
-  final String id;
-  final GeofenceType type;
-  final double latitude;
-  final double longitude;
-  final double radius; // in meters
-  final String taskId;
-  final String? label;
-  final Map<String, dynamic>? metadata;
-  
-  Geofence({
-    required this.id,
-    required this.type,
-    required this.latitude,
-    required this.longitude,
-    required this.radius,
-    required this.taskId,
-    this.label,
-    this.metadata,
-  });
-  
-  bool contains(double lat, double lng) {
-    final distance = Geolocator.distanceBetween(
-      latitude, longitude, lat, lng
-    );
-    return distance <= radius;
-  }
-}
-
-class TrackingMetrics {
-  final String taskId;
-  final double totalDistance;
-  final Duration totalDuration;
-  final Duration pickupWaitTime;
-  final Duration transitTime;
-  final Duration deliveryWaitTime;
-  final double averageSpeed;
-  final int locationUpdates;
-  final List<String> geofenceEvents;
-  final Map<String, dynamic> additionalMetrics;
-  
-  TrackingMetrics({
-    required this.taskId,
-    required this.totalDistance,
-    required this.totalDuration,
-    required this.pickupWaitTime,
-    required this.transitTime,
-    required this.deliveryWaitTime,
-    required this.averageSpeed,
-    required this.locationUpdates,
-    required this.geofenceEvents,
-    required this.additionalMetrics,
-  });
-  
-  Map<String, dynamic> toMap() {
-    return {
-      'taskId': taskId,
-      'totalDistance': totalDistance,
-      'totalDuration': totalDuration.inMinutes,
-      'pickupWaitTime': pickupWaitTime.inMinutes,
-      'transitTime': transitTime.inMinutes,
-      'deliveryWaitTime': deliveryWaitTime.inMinutes,
-      'averageSpeed': averageSpeed,
-      'locationUpdates': locationUpdates,
-      'geofenceEvents': geofenceEvents,
-      'additionalMetrics': additionalMetrics,
-      'completedAt': DateTime.now(),
-    };
-  }
-}
+export '../models/enums.dart' show TrackingStatus, GeofenceType;
+export '../models/tracking/location_tracking_model.dart';
 
 class RealTimeTrackingService {
   final FirestoreService _firestoreService;
@@ -190,10 +46,14 @@ class RealTimeTrackingService {
       final hasPermission = await _locationService.requestPermission();
       if (!hasPermission) {
         await _auditService.logEvent(
-          'tracking_permission_denied',
-          'Location permission denied for volunteer $volunteerId',
-          riskLevel: RiskLevel.high,
-          metadata: {'volunteerId': volunteerId, 'taskId': taskId},
+          eventType: AuditEventType.securityAlert,
+          userId: volunteerId,
+          riskLevel: AuditRiskLevel.high,
+          additionalData: {
+            'action': 'tracking_permission_denied',
+            'volunteerId': volunteerId,
+            'taskId': taskId,
+          },
         );
         return false;
       }
@@ -218,10 +78,12 @@ class RealTimeTrackingService {
       });
       
       await _auditService.logEvent(
-        'tracking_started',
-        'Real-time tracking started for volunteer $volunteerId on task $taskId',
-        riskLevel: RiskLevel.low,
-        metadata: {
+        eventType: AuditEventType.adminAction,
+        userId: 'system',
+        riskLevel: AuditRiskLevel.low,
+        additionalData: {
+          'action': 'tracking_started',
+          'message': 'Real-time tracking started for volunteer $volunteerId on task $taskId',
           'volunteerId': volunteerId,
           'taskId': taskId,
           'updateInterval': updateIntervalSeconds,
@@ -231,10 +93,11 @@ class RealTimeTrackingService {
       return true;
     } catch (e) {
       await _auditService.logEvent(
-        'tracking_start_error',
-        'Failed to start tracking for volunteer $volunteerId: $e',
-        riskLevel: RiskLevel.high,
-        metadata: {
+        eventType: AuditEventType.systemError,
+        userId: 'system',
+        riskLevel: AuditRiskLevel.high,
+        additionalData: {
+          'action': 'tracking_start_error',
           'volunteerId': volunteerId,
           'taskId': taskId,
           'error': e.toString(),
@@ -270,10 +133,13 @@ class RealTimeTrackingService {
         .forEach((entry) => _taskGeofences.remove(entry.key));
     
     await _auditService.logEvent(
-      'tracking_stopped',
-      'Real-time tracking stopped for volunteer $volunteerId',
-      riskLevel: RiskLevel.low,
-      metadata: {'volunteerId': volunteerId},
+      eventType: AuditEventType.adminAction,
+      userId: 'system',
+      riskLevel: AuditRiskLevel.low,
+      additionalData: {
+        'action': 'tracking_stopped',
+        'volunteerId': volunteerId,
+      },
     );
   }
   
@@ -322,10 +188,11 @@ class RealTimeTrackingService {
       
     } catch (e) {
       await _auditService.logEvent(
-        'location_update_error',
-        'Error updating location for volunteer $volunteerId: $e',
-        riskLevel: RiskLevel.medium,
-        metadata: {
+        eventType: AuditEventType.systemError,
+        userId: 'system',
+        riskLevel: AuditRiskLevel.medium,
+        additionalData: {
+          'action': 'location_update_error',
           'volunteerId': volunteerId,
           'taskId': taskId,
           'error': e.toString(),
@@ -371,10 +238,14 @@ class RealTimeTrackingService {
       
     } catch (e) {
       await _auditService.logEvent(
-        'geofence_setup_error',
-        'Error setting up geofences for task $taskId: $e',
-        riskLevel: RiskLevel.medium,
-        metadata: {'taskId': taskId, 'error': e.toString()},
+        eventType: AuditEventType.systemError,
+        userId: 'system',
+        riskLevel: AuditRiskLevel.medium,
+        additionalData: {
+          'action': 'geofence_setup_error',
+          'taskId': taskId,
+          'error': e.toString(),
+        },
       );
     }
   }
@@ -494,19 +365,20 @@ class RealTimeTrackingService {
       body: eventBody,
       data: {
         'type': 'geofence_entry',
-        'geofenceType': geofence.type.toString(),
+        'geofenceType': geofence.type.name,
         'volunteerId': update.volunteerId,
       },
     );
     
     await _auditService.logEvent(
-      'geofence_entry',
-      'Volunteer ${update.volunteerId} entered ${geofence.type} geofence for task ${update.taskId}',
-      riskLevel: RiskLevel.low,
-      metadata: {
+      eventType: AuditEventType.securityAlert,
+      userId: update.volunteerId,
+      riskLevel: AuditRiskLevel.low,
+      additionalData: {
+        'action': 'geofence_entry',
         'volunteerId': update.volunteerId,
         'taskId': update.taskId,
-        'geofenceType': geofence.type.toString(),
+        'geofenceType': geofence.type.name,
         'geofenceId': geofence.id,
       },
     );
@@ -567,10 +439,11 @@ class RealTimeTrackingService {
     );
     
     await _auditService.logEvent(
-      'delivery_completed',
-      'Delivery completed for task ${update.taskId} by volunteer ${update.volunteerId}',
-      riskLevel: RiskLevel.low,
-      metadata: {
+      eventType: AuditEventType.adminAction,
+      userId: update.volunteerId,
+      riskLevel: AuditRiskLevel.low,
+      additionalData: {
+        'action': 'delivery_completed',
         'taskId': update.taskId,
         'volunteerId': update.volunteerId,
         'completedAt': DateTime.now().toIso8601String(),
@@ -602,7 +475,7 @@ class RealTimeTrackingService {
         'latitude': update.latitude,
         'longitude': update.longitude,
       },
-      'status': update.status.toString(),
+      'status': update.status.name,
       'lastUpdate': update.timestamp,
       'metadata': update.metadata,
     });
@@ -614,6 +487,7 @@ class RealTimeTrackingService {
     if (history.isEmpty) {
       return TrackingMetrics(
         taskId: taskId,
+        volunteerId: volunteerId,
         totalDistance: 0,
         totalDuration: Duration.zero,
         pickupWaitTime: Duration.zero,
@@ -622,7 +496,7 @@ class RealTimeTrackingService {
         averageSpeed: 0,
         locationUpdates: 0,
         geofenceEvents: [],
-        additionalMetrics: {},
+        startTime: DateTime.now(),
       );
     }
     
@@ -680,18 +554,17 @@ class RealTimeTrackingService {
     
     return TrackingMetrics(
       taskId: taskId,
-      totalDistance: totalDistance,
+      volunteerId: volunteerId,
+      totalDistance: totalDistance.toDouble(),
       totalDuration: totalDuration,
       pickupWaitTime: pickupWaitTime,
       transitTime: transitTime,
       deliveryWaitTime: deliveryWaitTime,
-      averageSpeed: averageSpeed,
+      averageSpeed: averageSpeed.toDouble(),
       locationUpdates: history.length,
       geofenceEvents: [], // Will be populated from audit logs
-      additionalMetrics: {
-        'maxSpeed': history.map((h) => h.speed ?? 0).reduce((a, b) => a > b ? a : b),
-        'statusChanges': _countStatusChanges(history),
-      },
+      startTime: history.first.timestamp,
+      endTime: history.last.timestamp,
     );
   }
   

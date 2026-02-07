@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:geolocator/geolocator.dart';
+import '../enums.dart';
 
 // Store each location where volunteer stopped by
 class LocationUpdate {
@@ -11,7 +13,7 @@ class LocationUpdate {
   final double? speed;
   final double? heading;
   final DateTime timestamp;
-  final String status; // enRoute, atPickup, collected, inTransit, nearDelivery, delivered
+  final TrackingStatus status;
   final Map<String, dynamic>? metadata;
 
   LocationUpdate({
@@ -40,7 +42,7 @@ class LocationUpdate {
       'speed': speed,
       'heading': heading,
       'timestamp': Timestamp.fromDate(timestamp),
-      'status': status,
+      'status': status.name,
       'metadata': metadata,
     };
   }
@@ -57,7 +59,10 @@ class LocationUpdate {
       speed: map['speed']?.toDouble(),
       heading: map['heading']?.toDouble(),
       timestamp: (map['timestamp'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      status: map['status'] ?? 'enRoute',
+      status: TrackingStatus.values.firstWhere(
+        (e) => e.name == map['status'],
+        orElse: () => TrackingStatus.idle,
+      ),
       metadata: map['metadata'],
     );
   }
@@ -68,7 +73,7 @@ class GeofenceEvent {
   final String id;
   final String volunteerId;
   final String taskId;
-  final String type; // pickup, delivery, checkpoint
+  final GeofenceType type;
   final String eventType; // entry, exit
   final double latitude;
   final double longitude;
@@ -92,7 +97,7 @@ class GeofenceEvent {
       'id': id,
       'volunteerId': volunteerId,
       'taskId': taskId,
-      'type': type,
+      'type': type.name,
       'eventType': eventType,
       'latitude': latitude,
       'longitude': longitude,
@@ -106,12 +111,73 @@ class GeofenceEvent {
       id: map['id'] ?? '',
       volunteerId: map['volunteerId'] ?? '',
       taskId: map['taskId'] ?? '',
-      type: map['type'] ?? 'pickup',
+      type: GeofenceType.values.firstWhere(
+        (e) => e.name == map['type'],
+        orElse: () => GeofenceType.checkpoint,
+      ),
       eventType: map['eventType'] ?? 'entry',
       latitude: (map['latitude'] ?? 0).toDouble(),
       longitude: (map['longitude'] ?? 0).toDouble(),
       timestamp: (map['timestamp'] as Timestamp?)?.toDate() ?? DateTime.now(),
       radius: map['radius'] ?? 100,
+    );
+  }
+}
+
+class Geofence {
+  final String id;
+  final GeofenceType type;
+  final double latitude;
+  final double longitude;
+  final double radius; // in meters
+  final String taskId;
+  final String? label;
+  final Map<String, dynamic>? metadata;
+  
+  Geofence({
+    required this.id,
+    required this.type,
+    required this.latitude,
+    required this.longitude,
+    required this.radius,
+    required this.taskId,
+    this.label,
+    this.metadata,
+  });
+  
+  bool contains(double lat, double lng) {
+    final distance = Geolocator.distanceBetween(
+      latitude, longitude, lat, lng
+    );
+    return distance <= radius;
+  }
+  
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'type': type.name,
+      'latitude': latitude,
+      'longitude': longitude,
+      'radius': radius,
+      'taskId': taskId,
+      'label': label,
+      'metadata': metadata,
+    };
+  }
+  
+  factory Geofence.fromMap(Map<String, dynamic> map, {String? id}) {
+    return Geofence(
+      id: id ?? map['id'] ?? '',
+      type: GeofenceType.values.firstWhere(
+        (e) => e.name == map['type'],
+        orElse: () => GeofenceType.checkpoint,
+      ),
+      latitude: (map['latitude'] ?? 0).toDouble(),
+      longitude: (map['longitude'] ?? 0).toDouble(),
+      radius: (map['radius'] ?? 100).toDouble(),
+      taskId: map['taskId'] ?? '',
+      label: map['label'],
+      metadata: map['metadata'],
     );
   }
 }
@@ -130,6 +196,7 @@ class TrackingMetrics {
   final List<String> geofenceEvents;
   final DateTime startTime;
   final DateTime? endTime;
+  final Map<String, dynamic> additionalMetrics;
 
   TrackingMetrics({
     required this.taskId,
@@ -144,6 +211,7 @@ class TrackingMetrics {
     required this.geofenceEvents,
     required this.startTime,
     this.endTime,
+    this.additionalMetrics = const {},
   });
 
   Map<String, dynamic> toMap() {
@@ -160,6 +228,7 @@ class TrackingMetrics {
       'geofenceEvents': geofenceEvents,
       'startTime': Timestamp.fromDate(startTime),
       'endTime': endTime != null ? Timestamp.fromDate(endTime!) : null,
+      'additionalMetrics': additionalMetrics,
     };
   }
 
@@ -177,6 +246,7 @@ class TrackingMetrics {
       geofenceEvents: List<String>.from(map['geofenceEvents'] ?? []),
       startTime: (map['startTime'] as Timestamp?)?.toDate() ?? DateTime.now(),
       endTime: (map['endTime'] as Timestamp?)?.toDate(),
+      additionalMetrics: Map<String, dynamic>.from(map['additionalMetrics'] ?? {}),
     );
   }
 }
@@ -286,7 +356,7 @@ class TrackingState {
   final bool isTracking;
   final bool isOnline;
   final LocationUpdate? currentLocation;
-  final String? currentStatus;
+  final TrackingStatus? currentStatus;
   final String? currentTaskId;
   final int pendingUpdates;
   final DateTime? lastSync;
@@ -305,7 +375,7 @@ class TrackingState {
     bool? isTracking,
     bool? isOnline,
     LocationUpdate? currentLocation,
-    String? currentStatus,
+    TrackingStatus? currentStatus,
     String? currentTaskId,
     int? pendingUpdates,
     DateTime? lastSync,
@@ -319,5 +389,39 @@ class TrackingState {
       pendingUpdates: pendingUpdates ?? this.pendingUpdates,
       lastSync: lastSync ?? this.lastSync,
     );
+  }
+}
+
+class TrackingSession {
+  final String id;
+  final String volunteerId;
+  final String taskId;
+  final DateTime startTime;
+  final DateTime? endTime;
+  final TrackingStatus status;
+  final List<LocationUpdate> updates;
+  final Map<String, dynamic>? metadata;
+
+  TrackingSession({
+    required this.id,
+    required this.volunteerId,
+    required this.taskId,
+    required this.startTime,
+    this.endTime,
+    required this.status,
+    this.updates = const [],
+    this.metadata,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'volunteerId': volunteerId,
+      'taskId': taskId,
+      'startTime': Timestamp.fromDate(startTime),
+      'endTime': endTime != null ? Timestamp.fromDate(endTime!) : null,
+      'status': status.name,
+      'metadata': metadata,
+    };
   }
 }

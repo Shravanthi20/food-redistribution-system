@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math' as math;
+import 'dart:async';
 import '../services/firestore_service.dart';
 import '../services/audit_service.dart';
 
@@ -483,10 +484,11 @@ class AnalyticsMetricsService {
       
     } catch (e) {
       await _auditService.logEvent(
-        'metric_record_error',
-        'Failed to record metric $metricId: $e',
-        riskLevel: RiskLevel.low,
-        metadata: {
+        eventType: AuditEventType.securityAlert,
+        userId: 'system',
+        riskLevel: AuditRiskLevel.low,
+        additionalData: {
+          'action': 'metric_record_error',
           'metricId': metricId,
           'value': value,
           'error': e.toString(),
@@ -608,10 +610,11 @@ class AnalyticsMetricsService {
       return result;
     } catch (e) {
       await _auditService.logEvent(
-        'metrics_aggregation_error',
-        'Failed to aggregate metrics: $e',
-        riskLevel: RiskLevel.medium,
-        metadata: {
+        eventType: AuditEventType.securityAlert,
+        userId: 'system',
+        riskLevel: AuditRiskLevel.medium,
+        additionalData: {
+          'action': 'metrics_aggregation_error',
           'metricIds': metricIds,
           'error': e.toString(),
         },
@@ -624,7 +627,7 @@ class AnalyticsMetricsService {
   Future<AnalyticsReport> generateReport({
     required String name,
     required List<String> metricIds,
-    Map<String, dynamic> filters = const {},
+    Map<String, String> filters = const {},
     required AggregationPeriod period,
     DateTime? startDate,
     DateTime? endDate,
@@ -679,10 +682,11 @@ class AnalyticsMetricsService {
     });
     
     await _auditService.logEvent(
-      'analytics_report_generated',
-      'Analytics report "${report.name}" generated',
-      riskLevel: RiskLevel.low,
-      metadata: {
+      eventType: AuditEventType.adminAction,
+      userId: 'admin', // Placeholder or get current user
+      riskLevel: AuditRiskLevel.low,
+      additionalData: {
+        'action': 'analytics_report_generated',
         'reportId': report.id,
         'metricCount': metricIds.length,
         'period': period.name,
@@ -735,10 +739,11 @@ class AnalyticsMetricsService {
       
     } catch (e) {
       await _auditService.logEvent(
-        'dashboard_data_error',
-        'Failed to get dashboard data: $e',
-        riskLevel: RiskLevel.medium,
-        metadata: {
+        eventType: AuditEventType.securityAlert,
+        userId: 'system',
+        riskLevel: AuditRiskLevel.medium,
+        additionalData: {
+          'action': 'dashboard_data_error',
           'dashboardId': dashboardId,
           'error': e.toString(),
         },
@@ -764,10 +769,11 @@ class AnalyticsMetricsService {
       
     } catch (e) {
       await _auditService.logEvent(
-        'metric_buffer_flush_error',
-        'Failed to flush metrics buffer: $e',
-        riskLevel: RiskLevel.medium,
-        metadata: {
+        eventType: AuditEventType.securityAlert,
+        userId: 'system',
+        riskLevel: AuditRiskLevel.medium,
+        additionalData: {
+          'action': 'metric_buffer_flush_error',
           'bufferSize': _buffer.length,
           'error': e.toString(),
         },
@@ -804,10 +810,11 @@ class AnalyticsMetricsService {
     
     if (!targetMet) {
       await _auditService.logEvent(
-        'kpi_target_missed',
-        'KPI target missed for metric $metricId',
-        riskLevel: RiskLevel.medium,
-        metadata: {
+        eventType: AuditEventType.securityAlert,
+        userId: 'system',
+        riskLevel: AuditRiskLevel.medium,
+        additionalData: {
+          'action': 'kpi_target_missed',
           'metricId': metricId,
           'currentValue': value,
           'targetValue': target.targetValue,

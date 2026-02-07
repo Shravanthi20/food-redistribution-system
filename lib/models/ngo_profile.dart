@@ -1,15 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-enum NGOType {
-  orphanage,
-  oldAgeHome,
-  school,
-  hospital,
-  communityCenter,
-  foodBank,
-  shelter,
-  other
-}
+import 'enums.dart';
 
 class NGOProfile {
   final String userId;
@@ -32,6 +22,7 @@ class NGOProfile {
   final String? verificationCertificateUrl; // Changed: Replaced placeholder
   final String? taxExemptionCertificate;
   final List<BranchLocation> branches;
+  final String description;
   final bool isVerified;
   final DateTime createdAt;
   final DateTime? updatedAt;
@@ -40,22 +31,23 @@ class NGOProfile {
     required this.userId,
     required this.organizationName,
     required this.registrationNumber,
-    required this.ngoType,
+    this.ngoType = NGOType.other,
     required this.address,
-    required this.city,
-    required this.state,
-    required this.zipCode,
-    required this.location,
-    required this.capacity,
-    required this.servingPopulation,
-    required this.operatingHours,
-    required this.preferredFoodTypes,
-    required this.storageCapacity,
-    required this.refrigerationAvailable,
-    required this.contactPerson,
-    required this.contactPhone,
+    this.city = '',
+    this.state = '',
+    this.zipCode = '',
+    this.location = const {},
+    this.capacity = 0,
+    this.servingPopulation = const [],
+    this.operatingHours = '',
+    this.preferredFoodTypes = const [],
+    this.storageCapacity = 0,
+    this.refrigerationAvailable = false,
+    this.contactPerson = '',
+    this.contactPhone = '',
     this.verificationCertificateUrl,
     this.taxExemptionCertificate,
+    this.description = '',
     this.branches = const [],
     this.isVerified = false,
     required this.createdAt,
@@ -63,10 +55,12 @@ class NGOProfile {
   });
 
   factory NGOProfile.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
-    
+    return NGOProfile.fromMap(doc.data() as Map<String, dynamic>, id: doc.id);
+  }
+
+  factory NGOProfile.fromMap(Map<String, dynamic> data, {String? id}) {
     return NGOProfile(
-      userId: doc.id,
+      userId: id ?? data['userId'] ?? '',
       organizationName: data['organizationName'] ?? '',
       registrationNumber: data['registrationNumber'] ?? '',
       ngoType: NGOType.values.firstWhere(
@@ -92,10 +86,17 @@ class NGOProfile {
               ?.map((b) => BranchLocation.fromMap(b))
               .toList() ??
           [],
+      description: data['description'] ?? '',
       isVerified: data['isVerified'] ?? false,
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
+      createdAt: data['createdAt'] != null 
+          ? (data['createdAt'] is Timestamp 
+              ? (data['createdAt'] as Timestamp).toDate() 
+              : DateTime.parse(data['createdAt'].toString()))
+          : DateTime.now(),
       updatedAt: data['updatedAt'] != null
-          ? (data['updatedAt'] as Timestamp).toDate()
+          ? (data['updatedAt'] is Timestamp 
+              ? (data['updatedAt'] as Timestamp).toDate() 
+              : DateTime.parse(data['updatedAt'].toString()))
           : null,
     );
   }
@@ -103,6 +104,7 @@ class NGOProfile {
   Map<String, dynamic> toFirestore() {
     return {
       'organizationName': organizationName,
+      'description': description,
       'registrationNumber': registrationNumber,
       'ngoType': ngoType.name,
       'address': address,
@@ -126,6 +128,8 @@ class NGOProfile {
       'updatedAt': updatedAt != null ? Timestamp.fromDate(updatedAt!) : null,
     };
   }
+
+  String get id => userId;
 }
 
 class BranchLocation {

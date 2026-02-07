@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/firestore_service.dart';
 import '../services/notification_service.dart';
@@ -334,10 +335,14 @@ class NotificationDispatchService {
       // Check if notification should be throttled
       if (await _shouldThrottle(templateId, recipientIds)) {
         await _auditService.logEvent(
-          'notification_throttled',
-          'Notification $templateId throttled for recipients',
-          riskLevel: RiskLevel.low,
-          metadata: {'templateId': templateId, 'recipientCount': recipientIds.length},
+          eventType: AuditEventType.securityAlert,
+          userId: 'system',
+          riskLevel: AuditRiskLevel.low,
+          additionalData: {
+            'action': 'notification_throttled',
+            'templateId': templateId,
+            'recipientCount': recipientIds.length,
+          },
         );
         return false;
       }
@@ -362,10 +367,11 @@ class NotificationDispatchService {
       }
     } catch (e) {
       await _auditService.logEvent(
-        'notification_dispatch_error',
-        'Failed to dispatch notification $templateId: $e',
-        riskLevel: RiskLevel.medium,
-        metadata: {
+        eventType: AuditEventType.systemError,
+        userId: 'system',
+        riskLevel: AuditRiskLevel.medium,
+        additionalData: {
+          'action': 'notification_dispatch_error',
           'templateId': templateId,
           'error': e.toString(),
           'recipientCount': recipientIds.length,
@@ -415,24 +421,26 @@ class NotificationDispatchService {
       await _storeNotificationRecord(notification, template, successCount);
       
       await _auditService.logEvent(
-        'notification_sent',
-        'Notification ${template.name} sent to ${notification.recipientIds.length} recipients',
-        riskLevel: RiskLevel.low,
-        metadata: {
+        eventType: AuditEventType.adminAction,
+        userId: 'system',
+        riskLevel: AuditRiskLevel.low,
+        additionalData: {
+          'action': 'notification_sent',
           'templateId': template.id,
           'recipientCount': notification.recipientIds.length,
           'successCount': successCount,
-          'channels': template.channels.map((c) => c.toString()).toList(),
+          'channels': template.channels.map((c) => c.name).toList(),
         },
       );
       
       return successCount > 0;
     } catch (e) {
       await _auditService.logEvent(
-        'notification_send_error',
-        'Error sending notification: $e',
-        riskLevel: RiskLevel.high,
-        metadata: {
+        eventType: AuditEventType.systemError,
+        userId: 'system',
+        riskLevel: AuditRiskLevel.high,
+        additionalData: {
+          'action': 'notification_send_error',
           'notificationId': notification.id,
           'templateId': template.id,
           'error': e.toString(),
@@ -483,10 +491,11 @@ class NotificationDispatchService {
       await _firestoreService.addDocument('scheduled_notifications', notification.toMap());
       
       await _auditService.logEvent(
-        'notification_scheduled',
-        'Notification scheduled for ${notification.scheduledFor}',
-        riskLevel: RiskLevel.low,
-        metadata: {
+        eventType: AuditEventType.adminAction,
+        userId: 'system',
+        riskLevel: AuditRiskLevel.low,
+        additionalData: {
+          'action': 'notification_scheduled',
           'notificationId': notification.id,
           'templateId': notification.templateId,
           'scheduledFor': notification.scheduledFor.toIso8601String(),
@@ -497,10 +506,11 @@ class NotificationDispatchService {
       return true;
     } catch (e) {
       await _auditService.logEvent(
-        'notification_schedule_error',
-        'Failed to schedule notification: $e',
-        riskLevel: RiskLevel.medium,
-        metadata: {
+        eventType: AuditEventType.systemError,
+        userId: 'system',
+        riskLevel: AuditRiskLevel.medium,
+        additionalData: {
+          'action': 'notification_schedule_error',
           'notificationId': notification.id,
           'error': e.toString(),
         },
@@ -554,10 +564,13 @@ class NotificationDispatchService {
       }
     } catch (e) {
       await _auditService.logEvent(
-        'scheduled_notification_process_error',
-        'Error processing scheduled notifications: $e',
-        riskLevel: RiskLevel.high,
-        metadata: {'error': e.toString()},
+        eventType: AuditEventType.systemError,
+        userId: 'system',
+        riskLevel: AuditRiskLevel.high,
+        additionalData: {
+          'action': 'scheduled_notification_process_error',
+          'error': e.toString(),
+        },
       );
     }
   }
@@ -593,10 +606,11 @@ class NotificationDispatchService {
       }
       
       await _auditService.logEvent(
-        'notification_batch_created',
-        'Notification batch "$name" created with ${notifications.length} notifications',
-        riskLevel: RiskLevel.low,
-        metadata: {
+        eventType: AuditEventType.adminAction,
+        userId: 'system',
+        riskLevel: AuditRiskLevel.low,
+        additionalData: {
+          'action': 'notification_batch_created',
           'batchId': batch.id,
           'notificationCount': notifications.length,
         },
@@ -605,10 +619,13 @@ class NotificationDispatchService {
       return true;
     } catch (e) {
       await _auditService.logEvent(
-        'notification_batch_error',
-        'Failed to create notification batch: $e',
-        riskLevel: RiskLevel.medium,
-        metadata: {'error': e.toString()},
+        eventType: AuditEventType.systemError,
+        userId: 'system',
+        riskLevel: AuditRiskLevel.medium,
+        additionalData: {
+          'action': 'notification_batch_error',
+          'error': e.toString(),
+        },
       );
       return false;
     }
@@ -752,11 +769,11 @@ class NotificationDispatchService {
       'notificationId': notification.id,
       'templateId': template.id,
       'templateName': template.name,
-      'category': template.category.toString(),
+      'category': template.category.name,
       'recipientCount': notification.recipientIds.length,
       'successCount': successCount,
-      'channels': template.channels.map((c) => c.toString()).toList(),
-      'priority': template.priority.toString(),
+      'channels': template.channels.map((c) => c.name).toList(),
+      'priority': template.priority.name,
       'sentAt': DateTime.now(),
       'data': notification.data,
     });

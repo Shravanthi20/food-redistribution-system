@@ -298,15 +298,57 @@ class FirestoreService {
           .get();
       
       if (oldLogs.docs.isNotEmpty) {
-        final batch = _firestore.batch();
+        final batchAction = _firestore.batch();
         for (var doc in oldLogs.docs) {
-          batch.delete(doc.reference);
+          batchAction.delete(doc.reference);
         }
-        await batch.commit();
+        await batchAction.commit();
         print('Cleaned up ${oldLogs.docs.length} old audit logs from Firestore');
       }
     } catch (e) {
       print('Error cleaning up old audit logs: $e');
     }
   }
+
+  // Alias methods for compatibility
+  Future<List<DocumentSnapshot>> queryCollection(String collectionPath, {List<Map<String, dynamic>>? where}) async {
+    Query queryRef = _firestore.collection(collectionPath);
+    if (where != null) {
+      for (var condition in where) {
+        queryRef = queryRef.where(
+          condition['field'], 
+          isEqualTo: condition['operator'] == '==' ? condition['value'] : null,
+          isGreaterThanOrEqualTo: condition['operator'] == '>=' ? condition['value'] : null,
+          isLessThanOrEqualTo: condition['operator'] == '<=' ? condition['value'] : null,
+        );
+      }
+    }
+    final snap = await queryRef.get();
+    return snap.docs;
+  }
+
+  Future<DocumentReference> addDocument(String collectionPath, Map<String, dynamic> data) async {
+    return await _firestore.collection(collectionPath).add(data);
+  }
+
+  Future<DocumentSnapshot?> getDocument(String collectionPath, String docId) async {
+    final doc = await _firestore.collection(collectionPath).doc(docId).get();
+    return doc.exists ? doc : null;
+  }
+
+  Future<void> updateDocument(String collectionPath, String docId, Map<String, dynamic> data) async {
+    await _firestore.collection(collectionPath).doc(docId).update(data);
+  }
+
+  Future<void> setDocument(String collectionPath, String docId, Map<String, dynamic> data) async {
+    await _firestore.collection(collectionPath).doc(docId).set(data);
+  }
+
+  Stream<DocumentSnapshot> getDocumentStream(String collectionPath, String docId) {
+    return _firestore.collection(collectionPath).doc(docId).snapshots();
+  }
+
+  WriteBatch batch() => _firestore.batch();
+
+  CollectionReference collection(String collectionPath) => _firestore.collection(collectionPath);
 }

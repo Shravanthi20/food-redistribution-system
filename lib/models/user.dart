@@ -1,16 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'enums.dart';
+import 'location.dart';
 
-enum UserRole { donor, ngo, volunteer, admin }
-
-enum UserStatus { pending, verified, active, suspended, restricted }
-
-enum OnboardingState {
-  registered,
-  documentSubmitted,
-  verified,
-  profileComplete,
-  active
-}
+export 'enums.dart';
+export 'location.dart';
 
 class AppUser {
   final String uid;
@@ -22,12 +15,16 @@ class AppUser {
   final DateTime? updatedAt;
   final Map<String, dynamic>? restrictions;
   final DateTime? restrictionEndDate;
+  final DateTime? lastLoginAt;
+
+  String get id => uid;
 
   // Profile information
   final String? firstName;
   final String? lastName;
   final String? phone;
   final String? profileImageUrl;
+  final Location? address;
 
   AppUser({
     required this.uid,
@@ -43,6 +40,8 @@ class AppUser {
     this.lastName,
     this.phone,
     this.profileImageUrl,
+    this.address,
+    this.lastLoginAt,
   });
 
   factory AppUser.fromFirestore(DocumentSnapshot doc) {
@@ -71,10 +70,16 @@ class AppUser {
       restrictionEndDate: data['restrictionEndDate'] != null
           ? (data['restrictionEndDate'] as Timestamp).toDate()
           : null,
-      firstName: data['firstName'],
-      lastName: data['lastName'],
-      phone: data['phone'],
-      profileImageUrl: data['profileImageUrl'],
+      firstName: data['firstName'] ?? data['first_name'],
+      lastName: data['lastName'] ?? data['last_name'],
+      phone: data['phone'] ?? data['phone_number'],
+      profileImageUrl: data['profileImageUrl'] ?? data['profile_image_url'],
+      address: data['address'] != null ? Location.fromJson(data['address']) : null,
+      lastLoginAt: data['lastLoginAt'] != null 
+          ? (data['lastLoginAt'] is Timestamp 
+              ? (data['lastLoginAt'] as Timestamp).toDate() 
+              : DateTime.parse(data['lastLoginAt'].toString()))
+          : null,
     );
   }
 
@@ -94,6 +99,8 @@ class AppUser {
       'lastName': lastName,
       'phone': phone,
       'profileImageUrl': profileImageUrl,
+      'address': address?.toJson(),
+      'lastLoginAt': lastLoginAt != null ? Timestamp.fromDate(lastLoginAt!) : null,
     };
   }
 
@@ -109,6 +116,8 @@ class AppUser {
     String? lastName,
     String? phone,
     String? profileImageUrl,
+    Location? address,
+    DateTime? lastLoginAt,
   }) {
     return AppUser(
       uid: uid,
@@ -124,6 +133,8 @@ class AppUser {
       lastName: lastName ?? this.lastName,
       phone: phone ?? this.phone,
       profileImageUrl: profileImageUrl ?? this.profileImageUrl,
+      address: address ?? this.address,
+      lastLoginAt: lastLoginAt ?? this.lastLoginAt,
     );
   }
 
@@ -133,4 +144,6 @@ class AppUser {
   bool get isRestricted => 
       status == UserStatus.restricted || 
       (restrictions != null && restrictionEndDate?.isAfter(DateTime.now()) == true);
+  
+  String get fullName => '${firstName ?? ""} ${lastName ?? ""}'.trim();
 }

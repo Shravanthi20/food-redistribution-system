@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
-import '../services/dispatch_service.dart';
-import '../services/real_time_tracking_service.dart';
-import '../services/route_optimization_service.dart';
-import '../services/matching_service.dart';
-import '../providers/auth_provider.dart';
-import '../widgets/custom_text_field.dart';
-import '../widgets/loading_overlay.dart';
+import '../../services/dispatch_service.dart';
+import '../../services/real_time_tracking_service.dart';
+import '../../services/route_optimization_service.dart';
+import '../../services/matching_service.dart';
+import '../../providers/auth_provider.dart';
+import '../../widgets/custom_text_field.dart';
+import '../../widgets/loading_overlay.dart';
+import '../../models/enums.dart';
+import '../../models/dispatch.dart';
+import '../../models/matching.dart';
 
 class DeliveryCoordinationScreen extends StatefulWidget {
   @override
@@ -17,7 +20,7 @@ class DeliveryCoordinationScreen extends StatefulWidget {
 class _DeliveryCoordinationScreenState extends State<DeliveryCoordinationScreen> {
   late VolunteerDispatchService _dispatchService;
   late RealTimeTrackingService _trackingService;
-  late RouteOptimizationEngine _routeService;
+  late RouteOptimizationService _routeService;
   late FoodDonationMatchingService _matchingService;
   
   List<DeliveryTask> _activeTasks = [];

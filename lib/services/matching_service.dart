@@ -3,105 +3,15 @@ import 'package:geolocator/geolocator.dart';
 import '../models/food_donation.dart';
 import '../models/ngo_profile.dart';
 import '../models/volunteer_profile.dart';
+import '../models/matching.dart';
+import '../models/enums.dart';
 import '../services/firestore_service.dart';
 import '../services/location_service.dart';
 import '../services/notification_service.dart';
 import '../services/audit_service.dart';
 
-enum MatchingCriteria {
-  distance,
-  capacity,
-  urgency,
-  foodType,
-  availability
-}
-
-class MatchingAlgorithm {
-  final String id;
-  final String name;
-  final Map<MatchingCriteria, double> weights;
-  final double maxDistance; // in kilometers
-  
-  const MatchingAlgorithm({
-    required this.id,
-    required this.name,
-    required this.weights,
-    required this.maxDistance,
-  });
-  
-  static const urgent = MatchingAlgorithm(
-    id: 'urgent',
-    name: 'Urgent Food Rescue',
-    weights: {
-      MatchingCriteria.distance: 0.4,
-      MatchingCriteria.urgency: 0.35,
-      MatchingCriteria.capacity: 0.15,
-      MatchingCriteria.foodType: 0.05,
-      MatchingCriteria.availability: 0.05,
-    },
-    maxDistance: 25.0,
-  );
-  
-  static const optimal = MatchingAlgorithm(
-    id: 'optimal',
-    name: 'Optimal Distribution',
-    weights: {
-      MatchingCriteria.distance: 0.25,
-      MatchingCriteria.capacity: 0.25,
-      MatchingCriteria.availability: 0.2,
-      MatchingCriteria.foodType: 0.15,
-      MatchingCriteria.urgency: 0.15,
-    },
-    maxDistance: 50.0,
-  );
-  
-  static const capacity = MatchingAlgorithm(
-    id: 'capacity',
-    name: 'Maximum Capacity',
-    weights: {
-      MatchingCriteria.capacity: 0.4,
-      MatchingCriteria.distance: 0.3,
-      MatchingCriteria.foodType: 0.15,
-      MatchingCriteria.availability: 0.1,
-      MatchingCriteria.urgency: 0.05,
-    },
-    maxDistance: 75.0,
-  );
-}
-
-class MatchingResult {
-  final String ngoId;
-  final String donationId;
-  final double score;
-  final double distance;
-  final Map<MatchingCriteria, double> criteriaScores;
-  final NGOProfile ngo;
-  final String reasoning;
-  final DateTime timestamp;
-  
-  MatchingResult({
-    required this.ngoId,
-    required this.donationId,
-    required this.score,
-    required this.distance,
-    required this.criteriaScores,
-    required this.ngo,
-    required this.reasoning,
-    required this.timestamp,
-  });
-  
-  Map<String, dynamic> toMap() {
-    return {
-      'ngoId': ngoId,
-      'donationId': donationId,
-      'score': score,
-      'distance': distance,
-      'criteriaScores': criteriaScores.map((k, v) => MapEntry(k.toString(), v)),
-      'reasoning': reasoning,
-      'timestamp': timestamp,
-    };
-  }
-}
+export '../models/matching.dart';
+export '../models/enums.dart' show MatchingCriteria;
 
 class FoodDonationMatchingService {
   final FirestoreService _firestoreService;
@@ -138,10 +48,11 @@ class FoodDonationMatchingService {
       
       if (ngos.isEmpty) {
         await _auditService.logEvent(
-          'matching_no_ngos',
-          'No NGOs found within range for donation $donationId',
-          riskLevel: RiskLevel.medium,
-          metadata: {
+          eventType: AuditEventType.securityAlert,
+          userId: 'system',
+          riskLevel: AuditRiskLevel.medium,
+          additionalData: {
+            'action': 'matching_no_ngos',
             'donationId': donationId,
             'maxDistance': algorithm.maxDistance,
           },
@@ -173,10 +84,12 @@ class FoodDonationMatchingService {
       
       // Log successful matching
       await _auditService.logEvent(
-        'donation_matching_completed',
-        'Found ${topMatches.length} matches for donation $donationId',
-        riskLevel: RiskLevel.low,
-        metadata: {
+        eventType: AuditEventType.adminAction,
+        userId: 'system',
+        riskLevel: AuditRiskLevel.low,
+        additionalData: {
+          'action': 'donation_matching_completed',
+          'message': 'Found ${topMatches.length} matches for donation $donationId',
           'donationId': donationId,
           'algorithm': algorithm.id,
           'matchCount': topMatches.length,
@@ -187,10 +100,14 @@ class FoodDonationMatchingService {
       return topMatches;
     } catch (e) {
       await _auditService.logEvent(
-        'matching_error',
-        'Error finding matches for donation $donationId: $e',
-        riskLevel: RiskLevel.high,
-        metadata: {'donationId': donationId, 'error': e.toString()},
+        eventType: AuditEventType.systemError,
+        userId: 'system',
+        riskLevel: AuditRiskLevel.high,
+        additionalData: {
+          'action': 'matching_error',
+          'donationId': donationId,
+          'error': e.toString(),
+        },
       );
       rethrow;
     }
@@ -204,9 +121,11 @@ class FoodDonationMatchingService {
   }) async {
     try {
       // Calculate distance score
-      final distance = await _locationService.calculateDistance(
-        donation.pickupLocation,
-        ngo.address,
+      final distance = _locationService.calculateDistance(
+        (donation.pickupLocation['latitude'] as num).toDouble(),
+        (donation.pickupLocation['longitude'] as num).toDouble(),
+        (ngo.location['latitude'] as num).toDouble(),
+        (ngo.location['longitude'] as num).toDouble(),
       );
       
       if (distance > algorithm.maxDistance) return null;
@@ -253,10 +172,11 @@ class FoodDonationMatchingService {
       );
     } catch (e) {
       await _auditService.logEvent(
-        'score_calculation_error',
-        'Error calculating score for NGO ${ngo.id}: $e',
-        riskLevel: RiskLevel.medium,
-        metadata: {
+        eventType: AuditEventType.systemError,
+        userId: 'system',
+        riskLevel: AuditRiskLevel.medium,
+        additionalData: {
+          'action': 'score_calculation_error',
           'ngoId': ngo.id,
           'donationId': donation.id,
           'error': e.toString(),
@@ -274,7 +194,7 @@ class FoodDonationMatchingService {
   /// Calculate capacity compatibility score
   double _calculateCapacityScore(FoodDonation donation, NGOProfile ngo) {
     final donationQuantity = donation.quantity;
-    final ngoCapacity = ngo.dailyCapacity ?? 100; // Default capacity
+    final ngoCapacity = ngo.capacity;
     
     // Optimal if donation is 50-80% of NGO capacity
     final ratio = donationQuantity / ngoCapacity;
@@ -309,7 +229,7 @@ class FoodDonationMatchingService {
   
   /// Calculate food type compatibility score
   double _calculateFoodTypeScore(FoodDonation donation, NGOProfile ngo) {
-    final ngoPreferences = ngo.foodTypePreferences ?? [];
+    final ngoPreferences = ngo.preferredFoodTypes;
     final donationTypes = donation.foodTypes;
     
     if (ngoPreferences.isEmpty) return 0.5; // Neutral if no preferences
@@ -413,12 +333,14 @@ class FoodDonationMatchingService {
     final ngos = <NGOProfile>[];
     
     for (final doc in ngoDocs) {
-      final ngo = NGOProfile.fromMap(doc.data() as Map<String, dynamic>);
+      final ngo = NGOProfile.fromFirestore(doc);
       
       // Check if NGO is within range
-      final distance = await _locationService.calculateDistance(
-        donationLocation,
-        ngo.address,
+      final distance = _locationService.calculateDistance(
+        (donationLocation['latitude'] as num).toDouble(),
+        (donationLocation['longitude'] as num).toDouble(),
+        (ngo.location['latitude'] as num).toDouble(),
+        (ngo.location['longitude'] as num).toDouble(),
       );
       
       if (distance <= maxDistance) {
@@ -464,10 +386,12 @@ class FoodDonationMatchingService {
     }
     
     await _auditService.logEvent(
-      'match_notifications_sent',
-      'Sent ${matches.length} match notifications for donation ${donation.id}',
-      riskLevel: RiskLevel.low,
-      metadata: {
+      eventType: AuditEventType.adminAction,
+      userId: 'system',
+      riskLevel: AuditRiskLevel.low,
+      additionalData: {
+        'action': 'match_notifications_sent',
+        'message': 'Sent ${matches.length} match notifications for donation ${donation.id}',
         'donationId': donation.id,
         'notificationCount': matches.length,
       },

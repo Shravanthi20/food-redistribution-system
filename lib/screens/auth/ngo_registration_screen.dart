@@ -1,6 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../models/enums.dart';
 import '../../providers/auth_provider.dart';
 import '../../models/ngo_profile.dart';
 import '../../widgets/custom_text_field.dart';
