@@ -26,18 +26,21 @@ class CustomTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 4.0, bottom: 8.0),
+          padding: const EdgeInsets.only(left: 4.0, bottom: 10.0),
           child: Text(
             label,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: theme.colorScheme.onSurface.withOpacity(0.8),
               fontWeight: FontWeight.w700,
-              fontSize: 14,
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-              letterSpacing: 0.2,
+              fontSize: 13,
+              letterSpacing: 1.1,
+              transform: null, // Just to be safe
             ),
           ),
         ),
@@ -48,14 +51,16 @@ class CustomTextField extends StatelessWidget {
           validator: validator,
           maxLines: maxLines,
           enabled: enabled,
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+          cursorColor: theme.colorScheme.primary,
+          style: theme.textTheme.bodyLarge?.copyWith(
             fontWeight: FontWeight.w500,
+            fontSize: 16,
           ),
           decoration: InputDecoration(
             hintText: hintText ?? label,
             suffixIcon: suffixIcon,
             errorMaxLines: 2,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
           ),
         ),
       ],

@@ -36,13 +36,13 @@ class _LoginScreenState extends State<LoginScreen> {
     );
 
     if (success && mounted) {
-      // Navigation will be handled by auth state listener in splash screen
       Navigator.pushReplacementNamed(context, AppRouter.splash);
     } else if (mounted && authProvider.errorMessage != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(authProvider.errorMessage!),
-          backgroundColor: Colors.red,
+          backgroundColor: Theme.of(context).colorScheme.error,
+          behavior: SnackBarBehavior.floating,
         ),
       );
     }
@@ -53,8 +53,8 @@ class _LoginScreenState extends State<LoginScreen> {
     if (email.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please enter your email address first'),
-          backgroundColor: Colors.orange,
+          content: Text('Enter your email to reset password'),
+          behavior: SnackBarBehavior.floating,
         ),
       );
       return;
@@ -67,8 +67,9 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Password reset email sent successfully'),
-            backgroundColor: Colors.green,
+            content: Text('Password reset link sent to your email'),
+            backgroundColor: Color(0xFF10B981),
+            behavior: SnackBarBehavior.floating,
           ),
         );
       }
@@ -78,6 +79,7 @@ class _LoginScreenState extends State<LoginScreen> {
           SnackBar(
             content: Text('Error: $e'),
             backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
           ),
         );
       }
@@ -86,132 +88,177 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Consumer<AuthProvider>(
         builder: (context, authProvider, child) {
           return LoadingOverlay(
             isLoading: authProvider.isLoading,
             child: SafeArea(
               child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 40.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 20.0),
                   child: Form(
                     key: _formKey,
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const SizedBox(height: 20),
-                        // Premium Icon Container
-                        Center(
-                          child: Container(
-                            padding: const EdgeInsets.all(24),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(32),
+                        const SizedBox(height: 60),
+                        // Professional Branding
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: colorScheme.primary,
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: colorScheme.primary.withOpacity(0.3),
+                                    blurRadius: 15,
+                                    offset: const Offset(0, 8),
+                                  ),
+                                ],
+                              ),
+                              child: const Icon(
+                                Icons.restaurant_rounded,
+                                color: Colors.white,
+                                size: 32,
+                              ),
                             ),
-                            child: Icon(
-                              Icons.restaurant_rounded,
-                              size: 64,
-                              color: Theme.of(context).colorScheme.primary,
+                            const SizedBox(width: 16),
+                            Text(
+                              'ShareFood',
+                              style: theme.textTheme.headlineLarge?.copyWith(
+                                color: colorScheme.onBackground,
+                                fontWeight: FontWeight.w800,
+                              ),
                             ),
-                          ),
+                          ],
                         ),
-                        const SizedBox(height: 40),
+                        const SizedBox(height: 48),
                         Text(
-                          'Welcome Back',
-                          style: Theme.of(context).textTheme.displayMedium,
-                          textAlign: TextAlign.center,
+                          'Welcome back',
+                          style: theme.textTheme.displayMedium,
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          'Sign in to continue your impact',
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: Colors.grey[600],
-                            fontWeight: FontWeight.w500,
+                          'Continue your journey of reducing waste and feeding those in need.',
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            color: theme.brightness == Brightness.dark 
+                              ? Colors.white60 
+                              : Colors.grey[700],
+                            height: 1.4,
                           ),
-                          textAlign: TextAlign.center,
                         ),
-                        const SizedBox(height: 56),
+                        const SizedBox(height: 48),
 
-                        // Email Field
+                        // Form Fields
                         CustomTextField(
                           controller: _emailController,
-                          label: 'Email',
-                          hintText: 'name@example.com',
+                          label: 'EMAIL ADDRESS',
+                          hintText: 'e.g. david@impact.org',
                           keyboardType: TextInputType.emailAddress,
                           validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your email';
-                            }
+                            if (value == null || value.isEmpty) return 'Email is required';
                             if (!RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(value)) {
-                              return 'Please enter a valid email address';
+                              return 'Enter a valid email address';
                             }
                             return null;
                           },
                         ),
-                        const SizedBox(height: 24),
-
-                        // Password Field
+                        const SizedBox(height: 28),
                         CustomTextField(
                           controller: _passwordController,
-                          label: 'Password',
-                          hintText: 'Enter your password',
+                          label: 'PASSWORD',
+                          hintText: 'Your secure password',
                           obscureText: _obscurePassword,
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _obscurePassword ? Icons.visibility_rounded : Icons.visibility_off_rounded,
-                              color: Colors.grey,
+                              _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                              size: 20,
+                              color: colorScheme.primary.withOpacity(0.7),
                             ),
-                            onPressed: () {
-                              setState(() {
-                                _obscurePassword = !_obscurePassword;
-                              });
-                            },
+                            onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                           ),
                           validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your password';
-                            }
+                            if (value == null || value.isEmpty) return 'Password is required';
                             return null;
                           },
                         ),
-                        const SizedBox(height: 12),
-
-                        // Forgot Password
+                        
                         Align(
                           alignment: Alignment.centerRight,
                           child: TextButton(
                             onPressed: _forgotPassword,
+                            style: TextButton.styleFrom(
+                              foregroundColor: colorScheme.primary,
+                              visualDensity: VisualDensity.compact,
+                            ),
                             child: const Text('Forgot Password?'),
                           ),
                         ),
                         const SizedBox(height: 40),
 
-                        // Sign In Button
+                        // Animated Action Button
                         ElevatedButton(
                           onPressed: _signIn,
-                          child: const Text('Sign In'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: colorScheme.primary,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                          ),
+                          child: const Text('Sign Into Dashboard'),
                         ),
-                        const SizedBox(height: 32),
+                        const SizedBox(height: 40),
 
                         // Register Link
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'New to ShareFood? ',
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pushNamed(context, AppRouter.roleSelection);
-                              },
-                              child: const Text('Join Now'),
-                            ),
-                          ],
+                        Center(
+                          child: Wrap(
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            children: [
+                              Text(
+                                "Don't have an account? ",
+                                style: theme.textTheme.bodyMedium,
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pushNamed(context, AppRouter.roleSelection);
+                                },
+                                style: TextButton.styleFrom(
+                                  foregroundColor: colorScheme.secondary,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                child: const Text('Join the Community'),
+                              ),
+                            ],
+                          ),
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 40),
+                        
+                        // Trust indicators
+                        Center(
+                          child: Opacity(
+                            opacity: 0.5,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.shield_outlined, size: 14),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Secure End-to-End Encryption',
+                                  style: theme.textTheme.labelSmall,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
