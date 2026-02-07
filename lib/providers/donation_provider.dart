@@ -14,12 +14,6 @@ class DonationProvider extends ChangeNotifier {
   String? _errorMessage;
   
   // Getters
-  List<FoodDonation> get donations => _donations;
-  List<FoodDonation> get myDonations => _myDonations;
-  bool get isLoading => _isLoading;
-  List<FoodDonation> get donations => _donations;
-  List<FoodDonation> get myDonations => _myDonations;
-  bool get isLoading => _isLoading;
   final ConnectivityService _connectivityService = ConnectivityService();
 
   // Getters

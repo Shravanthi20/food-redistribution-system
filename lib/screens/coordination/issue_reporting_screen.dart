@@ -33,7 +33,7 @@ class _IssueReportingScreenState extends State<IssueReportingScreen> {
       await _issueService.reportIssue(
         donationId: widget.donationId,
         reporterId: authProvider.user!.uid,
-        reporterRole: authProvider.user!.role.name,
+        reporterRole: authProvider.appUser?.role.name ?? 'unknown',
         targetRole: _selectedTarget,
         reason: _reasonController.text.trim(),
       );

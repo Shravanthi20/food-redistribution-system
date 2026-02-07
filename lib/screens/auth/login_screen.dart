@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../utils/app_router.dart';
+import '../../models/user.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../widgets/loading_overlay.dart';
 
@@ -39,10 +40,96 @@ class _LoginScreenState extends State<LoginScreen> {
     );
 
     if (success && mounted) {
-      // Navigation is handled by auth state listener, but we can force it just in case
-      // The listener in Splash Screen usually handles this
+      if (authProvider.appUser != null) {
+        _navigateBasedOnUser(authProvider.appUser!);
+      }
     } else if (mounted && authProvider.errorMessage != null) {
       _showErrorSnackBar(authProvider.errorMessage!);
+    }
+  }
+
+  void _navigateBasedOnUser(dynamic user) {
+     // Use dynamic to avoid import issues if AppUser isn't perfectly visible, 
+     // though it should be available via auth_provider import.
+     // Better to cast if we can, or just access fields if we trust the object.
+     // Re-importing models/user.dart might be needed if not already there, 
+     // but AuthProvider exports it usually or it's imported at top.
+     // Top imports show: import '../../providers/auth_provider.dart'; which imports User/AppUser.
+     // But explicit import in this file is missing. I will add it if needed, 
+     // or just rely on the provider's user object.
+     
+     // Actually, let's look at the imports. 
+     // It imports auth_provider.dart. 
+     // It DOES NOT import properties of AppUser directly unless we import user.dart.
+     // I'll assume I need to handle logic here.
+     
+     // Quick logic based on role strings if we want to be safe, or just use the same logic as SplashScreen.
+     // Since I can't easily see the AppUser class definition from here without scrolling up (it was imported in splash), 
+     // I should check if LoginScreen has the import. 
+     // It does NOT have `import '../../models/user.dart';`. I need to add that too.
+     
+     // For now, I'll implement the logic assuming I add the import.
+     
+    if (user.role == UserRole.ngo) {
+       switch(user.onboardingState) {
+         case OnboardingState.registered:
+           Navigator.pushReplacementNamed(context, AppRouter.documentSubmission);
+           return;
+         case OnboardingState.documentSubmitted:
+           Navigator.pushReplacementNamed(context, AppRouter.verificationPending);
+           return;
+         case OnboardingState.verified:
+         case OnboardingState.active:
+           _navigateToRoleDashboard(user.role);
+           return;
+         default:
+           break;
+       }
+    }
+
+    // Default existing logic for others (Donor, Volunteer, Admin)
+    switch (user.onboardingState) {
+      case OnboardingState.registered:
+        // Donors are now active by default, so they won't hit this unless logic matches.
+        // Volunteers might still hit this.
+         Navigator.pushReplacementNamed(
+          context,
+          AppRouter.onboarding,
+          arguments: {'userRole': user.role},
+        );
+        break;
+      case OnboardingState.documentSubmitted:
+         Navigator.pushReplacementNamed(
+          context,
+          AppRouter.onboarding,
+          arguments: {'userRole': user.role},
+        );
+        break;
+      case OnboardingState.verified:
+      case OnboardingState.profileComplete:
+      case OnboardingState.active:
+        _navigateToRoleDashboard(user.role);
+        break;
+      default:
+        // Fallback
+        _navigateToRoleDashboard(user.role);
+    }
+  }
+
+  void _navigateToRoleDashboard(UserRole role) {
+    switch (role) {
+      case UserRole.donor:
+        Navigator.pushReplacementNamed(context, AppRouter.donorDashboard);
+        break;
+      case UserRole.ngo:
+        Navigator.pushReplacementNamed(context, AppRouter.ngoDashboard);
+        break;
+      case UserRole.volunteer:
+        Navigator.pushReplacementNamed(context, AppRouter.volunteerDashboard);
+        break;
+      case UserRole.admin:
+        Navigator.pushReplacementNamed(context, AppRouter.adminDashboard);
+        break;
     }
   }
 

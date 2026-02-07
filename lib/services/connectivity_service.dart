@@ -22,8 +22,9 @@ class ConnectivityService {
     }
   }
 
-  void _updateConnectionStatus(ConnectivityResult result) {
-    bool isOnline = result != ConnectivityResult.none;
+  void _updateConnectionStatus(List<ConnectivityResult> results) {
+    // If list contains anything other than none, we have connectivity
+    bool isOnline = results.any((r) => r != ConnectivityResult.none);
     _connectionStatusController.add(isOnline);
   }
 

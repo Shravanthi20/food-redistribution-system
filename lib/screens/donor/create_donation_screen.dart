@@ -15,6 +15,16 @@ class CreateDonationScreen extends StatefulWidget {
 
 class _CreateDonationScreenState extends State<CreateDonationScreen> {
   final _formKey = GlobalKey<FormState>();
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _quantityController = TextEditingController();
@@ -30,7 +40,7 @@ class _CreateDonationScreenState extends State<CreateDonationScreen> {
   DateTime _preparedAt = DateTime.now();
   DateTime _expiresAt = DateTime.now().add(const Duration(hours: 4));
   DateTime _availableFrom = DateTime.now();
-  DateTime _availableUntil = DateTime.now().add(const Duration(hours: 12));
+  DateTime _availableUntil = DateTime.now().add(const Duration(hours: 4)); // Match expiresAt by default
   FoodSafetyLevel _safetyLevel = FoodSafetyLevel.high;
   bool _requiresRefrigeration = false;
   bool _isVegetarian = false;
@@ -66,6 +76,17 @@ class _CreateDonationScreenState extends State<CreateDonationScreen> {
       return;
     }
 
+    // Validate Time Window
+    if (_availableFrom.isAfter(_availableUntil)) {
+      _showErrorSnackBar('Available Valid From must be before Available Until');
+      return;
+    }
+
+    if (_availableUntil.isAfter(_expiresAt)) {
+      _showErrorSnackBar('Availability cannot extend beyond Expiry time');
+      return;
+    }
+
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final donationProvider = Provider.of<DonationProvider>(context, listen: false);
     
@@ -92,7 +113,12 @@ class _CreateDonationScreenState extends State<CreateDonationScreen> {
       allergenInfo: _allergenController.text.trim().isEmpty ? null : _allergenController.text.trim(),
       specialInstructions: _instructionsController.text.trim().isEmpty ? null : _instructionsController.text.trim(),
       images: [],
-      pickupLocation: {},
+      // TODO: Implement actual map picker. Using placeholder coordinates for now.
+      pickupLocation: {
+        'latitude': 37.7749, // Default to San Francisco or user's current loc if available
+        'longitude': -122.4194,
+        'address': _pickupAddressController.text.trim(),
+      },
       pickupAddress: _pickupAddressController.text.trim(),
       donorContactPhone: _contactPhoneController.text.trim(),
       status: DonationStatus.listed,

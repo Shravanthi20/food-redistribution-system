@@ -36,6 +36,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
+    // IMMEDIATE FIX: Donors do not need verification. Redirect immediately.
+    if (user.role == UserRole.donor) {
+       WidgetsBinding.instance.addPostFrameCallback((_) {
+          _navigateToDashboard(context, user.role);
+       });
+       return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
     // Check Onboarding State
     if (user.onboardingState == OnboardingState.documentSubmitted) {
       return _buildUnderReviewScreen(context);
@@ -193,10 +201,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     String description;
 
     switch (role) {
-      case UserRole.donor:
-        title = 'Donor Verification';
-        description = 'To ensure food safety, please upload your FSSAI license or Business Registration certificate.';
-        break;
       case UserRole.ngo:
         title = 'NGO Verification';
         description = 'Please upload your NGO Registration Certificate (Trust/Society/Section 8) to verify your organization.';

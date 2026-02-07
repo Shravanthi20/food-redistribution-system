@@ -135,7 +135,7 @@ class _DonationListScreenState extends State<DonationListScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => DonationDetailScreen(donation: donation),
+              builder: (context) => DonationDetailScreen(initialDonation: donation),
             ),
           ).then((updated) {
             if (updated == true) {
