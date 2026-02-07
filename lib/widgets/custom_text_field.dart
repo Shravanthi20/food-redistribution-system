@@ -7,7 +7,6 @@ class CustomTextField extends StatelessWidget {
   final TextInputType? keyboardType;
   final bool obscureText;
   final Widget? suffixIcon;
-  final Widget? prefixIcon;
   final String? Function(String?)? validator;
   final int? maxLines;
   final bool enabled;
@@ -20,7 +19,6 @@ class CustomTextField extends StatelessWidget {
     this.keyboardType,
     this.obscureText = false,
     this.suffixIcon,
-    this.prefixIcon,
     this.validator,
     this.maxLines = 1,
     this.enabled = true,
@@ -31,14 +29,18 @@ class CustomTextField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: Theme.of(context).colorScheme.onSurface,
+        Padding(
+          padding: const EdgeInsets.only(left: 4.0, bottom: 8.0),
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              fontSize: 14,
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+              letterSpacing: 0.2,
+            ),
           ),
         ),
-        const SizedBox(height: 8),
         TextFormField(
           controller: controller,
           keyboardType: keyboardType,
@@ -46,11 +48,14 @@ class CustomTextField extends StatelessWidget {
           validator: validator,
           maxLines: maxLines,
           enabled: enabled,
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+            fontWeight: FontWeight.w500,
+          ),
           decoration: InputDecoration(
             hintText: hintText ?? label,
             suffixIcon: suffixIcon,
-            prefixIcon: prefixIcon,
             errorMaxLines: 2,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
           ),
         ),
       ],
