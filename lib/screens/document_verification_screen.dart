@@ -9,18 +9,16 @@ class DocumentVerificationScreen extends StatefulWidget {
   const DocumentVerificationScreen({Key? key}) : super(key: key);
 
   @override
-  State<DocumentVerificationScreen> createState() =>
-      _DocumentVerificationScreenState();
+  State<DocumentVerificationScreen> createState() => _DocumentVerificationScreenState();
 }
 
-class _DocumentVerificationScreenState
-    extends State<DocumentVerificationScreen> {
+class _DocumentVerificationScreenState extends State<DocumentVerificationScreen> {
   final _formKey = GlobalKey<FormBuilderState>();
   final VerificationService _verificationService = VerificationService();
   final AuthService _authService = AuthService();
-
+  
   bool _isSubmitting = false;
-  AppUser? _currentUser;
+  User? _currentUser;
 
   @override
   void initState() {
@@ -29,7 +27,7 @@ class _DocumentVerificationScreenState
   }
 
   Future<void> _loadCurrentUser() async {
-    final user = await _authService.getCurrentAppUser();
+    final user = await _authService.getCurrentUser();
     setState(() {
       _currentUser = user;
     });
@@ -95,8 +93,8 @@ class _DocumentVerificationScreenState
                       Text(
                         'Provide your document information below for verification',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Colors.grey.shade600,
-                            ),
+                          color: Colors.grey.shade600,
+                        ),
                       ),
                     ],
                   ),
@@ -124,8 +122,8 @@ class _DocumentVerificationScreenState
             Text(
               'Enter document details below (no file uploads required):',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey.shade600,
-                  ),
+                color: Colors.grey.shade600,
+              ),
             ),
             const SizedBox(height: 24),
             ..._buildRoleSpecificFields(),
@@ -137,10 +135,47 @@ class _DocumentVerificationScreenState
 
   List<Widget> _buildRoleSpecificFields() {
     switch (_currentUser!.role) {
-      // Donor verification removed
-      // case UserRole.donor:
-      //   return [];
-
+      case UserRole.donor:
+        return [
+          FormBuilderTextField(
+            name: 'business_license',
+            decoration: const InputDecoration(
+              labelText: 'Business License Number',
+              hintText: 'Enter your business license number',
+              prefixIcon: Icon(Icons.business),
+            ),
+            validator: FormBuilderValidators.compose([
+              FormBuilderValidators.required(),
+              FormBuilderValidators.minLength(5),
+            ]),
+          ),
+          const SizedBox(height: 16),
+          FormBuilderTextField(
+            name: 'food_safety_cert',
+            decoration: const InputDecoration(
+              labelText: 'Food Safety Certificate Number',
+              hintText: 'Enter your food safety certificate number',
+              prefixIcon: Icon(Icons.food_bank),
+            ),
+            validator: FormBuilderValidators.compose([
+              FormBuilderValidators.required(),
+            ]),
+          ),
+          const SizedBox(height: 16),
+          FormBuilderTextField(
+            name: 'business_address',
+            decoration: const InputDecoration(
+              labelText: 'Business Address',
+              hintText: 'Enter your complete business address',
+              prefixIcon: Icon(Icons.location_on),
+            ),
+            maxLines: 3,
+            validator: FormBuilderValidators.compose([
+              FormBuilderValidators.required(),
+            ]),
+          ),
+        ];
+      
       case UserRole.ngo:
         return [
           FormBuilderTextField(
@@ -192,7 +227,7 @@ class _DocumentVerificationScreenState
             ]),
           ),
         ];
-
+      
       case UserRole.volunteer:
         return [
           FormBuilderTextField(
@@ -245,7 +280,7 @@ class _DocumentVerificationScreenState
             ]),
           ),
         ];
-
+      
       default:
         return [
           FormBuilderTextField(
@@ -303,7 +338,7 @@ class _DocumentVerificationScreenState
 
     try {
       final formData = _formKey.currentState!.value;
-
+      
       // Convert form data to document info map
       Map<String, String> documentInfo = {};
       formData.forEach((key, value) {
@@ -313,7 +348,7 @@ class _DocumentVerificationScreenState
       });
 
       await _verificationService.submitVerificationInfo(
-        userId: _currentUser!.uid,
+        userId: _currentUser!.id,
         userRole: _currentUser!.role,
         documentInfo: documentInfo,
       );
@@ -321,12 +356,11 @@ class _DocumentVerificationScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content:
-                const Text('Verification information submitted successfully!'),
+            content: const Text('Verification information submitted successfully!'),
             backgroundColor: Colors.green.shade600,
           ),
         );
-
+        
         Navigator.pushReplacementNamed(context, '/verification-pending');
       }
     } catch (e) {

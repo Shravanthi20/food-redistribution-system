@@ -1,24 +1,16 @@
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart'; // [NEW]
-import 'package:flutter/foundation.dart'; // [NEW] for kIsWeb
-import 'dart:io'; // [NEW] for File
 import '../services/auth_service.dart';
 import '../models/user.dart';
-import '../models/ngo_profile.dart';
 
 class AuthProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance; // [NEW]
   User? _firebaseUser;
   AppUser? _appUser;
   bool _isLoading = true;
   String? _errorMessage;
 
   // Getters
-  User? get user => _firebaseUser; // [ALIAS] for backward compatibility
   User? get firebaseUser => _firebaseUser;
   AppUser? get appUser => _appUser;
   bool get isLoading => _isLoading;
@@ -109,7 +101,7 @@ class AuthProvider extends ChangeNotifier {
   Future<bool> registerNGO({
     required String email,
     required String password,
-    required NGOProfile ngoProfile,
+    required dynamic ngoProfile,
   }) async {
     try {
       _isLoading = true;
@@ -180,51 +172,7 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  // Submit Verification Document (For NGO onboarding flow)
-  Future<void> uploadVerificationDocument(String userId, PlatformFile file) async {
-    _setLoading(true);
-    try {
-      // 1. Upload file to Storage
-      // Ideally use a storage service, but calling directly for brevity as per previous implementation patterns here
-      // Assuming 'verification_docs' folder exists or is automatically created
-      // NOTE: Since I don't have the Storage instance exposed here clearly, I'll rely on a putative StorageService or similar logic. 
-      // Actually, I will check if Storage is initialized. 
-      // Re-using the logic from registerNGO but isolated.
-      
-      final ref = FirebaseStorage.instance
-          .ref()
-          .child('verification_docs')
-          .child('$userId.${file.extension}');
-          
-      if (kIsWeb) {
-        await ref.putData(file.bytes!);
-      } else {
-        await ref.putFile(File(file.path!));
-      }
-      
-      final url = await ref.getDownloadURL();
-
-      // 2. Update User Verification Status
-      await _firestore.collection('users').doc(userId).update({
-        'verificationDocUrl': url,
-        'onboardingState': OnboardingState.documentSubmitted.name,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-      
-      // Update local user model
-      await _fetchUser(userId);
-
-    } catch (e) {
-      _errorMessage = e.toString();
-      notifyListeners();
-      throw e;
-    } finally {
-      _setLoading(false);
-    }
-  }
-
   Future<void> signOut() async {
-
     try {
       _isLoading = true;
       notifyListeners();
@@ -260,20 +208,6 @@ class AuthProvider extends ChangeNotifier {
         _errorMessage = _getErrorMessage(e);
         notifyListeners();
       }
-    }
-  }
-
-  void _setLoading(bool value) {
-    _isLoading = value;
-    notifyListeners();
-  }
-
-  Future<void> _fetchUser(String userId) async {
-    try {
-      _appUser = await _authService.getCurrentAppUser();
-      notifyListeners();
-    } catch (e) {
-      print('Error refreshing user: $e');
     }
   }
 

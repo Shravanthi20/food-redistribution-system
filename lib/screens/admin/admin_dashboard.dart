@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../../providers/admin_dashboard_provider.dart';
 import '../../providers/auth_provider.dart';
-import '../../utils/app_router.dart'; // [NEW]
 import '../../services/verification_service.dart'; // For VerificationStatus enum
 import '../../services/user_service.dart'; // For logging out logic if needed or types
 
@@ -45,11 +44,6 @@ class _AdminDashboardState extends State<AdminDashboard> with SingleTickerProvid
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () => provider.loadDashboardData(),
-          ),
-          IconButton(
-            icon: const Icon(Icons.report_problem, color: Colors.amber), // Warning color
-            tooltip: 'Manage Issues',
-            onPressed: () => Navigator.pushNamed(context, AppRouter.adminIssues),
           ),
           IconButton(
             icon: const Icon(Icons.logout),

@@ -20,7 +20,7 @@ class NGOProfile {
   final String city;
   final String state;
   final String zipCode;
-  final Map<String, dynamic> location; // GeoPoint data + geohash
+  final Map<String, dynamic> location; // GeoPoint data
   final int capacity;
   final List<String> servingPopulation;
   final String operatingHours;
@@ -29,7 +29,7 @@ class NGOProfile {
   final bool refrigerationAvailable;
   final String contactPerson;
   final String contactPhone;
-  final String? verificationCertificateUrl; // Changed: Replaced placeholder
+  final String? registrationCertificate;
   final String? taxExemptionCertificate;
   final List<BranchLocation> branches;
   final bool isVerified;
@@ -54,7 +54,7 @@ class NGOProfile {
     required this.refrigerationAvailable,
     required this.contactPerson,
     required this.contactPhone,
-    this.verificationCertificateUrl,
+    this.registrationCertificate,
     this.taxExemptionCertificate,
     this.branches = const [],
     this.isVerified = false,
@@ -86,7 +86,7 @@ class NGOProfile {
       refrigerationAvailable: data['refrigerationAvailable'] ?? false,
       contactPerson: data['contactPerson'] ?? '',
       contactPhone: data['contactPhone'] ?? '',
-      verificationCertificateUrl: data['verificationCertificateUrl'],
+      registrationCertificate: data['registrationCertificate'],
       taxExemptionCertificate: data['taxExemptionCertificate'],
       branches: (data['branches'] as List<dynamic>?)
               ?.map((b) => BranchLocation.fromMap(b))
@@ -118,7 +118,7 @@ class NGOProfile {
       'refrigerationAvailable': refrigerationAvailable,
       'contactPerson': contactPerson,
       'contactPhone': contactPhone,
-      'verificationCertificateUrl': verificationCertificateUrl,
+      'registrationCertificate': registrationCertificate,
       'taxExemptionCertificate': taxExemptionCertificate,
       'branches': branches.map((b) => b.toMap()).toList(),
       'isVerified': isVerified,

@@ -1,12 +1,9 @@
-import 'dart:async'; // [NEW]
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dart_geohash/dart_geohash.dart';
 
 class LocationService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final GeoHasher _geoHasher = GeoHasher();
 
   // Get current location
   Future<Position?> getCurrentLocation() async {
@@ -41,12 +38,10 @@ class LocationService {
       List<Location> locations = await locationFromAddress(address);
       if (locations.isNotEmpty) {
         final location = locations.first;
-        final geohash = _geoHasher.encode(location.latitude, location.longitude);
         return {
           'latitude': location.latitude,
           'longitude': location.longitude,
           'geopoint': GeoPoint(location.latitude, location.longitude),
-          'geohash': geohash,
         };
       }
       return null;
@@ -93,7 +88,8 @@ class LocationService {
     required double radiusKm,
   }) async {
     try {
-      // NOTE: Client-side finding is limited. Use Cloud Functions for scalable Geo-queries.
+      // Firestore doesn't support radius queries directly
+      // This is a simplified implementation
       final donations = await _firestore
           .collection('food_donations')
           .where('status', isEqualTo: 'listed')
@@ -137,71 +133,15 @@ class LocationService {
   // Update user location
   Future<void> updateUserLocation(String userId, Position position) async {
     try {
-      final geohash = _geoHasher.encode(position.latitude, position.longitude);
-      
       await _firestore.collection('user_locations').doc(userId).set({
         'latitude': position.latitude,
         'longitude': position.longitude,
         'geopoint': GeoPoint(position.latitude, position.longitude),
-        'geohash': geohash,
         'accuracy': position.accuracy,
         'timestamp': Timestamp.now(),
       });
-      
     } catch (e) {
       print('Error updating user location: $e');
     }
-  }
-  // LIVE TRACKING
-
-  final Map<String, StreamSubscription<Position>> _trackingSubscriptions = {};
-
-  // Start tracking user location
-  Future<void> startLocationTracking(String userId) async {
-    try {
-      // check/request permission again just in case
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) return;
-      }
-
-      const LocationSettings locationSettings = LocationSettings(
-        accuracy: LocationAccuracy.high,
-        distanceFilter: 10, // Update every 10 meters
-      );
-
-      final stream = Geolocator.getPositionStream(locationSettings: locationSettings);
-      
-      _trackingSubscriptions[userId]?.cancel(); // Cancel existing if any
-
-      _trackingSubscriptions[userId] = stream.listen((Position position) {
-        updateUserLocation(userId, position);
-      });
-      
-      print('Started location tracking for $userId');
-
-    } catch (e) {
-      print('Error starting location tracking: $e');
-    }
-  }
-
-  // Stop tracking
-  Future<void> stopLocationTracking(String userId) async {
-    await _trackingSubscriptions[userId]?.cancel();
-    _trackingSubscriptions.remove(userId);
-    print('Stopped location tracking for $userId');
-  }
-
-  // Stream of specific user's location
-  Stream<Map<String, dynamic>> getUserLocationStream(String userId) {
-    return _firestore
-        .collection('user_locations')
-        .doc(userId)
-        .snapshots()
-        .map((doc) {
-          if (!doc.exists) return {};
-          return doc.data() as Map<String, dynamic>;
-        });
   }
 }
