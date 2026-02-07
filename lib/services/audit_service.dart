@@ -33,9 +33,10 @@ enum AuditRiskLevel {
 }
 
 class AuditService {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirestoreService _firestoreService = FirestoreService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   
   static final AuditService _instance = AuditService._internal();
   factory AuditService() => _instance;

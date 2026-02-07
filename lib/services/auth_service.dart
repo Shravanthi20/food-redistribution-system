@@ -1,6 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:file_picker/file_picker.dart';
+import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import '../models/user.dart';
 import '../models/donor_profile.dart';
 import '../models/ngo_profile.dart';
@@ -47,12 +53,13 @@ class AuthService {
 
       if (credential.user != null) {
         // Create AppUser document
+        // Donors are now active immediately, no verification required
         final appUser = AppUser(
           uid: credential.user!.uid,
           email: email,
           role: UserRole.donor,
-          status: UserStatus.pending,
-          onboardingState: OnboardingState.registered,
+          status: UserStatus.active, // Set to active immediately
+          onboardingState: OnboardingState.active, // Skip onboarding
           createdAt: DateTime.now(),
         );
 
@@ -135,6 +142,65 @@ class AuthService {
       rethrow;
     }
     return null;
+  }
+
+  // Upload Verification Certificate
+  Future<String?> uploadVerificationCertificate(String userId, PlatformFile file) async {
+    try {
+      final ref = FirebaseStorage.instance
+          .ref()
+          .child('verification_certificates')
+          .child('$userId.${file.extension}');
+
+      Uint8List? dataToUpload;
+      File? fileToUpload;
+
+      // Check if image and compress
+      final isImage = ['jpg', 'jpeg', 'png'].contains(file.extension?.toLowerCase());
+      
+      if (isImage) {
+        try {
+          // Attempt compression
+          if (kIsWeb) {
+             if (file.bytes != null) {
+               dataToUpload = await FlutterImageCompress.compressWithList(
+                 file.bytes!,
+                 minHeight: 1024,
+                 minWidth: 1024,
+                 quality: 70,
+               );
+             }
+          } else if (file.path != null) {
+            // Native
+             final result = await FlutterImageCompress.compressWithFile(
+               file.path!,
+               minHeight: 1024,
+               minWidth: 1024,
+               quality: 70,
+             );
+             if (result != null) {
+                dataToUpload = result; // Use bytes for upload
+             }
+          }
+        } catch (e) {
+          print('Compression failed or not supported, falling back to original file: $e');
+          // Fallback handled below (dataToUpload remains null)
+        }
+      }
+
+      if (dataToUpload != null) {
+        await ref.putData(dataToUpload);
+      } else if (kIsWeb) {
+        await ref.putData(file.bytes!);
+      } else {
+        await ref.putFile(File(file.path!));
+      }
+
+      return await ref.getDownloadURL();
+    } catch (e) {
+      print('Error uploading certificate: $e');
+      return null; // Don't block registration if upload fails, but prefer to handle it
+    }
   }
 
   // US3: Volunteer Account Creation
@@ -231,13 +297,14 @@ class AuthService {
   Future<void> signOut() async {
     try {
       final userId = currentUser?.uid;
-      await _auth.signOut();
-      await _secureStorage.deleteAll();
       
-      // Log logout action
+      // Log logout action BEFORE signing out (so we still have permissions)
       if (userId != null) {
         await _logAction('logout', userId);
       }
+
+      await _auth.signOut();
+      await _secureStorage.deleteAll();
     } catch (e) {
       print('Error signing out: $e');
       rethrow;

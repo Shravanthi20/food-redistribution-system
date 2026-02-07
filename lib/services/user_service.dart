@@ -10,9 +10,10 @@ import 'firestore_service.dart';
 import '../config/firestore_schema.dart';
 
 class UserService {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirestoreService _firestoreService = FirestoreService();
   final auth.FirebaseAuth _auth = auth.FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   final AuditService _auditService = AuditService();
   final NotificationService _notificationService = NotificationService();
 
@@ -104,6 +105,70 @@ class UserService {
     } catch (e) {
       print('Error checking user suspension: $e');
       return false;
+    }
+  }
+
+  // Get users by role (for Admin selection)
+  Future<List<Map<String, dynamic>>> getUsersByRole(UserRole role) async {
+    try {
+      final query = await _firestore
+          .collection('users')
+          .where('role', isEqualTo: role.name)
+          .where('status', isEqualTo: UserStatus.verified.name)
+          .get();
+
+      return query.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList();
+    } catch (e) {
+      print('Error getting users by role: $e');
+      return [];
+    }
+  }
+
+
+  // Submit verification documents
+  Future<void> submitVerificationDocuments({
+    required String userId,
+    required String certificateUrl,
+    required UserRole role,
+  }) async {
+    try {
+      final batch = _firestore.batch();
+
+      // Update User State
+      batch.update(_firestore.collection('users').doc(userId), {
+        'onboardingState': OnboardingState.documentSubmitted.name,
+        'updatedAt': Timestamp.now(),
+      });
+      
+      // Update specific profile with certificate URL
+      String collection;
+      switch (role) {
+        case UserRole.donor: collection = 'donor_profiles'; break;
+        case UserRole.ngo: collection = 'ngo_profiles'; break;
+        case UserRole.volunteer: collection = 'volunteer_profiles'; break;
+        default: collection = 'donor_profiles';
+      }
+      
+      batch.update(_firestore.collection(collection).doc(userId), {
+        'verificationCertificateUrl': certificateUrl,
+        'updatedAt': Timestamp.now(),
+      });
+
+      // Add to Review Queue
+      final reviewRef = _firestore.collection('review_queue').doc();
+      batch.set(reviewRef, {
+        'userId': userId,
+        'userRole': role.name,
+        'certificateUrl': certificateUrl,
+        'status': 'pending',
+        'createdAt': Timestamp.now(),
+        'type': 'verification_request',
+      });
+
+      await batch.commit();
+    } catch (e) {
+      print('Error submitting documents: $e');
+      rethrow;
     }
   }
 
