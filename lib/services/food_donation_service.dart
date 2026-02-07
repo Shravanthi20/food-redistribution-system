@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:geolocator/geolocator.dart'; // [NEW]
 import 'package:uuid/uuid.dart';
 import '../models/food_donation.dart';
 import '../models/ngo_profile.dart';
@@ -69,10 +70,100 @@ class FoodDonationService {
       // Log action
       await _logDonationAction('donation_created', donationId, donorId);
 
+      // [NEW] Client-Side Matching (Free Tier)
+      // Since we can't use Cloud Functions on Spark plan, we trigger matching here.
+      // In a real production app, this should be offloaded to a backend if possible.
+      _triggerClientSideMatching(donationId, donationWithId);
+
       return donationId;
     } catch (e) {
       print('Error creating food donation: $e');
       rethrow;
+    }
+  }
+
+  // [NEW] Client-Side Matching Logic
+  Future<void> _triggerClientSideMatching(String donationId, FoodDonation donation) async {
+    try {
+      print('Starting client-side match for $donationId');
+      // 1. Fetch Verified NGOs
+      final ngoSnap = await _firestore.collection('ngo_profiles')
+          .where('isVerified', isEqualTo: true)
+          .get(); // Fetching all confirmed NGOs (Ok for small scale demo)
+
+      if (ngoSnap.docs.isEmpty) {
+        print('No verified NGOs found');
+        return;
+      }
+
+      String? bestNGOId;
+      double minDistance = double.infinity;
+      
+      final pickupLat = (donation.pickupLocation['latitude'] as num).toDouble();
+      final pickupLng = (donation.pickupLocation['longitude'] as num).toDouble();
+
+      // 2. Find Nearest
+      for (var doc in ngoSnap.docs) {
+        final data = doc.data();
+        if (data['location'] != null) {
+           final lat = (data['location']['latitude'] as num).toDouble();
+           final lng = (data['location']['longitude'] as num).toDouble();
+           
+           // Simple Euclidean approximation for filtering or Haversine if Geolocator available
+           // Using simple calculation here to avoid extensive dependencies if pure math works
+           // But user has geolocator, let's try to use it if imported, else math.
+           
+           final dist = _calculateDistance(pickupLat, pickupLng, lat, lng);
+           if (dist < minDistance) {
+             minDistance = dist;
+             bestNGOId = doc.id;
+           }
+        }
+      }
+
+      // 3. Assign
+      if (bestNGOId != null && minDistance < 50000) { // < 50km
+         await _firestore.collection('food_donations').doc(donationId).update({
+           'assignedNGOId': bestNGOId,
+           'status': 'matched', // Convert enum to string if needed, check model: enum DonationStatus { listed, matched... }
+           'updatedAt': FieldValue.serverTimestamp(),
+           'matchingStatus': 'matched_client_side'
+         });
+         
+         // Create Assignment Record
+         await _firestore.collection('donation_assignments').add({
+           'donationId': donationId,
+           'assigneeId': bestNGOId,
+           'type': 'NGO_OFFER',
+           'status': 'pending', 
+           'createdAt': FieldValue.serverTimestamp(),
+         });
+         
+         print('Matched to NGO $bestNGOId ($minDistance m away)');
+      } else {
+         print('No NGO within range');
+      }
+
+    } catch (e) {
+      print('Error in client-side matching: $e');
+    }
+  }
+
+  double _calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+    return Geolocator.distanceBetween(lat1, lon1, lat2, lon2);
+  }
+
+  // Retrieve a single donation by ID
+  Future<FoodDonation?> getDonation(String donationId) async {
+    try {
+      final doc = await _firestore.collection('food_donations').doc(donationId).get();
+      if (doc.exists) {
+        return FoodDonation.fromFirestore(doc);
+      }
+      return null;
+    } catch (e) {
+      print('Error getting donation: $e');
+      return null;
     }
   }
 
@@ -144,6 +235,24 @@ class FoodDonationService {
       }
     } catch (e) {
       print('Error updating food donation: $e');
+      rethrow;
+    }
+  }
+
+  // Update Only Status (Helper)
+  Future<void> updateDonationStatus({
+    required String donationId,
+    required DonationStatus status,
+  }) async {
+    try {
+      await _firestore.collection('food_donations').doc(donationId).update({
+        'status': status.name, // Assuming enum name matches string in DB
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      // Notify?
+      await _notifyStakeholders(donationId, 'status_change');
+    } catch (e) {
+      print('Error updating status: $e');
       rethrow;
     }
   }

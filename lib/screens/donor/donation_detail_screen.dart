@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // [NEW] for Timestamp
 import '../../models/food_donation.dart';
 import '../../services/user_service.dart';
 import '../../models/user.dart';
 import '../../providers/auth_provider.dart';
 import 'package:provider/provider.dart';
 import '../../providers/donation_provider.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart'; // [NEW]
+import '../../widgets/live_tracking_map.dart'; // [NEW]
+import '../../utils/app_router.dart'; // [NEW]
 import '../admin/user_selection_screen.dart';
 import '../../services/location_service.dart'; // Import LocationService
 
@@ -203,7 +207,7 @@ class DonationDetailScreen extends StatelessWidget {
                       // Admin Controls
                       Consumer<AuthProvider>(
                         builder: (context, auth, _) {
-                          if (auth.user?.role != UserRole.admin) return const SizedBox.shrink();
+                          if (auth.appUser?.role != UserRole.admin) return const SizedBox.shrink();
                           
                           return _buildSection(
                             context,
@@ -295,7 +299,7 @@ class DonationDetailScreen extends StatelessWidget {
                   return Column(
                     children: [
                        LiveTrackingMap(
-                         pickupLocation: _parseGeoPoint(donation.pickupLocation),
+                         pickupLocation: _parseGeoPoint(donation.pickupLocation) ?? const LatLng(0, 0),
                          dropoffLocation: const LatLng(37.7749, -122.4194), // Placeholder for NGO location until fetched
                          volunteerLocation: LatLng(
                             (data['latitude'] as num).toDouble(),
@@ -606,5 +610,21 @@ class DonationDetailScreen extends StatelessWidget {
         }
       }
     }
+  }
+
+  LatLng? _parseGeoPoint(Map<String, dynamic>? location) {
+    if (location == null) return null;
+    final lat = location['latitude'];
+    final lng = location['longitude'];
+    if (lat is num && lng is num) {
+      return LatLng(lat.toDouble(), lng.toDouble());
+    }
+    return null;
+  }
+
+  String _formatTime(Timestamp? timestamp) {
+    if (timestamp == null) return 'Unknown';
+    final dt = timestamp.toDate();
+    return '${dt.hour}:${dt.minute.toString().padLeft(2, '0')}';
   }
 }

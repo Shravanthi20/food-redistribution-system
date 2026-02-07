@@ -46,6 +46,7 @@ dependencies:
   flutter_secure_storage: ^9.2.2
   crypto: ^3.0.5
   device_info_plus: ^10.1.2
+  connectivity_plus: ^6.1.0
 
   # Utilities
   http: ^1.2.2
@@ -57,9 +58,12 @@ dependencies:
   shared_preferences: ^2.3.2
   file_picker: ^10.3.10
   firebase_storage: ^12.4.10
+  flutter_image_compress: ^2.4.0
 
 dev_dependencies:
   flutter_test:
+    sdk: flutter
+  integration_test:
     sdk: flutter
   flutter_lints: ^4.0.0
 

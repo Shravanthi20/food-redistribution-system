@@ -2,18 +2,23 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart'; // [NEW]
+import 'package:flutter/foundation.dart'; // [NEW] for kIsWeb
+import 'dart:io'; // [NEW] for File
 import '../services/auth_service.dart';
 import '../models/user.dart';
 import '../models/ngo_profile.dart';
 
 class AuthProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance; // [NEW]
   User? _firebaseUser;
   AppUser? _appUser;
   bool _isLoading = true;
   String? _errorMessage;
 
   // Getters
+  User? get user => _firebaseUser; // [ALIAS] for backward compatibility
   User? get firebaseUser => _firebaseUser;
   AppUser? get appUser => _appUser;
   bool get isLoading => _isLoading;
@@ -255,6 +260,20 @@ class AuthProvider extends ChangeNotifier {
         _errorMessage = _getErrorMessage(e);
         notifyListeners();
       }
+    }
+  }
+
+  void _setLoading(bool value) {
+    _isLoading = value;
+    notifyListeners();
+  }
+
+  Future<void> _fetchUser(String userId) async {
+    try {
+      _appUser = await _authService.getCurrentAppUser();
+      notifyListeners();
+    } catch (e) {
+      print('Error refreshing user: $e');
     }
   }
 

@@ -1,3 +1,4 @@
+import 'dart:async'; // [NEW]
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -186,8 +187,8 @@ class LocationService {
   }
 
   // Stop tracking
-  void stopLocationTracking(String userId) {
-    _trackingSubscriptions[userId]?.cancel();
+  Future<void> stopLocationTracking(String userId) async {
+    await _trackingSubscriptions[userId]?.cancel();
     _trackingSubscriptions.remove(userId);
     print('Stopped location tracking for $userId');
   }

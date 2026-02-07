@@ -76,6 +76,8 @@ class AppRouter {
   static const String documentSubmission = '/document-submission';
   static const String verificationPending = '/verification-pending';
   static const String verificationRejected = '/verification-rejected';
+  
+  static const String issueReporting = '/issue-reporting'; // [NEW]
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -120,8 +122,21 @@ class AppRouter {
 
       case ngoDashboard:
         return MaterialPageRoute(builder: (_) => const NGODashboard());
+      
+      case documentSubmission:
+        return MaterialPageRoute(
+          builder: (_) => const DocumentSubmissionScreen(),
+        );
 
-      // ✅ NGO WORKFLOW
+      case verificationPending:
+        return MaterialPageRoute(
+          builder: (_) => const VerificationPendingScreen(),
+        );
+      
+       case verificationRejected:
+        return MaterialPageRoute(
+          builder: (_) => const VerificationRejectedScreen(),
+        );
       case inspectDelivery:
         return MaterialPageRoute(
           builder: (_) => const InspectDeliveryScreen(),
@@ -174,7 +189,7 @@ class AppRouter {
       case donationDetail:
         final donation = settings.arguments as FoodDonation;
         return MaterialPageRoute(
-          builder: (_) => DonationDetailScreen(donation: donation),
+          builder: (_) => DonationDetailScreen(initialDonation: donation),
         );
 
       case impactReports:
@@ -186,13 +201,18 @@ class AppRouter {
             builder: (_) => IssueReportingScreen(donationId: args['donationId']));
       
       default:
-        return MaterialPageRoute(
-          builder: (_) => Scaffold(
-            body: Center(
-              child: Text('No route defined for ${settings.name}'),
-            ),
-          ),
-        );
+        return _errorRoute();
     }
+  }
+
+  static Route<dynamic> _errorRoute() {
+    return MaterialPageRoute(
+      builder: (_) => Scaffold(
+        appBar: AppBar(title: const Text('Error')),
+        body: const Center(
+          child: Text('Page not found'),
+        ),
+      ),
+    );
   }
 }

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../../providers/admin_dashboard_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../utils/app_router.dart'; // [NEW]
 import '../../services/verification_service.dart'; // For VerificationStatus enum
 import '../../services/user_service.dart'; // For logging out logic if needed or types
 

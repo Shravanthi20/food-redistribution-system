@@ -137,46 +137,9 @@ class _DocumentVerificationScreenState
 
   List<Widget> _buildRoleSpecificFields() {
     switch (_currentUser!.role) {
-      case UserRole.donor:
-        return [
-          FormBuilderTextField(
-            name: 'business_license',
-            decoration: const InputDecoration(
-              labelText: 'Business License Number',
-              hintText: 'Enter your business license number',
-              prefixIcon: Icon(Icons.business),
-            ),
-            validator: FormBuilderValidators.compose([
-              FormBuilderValidators.required(),
-              FormBuilderValidators.minLength(5),
-            ]),
-          ),
-          const SizedBox(height: 16),
-          FormBuilderTextField(
-            name: 'food_safety_cert',
-            decoration: const InputDecoration(
-              labelText: 'Food Safety Certificate Number',
-              hintText: 'Enter your food safety certificate number',
-              prefixIcon: Icon(Icons.food_bank),
-            ),
-            validator: FormBuilderValidators.compose([
-              FormBuilderValidators.required(),
-            ]),
-          ),
-          const SizedBox(height: 16),
-          FormBuilderTextField(
-            name: 'business_address',
-            decoration: const InputDecoration(
-              labelText: 'Business Address',
-              hintText: 'Enter your complete business address',
-              prefixIcon: Icon(Icons.location_on),
-            ),
-            maxLines: 3,
-            validator: FormBuilderValidators.compose([
-              FormBuilderValidators.required(),
-            ]),
-          ),
-        ];
+      // Donor verification removed
+      // case UserRole.donor:
+      //   return [];
 
       case UserRole.ngo:
         return [
