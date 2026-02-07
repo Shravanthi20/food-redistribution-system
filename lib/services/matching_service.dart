@@ -81,4 +81,40 @@ class MatchingService extends BaseService {
       return filteredVolunteers;
     });
   }
+
+  /// Atomically creates a match between a donation and an NGO.
+  Future<Result<void>> createMatch({
+    required String donationId,
+    required String ngoId,
+  }) async {
+    return safeExecute(() async {
+      await _firestore.runTransaction((transaction) async {
+        final donationRef = _firestore.collection('food_donations').doc(donationId);
+        final donationDoc = await transaction.get(donationRef);
+
+        if (!donationDoc.exists) throw Exception('Donation not found');
+
+        final donationData = donationDoc.data() as Map<String, dynamic>;
+        if (donationData['status'] != DonationStatus.listed.name) {
+          throw Exception('Donation is no longer available for matching');
+        }
+
+        // 1. Update Donation Status
+        transaction.update(donationRef, {
+          'status': DonationStatus.matched.name,
+          'assignedNGOId': ngoId,
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+
+        // 2. Create Match Notification / Audit entry
+        final matchRef = _firestore.collection('matches').doc();
+        transaction.set(matchRef, {
+          'donationId': donationId,
+          'ngoId': ngoId,
+          'matchedAt': FieldValue.serverTimestamp(),
+          'status': 'active',
+        });
+      });
+    }, auditAction: 'create_match', auditData: {'donationId': donationId, 'ngoId': ngoId});
+  }
 }
