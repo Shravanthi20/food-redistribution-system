@@ -12,93 +12,141 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
+    // Helper to check if user is an admin
+    function isAdmin() {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
     // specific rules for collections
     
-    // Users collection: Users can read/write their own document
+    // Users collection
     match /users/{userId} {
-      allow read: if isAuthenticated(); // Allow reading other users (for verification/admin) or restrict further
+      allow read: if isAuthenticated(); 
       allow create: if isAuthenticated() && request.auth.uid == userId;
-      allow update: if isOwner(userId) || (isAuthenticated() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
-      allow delete: if false; // Only soft delete via status update
+      allow update: if isOwner(userId) || isAdmin();
+      allow delete: if isAdmin();
     }
 
     // Role-specific profiles
     match /donor_profiles/{userId} {
-      allow read, write: if isOwner(userId);
-      allow read: if isAuthenticated(); // NGOs need to see donors
+      allow read, write: if isOwner(userId) || isAdmin();
+      allow read: if isAuthenticated(); 
     }
     
     match /ngo_profiles/{userId} {
-      allow read, write: if isOwner(userId);
+      allow read, write: if isOwner(userId) || isAdmin();
       allow read: if isAuthenticated();
     }
     
     match /volunteer_profiles/{userId} {
-      allow read, write: if isOwner(userId);
-      allow read: if isAuthenticated(); // Admin/NGOs need to see volunteers
+      allow read, write: if isOwner(userId) || isAdmin();
+      allow read: if isAuthenticated(); 
     }
 
-    // Admin tasks
+    // Admin & Management
     match /admin_tasks/{taskId} {
-      allow read, write: if isAuthenticated(); 
+      allow read, write: if isAuthenticated() || isAdmin(); 
     }
     
-    // Verification submissions
     match /verification_submissions/{submissionId} {
        allow create: if isAuthenticated();
-       allow read, update: if isAuthenticated(); // Simplified for dev
+       allow read, update: if isAuthenticated() || isAdmin();
+    }
+    
+    match /verification_logs/{logId} {
+      allow read, write: if isAdmin();
+      allow create: if isAuthenticated();
     }
 
-    // Audit logs - mostly write only for users, read for admins
+    match /issues/{issueId} {
+      allow read, write: if isAdmin();
+      allow create: if isAuthenticated();
+    }
+
     match /audit_logs/{logId} {
       allow create: if isAuthenticated();
-      allow read: if isAuthenticated(); // Should be admin only in prod
+      allow read: if isAdmin();
+    }
+    
+    match /security_logs/{logId} {
+      allow read, write: if isAdmin();
+    }
+    
+    match /security_events/{eventId} {
+      allow read, write: if isAdmin();
+      allow create: if true; 
+    }
+    
+    match /security_alerts/{alertId} {
+      allow read, write: if isAdmin();
+    }
+    
+    match /user_sessions/{sessionId} {
+      allow read, write: if isAdmin();
+      allow read, update: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated();
     }
 
     // Food Donations
     match /food_donations/{donationId} {
-      allow create: if isAuthenticated() && (request.resource.data.donorId == request.auth.uid);
       allow read: if isAuthenticated();
-      allow update: if isAuthenticated() && (resource.data.donorId == request.auth.uid || resource.data.assignedNGOId == request.auth.uid);
+      allow create: if isAuthenticated() && (request.resource.data.donorId == request.auth.uid || isAdmin());
+      allow update: if isAuthenticated() && (resource.data.donorId == request.auth.uid || resource.data.assignedNGOId == request.auth.uid || isAdmin());
     }
 
-    // Matching & Assignments (Managed mainly by Cloud Functions, but read by users)
+    match /analytics_events/{eventId} {
+      allow read, write: if isAdmin();
+      allow create: if isAuthenticated();
+    }
+
+    // Matching & Assignments
     match /donation_assignments/{assignmentId} {
-      allow read: if isAuthenticated() && (resource.data.assigneeId == request.auth.uid);
-      allow update: if isAuthenticated() && (resource.data.assigneeId == request.auth.uid); // To accept/reject
+      allow read: if isAuthenticated() && (resource.data.assigneeId == request.auth.uid || isAdmin());
+      allow update: if isAuthenticated() && (resource.data.assigneeId == request.auth.uid || isAdmin());
     }
 
     match /donation_acceptances/{acceptanceId} {
-      allow read, create: if isAuthenticated();
+      allow read, create: if isAuthenticated() || isAdmin();
     }
 
     match /donation_rejections/{rejectionId} {
       allow create: if isAuthenticated();
-      allow read: if isAuthenticated();
+      allow read: if isAuthenticated() || isAdmin();
     }
     
-    match /review_queue/{reviewId} {
-      allow create: if isAuthenticated();
-      allow read: if isAuthenticated(); // Admins
-      allow update: if isAuthenticated(); // Admins
-    }
-
-    match /clarification_requests/{requestId} {
-      allow read, create, update: if isAuthenticated();
-    }
-
     match /notifications/{notificationId} {
-      allow read, create: if isAuthenticated();
-      allow update: if isAuthenticated() && (resource.data.userId == request.auth.uid);
+      allow read, create: if isAuthenticated() || isAdmin();
+      allow update: if isOwner(resource.data.userId) || isAdmin();
     }
 
-    match /food_requests/{requestId} {
-      allow read, create: if isAuthenticated();
+    // NGO Demands
+    match /ngo_demands/{demandId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && (request.resource.data.ngoId == request.auth.uid || isAdmin());
+      allow update, delete: if isAuthenticated() && (resource.data.ngoId == request.auth.uid || isAdmin());
     }
 
-    // Default deny
+    // Donation Tracking & Analytics
+    match /donation_tracking/{trackingId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+    }
+
+    // Governance & Reviews
+    match /review_queue/{reviewId} {
+      allow read, write: if isAdmin();
+      allow create: if isAuthenticated();
+    }
+
+    // System & Maintenance
+    match /scheduled_tasks/{taskId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Default deny (allow admin to read/write everything)
     match /{document=**} {
-      allow read, write: if false;
+      allow read, write: if isAdmin();
     }
   }
 }

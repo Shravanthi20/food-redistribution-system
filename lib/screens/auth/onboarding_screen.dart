@@ -36,8 +36,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    // IMMEDIATE FIX: Donors do not need verification. Redirect immediately.
-    if (user.role == UserRole.donor) {
+    // IMMEDIATE FIX: Donors and Volunteers do not need verification. Redirect immediately.
+    if (user.role == UserRole.donor || user.role == UserRole.volunteer) {
        WidgetsBinding.instance.addPostFrameCallback((_) {
           _navigateToDashboard(context, user.role);
        });
@@ -204,10 +204,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       case UserRole.ngo:
         title = 'NGO Verification';
         description = 'Please upload your NGO Registration Certificate (Trust/Society/Section 8) to verify your organization.';
-        break;
-      case UserRole.volunteer:
-        title = 'ID Verification';
-        description = 'Please upload a valid Government ID proof (Aadhar/Driving License) to verify your identity.';
         break;
       default:
         title = 'Verification';

@@ -70,10 +70,9 @@ class FoodDonationService {
       // Log action
       await _logDonationAction('donation_created', donationId, donorId);
 
-      // [NEW] Client-Side Matching (Free Tier)
-      // Since we can't use Cloud Functions on Spark plan, we trigger matching here.
-      // In a real production app, this should be offloaded to a backend if possible.
-      _triggerClientSideMatching(donationId, donationWithId);
+      // [NEW] Client-Side Matching (Free Tier) - DISABLED FOR PRODUCTION
+      // Since we are now using Cloud Functions (Blaze Plan), we skip this.
+      // _triggerClientSideMatching(donationId, donationWithId);
 
       return donationId;
     } catch (e) {

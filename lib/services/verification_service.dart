@@ -46,49 +46,91 @@ class VerificationService {
         });
       });
       
-      // Create verification submission
-      await _firestore.collection('verification_submissions').doc(submissionId).set({
-        'userId': userId,
-        'userRole': userRole.name,
-        'documentInfo': submittedDocs,
-        'status': VerificationStatus.pending.name,
-        'submittedAt': Timestamp.now(),
-        'reviewedBy': null,
-        'reviewedAt': null,
-        'notes': null,
-      });
-      
-      // Update user onboarding state
-      await _firestore.collection('users').doc(userId).update({
-        'onboardingState': OnboardingState.documentSubmitted.name,
-        'updatedAt': Timestamp.now(),
-      });
-      
-      // Add to admin review queue
-      await _firestore.collection('admin_tasks').add({
-        'type': 'document_verification',
-        'submissionId': submissionId,
-        'userId': userId,
-        'userRole': userRole.name,
-        'priority': _getPriority(userRole),
-        'status': 'pending',
-        'createdAt': Timestamp.now(),
-      });
-      
-      // Notify admins
-      await _notifyAdminsOfSubmission(submissionId, userRole);
-      
-      // Log verification event
-      await _logVerificationEvent('documents_submitted', userId, {
-        'submissionId': submissionId,
-        'documentCount': submittedDocs.length,
-      });
-      
-      return submissionId;
+      return await _createSubmission(
+        submissionId: submissionId,
+        userId: userId,
+        userRole: userRole,
+        submittedDocs: submittedDocs,
+      );
     } catch (e) {
       print('Error submitting verification info: $e');
       rethrow;
     }
+  }
+
+  // Submit file-based verification
+  Future<String> submitFileVerification({
+    required String userId,
+    required UserRole userRole,
+    required String documentUrl,
+    required String documentType,
+  }) async {
+    try {
+      final submissionId = _firestore.collection('verification_submissions').doc().id;
+      
+      List<Map<String, dynamic>> submittedDocs = [{
+        'type': documentType,
+        'information': documentUrl,
+        'submittedAt': Timestamp.now(),
+      }];
+      
+      return await _createSubmission(
+        submissionId: submissionId,
+        userId: userId,
+        userRole: userRole,
+        submittedDocs: submittedDocs,
+      );
+    } catch (e) {
+      print('Error submitting file verification: $e');
+      rethrow;
+    }
+  }
+
+  Future<String> _createSubmission({
+    required String submissionId,
+    required String userId,
+    required UserRole userRole,
+    required List<Map<String, dynamic>> submittedDocs,
+  }) async {
+    // Create verification submission
+    await _firestore.collection('verification_submissions').doc(submissionId).set({
+      'userId': userId,
+      'userRole': userRole.name,
+      'documentInfo': submittedDocs,
+      'status': VerificationStatus.pending.name,
+      'submittedAt': Timestamp.now(),
+      'reviewedBy': null,
+      'reviewedAt': null,
+      'notes': null,
+    });
+    
+    // Update user onboarding state
+    await _firestore.collection('users').doc(userId).update({
+      'onboardingState': OnboardingState.documentSubmitted.name,
+      'updatedAt': Timestamp.now(),
+    });
+    
+    // Add to admin review queue
+    await _firestore.collection('admin_tasks').add({
+      'type': 'document_verification',
+      'submissionId': submissionId,
+      'userId': userId,
+      'userRole': userRole.name,
+      'priority': _getPriority(userRole),
+      'status': 'pending',
+      'createdAt': Timestamp.now(),
+    });
+    
+    // Notify admins
+    await _notifyAdminsOfSubmission(submissionId, userRole);
+    
+    // Log verification event
+    await _logVerificationEvent('documents_submitted', userId, {
+      'submissionId': submissionId,
+      'documentCount': submittedDocs.length,
+    });
+    
+    return submissionId;
   }
 
   // Admin: Review submitted documents
@@ -101,25 +143,47 @@ class VerificationService {
   }) async {
     try {
       final batch = _firestore.batch();
-      
-      // Update submission
-      final submissionRef = _firestore.collection('verification_submissions').doc(submissionId);
-      batch.update(submissionRef, {
-        'status': decision.name,
-        'reviewedBy': adminId,
-        'reviewedAt': Timestamp.now(),
-        'notes': notes,
-        'requestedClarifications': requestedClarifications,
-      });
-      
-      // Get submission data to update user
-      final submissionDoc = await submissionRef.get();
-      if (!submissionDoc.exists) {
-        throw Exception('Submission not found');
+      String userId;
+      bool isLegacy = submissionId.startsWith('legacy_');
+
+      if (isLegacy) {
+        userId = submissionId.replaceFirst('legacy_', '');
+      } else {
+        // Update submission records
+        final submissionRef = _firestore.collection('verification_submissions').doc(submissionId);
+        
+        // Get submission data to update user
+        final submissionDoc = await submissionRef.get();
+        if (!submissionDoc.exists) {
+          throw Exception('Submission not found');
+        }
+
+        final submissionData = submissionDoc.data() as Map<String, dynamic>;
+        userId = submissionData['userId'];
+
+        batch.update(submissionRef, {
+          'status': decision.name,
+          'reviewedBy': adminId,
+          'reviewedAt': Timestamp.now(),
+          'notes': notes,
+          'requestedClarifications': requestedClarifications,
+        });
+
+        // Update admin task
+        final taskQuery = await _firestore
+            .collection('admin_tasks')
+            .where('submissionId', isEqualTo: submissionId)
+            .where('status', isEqualTo: 'pending')
+            .get();
+        
+        for (var doc in taskQuery.docs) {
+          batch.update(doc.reference, {
+            'status': 'completed',
+            'completedBy': adminId,
+            'completedAt': Timestamp.now(),
+          });
+        }
       }
-      
-      final submissionData = submissionDoc.data() as Map<String, dynamic>;
-      final userId = submissionData['userId'];
       
       // Update user status based on decision
       final userRef = _firestore.collection('users').doc(userId);
@@ -153,21 +217,6 @@ class VerificationService {
           break;
       }
       
-      // Update admin task
-      final taskQuery = await _firestore
-          .collection('admin_tasks')
-          .where('submissionId', isEqualTo: submissionId)
-          .where('status', isEqualTo: 'pending')
-          .get();
-      
-      for (var doc in taskQuery.docs) {
-        batch.update(doc.reference, {
-          'status': 'completed',
-          'completedBy': adminId,
-          'completedAt': Timestamp.now(),
-        });
-      }
-      
       await batch.commit();
       
       // Send notification to user
@@ -178,6 +227,7 @@ class VerificationService {
         'submissionId': submissionId,
         'adminId': adminId,
         'decision': decision.name,
+        'isLegacy': isLegacy,
       });
     } catch (e) {
       print('Error reviewing submission: $e');
@@ -188,19 +238,25 @@ class VerificationService {
   // Get pending verifications for admin
   Future<List<Map<String, dynamic>>> getPendingVerifications() async {
     try {
+      print('Fetching pending verifications...');
+      
+      // Attempt to get from submissions collection
+      // TEMPORARY: Removed .orderBy('submittedAt') to avoid indexing requirements until verified
       final query = await _firestore
           .collection('verification_submissions')
           .where('status', isEqualTo: VerificationStatus.pending.name)
-          .orderBy('submittedAt')
           .get();
       
       List<Map<String, dynamic>> submissions = [];
+      Set<String> processedUserIds = {}; // Track to avoid duplicates if falling back
       
       for (var doc in query.docs) {
         final data = doc.data();
+        final userId = data['userId'];
+        processedUserIds.add(userId);
         
         // Get user details
-        final userDoc = await _firestore.collection('users').doc(data['userId']).get();
+        final userDoc = await _firestore.collection('users').doc(userId).get();
         final userData = userDoc.exists ? userDoc.data() : {};
         
         submissions.add({
@@ -210,9 +266,55 @@ class VerificationService {
         });
       }
       
+      print('Found ${submissions.length} formal submissions.');
+
+      // FALLBACK: Look for users with onboardingState == 'documentSubmitted' but no submission record
+      // This handles NGOs created before the sync was implemented.
+      final fallbackQuery = await _firestore
+          .collection('users')
+          .where('onboardingState', isEqualTo: OnboardingState.documentSubmitted.name)
+          .get();
+      
+      int fallbackCount = 0;
+      for (var userDoc in fallbackQuery.docs) {
+        if (!processedUserIds.contains(userDoc.id)) {
+          final userData = userDoc.data();
+          
+          // Synthetic submission for the UI
+          final syntheticSubmission = {
+            'userId': userDoc.id,
+            'userRole': userData['role'] ?? 'ngo',
+            'documentInfo': [
+              if (userData['verificationDocUrl'] != null)
+                {
+                  'type': 'Uploaded Document',
+                  'information': userData['verificationDocUrl'],
+                }
+            ],
+            'status': VerificationStatus.pending.name,
+            'submittedAt': userData['updatedAt'] ?? Timestamp.now(),
+            'notes': 'Auto-recovered from legacy status',
+          };
+          
+          submissions.add({
+            'id': 'legacy_${userDoc.id}',
+            'submission': syntheticSubmission,
+            'user': userData,
+          });
+          fallbackCount++;
+        }
+      }
+
+      if (fallbackCount > 0) {
+        print('Recovered $fallbackCount legacy verifications from users collection.');
+      }
+      
       return submissions;
     } catch (e) {
-      print('Error getting pending verifications: $e');
+      print('ERROR in getPendingVerifications: $e');
+      if (e.toString().contains('index')) {
+        print('CRITICAL: Firestore Composite Index may be missing. Check the link in the error above.');
+      }
       return [];
     }
   }

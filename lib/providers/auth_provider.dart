@@ -8,9 +8,11 @@ import 'dart:io'; // [NEW] for File
 import '../services/auth_service.dart';
 import '../models/user.dart';
 import '../models/ngo_profile.dart';
+import '../services/verification_service.dart';
 
 class AuthProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();
+  final VerificationService _verificationService = VerificationService();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance; // [NEW]
   User? _firebaseUser;
   AppUser? _appUser;
@@ -204,12 +206,21 @@ class AuthProvider extends ChangeNotifier {
       
       final url = await ref.getDownloadURL();
 
-      // 2. Update User Verification Status
+      // 2. Update User Verification Status (Legacy field support)
       await _firestore.collection('users').doc(userId).update({
         'verificationDocUrl': url,
-        'onboardingState': OnboardingState.documentSubmitted.name,
         'updatedAt': FieldValue.serverTimestamp(),
       });
+      
+      // 3. Create official verification submission via VerificationService
+      if (_appUser != null) {
+        await _verificationService.submitFileVerification(
+          userId: userId,
+          userRole: _appUser!.role,
+          documentUrl: url,
+          documentType: 'NGO Registration/Food License',
+        );
+      }
       
       // Update local user model
       await _fetchUser(userId);

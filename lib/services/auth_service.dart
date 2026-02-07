@@ -147,6 +147,7 @@ class AuthService {
   // Upload Verification Certificate
   Future<String?> uploadVerificationCertificate(String userId, PlatformFile file) async {
     try {
+      print('Using Storage Bucket: ${FirebaseStorage.instance.bucket}'); 
       final ref = FirebaseStorage.instance
           .ref()
           .child('verification_certificates')
@@ -157,9 +158,12 @@ class AuthService {
 
       // Check if image and compress
       final isImage = ['jpg', 'jpeg', 'png'].contains(file.extension?.toLowerCase());
-      
+
+      print('Starting upload for ${file.name} (isImage: $isImage)');
+
       if (isImage) {
         try {
+          print('Attempting compression...');
           // Attempt compression
           if (kIsWeb) {
              if (file.bytes != null) {
@@ -182,21 +186,27 @@ class AuthService {
                 dataToUpload = result; // Use bytes for upload
              }
           }
+           print('Compression done.');
         } catch (e) {
           print('Compression failed or not supported, falling back to original file: $e');
           // Fallback handled below (dataToUpload remains null)
         }
       }
 
+      print('Uploading to ${ref.fullPath}...');
       if (dataToUpload != null) {
         await ref.putData(dataToUpload);
       } else if (kIsWeb) {
         await ref.putData(file.bytes!);
       } else {
+        print('Uploading file from path: ${file.path}');
         await ref.putFile(File(file.path!));
       }
+      print('Upload complete. Getting download URL...');
 
-      return await ref.getDownloadURL();
+      final url = await ref.getDownloadURL();
+      print('Got URL: $url');
+      return url;
     } catch (e) {
       print('Error uploading certificate: $e');
       return null; // Don't block registration if upload fails, but prefer to handle it
@@ -218,12 +228,13 @@ class AuthService {
 
       if (credential.user != null) {
         // Create AppUser document
+        // Volunteers are now active immediately, no verification required
         final appUser = AppUser(
           uid: credential.user!.uid,
           email: email,
           role: UserRole.volunteer,
-          status: UserStatus.pending,
-          onboardingState: OnboardingState.registered,
+          status: UserStatus.active, // Set to active immediately
+          onboardingState: OnboardingState.verified, // Set to verified immediately
           createdAt: DateTime.now(),
         );
 
