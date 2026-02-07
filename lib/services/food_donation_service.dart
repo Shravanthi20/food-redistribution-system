@@ -1,12 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:geolocator/geolocator.dart'; // [NEW]
 import 'package:uuid/uuid.dart';
 import '../models/food_donation.dart';
 import '../models/ngo_profile.dart';
-import '../models/user.dart';
+import '../utils/result_utils.dart';
+import 'base_service.dart';
 import 'user_service.dart';
 
-class FoodDonationService {
+class FoodDonationService extends BaseService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final UserService _userService = UserService();
   final Uuid _uuid = const Uuid();
@@ -17,11 +17,14 @@ class FoodDonationService {
     required FoodDonation donation,
   }) async {
     try {
-      // Validate donor permissions (check if user is a donor)
-      final hasRole = await _userService.hasAnyRole(donorId, [UserRole.donor, UserRole.admin]);
+      // Validate donor permissions
+      final hasPermission = await _userService.hasPermission(
+        userId: donorId,
+        permission: 'create_donation',
+      );
       
-      if (!hasRole) {
-        throw Exception('Only donors can create donations');
+      if (!hasPermission) {
+        throw Exception('Insufficient permissions to create donation');
       }
 
       // Validate safety time window
@@ -70,100 +73,10 @@ class FoodDonationService {
       // Log action
       await _logDonationAction('donation_created', donationId, donorId);
 
-      // [NEW] Client-Side Matching (Free Tier)
-      // Since we can't use Cloud Functions on Spark plan, we trigger matching here.
-      // In a real production app, this should be offloaded to a backend if possible.
-      _triggerClientSideMatching(donationId, donationWithId);
-
       return donationId;
     } catch (e) {
       print('Error creating food donation: $e');
       rethrow;
-    }
-  }
-
-  // [NEW] Client-Side Matching Logic
-  Future<void> _triggerClientSideMatching(String donationId, FoodDonation donation) async {
-    try {
-      print('Starting client-side match for $donationId');
-      // 1. Fetch Verified NGOs
-      final ngoSnap = await _firestore.collection('ngo_profiles')
-          .where('isVerified', isEqualTo: true)
-          .get(); // Fetching all confirmed NGOs (Ok for small scale demo)
-
-      if (ngoSnap.docs.isEmpty) {
-        print('No verified NGOs found');
-        return;
-      }
-
-      String? bestNGOId;
-      double minDistance = double.infinity;
-      
-      final pickupLat = (donation.pickupLocation['latitude'] as num).toDouble();
-      final pickupLng = (donation.pickupLocation['longitude'] as num).toDouble();
-
-      // 2. Find Nearest
-      for (var doc in ngoSnap.docs) {
-        final data = doc.data();
-        if (data['location'] != null) {
-           final lat = (data['location']['latitude'] as num).toDouble();
-           final lng = (data['location']['longitude'] as num).toDouble();
-           
-           // Simple Euclidean approximation for filtering or Haversine if Geolocator available
-           // Using simple calculation here to avoid extensive dependencies if pure math works
-           // But user has geolocator, let's try to use it if imported, else math.
-           
-           final dist = _calculateDistance(pickupLat, pickupLng, lat, lng);
-           if (dist < minDistance) {
-             minDistance = dist;
-             bestNGOId = doc.id;
-           }
-        }
-      }
-
-      // 3. Assign
-      if (bestNGOId != null && minDistance < 50000) { // < 50km
-         await _firestore.collection('food_donations').doc(donationId).update({
-           'assignedNGOId': bestNGOId,
-           'status': 'matched', // Convert enum to string if needed, check model: enum DonationStatus { listed, matched... }
-           'updatedAt': FieldValue.serverTimestamp(),
-           'matchingStatus': 'matched_client_side'
-         });
-         
-         // Create Assignment Record
-         await _firestore.collection('donation_assignments').add({
-           'donationId': donationId,
-           'assigneeId': bestNGOId,
-           'type': 'NGO_OFFER',
-           'status': 'pending', 
-           'createdAt': FieldValue.serverTimestamp(),
-         });
-         
-         print('Matched to NGO $bestNGOId ($minDistance m away)');
-      } else {
-         print('No NGO within range');
-      }
-
-    } catch (e) {
-      print('Error in client-side matching: $e');
-    }
-  }
-
-  double _calculateDistance(double lat1, double lon1, double lat2, double lon2) {
-    return Geolocator.distanceBetween(lat1, lon1, lat2, lon2);
-  }
-
-  // Retrieve a single donation by ID
-  Future<FoodDonation?> getDonation(String donationId) async {
-    try {
-      final doc = await _firestore.collection('food_donations').doc(donationId).get();
-      if (doc.exists) {
-        return FoodDonation.fromFirestore(doc);
-      }
-      return null;
-    } catch (e) {
-      print('Error getting donation: $e');
-      return null;
     }
   }
 
@@ -239,24 +152,6 @@ class FoodDonationService {
     }
   }
 
-  // Update Only Status (Helper)
-  Future<void> updateDonationStatus({
-    required String donationId,
-    required DonationStatus status,
-  }) async {
-    try {
-      await _firestore.collection('food_donations').doc(donationId).update({
-        'status': status.name, // Assuming enum name matches string in DB
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-      // Notify?
-      await _notifyStakeholders(donationId, 'status_change');
-    } catch (e) {
-      print('Error updating status: $e');
-      rethrow;
-    }
-  }
-
   // Cancel donation
   Future<void> cancelFoodDonation({
     required String donationId,
@@ -314,10 +209,13 @@ class FoodDonationService {
     required Map<String, dynamic> requirements,
   }) async {
     try {
-      final hasRole = await _userService.hasAnyRole(ngoId, [UserRole.ngo, UserRole.admin]);
+      final hasPermission = await _userService.hasPermission(
+        userId: ngoId,
+        permission: 'manage_food_requests',
+      );
       
-      if (!hasRole) {
-        throw Exception('Only NGOs can create food requests');
+      if (!hasPermission) {
+        throw Exception('Insufficient permissions to create food request');
       }
 
       await _firestore.collection('food_requests').add({
@@ -340,148 +238,64 @@ class FoodDonationService {
     }
   }
 
-  // Admin: Force assign NGO
-  Future<void> forceAssignNGO({
-    required String donationId,
-    required String adminId,
-    required String ngoId,
-    String? reason,
-  }) async {
-    try {
-      // Check admin role
-      final isAdmin = await _userService.hasAnyRole(adminId, [UserRole.admin]);
-      if (!isAdmin) throw Exception('Unauthorized: Only admins can force assignment');
-
-      await _firestore.collection('food_donations').doc(donationId).update({
-        'assignedNGOId': ngoId,
-        'status': DonationStatus.matched.name,
-        'matchingStatus': 'forced_admin',
-        'updatedAt': Timestamp.now(),
-      });
-
-      await _logDonationAction('admin_force_assign_ngo', donationId, adminId, additionalData: {
-        'assignedNGOId': ngoId,
-        'reason': reason,
-      });
-
-      // Notify stakeholders
-      await _notifyStakeholders(donationId, 'admin_forced_match');
-    } catch (e) {
-      print('Error forcing NGO assignment: $e');
-      rethrow;
-    }
-  }
-
-  // Admin: Force assign Volunteer
-  Future<void> forceAssignVolunteer({
-    required String donationId,
-    required String adminId,
-    required String volunteerId,
-    String? reason,
-  }) async {
-    try {
-      // Check admin role
-      final isAdmin = await _userService.hasAnyRole(adminId, [UserRole.admin]);
-      if (!isAdmin) throw Exception('Unauthorized: Only admins can force assignment');
-      
-      await _firestore.collection('food_donations').doc(donationId).update({
-        'assignedVolunteerId': volunteerId,
-        'updatedAt': Timestamp.now(),
-      });
-
-       await _logDonationAction('admin_force_assign_volunteer', donationId, adminId, additionalData: {
-        'assignedVolunteerId': volunteerId,
-        'reason': reason,
-      });
-
-      // Notify stakeholders
-      await _notifyStakeholders(donationId, 'admin_forced_volunteer');
-    } catch (e) {
-      print('Error forcing volunteer assignment: $e');
-      rethrow;
-    }
-  }
-
-  // US12: NGO Review and Accept Donations
-  Future<void> reviewDonation({
+  // US12: NGO Review and Accept Donations (Transactional & Effective)
+  Future<Result<void>> reviewDonation({
     required String donationId,
     required String ngoId,
     required bool accept,
     String? reason,
     Map<String, dynamic>? hygieneChecklist,
   }) async {
-    try {
-      final hasPermission = await _userService.hasAnyRole(ngoId, [UserRole.ngo, UserRole.admin]);
-      
-      if (!hasPermission) {
-        throw Exception('Only NGOs can review donations');
-      }
+    return safeExecute(() async {
+      return await _firestore.runTransaction((transaction) async {
+        final donationRef = _firestore.collection('food_donations').doc(donationId);
+        final donationDoc = await transaction.get(donationRef);
 
-      final donationDoc = await _firestore
-          .collection('food_donations')
-          .doc(donationId)
-          .get();
+        if (!donationDoc.exists) {
+          throw Exception('Donation not found');
+        }
 
-      if (!donationDoc.exists) {
-        throw Exception('Donation not found');
-      }
-
-      final donation = FoodDonation.fromFirestore(donationDoc);
-
-      if (donation.status != DonationStatus.listed) {
-        throw Exception('Donation is no longer available for review');
-      }
-
-      // Validate hygiene requirements
-      if (accept && !_validateHygieneSafety(donation, hygieneChecklist)) {
-        throw Exception('Hygiene safety requirements not met');
-      }
-
-      if (accept) {
-        // Accept donation
-        await _firestore
-            .collection('food_donations')
-            .doc(donationId)
-            .update({
-          'status': DonationStatus.matched.name,
-          'assignedNGOId': ngoId,
-          'hygieneCertification': hygieneChecklist,
-          'updatedAt': Timestamp.now(),
-        });
-
-        // Create donation acceptance record
-        await _firestore.collection('donation_acceptances').add({
-          'donationId': donationId,
-          'ngoId': ngoId,
-          'hygieneChecklist': hygieneChecklist,
-          'acceptedAt': Timestamp.now(),
-        });
-
-        // Log action
-        await _logDonationAction('donation_accepted', donationId, ngoId);
-
-        // Notify donor
-        await _notifyStakeholders(donationId, 'donation_accepted');
+        final donationData = donationDoc.data() as Map<String, dynamic>;
         
-        // Trigger volunteer assignment
-        await _triggerVolunteerAssignment(donationId);
-      } else {
-        // Record rejection for tracking
-        await _firestore.collection('donation_rejections').add({
-          'donationId': donationId,
-          'ngoId': ngoId,
-          'reason': reason,
-          'rejectedAt': Timestamp.now(),
-        });
+        // Race condition prevention: check if still available
+        if (donationData['status'] != DonationStatus.listed.name) {
+          throw Exception('This donation has already been claimed or cancelled.');
+        }
 
-        // Log action
-        await _logDonationAction('donation_rejected', donationId, ngoId,
-            additionalData: {'reason': reason});
-      }
-    } catch (e) {
-      print('Error reviewing donation: $e');
-      rethrow;
-    }
+        if (accept) {
+          // 1. Update Donation Status using transaction
+          transaction.update(donationRef, {
+            'status': DonationStatus.matched.name,
+            'assignedNGOId': ngoId,
+            'hygieneCertification': hygieneChecklist,
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
+
+          // 2. Create Acceptance Record
+          final acceptanceRef = _firestore.collection('donation_acceptances').doc();
+          transaction.set(acceptanceRef, {
+            'donationId': donationId,
+            'ngoId': ngoId,
+            'hygieneChecklist': hygieneChecklist,
+            'acceptedAt': FieldValue.serverTimestamp(),
+          });
+
+          // Trigger notifications/volunteers out of transaction (standard best practice)
+          // We can use a side-effect queue or just call them here since we're in safeExecute
+          _notifyStakeholders(donationId, 'donation_accepted');
+          _triggerVolunteerAssignment(donationId);
+        } else {
+          // Rejection logic: record for audit
+          final rejectionRef = _firestore.collection('donation_rejections').doc();
+          transaction.set(rejectionRef, {
+            'donationId': donationId,
+            'ngoId': ngoId,
+            'reason': reason,
+            'rejectedAt': FieldValue.serverTimestamp(),
+          });
+        }
+      });
+    }, auditAction: 'review_donation', auditUserId: ngoId, auditData: {'donationId': donationId, 'accepted': accept});
   }
 
   // Request clarification from donor
@@ -621,38 +435,6 @@ class FoodDonationService {
     }
   }
 
-  // Get available donations with optional filters
-  Future<List<FoodDonation>> getAvailableDonations({
-    Map<String, dynamic>? filters,
-  }) async {
-    try {
-      Query query = _firestore
-          .collection('food_donations')
-          .where('status', isEqualTo: DonationStatus.listed.name);
-
-      // Apply filters if provided
-      if (filters != null) {
-        if (filters['foodTypes'] != null && (filters['foodTypes'] as List).isNotEmpty) {
-          query = query.where('foodTypes', arrayContainsAny: filters['foodTypes']);
-        }
-        
-        if (filters['isUrgent'] != null) {
-          query = query.where('isUrgent', isEqualTo: filters['isUrgent']);
-        }
-      }
-
-      final result = await query.orderBy('createdAt', descending: true).limit(50).get();
-      
-      return result.docs
-          .map((doc) => FoodDonation.fromFirestore(doc))
-          .where((donation) => donation.isAvailable)
-          .toList();
-    } catch (e) {
-      print('Error getting available donations: $e');
-      return [];
-    }
-  }
-
   // Private helper methods
   bool _isValidSafetyWindow(FoodDonation donation) {
     final now = DateTime.now();
@@ -741,29 +523,5 @@ class FoodDonationService {
       'timestamp': Timestamp.now(),
       ...?additionalData,
     });
-  }
-  // Real-time Streams
-  Stream<FoodDonation?> getDonationStream(String donationId) {
-    return _firestore
-        .collection('food_donations')
-        .doc(donationId)
-        .snapshots()
-        .map((doc) {
-          if (!doc.exists) return null;
-          return FoodDonation.fromFirestore(doc);
-        });
-  }
-
-  Stream<List<FoodDonation>> getDonationStreamByStatus(String donorId, DonationStatus status) {
-     return _firestore
-        .collection('food_donations')
-        .where('donorId', isEqualTo: donorId)
-        .where('status', isEqualTo: status.name)
-        .snapshots()
-        .map((snapshot) {
-          return snapshot.docs
-              .map((doc) => FoodDonation.fromFirestore(doc))
-              .toList();
-        });
   }
 }

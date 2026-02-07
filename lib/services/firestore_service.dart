@@ -1,13 +1,36 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../config/firestore_schema.dart';
+import '../utils/result_utils.dart';
+import 'base_service.dart';
 
 // Firestore Database Service for centralized Firestore operations
-class FirestoreService {
+class FirestoreService extends BaseService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   
   static final FirestoreService _instance = FirestoreService._internal();
   factory FirestoreService() => _instance;
   FirestoreService._internal();
+
+  // Optimized CRUD with Result wrapper
+  Future<Result<void>> safeCreate(String collection, String docId, Map<String, dynamic> data) async {
+    return safeExecute(() async {
+      data['createdAt'] = FieldValue.serverTimestamp();
+      data['updatedAt'] = FieldValue.serverTimestamp();
+      await _firestore.collection(collection).doc(docId).set(data);
+    }, auditAction: 'create_$collection', auditData: {'docId': docId});
+  }
+
+  Future<Result<void>> safeUpdate(String collection, String docId, Map<String, dynamic> data) async {
+    return safeExecute(() async {
+      data['updatedAt'] = FieldValue.serverTimestamp();
+      await _firestore.collection(collection).doc(docId).update(data);
+    }, auditAction: 'update_$collection', auditData: {'docId': docId});
+  }
+
+  // Enhanced transaction helper for complex atomic operations
+  Future<Result<T>> runTransaction<T>(Future<T> Function(Transaction) transaction) async {
+    return safeExecute(() => _firestore.runTransaction(transaction));
+  }
 
   // Generic CRUD operations for any collection
   Future<void> create(String collection, String docId, Map<String, dynamic> data) async {
