@@ -293,11 +293,16 @@ class AuthService {
     try {
       await _auth.sendPasswordResetEmail(email: email);
       
-      // Log recovery action
-      await _logAction('password_reset_request', null, additionalData: {
-        'email': email,
-        'timestamp': Timestamp.now(),
-      });
+      // Log recovery action (best effort)
+      try {
+        await _logAction('password_reset_request', null, additionalData: {
+          'email': email,
+          'timestamp': Timestamp.now(),
+        });
+      } catch (logError) {
+        print('Failed to log password reset request: $logError');
+        // Retrieve silently so user flow isn't interrupted
+      }
     } catch (e) {
       print('Error sending password reset email: $e');
       rethrow;

@@ -5,6 +5,11 @@ import '../models/food_donation.dart';
 import '../models/ngo_profile.dart';
 import '../models/user.dart';
 import 'user_service.dart';
+// import 'matching_service.dart'; // [REMOVED]
+import 'firestore_service.dart'; // [NEW]
+import 'location_service.dart'; // [NEW]
+import 'notification_service.dart'; // [NEW]
+import 'audit_service.dart'; // [NEW]
 
 class FoodDonationService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -70,81 +75,14 @@ class FoodDonationService {
       // Log action
       await _logDonationAction('donation_created', donationId, donorId);
 
-      // [NEW] Client-Side Matching (Free Tier) - DISABLED FOR PRODUCTION
-      // Since we are now using Cloud Functions (Blaze Plan), we skip this.
+      // [REMOVED] Client-Side Matching
+      // Relying on Cloud Functions (functions/index.js) as requested.
       // _triggerClientSideMatching(donationId, donationWithId);
 
       return donationId;
     } catch (e) {
       print('Error creating food donation: $e');
       rethrow;
-    }
-  }
-
-  // [NEW] Client-Side Matching Logic
-  Future<void> _triggerClientSideMatching(String donationId, FoodDonation donation) async {
-    try {
-      print('Starting client-side match for $donationId');
-      // 1. Fetch Verified NGOs
-      final ngoSnap = await _firestore.collection('ngo_profiles')
-          .where('isVerified', isEqualTo: true)
-          .get(); // Fetching all confirmed NGOs (Ok for small scale demo)
-
-      if (ngoSnap.docs.isEmpty) {
-        print('No verified NGOs found');
-        return;
-      }
-
-      String? bestNGOId;
-      double minDistance = double.infinity;
-      
-      final pickupLat = (donation.pickupLocation['latitude'] as num).toDouble();
-      final pickupLng = (donation.pickupLocation['longitude'] as num).toDouble();
-
-      // 2. Find Nearest
-      for (var doc in ngoSnap.docs) {
-        final data = doc.data();
-        if (data['location'] != null) {
-           final lat = (data['location']['latitude'] as num).toDouble();
-           final lng = (data['location']['longitude'] as num).toDouble();
-           
-           // Simple Euclidean approximation for filtering or Haversine if Geolocator available
-           // Using simple calculation here to avoid extensive dependencies if pure math works
-           // But user has geolocator, let's try to use it if imported, else math.
-           
-           final dist = _calculateDistance(pickupLat, pickupLng, lat, lng);
-           if (dist < minDistance) {
-             minDistance = dist;
-             bestNGOId = doc.id;
-           }
-        }
-      }
-
-      // 3. Assign
-      if (bestNGOId != null && minDistance < 50000) { // < 50km
-         await _firestore.collection('food_donations').doc(donationId).update({
-           'assignedNGOId': bestNGOId,
-           'status': 'matched', // Convert enum to string if needed, check model: enum DonationStatus { listed, matched... }
-           'updatedAt': FieldValue.serverTimestamp(),
-           'matchingStatus': 'matched_client_side'
-         });
-         
-         // Create Assignment Record
-         await _firestore.collection('donation_assignments').add({
-           'donationId': donationId,
-           'assigneeId': bestNGOId,
-           'type': 'NGO_OFFER',
-           'status': 'pending', 
-           'createdAt': FieldValue.serverTimestamp(),
-         });
-         
-         print('Matched to NGO $bestNGOId ($minDistance m away)');
-      } else {
-         print('No NGO within range');
-      }
-
-    } catch (e) {
-      print('Error in client-side matching: $e');
     }
   }
 
@@ -764,5 +702,108 @@ class FoodDonationService {
               .map((doc) => FoodDonation.fromFirestore(doc))
               .toList();
         });
+  }
+
+  // Get all donations for a donor as a stream
+  Stream<List<FoodDonation>> getDonorDonationsStream(String donorId) {
+    return _firestore
+        .collection('food_donations')
+        .where('donorId', isEqualTo: donorId)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs
+          .map((doc) => FoodDonation.fromFirestore(doc))
+          .toList();
+    });
+  }
+
+  // Get available donations for volunteers (listed OR matched)
+  Stream<List<FoodDonation>> getAvailableDonationsStream() {
+    return _firestore
+        .collection('food_donations')
+        .where('status', whereIn: [DonationStatus.listed.name, DonationStatus.matched.name])
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs
+          .map((doc) => FoodDonation.fromFirestore(doc))
+          .toList();
+    });
+  }
+
+  // Get tasks assigned to a specific volunteer
+  Stream<List<FoodDonation>> getVolunteerTasksStream(String volunteerId) {
+    return _firestore
+        .collection('food_donations')
+        .where('assignedVolunteerId', isEqualTo: volunteerId)
+        .where('status', whereIn: ['matched', 'pickedUp', 'inTransit', 'delivered'])
+        .orderBy('updatedAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs
+          .map((doc) => FoodDonation.fromFirestore(doc))
+          .toList();
+    });
+  }
+
+  // Get pending assignments for a volunteer
+  Stream<List<Map<String, dynamic>>> getPendingAssignments(String volunteerId) {
+    return _firestore
+        .collection('donation_assignments')
+        .where('assigneeId', isEqualTo: volunteerId)
+        .where('status', isEqualTo: 'pending')
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) => {
+        'assignmentId': doc.id,
+        ...doc.data(),
+      }).toList();
+    });
+  }
+
+  // Accept an assignment
+  Future<void> acceptAssignment(String assignmentId, String donationId, String volunteerId) async {
+    final batch = _firestore.batch();
+    
+    // 1. Update Assignment Status
+    final assignmentRef = _firestore.collection('donation_assignments').doc(assignmentId);
+    batch.update(assignmentRef, {
+      'status': 'accepted',
+      'acceptedAt': Timestamp.now(),
+    });
+
+    // 2. Update Donation Status
+    final donationRef = _firestore.collection('food_donations').doc(donationId);
+    batch.update(donationRef, {
+      'assignedVolunteerId': volunteerId,
+      'matchingStatus': 'volunteer_accepted',
+      // Note: We don't change 'status' from 'matched' yet, 
+      // usually status changes to 'pickedUp' when they physically pick it up.
+      // But we might want to flag it.
+      'updatedAt': Timestamp.now(),
+    });
+
+    await batch.commit();
+    await _logDonationAction('volunteer_assignment_accepted', donationId, volunteerId);
+  }
+
+  // Reject an assignment
+  Future<void> rejectAssignment(String assignmentId, String donationId, String volunteerId, String reason) async {
+    final batch = _firestore.batch();
+    
+    // 1. Update Assignment Status
+    final assignmentRef = _firestore.collection('donation_assignments').doc(assignmentId);
+    batch.update(assignmentRef, {
+      'status': 'rejected',
+      'rejectedAt': Timestamp.now(),
+      'reason': reason,
+    });
+
+    // Cloud Function onAssignmentUpdate will trigger reassignment
+    
+    await batch.commit();
+    await _logDonationAction('volunteer_assignment_rejected', donationId, volunteerId, additionalData: {'reason': reason});
   }
 }

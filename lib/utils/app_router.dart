@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import '../models/food_donation.dart';
 // Auth screens
 import '../screens/auth/splash_screen.dart';
 import '../screens/auth/login_screen.dart';
@@ -39,6 +39,7 @@ import '../screens/volunteer/accept_task_screen.dart';
 import '../screens/volunteer/reject_task_screen.dart';
 import '../screens/volunteer/task_execution_screen.dart';
 import '../screens/coordination/issue_reporting_screen.dart';
+import '../screens/volunteer/volunteer_profile_screen.dart';
 
 class AppRouter {
   static const String splash = '/';
@@ -80,6 +81,7 @@ class AppRouter {
   
   static const String issueReporting = '/issue-reporting'; // [NEW]
   static const String verifyUser = '/admin/verify-user';
+  static const String volunteerProfile = '/volunteer-profile';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -140,8 +142,9 @@ class AppRouter {
           builder: (_) => const VerificationRejectedScreen(),
         );
       case inspectDelivery:
+        final donation = settings.arguments as FoodDonation;
         return MaterialPageRoute(
-          builder: (_) => const InspectDeliveryScreen(),
+          builder: (_) => InspectDeliveryScreen(donation: donation),
         );
 
       case clarifyRequest:
@@ -161,6 +164,9 @@ class AppRouter {
 
       case volunteerDashboard:
         return MaterialPageRoute(builder: (_) => const VolunteerDashboard());
+
+      case volunteerProfile:
+        return MaterialPageRoute(builder: (_) => const VolunteerProfileScreen());
 
       case acceptTask:
         return MaterialPageRoute(builder: (_) => const AcceptTaskScreen());
