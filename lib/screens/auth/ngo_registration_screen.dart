@@ -116,7 +116,10 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
       city: _cityController.text.trim(),
       state: _stateController.text.trim(),
       zipCode: _zipCodeController.text.trim(),
-      location: {}, // Will be set later with geocoding
+      location: {
+        'latitude': 37.7750,
+        'longitude': -122.4180,
+      }, // [TESTING] Hardcoded SF location to match Donor default
       capacity: int.tryParse(_capacityController.text.trim()) ?? 0,
       servingPopulation: _selectedServingPopulation,
       operatingHours: _operatingHoursController.text.trim(),

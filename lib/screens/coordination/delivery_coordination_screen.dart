@@ -4,7 +4,7 @@ import 'package:geolocator/geolocator.dart';
 import '../../services/dispatch_service.dart';
 import '../../services/real_time_tracking_service.dart';
 import '../../services/route_optimization_service.dart';
-import '../../services/matching_service.dart';
+// import '../../services/matching_service.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../widgets/loading_overlay.dart';
@@ -21,7 +21,7 @@ class _DeliveryCoordinationScreenState extends State<DeliveryCoordinationScreen>
   late VolunteerDispatchService _dispatchService;
   late RealTimeTrackingService _trackingService;
   late RouteOptimizationService _routeService;
-  late FoodDonationMatchingService _matchingService;
+  // late FoodDonationMatchingService _matchingService;
   
   List<DeliveryTask> _activeTasks = [];
   List<MatchingResult> _availableMatches = [];

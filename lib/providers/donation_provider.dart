@@ -28,6 +28,15 @@ class DonationProvider extends ChangeNotifier {
   Stream<FoodDonation?> getDonationStream(String donationId) => 
       _donationService.getDonationStream(donationId);
 
+  Stream<List<FoodDonation>> getMyDonationsStream(String donorId) =>
+      _donationService.getDonorDonationsStream(donorId);
+
+  Stream<List<FoodDonation>> getAvailableDonationsStream() =>
+      _donationService.getAvailableDonationsStream();
+
+  Stream<List<FoodDonation>> getVolunteerTasksStream(String volunteerId) =>
+      _donationService.getVolunteerTasksStream(volunteerId);
+
   List<FoodDonation> getDonationsByStatus(DonationStatus status) {
     return _myDonations.where((d) => d.status == status).toList();
   }
@@ -147,6 +156,42 @@ class DonationProvider extends ChangeNotifier {
     }
   }
   
+  // Get pending assignments stream
+  Stream<List<Map<String, dynamic>>> getPendingAssignmentsStream(String volunteerId) =>
+      _donationService.getPendingAssignments(volunteerId);
+
+  // Accept Assignment
+  Future<bool> acceptAssignment(String assignmentId, String donationId, String volunteerId) async {
+    try {
+      _isLoading = true;
+      notifyListeners();
+      await _donationService.acceptAssignment(assignmentId, donationId, volunteerId);
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Reject Assignment
+  Future<bool> rejectAssignment(String assignmentId, String donationId, String volunteerId, String reason) async {
+    try {
+      _isLoading = true;
+      notifyListeners();
+      await _donationService.rejectAssignment(assignmentId, donationId, volunteerId, reason);
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   void clearError() {
     _errorMessage = null;
     notifyListeners();

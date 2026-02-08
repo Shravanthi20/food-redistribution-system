@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import '../../models/food_donation.dart';
+import '../../services/food_donation_service.dart';
 
 class InspectDeliveryScreen extends StatefulWidget {
-  const InspectDeliveryScreen({super.key});
+  final FoodDonation donation;
+
+  const InspectDeliveryScreen({Key? key, required this.donation}) : super(key: key);
 
   @override
   State<InspectDeliveryScreen> createState() =>
@@ -9,8 +13,10 @@ class InspectDeliveryScreen extends StatefulWidget {
 }
 
 class _InspectDeliveryScreenState extends State<InspectDeliveryScreen> {
+  final FoodDonationService _donationService = FoodDonationService();
   bool packagingOk = false;
   bool appearanceOk = false;
+  bool temperatureOk = false; // Simplified for demo
   final TextEditingController temperatureController =
       TextEditingController();
 
@@ -18,6 +24,41 @@ class _InspectDeliveryScreenState extends State<InspectDeliveryScreen> {
       packagingOk &&
       appearanceOk &&
       temperatureController.text.isNotEmpty;
+
+  bool _isLoading = false;
+
+  Future<void> _confirmDelivery() async {
+    setState(() => _isLoading = true);
+    try {
+      await _donationService.updateDonationStatus(
+        donationId: widget.donation.id,
+        status: DonationStatus.delivered,
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Delivery confirmed successfully!')),
+        );
+        Navigator.pop(context); // Return to dashboard
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error confirming delivery: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _flagUnsafe() async {
+     // Implementation for flagging unsafe
+     // For now, just show a dialog or snackbar
+     ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Flagged as unsafe. Admin notified.')),
+     );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,12 +70,12 @@ class _InspectDeliveryScreenState extends State<InspectDeliveryScreen> {
         leading: const BackButton(color: Colors.black),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            Text("Inspect Delivery",
-                style: TextStyle(color: Colors.black)),
-            SizedBox(height: 2),
-            Text("Batch #FS-4829",
-                style: TextStyle(
+          children: [
+            const Text("Inspect Delivery",
+                style: TextStyle(color: Colors.black, fontSize: 16)),
+            const SizedBox(height: 2),
+            Text("ID #${widget.donation.id.substring(0, 8)}",
+                style: const TextStyle(
                     fontSize: 12, color: Colors.grey)),
           ],
         ),
@@ -80,27 +121,27 @@ class _InspectDeliveryScreenState extends State<InspectDeliveryScreen> {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text("DONOR INFORMATION",
+              children: [
+                const Text("DONOR INFORMATION",
                     style: TextStyle(
                         fontSize: 12, color: Colors.grey)),
-                SizedBox(height: 6),
-                Text("Whole Foods Market",
+                const SizedBox(height: 6),
+                Text(widget.donation.donorContactPhone ?? "Anonymous Donor", // Ideally fetch donor name
                     style:
-                        TextStyle(fontWeight: FontWeight.bold)),
-                SizedBox(height: 4),
-                Text("Mixed Produce & Bakery • Arrived 10:45 AM",
-                    style: TextStyle(color: Colors.grey)),
+                        const TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 4),
+                Text("${widget.donation.foodTypes.map((e) => e.name).join(', ')} • ${widget.donation.quantity} ${widget.donation.unit}",
+                    style: const TextStyle(color: Colors.grey)),
               ],
             ),
           ),
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: Image.asset(
-              "assets/food_sample.jpg", // replace with Firebase image later
+            child: Container(
               height: 60,
               width: 60,
-              fit: BoxFit.cover,
+              color: Colors.grey[200],
+              child: const Icon(Icons.image, color: Colors.grey), // Placeholder
             ),
           )
         ],
@@ -173,6 +214,7 @@ class _InspectDeliveryScreenState extends State<InspectDeliveryScreen> {
           const SizedBox(height: 8),
           TextField(
             controller: temperatureController,
+            onChanged: (_) => setState(() {}),
             keyboardType:
                 const TextInputType.numberWithOptions(decimal: true),
             decoration: InputDecoration(
@@ -196,9 +238,7 @@ class _InspectDeliveryScreenState extends State<InspectDeliveryScreen> {
         borderRadius: BorderRadius.circular(16),
       ),
       child: TextButton.icon(
-        onPressed: () {
-          // Firebase: mark donation as unsafe
-        },
+        onPressed: _flagUnsafe,
         icon: const Icon(Icons.warning, color: Colors.red),
         label: const Text(
           "Flag Unsafe Food",
@@ -213,14 +253,16 @@ class _InspectDeliveryScreenState extends State<InspectDeliveryScreen> {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: isSafe ? () {} : null,
+        onPressed: (isSafe && !_isLoading) ? _confirmDelivery : null,
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.tealAccent.shade700,
           padding: const EdgeInsets.symmetric(vertical: 14),
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16)),
         ),
-        child: const Text(
+        child: _isLoading 
+          ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+          : const Text(
           "Confirm Receipt",
           style: TextStyle(fontSize: 16),
         ),

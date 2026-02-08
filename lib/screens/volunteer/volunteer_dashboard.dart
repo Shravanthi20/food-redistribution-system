@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../models/food_donation.dart';
+import '../../providers/auth_provider.dart';
+import '../../providers/donation_provider.dart';
 import '../../utils/app_router.dart';
 
 class VolunteerDashboard extends StatefulWidget {
@@ -28,12 +32,17 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
 
   @override
   Widget build(BuildContext context) {
+    final user = Provider.of<AuthProvider>(context).appUser;
+    final donationProvider = Provider.of<DonationProvider>(context, listen: false);
+
+    if (user == null) return const Center(child: CircularProgressIndicator());
+
     return Scaffold(
       backgroundColor: const Color(0xFFF7F9FC),
       body: SafeArea(
         child: Column(
           children: [
-            _topHeader(),
+            _topHeader(user.fullName),
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
@@ -42,32 +51,11 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                   children: [
                     _statusCard(),
                     const SizedBox(height: 16),
-                    _timeSlotCard(),
-                    const SizedBox(height: 16),
-                    _statsSection(),
+                    _newRequestsSection(donationProvider, user.uid), // [NEW]
                     const SizedBox(height: 20),
-                    _availableTasksHeader(),
-                    const SizedBox(height: 12),
-                    _taskCard(
-                      title: "City Loaves Downtown",
-                      category: "BAKERY SURPLUS",
-                      distance: "1.2 miles away",
-                      time: "Within 30 mins",
-                      foodType: "Baked Goods",
-                      load: "~15 kg load",
-                      urgency: "High Urgency",
-                      imagePath: "assets/images/bread.jpg",
-                    ),
-                    _taskCard(
-                      title: "Green Market Coop",
-                      category: "PRODUCE DISTRIBUTION",
-                      distance: "0.8 miles away",
-                      time: "Within 1 hour",
-                      foodType: "Fresh Produce",
-                      load: "~8 kg load",
-                      urgency: null,
-                      imagePath: "assets/images/vegetables.jpg",
-                    ),
+                    _activeTasksSection(donationProvider, user.uid),
+                    const SizedBox(height: 20),
+                    _availableTasksSection(donationProvider),
                   ],
                 ),
               ),
@@ -78,8 +66,157 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
     );
   }
 
+  // ================= NEW REQUESTS (ASSIGNMENTS) =================
+  Widget _newRequestsSection(DonationProvider provider, String userId) {
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: provider.getPendingAssignmentsStream(userId),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || snapshot.data!.isEmpty) return const SizedBox.shrink();
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.orange.shade100,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.notification_important, size: 16, color: Colors.orange.shade900),
+                  const SizedBox(width: 8),
+                  Text(
+                    "YOU HAVE NEW ASSIGNMENTS!",
+                    style: TextStyle(
+                      color: Colors.orange.shade900, 
+                      fontWeight: FontWeight.bold, 
+                      fontSize: 12
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            ...snapshot.data!.map((assignment) {
+              final donationId = assignment['donationId'];
+              final assignmentId = assignment['assignmentId'];
+              
+              // Fetch Donation Details for this assignment
+              return StreamBuilder<FoodDonation?>(
+                stream: provider.getDonationStream(donationId),
+                builder: (context, docSnapshot) {
+                  if (!docSnapshot.hasData) return const SizedBox.shrink();
+                  final donation = docSnapshot.data!;
+                  
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(color: Colors.orange, width: 2),
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.orange.withOpacity(0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4)
+                        )
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text("MATCHED — ACTION REQUIRED", style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold, fontSize: 12)),
+                        const SizedBox(height: 8),
+                        Text(donation.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                        const SizedBox(height: 4),
+                        Text("${donation.quantity} ${donation.unit} from Anonymous Donor", style: TextStyle(color: Colors.grey[600])),
+                         const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: () async {
+                                  await provider.acceptAssignment(assignmentId, donationId, userId);
+                                },
+                                style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                                child: const Text("Accept"),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: () async {
+                                   await provider.rejectAssignment(assignmentId, donationId, userId, "User declined");
+                                },
+                                style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
+                                child: const Text("Decline"),
+                              ),
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
+                  );
+                },
+              );
+            }).toList(),
+          ],
+        );
+      },
+    );
+  }
+
+  // ================= ACTIVE TASKS =================
+  Widget _activeTasksSection(DonationProvider provider, String userId) {
+    return StreamBuilder<List<FoodDonation>>(
+      stream: provider.getVolunteerTasksStream(userId),
+      builder: (context, snapshot) {
+         if (!snapshot.hasData || snapshot.data!.isEmpty) return const SizedBox.shrink();
+         
+         final tasks = snapshot.data!;
+         return Column(
+           crossAxisAlignment: CrossAxisAlignment.start,
+           children: [
+             const Text("My Active Tasks", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+             const SizedBox(height: 12),
+             ...tasks.map((task) => _taskCard(context, task, isActive: true)).toList(),
+           ],
+         );
+      },
+    );
+  }
+
+  // ================= AVAILABLE TASKS =================
+  Widget _availableTasksSection(DonationProvider provider) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _availableTasksHeader(),
+        const SizedBox(height: 12),
+        StreamBuilder<List<FoodDonation>>(
+          stream: provider.getAvailableDonationsStream(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return const Center(child: Text("No available tasks nearby."));
+            }
+
+            return Column(
+              children: snapshot.data!.map((task) => _taskCard(context, task)).toList(),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
   // ================= HEADER =================
-  Widget _topHeader() {
+  Widget _topHeader(String name) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
@@ -92,21 +229,51 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text(
+              children: [
+                const Text(
                   "Good morning,",
                   style: TextStyle(fontSize: 12, color: Colors.grey),
                 ),
                 Text(
-                  "Sam Williams",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  name,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
           ),
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.notifications_none),
+          PopupMenuButton<String>(
+            onSelected: (value) async {
+              if (value == 'profile') {
+                Navigator.pushNamed(context, AppRouter.volunteerProfile);
+              } else if (value == 'logout') {
+                final auth = Provider.of<AuthProvider>(context, listen: false);
+                await auth.signOut();
+                Navigator.pushNamedAndRemoveUntil(context, AppRouter.login, (route) => false);
+              }
+            },
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+              const PopupMenuItem<String>(
+                value: 'profile',
+                child: Row(
+                  children: [
+                    Icon(Icons.person, color: Colors.black54),
+                    SizedBox(width: 8),
+                    Text('Edit Profile'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem<String>(
+                value: 'logout',
+                child: Row(
+                  children: [
+                    Icon(Icons.logout, color: Colors.red),
+                    SizedBox(width: 8),
+                    Text('Sign Out', style: TextStyle(color: Colors.red)),
+                  ],
+                ),
+              ),
+            ],
+            icon: const Icon(Icons.more_vert),
           )
         ],
       ),
@@ -163,130 +330,6 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
     );
   }
 
-  // ================= TIME SLOT CARD (NEW) =================
-  Widget _timeSlotCard() {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            "Availability Time Slot",
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 6),
-          const Text(
-            "Select your preferred working slot",
-            style: TextStyle(fontSize: 12, color: Colors.grey),
-          ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: timeSlots.map((slot) {
-              bool isSelected = selectedSlot == slot;
-
-              return ChoiceChip(
-                label: Text(slot),
-                selected: isSelected,
-                selectedColor: Colors.green,
-                backgroundColor: Colors.grey.shade200,
-                labelStyle: TextStyle(
-                  color: isSelected ? Colors.white : Colors.black,
-                ),
-                onSelected: (selected) {
-                  setState(() {
-                    selectedSlot = slot;
-                  });
-                },
-              );
-            }).toList(),
-          ),
-          const SizedBox(height: 10),
-          Align(
-            alignment: Alignment.centerRight,
-            child: Text(
-              "Selected: $selectedSlot",
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: Colors.green,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ================= STATS =================
-  Widget _statsSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          "YOUR STATS",
-          style:
-              TextStyle(fontSize: 14, color: Color.fromARGB(217, 62, 61, 61)),
-        ),
-        const SizedBox(height: 10),
-        Row(
-          children: [
-            Expanded(
-              child: _statCard(
-                icon: Icons.check_circle,
-                iconColor: Colors.green,
-                title: "Deliveries",
-                value: deliveries.toString(),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _statCard(
-                icon: Icons.star,
-                iconColor: Colors.orange,
-                title: "Reliability",
-                value: "$reliability/5",
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _statCard({
-    required IconData icon,
-    required Color iconColor,
-    required String title,
-    required String value,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: iconColor),
-          const SizedBox(height: 10),
-          Text(
-            value,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 4),
-          Text(title, style: const TextStyle(color: Colors.grey)),
-        ],
-      ),
-    );
-  }
-
   // ================= TASK HEADER =================
   Widget _availableTasksHeader() {
     return Row(
@@ -308,86 +351,33 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
   }
 
   // ================= TASK CARD =================
-  Widget _taskCard({
-    required String title,
-    required String category,
-    required String distance,
-    required String time,
-    required String foodType,
-    required String load,
-    required String imagePath,
-    String? urgency,
-  }) {
+  Widget _taskCard(BuildContext context, FoodDonation task, {bool isActive = false}) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
+        border: isActive ? Border.all(color: Colors.green, width: 2) : null,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(18),
-              topRight: Radius.circular(18),
-            ),
-            child: Stack(
-              children: [
-                Image.asset(
-                  imagePath,
-                  height: 150,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
-                if (urgency != null)
-                  Positioned(
-                    top: 12,
-                    right: 12,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 5,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Row(
-                        children: const [
-                          Icon(Icons.flash_on, color: Colors.white, size: 14),
-                          SizedBox(width: 4),
-                          Text(
-                            "High Urgency",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
           Padding(
             padding: const EdgeInsets.all(14),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  category,
-                  style: const TextStyle(
-                    color: Colors.green,
+                  isActive ? "IN PROGRESS" : "AVAILABLE",
+                  style: TextStyle(
+                    color: isActive ? Colors.green : Colors.blue,
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  title,
+                  task.title,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -398,69 +388,69 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                   children: [
                     const Icon(Icons.location_on, size: 16, color: Colors.grey),
                     const SizedBox(width: 4),
-                    Text(distance,
+                    Text("~2.5 km", // Placeholder for actual distance calc
                         style:
                             const TextStyle(fontSize: 12, color: Colors.grey)),
                     const SizedBox(width: 14),
                     const Icon(Icons.timer, size: 16, color: Colors.grey),
                     const SizedBox(width: 4),
-                    Text(time,
+                    Text(task.isUrgent ? "Urgent" : "Normal",
                         style:
-                            const TextStyle(fontSize: 12, color: Colors.grey)),
+                            TextStyle(fontSize: 12, color: task.isUrgent ? Colors.red : Colors.grey)),
                   ],
                 ),
                 const SizedBox(height: 10),
-                Row(
-                  children: [
-                    const Icon(Icons.restaurant_menu,
-                        size: 16, color: Colors.grey),
-                    const SizedBox(width: 4),
-                    Text(foodType,
-                        style:
-                            const TextStyle(fontSize: 12, color: Colors.grey)),
-                    const SizedBox(width: 14),
-                    const Icon(Icons.inventory_2, size: 16, color: Colors.grey),
-                    const SizedBox(width: 4),
-                    Text(load,
-                        style:
-                            const TextStyle(fontSize: 12, color: Colors.grey)),
-                  ],
+                Text(
+                  "${task.quantity} ${task.unit} • ${task.foodTypes.map((e) => e.name).join(', ')}",
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
                 ),
                 const SizedBox(height: 14),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () {
-                          Navigator.pushNamed(context, AppRouter.rejectTask);
-                        },
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.red,
-                          side: const BorderSide(color: Colors.red),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                if (!isActive)
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                             Navigator.pushNamed(
+                               context, 
+                               AppRouter.acceptTask,
+                               arguments: task // Pass donation object
+                             );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
+                          child: const Text("Accept Task"),
                         ),
-                        child: const Text("Reject"),
                       ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pushNamed(context, AppRouter.acceptTask);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                    ],
+                  )
+                else
+                   Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                             Navigator.pushNamed(
+                               context, 
+                               AppRouter.taskExecution, 
+                               arguments: {'donationId': task.id}
+                             );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
+                          child: const Text("Continue Delivery"),
                         ),
-                        child: const Text("Accept Task"),
                       ),
-                    ),
-                  ],
-                )
+                    ],
+                  )
               ],
             ),
           )

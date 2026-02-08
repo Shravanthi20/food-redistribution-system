@@ -239,6 +239,9 @@ async function findBestVolunteers(donation, ngo) {
         if (donation.quantity > 20 && !vol.hasVehicle) continue;
         if (donation.requiresRefrigeration && vol.vehicleType !== "refrigerated_truck" && vol.vehicleType !== "car") continue;
 
+        // [NEW] Hard Constraint: Time Availability
+        if (!isVolunteerAvailableNow(vol)) continue;
+
         // BATCHING / VRP Logic
         // Determine active tasks (Is this person busy?)
         const activeTasksSnap = await db.collection("donation_assignments")
@@ -411,4 +414,25 @@ async function getActiveTaskCount(volunteerId) {
         .where("status", "in", ["pending", "accepted"])
         .get();
     return snap.size;
+}
+
+function isVolunteerAvailableNow(vol) {
+    if (!vol.availabilityHours || vol.availabilityHours.length === 0) return true; // Assume available if not set
+
+    const now = new Date();
+    const currentHour = now.getHours();
+    const day = now.getDay(); // 0 = Sunday, 1 = Monday...
+
+    // Check Weekends
+    const isWeekend = (day === 0 || day === 6);
+    if (vol.availabilityHours.includes("Weekends") && isWeekend) return true;
+
+    // Check Time Slots
+    // "Morning (6AM-12PM)", "Afternoon (12PM-5PM)", "Evening (5PM-10PM)"
+
+    if (vol.availabilityHours.includes("Morning (6AM-12PM)") && (currentHour >= 6 && currentHour < 12)) return true;
+    if (vol.availabilityHours.includes("Afternoon (12PM-5PM)") && (currentHour >= 12 && currentHour < 17)) return true;
+    if (vol.availabilityHours.includes("Evening (5PM-10PM)") && (currentHour >= 17 && currentHour < 22)) return true;
+
+    return false;
 }
