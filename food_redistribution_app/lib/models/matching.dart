@@ -14,6 +14,12 @@ class MatchingAlgorithm {
     required this.maxDistance,
   });
   
+  // Validate that weights sum to 1.0
+  bool get isValid {
+    final sum = weights.values.fold(0.0, (sum, weight) => sum + weight);
+    return (sum - 1.0).abs() < 0.001; // Allow small floating point errors
+  }
+  
   static const urgent = MatchingAlgorithm(
     id: 'urgent',
     name: 'Urgent Food Rescue',
@@ -52,6 +58,8 @@ class MatchingAlgorithm {
     },
     maxDistance: 75.0,
   );
+  
+  static List<MatchingAlgorithm> get all => [urgent, optimal, capacity];
 }
 
 class MatchingResult {
@@ -75,6 +83,9 @@ class MatchingResult {
     required this.timestamp,
   });
   
+  // Validate score is between 0 and 1
+  bool get isValidScore => score >= 0.0 && score <= 1.0;
+  
   Map<String, dynamic> toMap() {
     return {
       'ngoId': ngoId,
@@ -85,5 +96,24 @@ class MatchingResult {
       'reasoning': reasoning,
       'timestamp': timestamp.toIso8601String(),
     };
+  }
+  
+  factory MatchingResult.fromMap(Map<String, dynamic> map) {
+    return MatchingResult(
+      ngoId: map['ngoId'] ?? '',
+      donationId: map['donationId'] ?? '',
+      score: (map['score'] ?? 0.0).toDouble(),
+      distance: (map['distance'] ?? 0.0).toDouble(),
+      criteriaScores: (map['criteriaScores'] as Map<String, dynamic>? ?? {})
+          .map((k, v) => MapEntry(
+                MatchingCriteria.values.firstWhere(
+                  (e) => e.name == k,
+                  orElse: () => MatchingCriteria.distance,
+                ),
+                (v ?? 0.0).toDouble(),
+              )),
+      reasoning: map['reasoning'] ?? '',
+      timestamp: DateTime.tryParse(map['timestamp'] ?? '') ?? DateTime.now(),
+    );
   }
 }

@@ -1,108 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geolocator/geolocator.dart';
+import 'dart:math' as math;
 import '../models/food_donation.dart';
 import '../models/food_request.dart';
 import '../models/ngo_profile.dart';
 import '../models/volunteer_profile.dart';
+import '../models/matching.dart';
+import '../models/enums.dart';
 import '../services/firestore_service.dart';
 import '../services/location_service.dart';
 import '../services/notification_service.dart';
 import '../services/audit_service.dart';
-
-enum MatchingCriteria {
-  distance,
-  capacity,
-  urgency,
-  foodType,
-  availability
-}
-
-class MatchingAlgorithm {
-  final String id;
-  final String name;
-  final Map<MatchingCriteria, double> weights;
-  final double maxDistance; // in kilometers
-  
-  const MatchingAlgorithm({
-    required this.id,
-    required this.name,
-    required this.weights,
-    required this.maxDistance,
-  });
-  
-  static const urgent = MatchingAlgorithm(
-    id: 'urgent',
-    name: 'Urgent Food Rescue',
-    weights: {
-      MatchingCriteria.distance: 0.4,
-      MatchingCriteria.urgency: 0.35,
-      MatchingCriteria.capacity: 0.15,
-      MatchingCriteria.foodType: 0.05,
-      MatchingCriteria.availability: 0.05,
-    },
-    maxDistance: 25.0,
-  );
-  
-  static const optimal = MatchingAlgorithm(
-    id: 'optimal',
-    name: 'Optimal Distribution',
-    weights: {
-      MatchingCriteria.distance: 0.25,
-      MatchingCriteria.capacity: 0.25,
-      MatchingCriteria.availability: 0.2,
-      MatchingCriteria.foodType: 0.15,
-      MatchingCriteria.urgency: 0.15,
-    },
-    maxDistance: 50.0,
-  );
-  
-  static const capacity = MatchingAlgorithm(
-    id: 'capacity',
-    name: 'Maximum Capacity',
-    weights: {
-      MatchingCriteria.capacity: 0.4,
-      MatchingCriteria.distance: 0.3,
-      MatchingCriteria.foodType: 0.15,
-      MatchingCriteria.availability: 0.1,
-      MatchingCriteria.urgency: 0.05,
-    },
-    maxDistance: 75.0,
-  );
-}
-
-class MatchingResult {
-  final String ngoId;
-  final String donationId;
-  final double score;
-  final double distance;
-  final Map<MatchingCriteria, double> criteriaScores;
-  final NGOProfile ngo;
-  final String reasoning;
-  final DateTime timestamp;
-  
-  MatchingResult({
-    required this.ngoId,
-    required this.donationId,
-    required this.score,
-    required this.distance,
-    required this.criteriaScores,
-    required this.ngo,
-    required this.reasoning,
-    required this.timestamp,
-  });
-  
-  Map<String, dynamic> toMap() {
-    return {
-      'ngoId': ngoId,
-      'donationId': donationId,
-      'score': score,
-      'distance': distance,
-      'criteriaScores': criteriaScores.map((k, v) => MapEntry(k.toString(), v)),
-      'reasoning': reasoning,
-      'timestamp': timestamp,
-    };
-  }
-}
 
 class FoodDonationMatchingService {
   final FirestoreService _firestoreService;
@@ -290,8 +198,11 @@ class FoodDonationMatchingService {
   
   /// Calculate capacity compatibility score
   double _calculateCapacityScore(FoodDonation donation, NGOProfile ngo) {
-    final donationQuantity = donation.quantity;
-    final ngoCapacity = ngo.capacity ?? 100; // Default capacity
+    final donationQuantity = donation.quantity.toDouble();
+    final ngoCapacity = (ngo.capacity ?? 100).toDouble(); // Default capacity
+    
+    // Prevent division by zero
+    if (ngoCapacity <= 0) return 0.5;
     
     // Optimal if donation is 50-80% of NGO capacity
     final ratio = donationQuantity / ngoCapacity;
@@ -300,18 +211,23 @@ class FoodDonationMatchingService {
       return 1.0;
     } else if (ratio < 0.5) {
       return ratio / 0.5; // Linear scale up to 50%
-    } else {
+    } else if (ratio <= 1.2) {
       return 1.0 - ((ratio - 0.8) / 0.4); // Linear scale down after 80%
+    } else {
+      return 0.2; // Very poor match for oversized donations
     }
   }
   
   /// Calculate urgency score based on expiry time
   double _calculateUrgencyScore(FoodDonation donation) {
     final now = DateTime.now();
-    final expiry = donation.expiresAt;
+    final expiry = donation.expiryDateTime; // Use correct field name
     final hoursUntilExpiry = expiry.difference(now).inHours;
     
-    if (hoursUntilExpiry <= 2) {
+    // Handle expired food
+    if (hoursUntilExpiry <= 0) {
+      return 0.0; // Expired food
+    } else if (hoursUntilExpiry <= 2) {
       return 1.0; // Critical urgency
     } else if (hoursUntilExpiry <= 6) {
       return 0.8; // High urgency
@@ -326,16 +242,36 @@ class FoodDonationMatchingService {
   
   /// Calculate food type compatibility score
   double _calculateFoodTypeScore(FoodDonation donation, NGOProfile ngo) {
-    final ngoPreferences = ngo.preferredFoodTypes ?? [];
-    final donationTypes = donation.foodTypes;
+    // Use servingPopulation as a proxy for food type preferences
+    final ngoServingTypes = ngo.servingPopulation;
+    final donationFoodTypes = donation.foodTypes;
     
-    if (ngoPreferences.isEmpty) return 0.5; // Neutral if no preferences
+    // If no specific preferences, give neutral score
+    if (ngoServingTypes.isEmpty || donationFoodTypes.isEmpty) return 0.7;
     
-    final matchCount = donationTypes
-        .where((type) => ngoPreferences.contains(type))
-        .length;
+    // Calculate max compatibility score across all food types
+    double maxScore = 0.0;
+    for (final foodType in donationFoodTypes) {
+      // Basic compatibility matrix
+      if (ngoServingTypes.contains('Children') && 
+          [FoodType.fruits, FoodType.dairy, FoodType.cooked].contains(foodType)) {
+        maxScore = math.max(maxScore, 0.9);
+      }
+      
+      if (ngoServingTypes.contains('Elderly') && 
+          [FoodType.cooked, FoodType.dairy, FoodType.fruits].contains(foodType)) {
+        maxScore = math.max(maxScore, 0.8);
+      }
+      
+      // Add more general compatibility checks
+      if (ngoServingTypes.contains('Homeless') && 
+          [FoodType.cooked, FoodType.packaged].contains(foodType)) {
+        maxScore = math.max(maxScore, 0.8);
+      }
+    }
     
-    return matchCount / donationTypes.length;
+    // General compatibility for all populations if no specific match found
+    return maxScore > 0.0 ? maxScore : 0.6;
   }
   
   /// Calculate availability score based on current workload
@@ -413,39 +349,66 @@ class FoodDonationMatchingService {
     return FoodDonation.fromFirestore(doc);
   }
   
-  /// Get available NGOs within range
+  /// Get available NGOs within range (optimized)
   Future<List<NGOProfile>> _getAvailableNGOs({
     required Map<String, double> donationLocation,
     required double maxDistance,
   }) async {
-    // Get all verified NGOs
-    final ngoDocs = await _firestoreService.query(
-      'ngo_profiles',
-      where: {
-        'verificationStatus': 'verified',
-        'isActive': true,
-      },
-    );
-    
-    final ngos = <NGOProfile>[];
-    
-    for (final doc in ngoDocs.docs) {
-      final ngo = NGOProfile.fromFirestore(doc);
-      
-      // Check if NGO is within range
-      final distance = await _locationService.calculateDistance(
-        donationLocation['latitude']?.toDouble() ?? 0.0,
-        donationLocation['longitude']?.toDouble() ?? 0.0,
-        ngo.location['latitude']?.toDouble() ?? 0.0,
-        ngo.location['longitude']?.toDouble() ?? 0.0,
+    try {
+      // Get all verified and active NGOs
+      final ngoDocs = await _firestoreService.query(
+        'ngo_profiles',
+        where: {
+          'verificationStatus': 'approved',
+          'isActive': true,
+        },
       );
       
-      if (distance <= maxDistance) {
-        ngos.add(ngo);
+      final ngos = <NGOProfile>[];
+      final donationLat = donationLocation['latitude']?.toDouble() ?? 0.0;
+      final donationLng = donationLocation['longitude']?.toDouble() ?? 0.0;
+      
+      // Batch process distance calculations
+      for (final doc in ngoDocs.docs) {
+        try {
+          final ngo = NGOProfile.fromMap(doc.data()! as Map<String, dynamic>);
+          
+          // Ensure location data exists
+          if (ngo.location['latitude'] == null || ngo.location['longitude'] == null) {
+            continue;
+          }
+          
+          final ngoLat = ngo.location['latitude']!.toDouble();
+          final ngoLng = ngo.location['longitude']!.toDouble();
+          
+          // Calculate distance
+          final distance = await _locationService.calculateDistance(
+            donationLat, donationLng, ngoLat, ngoLng,
+          );
+          
+          if (distance <= maxDistance) {
+            ngos.add(ngo);
+          }
+        } catch (e) {
+          // Skip invalid NGO profiles
+          continue;
+        }
       }
+      
+      return ngos;
+    } catch (e) {
+      await _auditService.logEvent(
+        eventType: AuditEventType.dataAccess,
+        userId: 'system',
+        riskLevel: AuditRiskLevel.medium,
+        additionalData: {
+          'event': 'ngo_query_error',
+          'description': 'Error querying available NGOs: $e',
+          'error': e.toString(),
+        },
+      );
+      return [];
     }
-    
-    return ngos;
   }
   
   /// Store matching results for analytics
@@ -822,73 +785,139 @@ class EnhancedMatchingService {
     FoodDonation donation,
     FoodRequest request,
   ) async {
-    double score = 0.0;
-    
-    // Food type compatibility (35%)
-    double foodTypeScore = 0.0;
-    for (final reqType in request.requiredFoodTypes) {
-      for (final donType in donation.foodTypes) {
-        if (_areFoodTypesCompatible(reqType, donType)) {
-          foodTypeScore = 1.0;
+    try {
+      double score = 0.0;
+      
+      // Food type compatibility (35%)
+      double foodTypeScore = 0.0;
+      final donationFoodTypes = donation.foodTypes;
+      
+      for (final reqType in request.requiredFoodTypes) {
+        for (final donType in donationFoodTypes) {
+          if (_areFoodTypesCompatible(reqType, donType)) {
+            foodTypeScore = 1.0;
+            break;
+          }
+        }
+        if (foodTypeScore > 0) break;
+      }
+      score += foodTypeScore * 0.35;
+      
+      // Quantity match (25%) - with better handling
+      final requestQuantity = request.requiredQuantity.toDouble();
+      final donationQuantity = donation.quantity.toDouble();
+      
+      if (requestQuantity <= 0) {
+        return 0.0; // Invalid request
+      }
+      
+      final quantityRatio = donationQuantity / requestQuantity;
+      double quantityScore;
+      
+      if (quantityRatio >= 0.8 && quantityRatio <= 1.2) {
+        quantityScore = 1.0; // Perfect match
+      } else if (quantityRatio >= 0.5 && quantityRatio < 0.8) {
+        quantityScore = quantityRatio / 0.8; // Proportional score for under-supply
+      } else if (quantityRatio > 1.2 && quantityRatio <= 2.0) {
+        quantityScore = 0.8; // Good for over-supply
+      } else if (quantityRatio > 2.0) {
+        quantityScore = 0.5; // Acceptable for large over-supply
+      } else {
+        quantityScore = quantityRatio; // Poor match for severe under-supply
+      }
+      
+      score += quantityScore * 0.25;
+      
+      // Distance score (20%)
+      try {
+        final distance = await _locationService.calculateDistance(
+          donation.pickupLocation['latitude']?.toDouble() ?? 0.0,
+          donation.pickupLocation['longitude']?.toDouble() ?? 0.0,
+          request.deliveryLocation['latitude']?.toDouble() ?? 0.0,
+          request.deliveryLocation['longitude']?.toDouble() ?? 0.0,
+        );
+        
+        double distanceScore;
+        if (distance <= 5) {
+          distanceScore = 1.0;
+        } else if (distance <= 15) {
+          distanceScore = 0.8;
+        } else if (distance <= 30) {
+          distanceScore = (40.0 - distance) / 25.0;
+        } else {
+          distanceScore = 0.1;
+        }
+        
+        score += (distanceScore > 0 ? distanceScore : 0) * 0.2;
+      } catch (e) {
+        // If distance calculation fails, use medium score
+        score += 0.5 * 0.2;
+      }
+      
+      // Time compatibility (15%)
+      final now = DateTime.now();
+      final timeToExpiry = donation.expiryDateTime.difference(now).inHours;
+      final timeToNeeded = request.neededBy.difference(now).inHours;
+      
+      double timeScore;
+      if (timeToExpiry <= 0) {
+        timeScore = 0.0; // Expired
+      } else if (timeToNeeded > 0 && timeToExpiry > timeToNeeded + 2) {
+        timeScore = 1.0; // Perfect timing
+      } else if (timeToNeeded > 0 && timeToExpiry > timeToNeeded) {
+        timeScore = 0.8; // Good timing
+      } else if (timeToExpiry > 6) {
+        timeScore = 0.6; // Acceptable
+      } else {
+        timeScore = 0.3; // Poor timing
+      }
+      
+      score += timeScore * 0.15;
+      
+      // Dietary compatibility (5%)
+      double dietaryScore = 1.0;
+      for (final restriction in request.dietaryRestrictions) {
+        if (!_isDietaryCompatible(restriction, donation)) {
+          dietaryScore = 0.0;
           break;
         }
       }
-      if (foodTypeScore > 0) break;
-    }
-    score += foodTypeScore * 0.35;
-    
-    // Quantity match (25%)
-    final quantityRatio = donation.quantity / request.requiredQuantity;
-    final quantityScore = quantityRatio >= 1.0 ? 1.0 : quantityRatio;
-    score += quantityScore * 0.25;
-    
-    // Distance score (20%)
-    try {
-      final distance = await _locationService.calculateDistance(
-        donation.pickupLocation['latitude']?.toDouble() ?? 0.0,
-        donation.pickupLocation['longitude']?.toDouble() ?? 0.0,
-        request.deliveryLocation['latitude']?.toDouble() ?? 0.0,
-        request.deliveryLocation['longitude']?.toDouble() ?? 0.0,
-      );
-      final distanceScore = distance <= 10 ? 1.0 : (30.0 - distance) / 20.0;
-      score += (distanceScore > 0 ? distanceScore : 0) * 0.2;
+      score += dietaryScore * 0.05;
+      
+      // Ensure score is between 0 and 1
+      return score.clamp(0.0, 1.0);
     } catch (e) {
-      // If distance calculation fails, assume medium score
-      score += 0.5 * 0.2;
+      // Return low score for any calculation errors
+      return 0.1;
     }
-    
-    // Time compatibility (15%)
-    final timeToExpiry = donation.expiresAt.difference(DateTime.now()).inHours;
-    final timeToNeeded = request.neededBy.difference(DateTime.now()).inHours;
-    final timeScore = timeToNeeded > 0 && timeToExpiry > timeToNeeded ? 1.0 : 0.3;
-    score += timeScore * 0.15;
-    
-    // Dietary compatibility (5%)
-    double dietaryScore = 1.0;
-    for (final restriction in request.dietaryRestrictions) {
-      if (!_isDietaryCompatible(restriction, donation)) {
-        dietaryScore = 0.0;
-        break;
-      }
-    }
-    score += dietaryScore * 0.05;
-    
-    return score;
   }
 
   /// Check if food types are compatible
   bool _areFoodTypesCompatible(FoodCategory requestType, FoodType donationType) {
+    // Improved compatibility mapping
     switch (donationType) {
       case FoodType.cooked:
         return requestType == FoodCategory.readyToEat;
       case FoodType.raw:
         return [FoodCategory.vegetables, FoodCategory.fruits, FoodCategory.grains, FoodCategory.meat].contains(requestType);
       case FoodType.packaged:
-        return [FoodCategory.grains, FoodCategory.beverages, FoodCategory.bakery].contains(requestType);
+        return [FoodCategory.grains, FoodCategory.beverages, FoodCategory.bakery, FoodCategory.other].contains(requestType);
       case FoodType.fruits:
-        return [FoodCategory.vegetables, FoodCategory.fruits, FoodCategory.dairy].contains(requestType);
+        return requestType == FoodCategory.fruits;
+      case FoodType.vegetables:
+        return requestType == FoodCategory.vegetables;
+      case FoodType.dairy:
+        return requestType == FoodCategory.dairy;
+      case FoodType.meat:
+        return requestType == FoodCategory.meat;
+      case FoodType.grains:
+        return [FoodCategory.grains, FoodCategory.bakery].contains(requestType);
+      case FoodType.beverages:
+        return requestType == FoodCategory.beverages;
+      case FoodType.bakery:
+        return [FoodCategory.bakery, FoodCategory.grains].contains(requestType);
       default:
-        return true;
+        return requestType == FoodCategory.other;
     }
   }
 

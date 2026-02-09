@@ -71,7 +71,7 @@ class RealTimeTrackingService {
       );
       
       // Update volunteer status
-      await _firestoreService.updateDocument('volunteer_profiles', volunteerId, {
+      await _firestoreService.update('volunteer_profiles', volunteerId, {
         'isTracking': true,
         'trackingStarted': DateTime.now(),
         'currentTaskId': taskId,
@@ -114,7 +114,7 @@ class RealTimeTrackingService {
     _activeTrackers.remove(volunteerId);
     
     // Update volunteer status
-    await _firestoreService.updateDocument('volunteer_profiles', volunteerId, {
+    await _firestoreService.update('volunteer_profiles', volunteerId, {
       'isTracking': false,
       'trackingEnded': DateTime.now(),
     });
@@ -158,6 +158,7 @@ class RealTimeTrackingService {
       );
       
       final locationUpdate = LocationUpdate(
+        id: 'loc_${DateTime.now().millisecondsSinceEpoch}_$volunteerId',
         volunteerId: volunteerId,
         taskId: taskId,
         latitude: position.latitude,
@@ -264,7 +265,7 @@ class RealTimeTrackingService {
         switch (geofence.type) {
           case GeofenceType.pickup:
             // Check if food has been collected
-            final taskDoc = await _firestoreService.getDocument('delivery_tasks', taskId);
+            final taskDoc = await _firestoreService.get('delivery_tasks', taskId);
             final taskData = taskDoc?.data() as Map<String, dynamic>?;
             final isCollected = taskData?['foodCollected'] == true;
             
@@ -335,7 +336,7 @@ class RealTimeTrackingService {
         eventBody = 'Volunteer has arrived at the pickup location';
         
         // Update task status
-        await _firestoreService.updateDocument('delivery_tasks', update.taskId, {
+        await _firestoreService.update('delivery_tasks', update.taskId, {
           'status': 'volunteer_arrived_pickup',
           'volunteerArrivedPickupAt': DateTime.now(),
         });
@@ -346,7 +347,7 @@ class RealTimeTrackingService {
         eventBody = 'Volunteer has arrived at the delivery location';
         
         // Update task status
-        await _firestoreService.updateDocument('delivery_tasks', update.taskId, {
+        await _firestoreService.update('delivery_tasks', update.taskId, {
           'status': 'volunteer_arrived_delivery',
           'volunteerArrivedDeliveryAt': DateTime.now(),
         });
@@ -389,7 +390,7 @@ class RealTimeTrackingService {
     switch (geofence.type) {
       case GeofenceType.pickup:
         // Assume food was collected when leaving pickup
-        await _firestoreService.updateDocument('delivery_tasks', update.taskId, {
+        await _firestoreService.update('delivery_tasks', update.taskId, {
           'status': 'food_collected',
           'foodCollectedAt': DateTime.now(),
         });
@@ -418,7 +419,7 @@ class RealTimeTrackingService {
   
   /// Handle delivery completion
   Future<void> _handleDeliveryCompletion(LocationUpdate update) async {
-    await _firestoreService.updateDocument('delivery_tasks', update.taskId, {
+    await _firestoreService.update('delivery_tasks', update.taskId, {
       'status': 'delivered',
       'deliveredAt': DateTime.now(),
       'deliveryCompletedBy': update.volunteerId,
@@ -453,10 +454,10 @@ class RealTimeTrackingService {
   
   /// Store location update in database
   Future<void> _storeLocationUpdate(LocationUpdate update) async {
-    await _firestoreService.addDocument('location_updates', update.toMap());
+    await _firestoreService.create('location_updates', 'update_${DateTime.now().millisecondsSinceEpoch}', update.toMap());
     
     // Also update the current location in the volunteer profile
-    await _firestoreService.updateDocument('volunteer_profiles', update.volunteerId, {
+    await _firestoreService.update('volunteer_profiles', update.volunteerId, {
       'currentLocation': {
         'latitude': update.latitude,
         'longitude': update.longitude,
@@ -469,7 +470,7 @@ class RealTimeTrackingService {
   /// Broadcast location update to real-time listeners
   Future<void> _broadcastLocationUpdate(LocationUpdate update) async {
     // Update real-time tracking document for live updates
-    await _firestoreService.setDocument('real_time_tracking', update.taskId, {
+    await _firestoreService.update('real_time_tracking', update.taskId, {
       'volunteerId': update.volunteerId,
       'currentLocation': {
         'latitude': update.latitude,
@@ -582,12 +583,15 @@ class RealTimeTrackingService {
   
   /// Store tracking metrics for analytics
   Future<void> _storeTrackingMetrics(TrackingMetrics metrics) async {
-    await _firestoreService.addDocument('tracking_metrics', metrics.toMap());
+    await _firestoreService.create('tracking_metrics', 'metrics_${DateTime.now().millisecondsSinceEpoch}', metrics.toMap());
   }
   
   /// Get real-time tracking stream for a task
   Stream<DocumentSnapshot> getTrackingStream(String taskId) {
-    return _firestoreService.getDocumentStream('real_time_tracking', taskId);
+    return FirebaseFirestore.instance
+        .collection('real_time_tracking')
+        .doc(taskId)
+        .snapshots();
   }
   
   /// Get tracking history for a task

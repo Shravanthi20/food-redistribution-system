@@ -145,7 +145,7 @@ class VolunteerDispatchService {
     );
     
     // Store task in database
-    await _firestoreService.addDocument('delivery_tasks', task.toMap());
+    await _firestoreService.create('delivery_tasks', task.toMap());
     
     await _auditService.logEvent(
       eventType: AuditEventType.dataModification,
@@ -171,7 +171,7 @@ class VolunteerDispatchService {
   }) async {
     try {
       // Update task with volunteer assignment
-      await _firestoreService.updateDocument('delivery_tasks', taskId, {
+      await _firestoreService.update('delivery_tasks', taskId, {
         'assignedVolunteerId': volunteerId,
         'status': 'assigned',
         'assignedAt': DateTime.now(),
@@ -179,7 +179,7 @@ class VolunteerDispatchService {
       });
       
       // Update volunteer status
-      await _firestoreService.updateDocument('volunteer_profiles', volunteerId, {
+      await _firestoreService.update('volunteer_profiles', volunteerId, {
         'currentTaskId': taskId,
         'status': 'busy',
         'lastAssignedAt': DateTime.now(),
@@ -194,9 +194,9 @@ class VolunteerDispatchService {
         await _notificationService.sendNotification(
           userId: volunteerId,
           title: 'New Delivery Assignment',
-          body: 'You have been assigned a delivery task from ${task['pickupAddress']} to ${task['deliveryAddress']}',
+          message: 'You have been assigned a delivery task from ${task['pickupAddress']} to ${task['deliveryAddress']}',
+          type: 'task_assignment',
           data: {
-            'type': 'task_assignment',
             'taskId': taskId,
             'priority': task['priority'],
             'estimatedDuration': task['estimatedDuration']?.toString() ?? '60',
@@ -339,7 +339,7 @@ class VolunteerDispatchService {
     required DispatchCriteria criteria,
   }) async {
     // Get all verified and available volunteers
-    final volunteerDocs = await _firestoreService.queryCollection(
+    final volunteerDocs = await _firestoreService.query(
       'volunteer_profiles',
       where: [
         {'field': 'verificationStatus', 'operator': '==', 'value': 'verified'},
@@ -355,7 +355,7 @@ class VolunteerDispatchService {
       
       // Check basic criteria
       if ((volunteer.rating ?? 0) >= criteria.minRating &&
-          criteria.allowedTransport.contains(volunteer.VehicleType)) {
+          criteria.allowedTransport.contains(volunteer.vehicleType)) {
         volunteers.add(volunteer);
       }
     }
@@ -401,11 +401,11 @@ class VolunteerDispatchService {
   }
   
   double _calculateTransportScore(VolunteerProfile volunteer, List<VehicleType> allowed) {
-    if (allowed.contains(volunteer.VehicleType)) {
+    if (allowed.contains(volunteer.vehicleType)) {
       // Bonus for better transport methods
-      switch (volunteer.VehicleType) {
+      switch (volunteer.vehicleType) {
         case VehicleType.car: return 1.0;
-        case VehicleType.bike: return 0.8;
+        case VehicleType.bicycle: return 0.8;
         case VehicleType.scooter: return 0.6;
         case VehicleType.public: return 0.4;
         case VehicleType.walking: return 0.2;
@@ -433,9 +433,9 @@ class VolunteerDispatchService {
   double _estimateTaskDuration(double distance, DeliveryTask task, VolunteerProfile volunteer) {
     // Base time on transport method and distance
     double baseSpeed; // km/hour
-    switch (volunteer.VehicleType) {
+    switch (volunteer.vehicleType) {
       case VehicleType.car: baseSpeed = 30; break;
-      case VehicleType.bike: baseSpeed = 15; break;
+      case VehicleType.bicycle: baseSpeed = 15; break;
       case VehicleType.scooter: baseSpeed = 25; break;
       case VehicleType.public: baseSpeed = 12; break;
       case VehicleType.walking: baseSpeed = 5; break;
@@ -473,19 +473,19 @@ class VolunteerDispatchService {
   
   /// Helper functions for data retrieval
   Future<FoodDonation?> _getDonation(String donationId) async {
-    final doc = await _firestoreService.getDocument('food_donations', donationId);
+    final doc = await _firestoreService.get('food_donations', donationId);
     if (doc == null) return null;
     return FoodDonation.fromMap(doc.data()! as Map<String, dynamic>);
   }
   
   Future<VolunteerProfile?> _getVolunteer(String volunteerId) async {
-    final doc = await _firestoreService.getDocument('volunteer_profiles', volunteerId);
+    final doc = await _firestoreService.get('volunteer_profiles', volunteerId);
     if (doc == null) return null;
     return VolunteerProfile.fromMap(doc.data()! as Map<String, dynamic>);
   }
   
   Future<Map<String, dynamic>?> _getTask(String taskId) async {
-    final doc = await _firestoreService.getDocument('delivery_tasks', taskId);
+    final doc = await _firestoreService.get('delivery_tasks', taskId);
     return doc?.data() as Map<String, dynamic>?;
   }
   
@@ -527,6 +527,6 @@ class VolunteerDispatchService {
       'timestamp': DateTime.now(),
     };
     
-    await _firestoreService.addDocument('dispatch_analytics', analysis);
+    await _firestoreService.create('dispatch_analytics', analysis);
   }
 }

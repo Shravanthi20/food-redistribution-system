@@ -1,4 +1,5 @@
 import '../constants/app_constants.dart';
+import 'enums.dart';
 
 class AppUser {
   final String id;

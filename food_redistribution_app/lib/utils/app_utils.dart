@@ -96,11 +96,11 @@ class AppUtils {
   
   static Color getStatusColor(DonationStatus status) {
     switch (status) {
-      case DonationStatus.available:
+      case DonationStatus.listed:
         return AppColors.successColor;
-      case DonationStatus.reserved:
+      case DonationStatus.matched:
         return AppColors.warningColor;
-      case DonationStatus.collected:
+      case DonationStatus.pickedUp:
         return AppColors.infoColor;
       case DonationStatus.delivered:
         return AppColors.successColor;
@@ -116,7 +116,7 @@ class AppUtils {
     switch (priority) {
       case Priority.low:
         return Colors.green;
-      case Priority.medium:
+      case Priority.normal:
         return Colors.orange;
       case Priority.high:
         return Colors.red;
@@ -266,7 +266,7 @@ class AppUtils {
     } else if (hoursUntilExpiry <= 8) {
       return Priority.high;
     } else if (hoursUntilExpiry <= 24 || quantity > 50) {
-      return Priority.medium;
+      return Priority.normal;
     } else {
       return Priority.low;
     }
