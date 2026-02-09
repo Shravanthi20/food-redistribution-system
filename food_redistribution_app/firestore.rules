@@ -1,0 +1,80 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper to check if user is accessing their own data
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // specific rules for collections
+    
+    // Users collection: Users can read/write their own document
+    match /users/{userId} {
+      allow read: if isAuthenticated(); // Allow reading other users (for verification/admin) or restrict further
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      allow update: if isOwner(userId) || (isAuthenticated() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
+      allow delete: if false; // Only soft delete via status update
+    }
+
+    // Role-specific profiles
+    match /donor_profiles/{userId} {
+      allow read, write: if isOwner(userId);
+      allow read: if isAuthenticated(); // NGOs need to see donors
+    }
+    
+    match /ngo_profiles/{userId} {
+      allow read, write: if isOwner(userId);
+      allow read: if isAuthenticated();
+    }
+    
+    match /volunteer_profiles/{userId} {
+      allow read, write: if isOwner(userId);
+      allow read: if isAuthenticated(); // Admin/NGOs need to see volunteers
+    }
+
+    // Admin tasks
+    match /admin_tasks/{taskId} {
+      allow read, write: if isAuthenticated(); 
+    }
+    
+    // Verification submissions
+    match /verification_submissions/{submissionId} {
+       allow create: if isAuthenticated();
+       allow read, update: if isAuthenticated(); // Simplified for dev
+    }
+
+    // Audit logs - mostly write only for users, read for admins
+    match /audit_logs/{logId} {
+      allow create: if isAuthenticated();
+      allow read: if isAuthenticated(); // Should be admin only in prod
+    }
+
+    // Food Donations
+    match /food_donations/{donationId} {
+      allow create: if isAuthenticated(); // Donors create
+      allow read: if isAuthenticated(); // NGOs/Volunteers need to see
+      allow update: if isAuthenticated() && (resource.data.donorId == request.auth.uid || resource.data.assignedNGOId == request.auth.uid);
+    }
+
+    // Matching & Assignments (Managed mainly by Cloud Functions, but read by users)
+    match /donation_assignments/{assignmentId} {
+      allow read: if isAuthenticated() && (resource.data.assigneeId == request.auth.uid);
+      allow update: if isAuthenticated() && (resource.data.assigneeId == request.auth.uid); // To accept/reject
+    }
+
+    match /donation_acceptances/{acceptanceId} {
+      allow read, create: if isAuthenticated();
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
