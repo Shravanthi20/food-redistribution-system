@@ -65,6 +65,10 @@ Optional menu-driven test runner:
 
 - Windows: `scripts/run_tests.bat`
 - macOS/Linux: `scripts/run_tests.sh`
+- 
+-flutter build apk
+-flutter build appbundle
+-flutter build ios
 
 ## Project structure map
 
