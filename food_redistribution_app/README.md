@@ -1,6 +1,7 @@
 # Food Redistribution App (Flutter)
 
-Flutter application for coordinating food donations between **Donors**, **NGOs**, and **Volunteers**, with an **Admin** flow for reviewing verification submissions.
+Food Redistribution App (Flutter)
+A Flutter-based application designed to coordinate food donations between Donors, NGOs, and Volunteers. The app includes role-based access, real-time coordination, and an Admin workflow for reviewing and managing user verification submissions to ensure trust and transparency.
 
 ## What’s in this repo (high-level)
 
