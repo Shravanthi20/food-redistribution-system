@@ -15,6 +15,7 @@ import '../screens/donor/create_donation_screen.dart';
 import '../screens/donor/donation_list_screen.dart';
 import '../screens/donor/donation_detail_screen.dart';
 import '../screens/donor/impact_reports_screen.dart';
+import '../screens/donor/donor_verification_screen.dart'; // [NEW] Donor verification
 
 // NGO extra screens
 import '../screens/ngo/clarify_request_screen.dart';
@@ -54,6 +55,7 @@ class AppRouter {
   static const String forgotPassword = '/forgot-password'; // [NEW] Route
 
   static const String donorDashboard = '/donor-dashboard';
+  static const String donorVerification = '/donor-verification'; // [NEW] Donor verification route
   static const String ngoDashboard = '/ngo-dashboard';
   static const String volunteerDashboard = '/volunteer-dashboard';
   static const String adminDashboard = '/admin-dashboard';
@@ -123,6 +125,9 @@ class AppRouter {
 
       case donorDashboard:
         return MaterialPageRoute(builder: (_) => const DonorDashboard());
+
+      case donorVerification:
+        return MaterialPageRoute(builder: (_) => const DonorVerificationScreen());
 
       case ngoDashboard:
         return MaterialPageRoute(builder: (_) => const NGODashboard());

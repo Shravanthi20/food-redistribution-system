@@ -14,7 +14,7 @@ class UpdateDemandScreen extends StatefulWidget {
 }
 
 class _UpdateDemandScreenState extends State<UpdateDemandScreen> {
-  final GlobalKey&lt;FormState&gt; _formKey = GlobalKey&lt;FormState&gt;();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   
   // Controllers
   late TextEditingController _titleController;
@@ -23,22 +23,22 @@ class _UpdateDemandScreenState extends State<UpdateDemandScreen> {
   late TextEditingController _beneficiariesController;
   
   // Selection states
-  late List&lt;FoodCategory&gt; _selectedFoodTypes;
+  late List<FoodCategory> _selectedFoodTypes;
   late RequestUrgency _selectedUrgency;
   late String _selectedUnit;
   late DateTime _selectedNeededBy;
-  late List&lt;String&gt; _selectedServingPopulation;
+  late List<String> _selectedServingPopulation;
   late bool _requiresRefrigeration;
-  late List&lt;String&gt; _selectedDietaryRestrictions;
+  late List<String> _selectedDietaryRestrictions;
   
   bool _isSubmitting = false;
   
   // Options
-  final List&lt;String&gt; _units = ['kg', 'servings', 'packets', 'boxes', 'bags', 'liters', 'pieces'];
-  final List&lt;String&gt; _servingPopulations = [
+  final List<String> _units = ['kg', 'servings', 'packets', 'boxes', 'bags', 'liters', 'pieces'];
+  final List<String> _servingPopulations = [
     'Children', 'Elderly', 'Families', 'Homeless', 'Students', 'Workers', 'Refugees', 'All ages'
   ];
-  final List&lt;String&gt; _dietaryRestrictions = [
+  final List<String> _dietaryRestrictions = [
     'Vegetarian', 'Vegan', 'Halal', 'Kosher', 'Gluten-free', 'Dairy-free', 'Nut-free', 'No restrictions'
   ];
 
@@ -307,7 +307,7 @@ class _UpdateDemandScreenState extends State<UpdateDemandScreen> {
                   if (value == null || value.trim().isEmpty) {
                     return 'Please enter expected beneficiaries';
                   }
-                  if (int.tryParse(value) == null || int.parse(value) &lt;= 0) {
+                  if (int.tryParse(value) == null || int.parse(value) <= 0) {
                     return 'Please enter a valid number';
                   }
                   return null;
@@ -510,7 +510,7 @@ class _UpdateDemandScreenState extends State<UpdateDemandScreen> {
     return category.name.replaceFirst(category.name[0], category.name[0].toUpperCase());
   }
 
-  Future&lt;void&gt; _selectNeededByDate() async {
+  Future<void> _selectNeededByDate() async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _selectedNeededBy,
@@ -524,28 +524,30 @@ class _UpdateDemandScreenState extends State<UpdateDemandScreen> {
     }
   }
 
-  Future&lt;void&gt; _submitUpdate() async {
-    if (!_formKey.currentState!.validate()) return;
+  Future<void> _submitUpdate() async {
+    if (!_formKey.currentState!.validate()) {
+      return Future.value();
+    }
     
     if (_selectedFoodTypes.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please select at least one food type')),
       );
-      return;
+      return Future.value();
     }
     
     if (_selectedServingPopulation.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please select serving population')),
       );
-      return;
+      return Future.value();
     }
 
-    setState(() =&gt; _isSubmitting = true);
+    setState(() => _isSubmitting = true);
 
     try {
-      final authProvider = Provider.of&lt;AuthProvider&gt;(context, listen: false);
-      final ngoProvider = Provider.of&lt;NGOProvider&gt;(context, listen: false);
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final ngoProvider = Provider.of<NGOProvider>(context, listen: false);
       
       final updates = {
         'title': _titleController.text.trim(),
@@ -634,14 +636,14 @@ class _UpdateDemandScreenState extends State<UpdateDemandScreen> {
     );
   }
 
-  Future&lt;void&gt; _deleteRequest() async {
+  Future<void> _deleteRequest() async {
     if (widget.foodRequest == null) return;
     
-    setState(() =&gt; _isSubmitting = true);
+    setState(() => _isSubmitting = true);
     
     try {
-      final authProvider = Provider.of&lt;AuthProvider&gt;(context, listen: false);
-      final ngoProvider = Provider.of&lt;NGOProvider&gt;(context, listen: false);
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final ngoProvider = Provider.of<NGOProvider>(context, listen: false);
       
       final success = await ngoProvider.cancelFoodRequest(
         widget.foodRequest!.id,
@@ -678,7 +680,7 @@ class _UpdateDemandScreenState extends State<UpdateDemandScreen> {
       }
     } finally {
       if (mounted) {
-        setState(() =&gt; _isSubmitting = false);
+        setState(() => _isSubmitting = false);
       }
     }
   }

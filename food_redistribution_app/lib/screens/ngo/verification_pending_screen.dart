@@ -12,10 +12,10 @@ class VerificationPendingScreen extends StatefulWidget {
 
 class _VerificationPendingScreenState extends State<VerificationPendingScreen> with TickerProviderStateMixin {
   late AnimationController _animationController;
-  late Animation&lt;double&gt; _pulseAnimation;
+  late Animation<double> _pulseAnimation;
   final VerificationService _verificationService = VerificationService();
   
-  Map&lt;String, dynamic&gt;? _submissionDetails;
+  Map<String, dynamic>? _submissionDetails;
   bool _isLoading = true;
 
   @override
@@ -25,7 +25,7 @@ class _VerificationPendingScreenState extends State<VerificationPendingScreen> w
       duration: const Duration(seconds: 2),
       vsync: this,
     );
-    _pulseAnimation = Tween&lt;double&gt;(begin: 0.8, end: 1.2).animate(
+    _pulseAnimation = Tween<double>(begin: 0.8, end: 1.2).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
     _animationController.repeat(reverse: true);
@@ -39,9 +39,9 @@ class _VerificationPendingScreenState extends State<VerificationPendingScreen> w
     super.dispose();
   }
 
-  Future&lt;void&gt; _loadSubmissionDetails() async {
+  Future<void> _loadSubmissionDetails() async {
     try {
-      final authProvider = Provider.of&lt;AuthProvider&gt;(context, listen: false);
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
       // In a real app, you'd load the submission details from the service
       // For now, we'll simulate the data structure
       await Future.delayed(const Duration(seconds: 1));
@@ -514,9 +514,9 @@ class _VerificationPendingScreenState extends State<VerificationPendingScreen> w
     final now = DateTime.now();
     final difference = now.difference(dateTime);
     
-    if (difference.inMinutes &lt; 60) {
+    if (difference.inMinutes < 60) {
       return '${difference.inMinutes}m ago';
-    } else if (difference.inHours &lt; 24) {
+    } else if (difference.inHours < 24) {
       return '${difference.inHours}h ago';
     } else {
       return '${difference.inDays}d ago';

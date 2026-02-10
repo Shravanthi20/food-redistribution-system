@@ -1,0 +1,42 @@
+================================================================================
+ONE-TIME CLEANUP - Run once so "git pull" never causes conflicts again
+================================================================================
+One person (or everyone) run this ONCE from repo root. This stops Git from
+tracking files that are now in .gitignore, so they will no longer cause
+merge conflicts when the team pulls.
+
+  cd c:\software_eval
+
+  # Stop tracking IDE and machine-specific (recommended)
+  git rm -r --cached "food_redistribution_app/.idea" 2>nul
+  git rm -r --cached "food_redistribution_app/.vscode" 2>nul
+  git rm -r --cached "food_redistribution_app/android/local.properties" 2>nul
+  git rm -r --cached "food_redistribution_app/android/.gradle" 2>nul
+  git rm -r --cached "food_redistribution_app/android/build" 2>nul
+  git rm -r --cached "food_redistribution_app/android/app/build" 2>nul
+  git rm -r --cached "food_redistribution_app/android/gradle/wrapper/gradle-wrapper.jar" 2>nul
+  git rm -r --cached "food_redistribution_app/ios/Pods" 2>nul
+  git rm -r --cached "food_redistribution_app/ios/build" 2>nul
+  git rm -r --cached "food_redistribution_app/build" 2>nul
+  git rm -r --cached "food_redistribution_app/.dart_tool" 2>nul
+  git rm -r --cached "food_redistribution_app/.metadata" 2>nul
+  git rm --cached "food_redistribution_app/pubspec.lock" 2>nul
+  git rm --cached "food_redistribution_app/lib/firebase_options.dart" 2>nul
+  git rm --cached "food_redistribution_app/android/app/google-services.json" 2>nul
+
+  # Stop tracking *.iml and *.md if they were ever committed
+  git rm -r --cached "food_redistribution_app/*.iml" 2>nul
+  git rm -r --cached "food_redistribution_app/**/*.md" 2>nul
+
+  # Stage the updated .gitignore files
+  git add .gitignore food_redistribution_app/.gitignore food_redistribution_app/android/.gitignore
+  git add food_redistribution_app/docs/CLEAN_GIT_ONCE.txt
+  git status
+  git commit -m "chore: stronger gitignore, stop tracking generated/IDE files to prevent pull conflicts"
+
+Then push. Everyone else:  git pull  then  cd food_redistribution_app && flutter pub get
+
+After this one-time cleanup, the stronger .gitignore will keep these files
+out of Git forever, so no more conflicts on pull.
+
+================================================================================

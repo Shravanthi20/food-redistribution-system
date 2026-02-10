@@ -20,6 +20,7 @@ class _DonorDashboardState extends State<DonorDashboard> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadDonations();
+      _checkVerificationStatus();
     });
   }
 
@@ -30,6 +31,26 @@ class _DonorDashboardState extends State<DonorDashboard> {
     final userId = authProvider.appUser?.uid;
     if (userId != null) {
       await donationProvider.loadMyDonations(userId);
+    }
+  }
+
+  Future<void> _checkVerificationStatus() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    
+    // Check if verification status has been updated
+    final statusChanged = await authProvider.checkAndUpdateVerificationStatus();
+    
+    if (statusChanged && mounted) {
+      // Show success message for verified status
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('🎉 Your account has been verified! You can now create donations.'),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+          duration: Duration(seconds: 5),
+        ),
+      );
+      setState(() {}); // Refresh the UI
     }
   }
 
@@ -107,6 +128,12 @@ class _DonorDashboardState extends State<DonorDashboard> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Verification Status Banner
+                    if (user.onboardingState == OnboardingState.documentSubmitted)
+                      _buildVerificationPendingBanner(),
+                    if (user.onboardingState == OnboardingState.documentSubmitted)
+                      const SizedBox(height: 16),
+                    
                     // Welcome Card
                     Card(
                       elevation: 4,
@@ -499,5 +526,75 @@ class _DonorDashboardState extends State<DonorDashboard> {
       case DonationStatus.expired:
         return 'Expired';
     }
+  }
+
+  Widget _buildVerificationPendingBanner() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.orange.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.orange.shade300, width: 2),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.pending_actions,
+                color: Colors.orange.shade700,
+                size: 24,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Verification Pending',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    color: Colors.orange.shade800,
+                  ),
+                ),
+              ),
+              Icon(
+                Icons.hourglass_top,
+                color: Colors.orange.shade600,
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Your documents are currently under review by our admin team. You\'ll be able to create donations once your account is verified.',
+            style: TextStyle(
+              color: Colors.orange.shade700,
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Icon(
+                Icons.info_outline,
+                color: Colors.orange.shade600,
+                size: 16,
+              ),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text(
+                  'Verification usually takes 24-48 hours',
+                  style: TextStyle(
+                    color: Colors.orange.shade600,
+                    fontSize: 12,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }

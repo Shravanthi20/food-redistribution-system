@@ -316,4 +316,47 @@ class AuthProvider extends ChangeNotifier {
     }
     return error.toString();
   }
+
+  // Check verification status for current user
+  Future<Map<String, dynamic>?> checkVerificationStatus() async {
+    try {
+      if (_firebaseUser?.uid == null) return null;
+      return await _verificationService.checkVerificationStatus(_firebaseUser!.uid);
+    } catch (e) {
+      print('Error checking verification status: $e');
+      return null;
+    }
+  }
+
+  // Check if user verification is approved and update user state
+  Future<bool> checkAndUpdateVerificationStatus() async {
+    try {
+      if (_firebaseUser?.uid == null || _appUser == null) return false;
+      
+      final verificationStatus = await checkVerificationStatus();
+      if (verificationStatus == null) return false;
+
+      if (verificationStatus['status'] == 'approved' && 
+          _appUser!.onboardingState != OnboardingState.verified) {
+        
+        // Update user state to verified
+        await _firestore.collection('users').doc(_firebaseUser!.uid).update({
+          'onboardingState': OnboardingState.verified.name,
+          'status': UserStatus.active.name,
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+
+        // Refresh user data
+        _appUser = await _authService.getCurrentAppUser();
+        notifyListeners();
+        
+        return true; // Status changed to verified
+      }
+      
+      return false;
+    } catch (e) {
+      print('Error checking and updating verification status: $e');
+      return false;
+    }
+  }
 }
