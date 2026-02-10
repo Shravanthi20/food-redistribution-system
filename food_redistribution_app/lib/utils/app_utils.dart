@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../constants/app_constants.dart';
@@ -337,9 +338,7 @@ class AppUtils {
   }
 }
 
-// Helper function imports
-import 'dart:math';
-
+// DateTime extension helpers
 extension DateTimeExtension on DateTime {
   bool get isToday {
     final now = DateTime.now();

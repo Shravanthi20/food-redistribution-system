@@ -8,7 +8,7 @@ import 'providers/user_provider.dart';
 import 'providers/admin_dashboard_provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/donation_provider.dart';
-import 'screens/auth/splash_screen.dart';
+import 'providers/ngo_provider.dart';
 import 'utils/app_theme.dart';
 import 'utils/app_router.dart';
 
@@ -32,6 +32,7 @@ class FoodRedistributionApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AdminDashboardProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => DonationProvider()),
+        ChangeNotifierProvider(create: (_) => NGOProvider()),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {

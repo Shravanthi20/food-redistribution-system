@@ -2,14 +2,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/food_request.dart';
 import '../models/food_donation.dart';
 import '../models/ngo_profile.dart';
-import '../services/firestore_service.dart';
 import '../services/notification_service.dart';
 import '../services/audit_service.dart';
 import '../services/location_service.dart';
+import '../config/firebase_schema.dart';
 
 class FoodRequestService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirestoreService _firestoreService = FirestoreService();
   final NotificationService _notificationService = NotificationService();
   final AuditService _auditService = AuditService();
   final LocationService _locationService = LocationService();
@@ -21,7 +20,7 @@ class FoodRequestService {
   }) async {
     try {
       // Validate NGO exists and is verified
-      final ngoDoc = await _firestore.collection('ngo_profiles').doc(ngoId).get();
+      final ngoDoc = await _firestore.collection(Collections.organizations).doc(ngoId).get();
       if (!ngoDoc.exists) {
         throw Exception('NGO profile not found');
       }
@@ -32,7 +31,7 @@ class FoodRequestService {
       }
 
       // Create request document
-      final docRef = await _firestore.collection('food_requests').add(request.toMap());
+      final docRef = await _firestore.collection(Collections.requests).add(request.toMap());
       
       // Log action
       await _auditService.logEvent(
@@ -73,7 +72,7 @@ class FoodRequestService {
   Future<List<FoodRequest>> getNGORequests(String ngoId, {RequestStatus? status}) async {
     try {
       Query query = _firestore
-          .collection('food_requests')
+          .collection(Collections.requests)
           .where('ngoId', isEqualTo: ngoId)
           .orderBy('createdAt', descending: true);
       
@@ -103,7 +102,7 @@ class FoodRequestService {
   Future<List<FoodRequest>> getAllActiveRequests() async {
     try {
       final snapshot = await _firestore
-          .collection('food_requests')
+          .collection(Collections.requests)
           .where('status', whereIn: [
             RequestStatus.pending.name,
             RequestStatus.matched.name,
@@ -132,7 +131,7 @@ class FoodRequestService {
   Future<void> updateFoodRequest(String requestId, Map<String, dynamic> updates) async {
     try {
       updates['updatedAt'] = Timestamp.now();
-      await _firestore.collection('food_requests').doc(requestId).update(updates);
+      await _firestore.collection(Collections.requests).doc(requestId).update(updates);
       
       await _auditService.logEvent(
         eventType: AuditEventType.dataModification,
@@ -168,7 +167,7 @@ class FoodRequestService {
   /// Cancel food request
   Future<void> cancelFoodRequest(String requestId, String ngoId, String reason) async {
     try {
-      await _firestore.collection('food_requests').doc(requestId).update({
+      await _firestore.collection(Collections.requests).doc(requestId).update({
         'status': RequestStatus.cancelled.name,
         'updatedAt': Timestamp.now(),
         'metadata.cancellationReason': reason,
@@ -214,14 +213,14 @@ class FoodRequestService {
       final batch = _firestore.batch();
       
       // Update request
-      batch.update(_firestore.collection('food_requests').doc(requestId), {
+      batch.update(_firestore.collection(Collections.requests).doc(requestId), {
         'status': RequestStatus.matched.name,
         'matchedDonationId': donationId,
         'updatedAt': Timestamp.now(),
       });
       
       // Update donation
-      batch.update(_firestore.collection('food_donations').doc(donationId), {
+      batch.update(_firestore.collection(Collections.donations).doc(donationId), {
         'status': DonationStatus.matched.name,
         'matchedRequestId': requestId,
         'updatedAt': Timestamp.now(),
@@ -269,7 +268,7 @@ class FoodRequestService {
   /// Find potential donations for a request
   Future<List<FoodDonation>> findPotentialDonations(String requestId) async {
     try {
-      final requestDoc = await _firestore.collection('food_requests').doc(requestId).get();
+      final requestDoc = await _firestore.collection(Collections.requests).doc(requestId).get();
       if (!requestDoc.exists) return [];
       
       final request = FoodRequest.fromFirestore(requestDoc);
@@ -277,7 +276,7 @@ class FoodRequestService {
       // Get available donations within reasonable distance
       final donations = <FoodDonation>[];
       final donationsSnapshot = await _firestore
-          .collection('food_donations')
+          .collection(Collections.donations)
           .where('status', isEqualTo: DonationStatus.listed.name)
           .get();
       
@@ -428,7 +427,7 @@ class FoodRequestService {
       if (potentialDonations.isNotEmpty) {
         // Get the best match (first in sorted list)
         final bestDonation = potentialDonations.first;
-        final requestDoc = await _firestore.collection('food_requests').doc(requestId).get();
+        final requestDoc = await _firestore.collection(Collections.requests).doc(requestId).get();
         final request = FoodRequest.fromFirestore(requestDoc);
         
         // Check compatibility score threshold
@@ -458,8 +457,8 @@ class FoodRequestService {
   Future<void> _notifyMatch(String requestId, String donationId) async {
     try {
       // Get request and donation details
-      final requestDoc = await _firestore.collection('food_requests').doc(requestId).get();
-      final donationDoc = await _firestore.collection('food_donations').doc(donationId).get();
+      final requestDoc = await _firestore.collection(Collections.requests).doc(requestId).get();
+      final donationDoc = await _firestore.collection(Collections.donations).doc(donationId).get();
       
       if (!requestDoc.exists || !donationDoc.exists) return;
       
@@ -511,7 +510,7 @@ class FoodRequestService {
   /// Get request statistics for admin dashboard
   Future<Map<String, dynamic>> getRequestStatistics() async {
     try {
-      final snapshot = await _firestore.collection('food_requests').get();
+      final snapshot = await _firestore.collection(Collections.requests).get();
       final requests = snapshot.docs.map((doc) => FoodRequest.fromFirestore(doc)).toList();
       
       return {

@@ -4,6 +4,9 @@ import '../../providers/auth_provider.dart';
 import '../../providers/donation_provider.dart';
 import '../../models/food_donation.dart';
 import '../../utils/app_router.dart';
+import '../../utils/app_theme.dart';
+import '../../widgets/gradient_scaffold.dart';
+import '../../widgets/glass_widgets.dart';
 import 'create_donation_screen.dart';
 import 'donation_list_screen.dart';
 
@@ -37,50 +40,56 @@ class _DonorDashboardState extends State<DonorDashboard> {
   Future<void> _checkVerificationStatus() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     
-    // Check if verification status has been updated
     final statusChanged = await authProvider.checkAndUpdateVerificationStatus();
     
     if (statusChanged && mounted) {
-      // Show success message for verified status
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('🎉 Your account has been verified! You can now create donations.'),
-          backgroundColor: Colors.green,
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.check_circle, color: AppTheme.primaryNavy),
+              SizedBox(width: 12),
+              Text('Your account has been verified!'),
+            ],
+          ),
+          backgroundColor: AppTheme.successTeal,
           behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           duration: Duration(seconds: 5),
         ),
       );
-      setState(() {}); // Refresh the UI
+      setState(() {});
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Donor Dashboard'),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Colors.white,
+    return GradientScaffold(
+      showAnimatedBackground: true,
+      appBar: GlassAppBar(
+        title: 'Dashboard',
         actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
+          GlassIconButton(
+            icon: Icons.logout_rounded,
+            size: 40,
             onPressed: () async {
-              final confirmed = await showDialog<bool>(
+              final confirmed = await GlassDialog.show<bool>(
                 context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Logout'),
-                  content: const Text('Are you sure you want to logout?'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      child: const Text('Cancel'),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, true),
-                      child: const Text('Logout'),
-                    ),
-                  ],
+                title: 'Sign Out',
+                content: Text(
+                  'Are you sure you want to sign out?',
+                  style: TextStyle(color: AppTheme.textSecondary),
                 ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    child: Text('Cancel', style: TextStyle(color: AppTheme.textMuted)),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    child: Text('Sign Out', style: TextStyle(color: AppTheme.errorCoral)),
+                  ),
+                ],
               );
 
               if (confirmed == true && mounted) {
@@ -90,12 +99,19 @@ class _DonorDashboardState extends State<DonorDashboard> {
               }
             },
           ),
+          SizedBox(width: 8),
         ],
       ),
       body: Consumer<AuthProvider>(
         builder: (context, authProvider, _) {
           final user = authProvider.appUser;
-          if (user == null) return const Center(child: CircularProgressIndicator());
+          if (user == null) {
+            return Center(
+              child: CircularProgressIndicator(
+                color: AppTheme.accentTeal,
+              ),
+            );
+          }
 
           final donationProvider = Provider.of<DonationProvider>(context, listen: false);
 
@@ -103,12 +119,13 @@ class _DonorDashboardState extends State<DonorDashboard> {
             stream: donationProvider.getMyDonationsStream(user.uid),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
+                return Center(
+                  child: CircularProgressIndicator(color: AppTheme.accentTeal),
+                );
               }
 
               final myDonations = snapshot.data ?? [];
               
-              // Calculate stats from stream data
               final activeCount = myDonations.where((d) => 
                 d.status == DonationStatus.listed || 
                 d.status == DonationStatus.matched
@@ -124,7 +141,7 @@ class _DonorDashboardState extends State<DonorDashboard> {
 
               return SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -132,110 +149,122 @@ class _DonorDashboardState extends State<DonorDashboard> {
                     if (user.onboardingState == OnboardingState.documentSubmitted)
                       _buildVerificationPendingBanner(),
                     if (user.onboardingState == OnboardingState.documentSubmitted)
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 20),
                     
                     // Welcome Card
-                    Card(
-                      elevation: 4,
-                      child: Padding(
-                        padding: const EdgeInsets.all(20.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(12),
+                    GlassContainer(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(14),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      AppTheme.accentTeal.withOpacity(0.2),
+                                      AppTheme.accentCyan.withOpacity(0.1),
+                                    ],
                                   ),
-                                  child: Icon(
-                                    Icons.volunteer_activism,
-                                    size: 32,
-                                    color: Theme.of(context).colorScheme.primary,
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: AppTheme.accentTeal.withOpacity(0.3),
                                   ),
                                 ),
-                                const SizedBox(width: 16),
+                                child: Icon(
+                                  Icons.volunteer_activism_rounded,
+                                  size: 28,
+                                  color: AppTheme.accentTeal,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Welcome Back!',
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppTheme.textPrimary,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      user.email,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: AppTheme.textSecondary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: AppTheme.successTeal.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: AppTheme.successTeal.withOpacity(0.2),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(Icons.eco_rounded, color: AppTheme.successTeal, size: 20),
+                                const SizedBox(width: 10),
                                 Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Welcome Back!',
-                                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        user.email,
-                                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                          color: Colors.grey[600],
-                                        ),
-                                      ),
-                                    ],
+                                  child: Text(
+                                    'Ready to reduce food waste today?',
+                                    style: TextStyle(
+                                      color: AppTheme.successTeal,
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 14,
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 16),
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Colors.green[50],
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(Icons.eco, color: Colors.green[700], size: 20),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      'Ready to reduce food waste today?',
-                                      style: TextStyle(
-                                        color: Colors.green[700],
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 28),
 
-                    // Statistics Cards
+                    // Statistics Section
                     Text(
                       'Your Impact',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.textPrimary,
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 16),
                     
                     Row(
                       children: [
                         Expanded(
-                          child: _buildStatCard(
-                            context,
-                            'Active',
-                            activeCount.toString(),
-                            Icons.list_alt,
-                            Colors.blue,
+                          child: GlassStatCard(
+                            title: 'Active',
+                            value: activeCount.toString(),
+                            icon: Icons.list_alt_rounded,
+                            accentColor: AppTheme.accentCyan,
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
-                          child: _buildStatCard(
-                            context,
-                            'Total',
-                            myDonations.length.toString(),
-                            Icons.all_inclusive,
-                            Colors.purple,
+                          child: GlassStatCard(
+                            title: 'Total',
+                            value: myDonations.length.toString(),
+                            icon: Icons.all_inclusive_rounded,
+                            accentColor: AppTheme.infoCyan,
                           ),
                         ),
                       ],
@@ -245,140 +274,122 @@ class _DonorDashboardState extends State<DonorDashboard> {
                     Row(
                       children: [
                         Expanded(
-                          child: _buildStatCard(
-                            context,
-                            'Delivered',
-                            deliveredCount.toString(),
-                            Icons.check_circle,
-                            Colors.green,
+                          child: GlassStatCard(
+                            title: 'Delivered',
+                            value: deliveredCount.toString(),
+                            icon: Icons.check_circle_rounded,
+                            accentColor: AppTheme.successTeal,
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
-                          child: _buildStatCard(
-                            context,
-                            'In Progress',
-                            inProgressCount.toString(),
-                            Icons.local_shipping,
-                            Colors.orange,
+                          child: GlassStatCard(
+                            title: 'In Progress',
+                            value: inProgressCount.toString(),
+                            icon: Icons.local_shipping_rounded,
+                            accentColor: AppTheme.warningAmber,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 28),
 
-                    // Quick Actions
+                    // Quick Actions Section
                     Text(
                       'Quick Actions',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    
+                    _buildActionCard(
+                      'Create New Donation',
+                      'Post surplus food for redistribution',
+                      Icons.add_circle_rounded,
+                      AppTheme.successTeal,
+                      () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const CreateDonationScreen()),
                       ),
                     ),
                     const SizedBox(height: 12),
                     
                     _buildActionCard(
-                      context,
-                      'Create New Donation',
-                      'Post surplus food for redistribution',
-                      Icons.add_circle,
-                      Colors.green,
-                      () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const CreateDonationScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    
-                    _buildActionCard(
-                      context,
                       'My Donations',
                       'View and manage all your donations',
-                      Icons.list,
-                      Colors.blue,
-                      () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const DonationListScreen(),
-                          ),
-                        );
-                      },
+                      Icons.list_rounded,
+                      AppTheme.accentCyan,
+                      () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const DonationListScreen()),
+                      ),
                     ),
                     const SizedBox(height: 12),
                     
                     _buildActionCard(
-                      context,
                       'Impact Report',
                       'See your contribution statistics',
-                      Icons.analytics,
-                      Colors.purple,
-                      () {
-                        Navigator.pushNamed(context, AppRouter.impactReports);
-                      },
+                      Icons.analytics_rounded,
+                      AppTheme.infoCyan,
+                      () => Navigator.pushNamed(context, AppRouter.impactReports),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 28),
 
-                    // Recent Donations
+                    // Recent Donations Section
                     if (myDonations.isNotEmpty) ...[
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
                             'Recent Donations',
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.textPrimary,
                             ),
                           ),
                           TextButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const DonationListScreen(),
-                                ),
-                              );
-                            },
-                            child: const Text('View All'),
+                            onPressed: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const DonationListScreen()),
+                            ),
+                            child: Text(
+                              'View All',
+                              style: TextStyle(color: AppTheme.accentTeal),
+                            ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 12),
                       
                       ...myDonations.take(3).map((donation) {
-                        return Card(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          child: ListTile(
-                            leading: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: _getStatusColor(donation.status).withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Icon(
-                                Icons.restaurant,
-                                color: _getStatusColor(donation.status),
-                              ),
+                        return GlassListTile(
+                          title: donation.title,
+                          subtitle: '${donation.quantity} ${donation.unit} • ${_getStatusDisplayName(donation.status)}',
+                          leading: Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: _getStatusColor(donation.status).withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                            title: Text(
-                              donation.title,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                            child: Icon(
+                              Icons.restaurant_rounded,
+                              color: _getStatusColor(donation.status),
+                              size: 22,
                             ),
-                            subtitle: Text(
-                              '${donation.quantity} ${donation.unit} • ${_getStatusDisplayName(donation.status)}',
-                            ),
-                            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                            onTap: () {
-                               Navigator.pushNamed(
-                                  context, 
-                                  AppRouter.donationDetail,
-                                  arguments: donation,
-                               );
-                            },
+                          ),
+                          trailing: Icon(
+                            Icons.arrow_forward_ios_rounded,
+                            size: 16,
+                            color: AppTheme.textMuted,
+                          ),
+                          onTap: () => Navigator.pushNamed(
+                            context, 
+                            AppRouter.donationDetail,
+                            arguments: donation,
                           ),
                         );
                       }).toList(),
@@ -390,102 +401,75 @@ class _DonorDashboardState extends State<DonorDashboard> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: GlassFAB(
         onPressed: () async {
           final result = await Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => const CreateDonationScreen(),
-            ),
+            MaterialPageRoute(builder: (context) => const CreateDonationScreen()),
           );
-          
-          if (result == true) {
-            _loadDonations();
-          }
+          if (result == true) _loadDonations();
         },
-        icon: const Icon(Icons.add),
-        label: const Text('New Donation'),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Colors.white,
+        icon: Icons.add_rounded,
+        extended: true,
+        label: 'New Donation',
       ),
     );
   }
 
-  Widget _buildStatCard(BuildContext context, String label, String value, IconData icon, Color color) {
-    return Card(
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Icon(icon, size: 32, color: color),
-            const SizedBox(height: 8),
-            Text(
-              value,
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: color,
+  Widget _buildActionCard(String title, String subtitle, IconData icon, Color color, VoidCallback onTap) {
+    return GlassContainer(
+      onTap: onTap,
+      padding: const EdgeInsets.all(18),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: color.withOpacity(0.3),
               ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey[600],
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildActionCard(BuildContext context, String title, String subtitle, IconData icon, Color color, VoidCallback onTap) {
-    return Card(
-      elevation: 2,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(icon, color: color, size: 28),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey[400]),
-            ],
+            child: Icon(icon, color: color, size: 26),
           ),
-        ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: AppTheme.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              Icons.arrow_forward_rounded,
+              size: 18,
+              color: color,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -493,19 +477,19 @@ class _DonorDashboardState extends State<DonorDashboard> {
   Color _getStatusColor(DonationStatus status) {
     switch (status) {
       case DonationStatus.listed:
-        return Colors.blue;
+        return AppTheme.accentCyan;
       case DonationStatus.matched:
-        return Colors.orange;
+        return AppTheme.warningAmber;
       case DonationStatus.pickedUp:
-        return Colors.purple;
+        return AppTheme.infoCyan;
       case DonationStatus.inTransit:
-        return Colors.indigo;
+        return AppTheme.accentTealLight;
       case DonationStatus.delivered:
-        return Colors.green;
+        return AppTheme.successTeal;
       case DonationStatus.cancelled:
-        return Colors.red;
+        return AppTheme.errorCoral;
       case DonationStatus.expired:
-        return Colors.grey;
+        return AppTheme.textMuted;
     }
   }
 
@@ -529,69 +513,72 @@ class _DonorDashboardState extends State<DonorDashboard> {
   }
 
   Widget _buildVerificationPendingBanner() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.orange.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.orange.shade300, width: 2),
-      ),
+    return GlassContainer(
+      padding: const EdgeInsets.all(20),
+      tintColor: AppTheme.warningAmber,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(
-                Icons.pending_actions,
-                color: Colors.orange.shade700,
-                size: 24,
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppTheme.warningAmber.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.pending_actions_rounded,
+                  color: AppTheme.warningAmber,
+                  size: 24,
+                ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   'Verification Pending',
                   style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                    color: Colors.orange.shade800,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 17,
+                    color: AppTheme.warningAmber,
                   ),
                 ),
               ),
               Icon(
-                Icons.hourglass_top,
-                color: Colors.orange.shade600,
+                Icons.hourglass_top_rounded,
+                color: AppTheme.warningAmber.withOpacity(0.7),
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 14),
           Text(
-            'Your documents are currently under review by our admin team. You\'ll be able to create donations once your account is verified.',
+            'Your documents are under review. You\'ll be able to create donations once verified.',
             style: TextStyle(
-              color: Colors.orange.shade700,
+              color: AppTheme.textSecondary,
               fontSize: 14,
             ),
           ),
           const SizedBox(height: 12),
-          Row(
-            children: [
-              Icon(
-                Icons.info_outline,
-                color: Colors.orange.shade600,
-                size: 16,
-              ),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Text(
-                  'Verification usually takes 24-48 hours',
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: AppTheme.surfaceGlassDark,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.schedule_rounded, color: AppTheme.textMuted, size: 14),
+                const SizedBox(width: 6),
+                Text(
+                  'Usually takes 24-48 hours',
                   style: TextStyle(
-                    color: Colors.orange.shade600,
+                    color: AppTheme.textTertiary,
                     fontSize: 12,
-                    fontStyle: FontStyle.italic,
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),

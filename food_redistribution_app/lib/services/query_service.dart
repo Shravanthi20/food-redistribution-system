@@ -1,12 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/query.dart' as query_model;
-import '../services/firestore_service.dart';
 import '../services/notification_service.dart';
 import '../services/audit_service.dart';
+import '../config/firebase_schema.dart';
 
 class QueryService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirestoreService _firestoreService = FirestoreService();
   final NotificationService _notificationService = NotificationService();
   final AuditService _auditService = AuditService();
 
@@ -40,7 +39,7 @@ class QueryService {
         createdAt: DateTime.now(),
       );
 
-      final docRef = await _firestore.collection('queries').add(query.toMap());
+      final docRef = await _firestore.collection(Collections.adminTasks).add(query.toMap());
 
       // Log action
       await _auditService.logEvent(
@@ -94,7 +93,7 @@ class QueryService {
   }) async {
     try {
       Query query = _firestore
-          .collection('queries')
+          .collection(Collections.adminTasks)
           .orderBy('priority', descending: true)
           .orderBy('createdAt', descending: true);
 
@@ -131,7 +130,7 @@ class QueryService {
   Future<List<query_model.Query>> getUserQueries(String userId) async {
     try {
       final snapshot = await _firestore
-          .collection('queries')
+          .collection(Collections.adminTasks)
           .where('raiserUserId', isEqualTo: userId)
           .orderBy('createdAt', descending: true)
           .get();
@@ -156,7 +155,7 @@ class QueryService {
   /// Assign query to admin
   Future<void> assignQueryToAdmin(String queryId, String adminId) async {
     try {
-      await _firestore.collection('queries').doc(queryId).update({
+      await _firestore.collection(Collections.adminTasks).doc(queryId).update({
         'assignedAdminId': adminId,
         'status': query_model.QueryStatus.inReview.name,
         'updatedAt': Timestamp.now(),
@@ -232,7 +231,7 @@ class QueryService {
         'changes': changes,
       };
 
-      await _firestore.collection('queries').doc(queryId).update({
+      await _firestore.collection(Collections.adminTasks).doc(queryId).update({
         'updatedAt': Timestamp.now(),
         'updates': FieldValue.arrayUnion([update]),
         ...changes, // Apply any status or field changes
@@ -278,7 +277,7 @@ class QueryService {
     String resolution,
   ) async {
     try {
-      await _firestore.collection('queries').doc(queryId).update({
+      await _firestore.collection(Collections.adminTasks).doc(queryId).update({
         'status': query_model.QueryStatus.resolved.name,
         'resolution': resolution,
         'resolvedAt': Timestamp.now(),
@@ -298,7 +297,7 @@ class QueryService {
       });
 
       // Get query details to notify raiser
-      final queryDoc = await _firestore.collection('queries').doc(queryId).get();
+      final queryDoc = await _firestore.collection(Collections.adminTasks).doc(queryId).get();
       if (queryDoc.exists) {
         final query = query_model.Query.fromFirestore(queryDoc);
         
@@ -358,7 +357,7 @@ class QueryService {
   ) async {
     try {
       // Get query details
-      final queryDoc = await _firestore.collection('queries').doc(queryId).get();
+      final queryDoc = await _firestore.collection(Collections.adminTasks).doc(queryId).get();
       if (!queryDoc.exists) throw Exception('Query not found');
       
       final query = query_model.Query.fromFirestore(queryDoc);
@@ -368,7 +367,7 @@ class QueryService {
       // If reassigning donation
       if (query.donationId != null && newDonationId != null) {
         // Update old donation
-        batch.update(_firestore.collection('food_donations').doc(query.donationId!), {
+        batch.update(_firestore.collection(Collections.donations).doc(query.donationId!), {
           'status': 'available',
           'matchedRequestId': null,
           'assignedVolunteerId': null,
@@ -377,7 +376,7 @@ class QueryService {
         });
         
         // Update new donation
-        batch.update(_firestore.collection('food_donations').doc(newDonationId), {
+        batch.update(_firestore.collection(Collections.donations).doc(newDonationId), {
           'status': 'matched',
           'matchedRequestId': query.requestId,
           'updatedAt': Timestamp.now(),
@@ -388,7 +387,7 @@ class QueryService {
       // If reassigning request
       if (query.requestId != null && newRequestId != null) {
         // Update old request
-        batch.update(_firestore.collection('food_requests').doc(query.requestId!), {
+        batch.update(_firestore.collection(Collections.requests).doc(query.requestId!), {
           'status': 'pending',
           'matchedDonationId': null,
           'assignedVolunteerId': null,
@@ -397,7 +396,7 @@ class QueryService {
         });
         
         // Update new request
-        batch.update(_firestore.collection('food_requests').doc(newRequestId), {
+        batch.update(_firestore.collection(Collections.requests).doc(newRequestId), {
           'status': 'matched',
           'matchedDonationId': query.donationId,
           'updatedAt': Timestamp.now(),
@@ -406,7 +405,7 @@ class QueryService {
       }
       
       // Update query with reassignment info
-      batch.update(_firestore.collection('queries').doc(queryId), {
+      batch.update(_firestore.collection(Collections.adminTasks).doc(queryId), {
         'status': query_model.QueryStatus.resolved.name,
         'resolution': 'Reassignment completed: $reassignmentReason',
         'resolvedAt': Timestamp.now(),
@@ -481,7 +480,7 @@ class QueryService {
     try {
       // Get all admin users
       final adminSnapshot = await _firestore
-          .collection('users')
+          .collection(Collections.users)
           .where('role', isEqualTo: 'admin')
           .where('isActive', isEqualTo: true)
           .get();
@@ -537,7 +536,7 @@ class QueryService {
       
       // If there was a donation involved, notify the donor
       if (query.donationId != null) {
-        final donationDoc = await _firestore.collection('food_donations').doc(query.donationId!).get();
+        final donationDoc = await _firestore.collection(Collections.donations).doc(query.donationId!).get();
         if (donationDoc.exists) {
           final donorId = donationDoc.data()!['donorId'];
           await _notificationService.sendNotification(
@@ -555,7 +554,7 @@ class QueryService {
       
       // If there was a request involved, notify the NGO
       if (query.requestId != null) {
-        final requestDoc = await _firestore.collection('food_requests').doc(query.requestId!).get();
+        final requestDoc = await _firestore.collection(Collections.requests).doc(query.requestId!).get();
         if (requestDoc.exists) {
           final ngoId = requestDoc.data()!['ngoId'];
           await _notificationService.sendNotification(
@@ -590,7 +589,7 @@ class QueryService {
   /// Get query statistics for admin dashboard
   Future<Map<String, dynamic>> getQueryStatistics() async {
     try {
-      final snapshot = await _firestore.collection('queries').get();
+      final snapshot = await _firestore.collection(Collections.adminTasks).get();
       final queries = snapshot.docs.map((doc) => query_model.Query.fromFirestore(doc)).toList();
       
       return {

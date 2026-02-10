@@ -1,5 +1,4 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
-import '../../models/tracking/location_tracking_model.dart';
 
 // Send push notifications to volunteers and NGOs
 class NotificationHandler {

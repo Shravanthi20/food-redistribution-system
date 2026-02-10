@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../config/firebase_schema.dart';
 
 class AnalyticsService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -10,7 +11,7 @@ class AnalyticsService {
     required int quantity,
   }) async {
     try {
-      await _firestore.collection('analytics_events').add({
+      await _firestore.collection(Collections.analytics).add({
         'event': 'donation_created',
         'donorId': donorId,
         'donationType': donationType,
@@ -31,7 +32,7 @@ class AnalyticsService {
     required int quantity,
   }) async {
     try {
-      await _firestore.collection('analytics_events').add({
+      await _firestore.collection(Collections.analytics).add({
         'event': 'donation_completed',
         'donationId': donationId,
         'donorId': donorId,
@@ -49,13 +50,13 @@ class AnalyticsService {
   Future<Map<String, dynamic>> getDonationStatistics(String userId) async {
     try {
       final completedQuery = await _firestore
-          .collection('analytics_events')
+          .collection(Collections.analytics)
           .where('donorId', isEqualTo: userId)
           .where('event', isEqualTo: 'donation_completed')
           .get();
 
       final createdQuery = await _firestore
-          .collection('analytics_events')
+          .collection(Collections.analytics)
           .where('donorId', isEqualTo: userId)
           .where('event', isEqualTo: 'donation_created')
           .get();
@@ -86,12 +87,12 @@ class AnalyticsService {
       final monthAgo = now.subtract(const Duration(days: 30));
 
       final recentDonations = await _firestore
-          .collection('food_donations')
+          .collection(Collections.donations)
           .where('createdAt', isGreaterThan: Timestamp.fromDate(monthAgo))
           .get();
 
       final completedDonations = await _firestore
-          .collection('food_donations')
+          .collection(Collections.donations)
           .where('status', isEqualTo: 'delivered')
           .where('createdAt', isGreaterThan: Timestamp.fromDate(monthAgo))
           .get();
@@ -111,7 +112,7 @@ class AnalyticsService {
   Future<int> _getActiveUsersCount() async {
     final monthAgo = DateTime.now().subtract(const Duration(days: 30));
     final activeUsers = await _firestore
-        .collection('users')
+        .collection(Collections.users)
         .where('updatedAt', isGreaterThan: Timestamp.fromDate(monthAgo))
         .get();
     return activeUsers.docs.length;
@@ -131,7 +132,7 @@ class AnalyticsService {
   // Get Regional Activity (Donations by District/Area approximated from Address)
   Future<Map<String, double>> getRegionalAnalytics() async {
     try {
-      final donations = await _firestore.collection('food_donations').get();
+      final donations = await _firestore.collection(Collections.donations).get();
       Map<String, int> counts = {};
       
       for (var doc in donations.docs) {
@@ -158,7 +159,7 @@ class AnalyticsService {
   // Get Delivery Performance
   Future<Map<String, dynamic>> getDeliveryPerformance() async {
     try {
-      final snapshot = await _firestore.collection('food_donations').get();
+      final snapshot = await _firestore.collection(Collections.donations).get();
       int success = 0;
       int failed = 0;
       int total = 0;

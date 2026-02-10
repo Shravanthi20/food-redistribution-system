@@ -14,24 +14,5 @@
     },
     "storage": {
         "rules": "storage.rules"
-    },
-    "flutter": {
-        "platforms": {
-            "android": {
-                "default": {
-                    "projectId": "freshsave-55cb3",
-                    "appId": "1:882385785123:android:ca53436597a25187c27c96",
-                    "fileOutput": "android/app/google-services.json"
-                }
-            },
-            "dart": {
-                "lib/firebase_options.dart": {
-                    "projectId": "freshsave-55cb3",
-                    "configurations": {
-                        "web": "1:199294842218:web:1f4fc9c7d3105f96946113"
-                    }
-                }
-            }
-        }
     }
 }

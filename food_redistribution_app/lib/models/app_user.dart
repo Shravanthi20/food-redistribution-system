@@ -1,4 +1,4 @@
-import '../constants/app_constants.dart';
+import 'dart:math' as math;
 import 'enums.dart';
 
 class AppUser {
@@ -148,6 +148,44 @@ class AppUser {
       lastLoginAt: lastLoginAt ?? this.lastLoginAt,
     );
   }
+
+  // Get user location (alias for address)
+  Location? get location => address;
+
+  // Email validation
+  bool isValidEmail() {
+    if (email.isEmpty) return false;
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    return emailRegex.hasMatch(email);
+  }
+
+  // RBAC permission methods
+  bool canCreateDonation() {
+    return role == UserRole.donor && isActive && isVerified;
+  }
+
+  bool canManageNGO() {
+    return role == UserRole.ngo && isActive;
+  }
+
+  bool canVolunteer() {
+    return role == UserRole.volunteer && isActive;
+  }
+
+  bool canCoordinate() {
+    return role == UserRole.admin && isActive;
+  }
+
+  // Preference management
+  dynamic getPreference(String key) {
+    return preferences[key];
+  }
+
+  AppUser setPreference(String key, dynamic value) {
+    final newPreferences = Map<String, dynamic>.from(preferences);
+    newPreferences[key] = value;
+    return copyWith(preferences: newPreferences);
+  }
 }
 
 class Location {
@@ -200,5 +238,25 @@ class Location {
   String get fullAddress {
     final parts = [address, city, state, zipCode].where((part) => part != null && part.isNotEmpty).toList();
     return parts.join(', ');
+  }
+
+  /// Calculate distance to another location using the Haversine formula
+  /// Returns distance in kilometers
+  double distanceTo(Location other) {
+    const double earthRadius = 6371.0; // km
+    
+    // Convert to radians
+    final lat1Rad = latitude * math.pi / 180;
+    final lat2Rad = other.latitude * math.pi / 180;
+    final deltaLat = (other.latitude - latitude) * math.pi / 180;
+    final deltaLon = (other.longitude - longitude) * math.pi / 180;
+    
+    // Haversine formula
+    final a = math.sin(deltaLat / 2) * math.sin(deltaLat / 2) +
+              math.cos(lat1Rad) * math.cos(lat2Rad) *
+              math.sin(deltaLon / 2) * math.sin(deltaLon / 2);
+    final c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
+    
+    return earthRadius * c;
   }
 }

@@ -72,7 +72,7 @@ CONFIG FILES (Firebase, rules - keep in repo)
 FILES NOT IN GIT (ignored - so no conflicts on git pull)
 --------------------------------------------------------------------------------
 
-  *.md                        --> All markdown docs
+  *.md                        --> Markdown docs (README.md is kept)
   build/                      --> Build output
   .dart_tool/                 --> Dart/Flutter tooling
   android/.gradle/

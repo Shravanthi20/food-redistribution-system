@@ -1,4 +1,3 @@
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/enums.dart';
@@ -7,6 +6,9 @@ import '../../models/ngo_profile.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../widgets/loading_overlay.dart';
 import '../../utils/app_router.dart';
+import '../../utils/app_theme.dart';
+import '../../widgets/gradient_scaffold.dart';
+import '../../widgets/glass_widgets.dart';
 
 class NGORegistrationScreen extends StatefulWidget {
   const NGORegistrationScreen({Key? key}) : super(key: key);
@@ -151,10 +153,12 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return GradientScaffold(
       appBar: AppBar(
-        title: const Text('NGO Registration'),
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        title: const Text('NGO Registration', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Consumer<AuthProvider>(
         builder: (context, authProvider, child) {
@@ -168,15 +172,20 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     // Header
-                    Text(
-                      'Join as an NGO Partner',
-                      style: Theme.of(context).textTheme.headlineMedium,
-                      textAlign: TextAlign.center,
+                    ShaderMask(
+                      shaderCallback: (bounds) => LinearGradient(
+                        colors: [AppTheme.accentTeal, AppTheme.accentCyan],
+                      ).createShader(bounds),
+                      child: const Text(
+                        'Join as an NGO Partner',
+                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'Help us distribute food to those in need',
-                      style: Theme.of(context).textTheme.bodyLarge,
+                      style: TextStyle(fontSize: 16, color: Colors.white.withOpacity(0.7)),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 32),
@@ -184,7 +193,7 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
                     // Account Information
                     Text(
                       'Account Information',
-                      style: Theme.of(context).textTheme.headlineSmall,
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                     const SizedBox(height: 16),
 
@@ -259,7 +268,7 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
                     // Organization Information
                     Text(
                       'Organization Information',
-                      style: Theme.of(context).textTheme.headlineSmall,
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                     const SizedBox(height: 16),
 
@@ -269,18 +278,37 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
                       children: [
                         Text(
                           'Organization Type',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white.withOpacity(0.9),
                           ),
                         ),
                         const SizedBox(height: 8),
                         DropdownButtonFormField<NGOType>(
                           value: _selectedNGOType,
-                          decoration: const InputDecoration(),
+                          dropdownColor: AppTheme.primaryNavyLight,
+                          style: const TextStyle(color: Colors.white),
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white.withOpacity(0.1),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: AppTheme.accentTeal, width: 2),
+                            ),
+                          ),
                           items: NGOType.values.map((type) {
                             return DropdownMenuItem(
                               value: type,
-                              child: Text(_getNGOTypeDisplayName(type)),
+                              child: Text(_getNGOTypeDisplayName(type), style: const TextStyle(color: Colors.white)),
                             );
                           }).toList(),
                           onChanged: (value) {
@@ -385,7 +413,7 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
                     // Contact Information
                     Text(
                       'Contact Information',
-                      style: Theme.of(context).textTheme.headlineSmall,
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                     const SizedBox(height: 16),
 
@@ -430,7 +458,7 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
                     // Capacity Information
                     Text(
                       'Capacity Information',
-                      style: Theme.of(context).textTheme.headlineSmall,
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                     const SizedBox(height: 16),
 
@@ -474,9 +502,13 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
                     const SizedBox(height: 16),
 
                     CheckboxListTile(
-                      title: const Text('Refrigeration Available'),
-                      subtitle: const Text('We have refrigeration facilities for storage'),
+                      title: const Text('Refrigeration Available', style: TextStyle(color: Colors.white)),
+                      subtitle: Text('We have refrigeration facilities for storage', style: TextStyle(color: Colors.white.withOpacity(0.6))),
                       value: _refrigerationAvailable,
+                      activeColor: AppTheme.accentTeal,
+                      checkColor: Colors.white,
+                      tileColor: Colors.white.withOpacity(0.05),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       onChanged: (value) {
                         setState(() {
                           _refrigerationAvailable = value ?? false;
@@ -488,7 +520,7 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
                     // Serving Population
                     Text(
                       'Serving Population',
-                      style: Theme.of(context).textTheme.headlineSmall,
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                     const SizedBox(height: 16),
                     
@@ -498,8 +530,11 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
                       children: _servingPopulationOptions.map((population) {
                         final isSelected = _selectedServingPopulation.contains(population);
                         return FilterChip(
-                          label: Text(population),
+                          label: Text(population, style: TextStyle(color: isSelected ? Colors.white : Colors.white.withOpacity(0.9))),
                           selected: isSelected,
+                          selectedColor: AppTheme.accentTeal,
+                          backgroundColor: Colors.white.withOpacity(0.1),
+                          checkmarkColor: Colors.white,
                           onSelected: (selected) {
                             setState(() {
                               if (selected) {
@@ -517,7 +552,7 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
                     // Preferred Food Types
                     Text(
                       'Preferred Food Types',
-                      style: Theme.of(context).textTheme.headlineSmall,
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                     const SizedBox(height: 16),
                     
@@ -527,8 +562,11 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
                       children: _foodTypes.map((foodType) {
                         final isSelected = _selectedFoodTypes.contains(foodType);
                         return FilterChip(
-                          label: Text(foodType),
+                          label: Text(foodType, style: TextStyle(color: isSelected ? Colors.white : Colors.white.withOpacity(0.9))),
                           selected: isSelected,
+                          selectedColor: AppTheme.accentTeal,
+                          backgroundColor: Colors.white.withOpacity(0.1),
+                          checkmarkColor: Colors.white,
                           onSelected: (selected) {
                             setState(() {
                               if (selected) {
@@ -544,9 +582,10 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
                     const SizedBox(height: 32),
 
                     // Register Button
-                    ElevatedButton(
+                    GradientButton(
                       onPressed: _register,
-                      child: const Text('Create NGO Account'),
+                      text: 'Create NGO Account',
+                      icon: Icons.person_add,
                     ),
                     const SizedBox(height: 16),
 
@@ -556,13 +595,21 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
                       children: [
                         Text(
                           'Already have an account? ',
-                          style: Theme.of(context).textTheme.bodyMedium,
+                          style: TextStyle(color: Colors.white.withOpacity(0.7)),
                         ),
-                        TextButton(
-                          onPressed: () {
+                        GestureDetector(
+                          onTap: () {
                             Navigator.pushReplacementNamed(context, AppRouter.login);
                           },
-                          child: const Text('Sign In'),
+                          child: ShaderMask(
+                            shaderCallback: (bounds) => LinearGradient(
+                              colors: [AppTheme.accentTeal, AppTheme.accentCyan],
+                            ).createShader(bounds),
+                            child: const Text(
+                              'Sign In',
+                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                            ),
+                          ),
                         ),
                       ],
                     ),

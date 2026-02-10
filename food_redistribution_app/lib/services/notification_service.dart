@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import '../config/firebase_schema.dart';
 
 class NotificationService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -39,7 +40,7 @@ class NotificationService {
     Map<String, dynamic>? data,
   }) async {
     try {
-      await _firestore.collection('notifications').add({
+      await _firestore.collection(Collections.notifications).add({
         'userId': userId,
         'title': title,
         'message': message,
@@ -83,7 +84,7 @@ class NotificationService {
   }) async {
     try {
       // Fetch task to get donor and NGO IDs
-      final taskDoc = await _firestore.collection('delivery_tasks').doc(taskId).get();
+      final taskDoc = await _firestore.collection(Collections.deliveries).doc(taskId).get();
       if (!taskDoc.exists) return;
 
       final taskData = taskDoc.data()!;
@@ -120,7 +121,7 @@ class NotificationService {
   // Get user notifications
   Stream<List<Map<String, dynamic>>> getUserNotifications(String userId) {
     return _firestore
-        .collection('notifications')
+        .collection(Collections.notifications)
         .where('userId', isEqualTo: userId)
         .orderBy('createdAt', descending: true)
         .snapshots()
@@ -148,9 +149,9 @@ class NotificationService {
 
   Future<void> _saveToken(String userId, String token) async {
     await _firestore
-        .collection('users')
+        .collection(Collections.users)
         .doc(userId)
-        .collection('tokens')
+        .collection(Subcollections.tokens)
         .doc(token)
         .set({
           'token': token,
@@ -163,7 +164,7 @@ class NotificationService {
   Future<void> markAsRead(String notificationId) async {
     try {
       await _firestore
-          .collection('notifications')
+          .collection(Collections.notifications)
           .doc(notificationId)
           .update({'read': true});
     } catch (e) {

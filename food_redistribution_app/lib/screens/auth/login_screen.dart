@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../utils/app_router.dart';
+import '../../utils/app_theme.dart';
 import '../../models/user.dart';
-import '../../widgets/custom_text_field.dart';
+import '../../widgets/glass_widgets.dart';
+import '../../widgets/gradient_scaffold.dart';
 import '../../widgets/loading_overlay.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -13,16 +15,37 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+    );
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.1),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _animationController, curve: Curves.easeOut));
+    _animationController.forward();
+  }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -49,26 +72,11 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _navigateBasedOnUser(dynamic user) {
-     // Use dynamic to avoid import issues if AppUser isn't perfectly visible, 
-     // though it should be available via auth_provider import.
-     // Better to cast if we can, or just access fields if we trust the object.
-     // Re-importing models/user.dart might be needed if not already there, 
-     // but AuthProvider exports it usually or it's imported at top.
-     // Top imports show: import '../../providers/auth_provider.dart'; which imports User/AppUser.
-     // But explicit import in this file is missing. I will add it if needed, 
-     // or just rely on the provider's user object.
-     
-     // Actually, let's look at the imports. 
-     // It imports auth_provider.dart. 
-     // It DOES NOT import properties of AppUser directly unless we import user.dart.
-     // I'll assume I need to handle logic here.
-     
-     // Quick logic based on role strings if we want to be safe, or just use the same logic as SplashScreen.
-     // Since I can't easily see the AppUser class definition from here without scrolling up (it was imported in splash), 
-     // I should check if LoginScreen has the import. 
-     // It does NOT have `import '../../models/user.dart';`. I need to add that too.
-     
-     // For now, I'll implement the logic assuming I add the import.
+     // Admin users bypass all verification/onboarding - go directly to dashboard
+     if (user.role == UserRole.admin) {
+       Navigator.pushReplacementNamed(context, AppRouter.adminDashboard);
+       return;
+     }
      
     if (user.role == UserRole.ngo) {
        switch(user.onboardingState) {
@@ -137,8 +145,9 @@ class _LoginScreenState extends State<LoginScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: Colors.red.shade600,
+        backgroundColor: AppTheme.errorCoral,
         behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
@@ -149,10 +158,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    
-    return Scaffold(
-      backgroundColor: Colors.grey[50],
+    return GradientScaffold(
+      showAnimatedBackground: true,
       body: Consumer<AuthProvider>(
         builder: (context, authProvider, child) {
           return LoadingOverlay(
@@ -161,127 +168,154 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Center(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Logo/Icon
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.primaryContainer,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.local_dining,
-                          size: 64,
-                          color: theme.colorScheme.primary,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      
-                      Text(
-                        'Welcome Back',
-                        style: theme.textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Sign in to access your dashboard',
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                      const SizedBox(height: 48),
-
-                      // Login Card
-                      Card(
-                        elevation: 2,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(24.0),
-                          child: Form(
-                            key: _formKey,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                CustomTextField(
-                                  controller: _emailController,
-                                  label: 'Email',
-                                  hintText: 'hello@example.com',
-                                  prefixIcon: const Icon(Icons.email_outlined),
-                                  keyboardType: TextInputType.emailAddress,
-                                  validator: (v) {
-                                    if (v == null || v.isEmpty) return 'Required';
-                                    if (!v.contains('@')) return 'Invalid email';
-                                    return null;
-                                  },
-                                ),
-                                const SizedBox(height: 16),
-                                CustomTextField(
-                                  controller: _passwordController,
-                                  label: 'Password',
-                                  hintText: '••••••••',
-                                  prefixIcon: const Icon(Icons.lock_outline),
-                                  obscureText: _obscurePassword,
-                                  suffixIcon: IconButton(
-                                    icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
-                                    onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-                                  ),
-                                  validator: (v) => v!.isEmpty ? 'Required' : null,
-                                ),
-                                const SizedBox(height: 12),
-                                Align(
-                                  alignment: Alignment.centerRight,
-                                  child: TextButton(
-                                    onPressed: _navigateToForgotPassword,
-                                    child: const Text('Forgot Password?'),
-                                  ),
-                                ),
-                                const SizedBox(height: 24),
-                                SizedBox(
-                                  height: 50,
-                                  child: ElevatedButton(
-                                    onPressed: _signIn,
-                                    style: ElevatedButton.styleFrom(
-                                      elevation: 2,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                    ),
-                                    child: const Text(
-                                      'Sign In',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                  ),
+                  child: FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: SlideTransition(
+                      position: _slideAnimation,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // Logo with glow effect
+                          Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  AppTheme.accentTeal.withOpacity(0.2),
+                                  AppTheme.accentCyan.withOpacity(0.1),
+                                ],
+                              ),
+                              border: Border.all(
+                                color: AppTheme.accentTeal.withOpacity(0.3),
+                                width: 2,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppTheme.accentTeal.withOpacity(0.3),
+                                  blurRadius: 30,
+                                  spreadRadius: 5,
                                 ),
                               ],
                             ),
+                            child: const Icon(
+                              Icons.restaurant_menu_rounded,
+                              size: 56,
+                              color: AppTheme.accentTeal,
+                            ),
                           ),
-                        ),
-                      ),
-                      
-                      const SizedBox(height: 24),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
+                          const SizedBox(height: 32),
+                          
+                          // Title with gradient text effect
+                          ShaderMask(
+                            shaderCallback: (bounds) => const LinearGradient(
+                              colors: [AppTheme.textPrimary, AppTheme.accentCyanSoft],
+                            ).createShader(bounds),
+                            child: const Text(
+                              'Welcome Back',
+                              style: TextStyle(
+                                fontSize: 32,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
                           Text(
-                            "Don't have an account? ",
-                            style: TextStyle(color: Colors.grey[600]),
+                            'Sign in to continue your mission',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: AppTheme.textSecondary,
+                            ),
                           ),
-                          TextButton(
-                            onPressed: () => Navigator.pushNamed(context, AppRouter.roleSelection),
-                            child: const Text('Create Account'),
+                          const SizedBox(height: 48),
+
+                          // Glass Login Card
+                          GlassContainer(
+                            padding: const EdgeInsets.all(28),
+                            child: Form(
+                              key: _formKey,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  GlassTextField(
+                                    controller: _emailController,
+                                    label: 'Email',
+                                    hintText: 'your@email.com',
+                                    prefixIcon: const Icon(Icons.email_outlined, color: AppTheme.textSecondary),
+                                    keyboardType: TextInputType.emailAddress,
+                                    validator: (v) {
+                                      if (v == null || v.isEmpty) return 'Email is required';
+                                      if (!v.contains('@')) return 'Enter a valid email';
+                                      return null;
+                                    },
+                                  ),
+                                  const SizedBox(height: 20),
+                                  GlassTextField(
+                                    controller: _passwordController,
+                                    label: 'Password',
+                                    hintText: '••••••••',
+                                    prefixIcon: const Icon(Icons.lock_outline, color: AppTheme.textSecondary),
+                                    obscureText: _obscurePassword,
+                                    suffixIcon: IconButton(
+                                      icon: Icon(
+                                        _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                                        color: AppTheme.textMuted,
+                                      ),
+                                      onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                                    ),
+                                    validator: (v) => v!.isEmpty ? 'Password is required' : null,
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: TextButton(
+                                      onPressed: _navigateToForgotPassword,
+                                      child: Text(
+                                        'Forgot Password?',
+                                        style: TextStyle(color: AppTheme.accentTeal),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 24),
+                                  GradientButton(
+                                    text: 'Sign In',
+                                    onPressed: _signIn,
+                                    icon: Icons.login_rounded,
+                                    isLoading: authProvider.isLoading,
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
+                          
+                          const SizedBox(height: 32),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "Don't have an account? ",
+                                style: TextStyle(color: AppTheme.textSecondary),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.pushNamed(context, AppRouter.roleSelection),
+                                child: Text(
+                                  'Create Account',
+                                  style: TextStyle(
+                                    color: AppTheme.accentTeal,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
                         ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),
@@ -319,12 +353,13 @@ class _ForgotPasswordFormState extends State<_ForgotPasswordForm> {
           .sendPasswordResetEmail(_emailResetController.text.trim());
       
       if (mounted) {
-        Navigator.pop(context); // Close modal
+        Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('Reset link sent! Check your email.'),
-            backgroundColor: Colors.green,
+            backgroundColor: AppTheme.successTeal,
             behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         );
       }
@@ -333,8 +368,9 @@ class _ForgotPasswordFormState extends State<_ForgotPasswordForm> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppTheme.errorCoral,
             behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         );
       }
@@ -351,49 +387,40 @@ class _ForgotPasswordFormState extends State<_ForgotPasswordForm> {
       children: [
         Text(
           'Reset Password',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+          style: TextStyle(
+            fontSize: 22,
             fontWeight: FontWeight.bold,
+            color: AppTheme.textPrimary,
           ),
         ),
         const SizedBox(height: 8),
         Text(
           'Enter your email to receive a password reset link.',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Colors.grey[600],
+          style: TextStyle(
+            color: AppTheme.textSecondary,
           ),
         ),
         const SizedBox(height: 24),
         Form(
           key: _resetFormKey,
-          child: CustomTextField(
+          child: GlassTextField(
             controller: _emailResetController,
             label: 'Email Address',
-            prefixIcon: const Icon(Icons.email_outlined),
+            prefixIcon: Icon(Icons.email_outlined, color: AppTheme.textSecondary),
             keyboardType: TextInputType.emailAddress,
             validator: (v) {
-              if (v == null || v.isEmpty) return 'Required';
-              if (!v.contains('@')) return 'Invalid email';
+              if (v == null || v.isEmpty) return 'Email is required';
+              if (!v.contains('@')) return 'Enter a valid email';
               return null;
             },
           ),
         ),
         const SizedBox(height: 24),
-        SizedBox(
+        GradientButton(
+          text: 'Send Reset Link',
+          isLoading: _isLoading,
           width: double.infinity,
-          height: 50,
-          child: ElevatedButton(
-            onPressed: _isLoading ? null : _sendResetLink,
-            style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-            child: _isLoading 
-                ? const SizedBox(
-                    width: 20, 
-                    height: 20, 
-                    child: CircularProgressIndicator(strokeWidth: 2)
-                  )
-                : const Text('Send Reset Link'),
-          ),
+          onPressed: _sendResetLink,
         ),
         const SizedBox(height: 24),
       ],

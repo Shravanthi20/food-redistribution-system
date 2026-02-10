@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/ngo_provider.dart';
-import '../../providers/auth_provider.dart';
 import '../../models/food_request.dart';
 import '../../services/matching_service.dart';
 

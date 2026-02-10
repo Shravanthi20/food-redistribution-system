@@ -7,6 +7,7 @@ import '../services/notification_service.dart';
 import '../services/audit_service.dart';
 import '../models/enums.dart';
 import '../models/tracking/location_tracking_model.dart';
+import '../config/firebase_schema.dart';
 
 export '../models/enums.dart' show TrackingStatus, GeofenceType;
 export '../models/tracking/location_tracking_model.dart';
@@ -205,8 +206,8 @@ class RealTimeTrackingService {
   /// Set up geofences for task locations
   Future<void> _setupGeofences(String taskId) async {
     try {
-      final taskDoc = await _firestoreService.getDocument('delivery_tasks', taskId);
-      if (taskDoc == null) return;
+      final taskDoc = await _firestoreService.get('delivery_tasks', taskId);
+      if (!taskDoc.exists) return;
       
       final taskData = taskDoc.data() as Map<String, dynamic>;
       final geofences = <Geofence>[];
@@ -266,7 +267,7 @@ class RealTimeTrackingService {
           case GeofenceType.pickup:
             // Check if food has been collected
             final taskDoc = await _firestoreService.get('delivery_tasks', taskId);
-            final taskData = taskDoc?.data() as Map<String, dynamic>?;
+            final taskData = taskDoc.data() as Map<String, dynamic>?;
             final isCollected = taskData?['foodCollected'] == true;
             
             return isCollected ? TrackingStatus.collected : TrackingStatus.atPickup;
@@ -569,18 +570,6 @@ class RealTimeTrackingService {
     );
   }
   
-  int _countStatusChanges(List<LocationUpdate> history) {
-    if (history.length < 2) return 0;
-    
-    int changes = 0;
-    for (int i = 1; i < history.length; i++) {
-      if (history[i].status != history[i-1].status) {
-        changes++;
-      }
-    }
-    return changes;
-  }
-  
   /// Store tracking metrics for analytics
   Future<void> _storeTrackingMetrics(TrackingMetrics metrics) async {
     await _firestoreService.create('tracking_metrics', 'metrics_${DateTime.now().millisecondsSinceEpoch}', metrics.toMap());
@@ -589,20 +578,20 @@ class RealTimeTrackingService {
   /// Get real-time tracking stream for a task
   Stream<DocumentSnapshot> getTrackingStream(String taskId) {
     return FirebaseFirestore.instance
-        .collection('real_time_tracking')
+        .collection(Collections.tracking)
         .doc(taskId)
         .snapshots();
   }
   
   /// Get tracking history for a task
   Future<List<LocationUpdate>> getTrackingHistory(String taskId) async {
-    final docs = await _firestoreService.queryCollection(
-      'location_updates',
-      where: [{'field': 'taskId', 'operator': '==', 'value': taskId}],
-      orderBy: [{'field': 'timestamp', 'descending': false}],
-    );
+    final snapshot = await FirebaseFirestore.instance
+        .collection(Collections.tracking)
+        .where('taskId', isEqualTo: taskId)
+        .orderBy('timestamp')
+        .get();
     
-    return docs.map((doc) => LocationUpdate.fromMap(doc.data() as Map<String, dynamic>)).toList();
+    return snapshot.docs.map((doc) => LocationUpdate.fromMap(doc.data())).toList();
   }
   
   /// Dispose resources

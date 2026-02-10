@@ -258,25 +258,80 @@ SECURITY RULES:
 */
 
 class FirestoreCollections {
-  // Collection names as constants
+  // ============================================================
+  // NEW SCHEMA v2.0 - Primary collection names
+  // ============================================================
   static const String users = 'users';
-  static const String donorProfiles = 'donor_profiles';
-  static const String ngoProfiles = 'ngo_profiles';
-  static const String volunteerProfiles = 'volunteer_profiles';
-  static const String adminProfiles = 'admin_profiles';
-  static const String foodDonations = 'food_donations';
-  static const String verificationSubmissions = 'verification_submissions';
-  static const String adminTasks = 'admin_tasks';
-  static const String auditLogs = 'audit_logs';
-  static const String securityLogs = 'security_logs';
-  static const String userSessions = 'user_sessions';
-  static const String securityEvents = 'security_events';
-  static const String securityAlerts = 'security_alerts';
+  static const String organizations = 'organizations';
+  static const String donations = 'donations';
+  static const String deliveries = 'deliveries';
+  static const String requests = 'requests';
+  static const String assignments = 'assignments';
+  static const String tracking = 'tracking';
   static const String notifications = 'notifications';
-  static const String donationTracking = 'donation_tracking';
-  static const String donationAssignments = 'donation_assignments';
-  static const String verificationLogs = 'verification_logs';
+  static const String verifications = 'verifications';
+  static const String audit = 'audit';
+  static const String security = 'security';
+  static const String analytics = 'analytics';
+  static const String matching = 'matching';
+  static const String adminTasks = 'admin_tasks';
+  static const String system = 'system';
+  
+  // ============================================================
+  // LEGACY ALIASES - For backward compatibility during migration
+  // These will be deprecated after full migration
+  // ============================================================
+  @Deprecated('Use organizations instead')
+  static const String ngoProfiles = 'organizations';
+  
+  @Deprecated('Use users with profile.role=donor instead')
+  static const String donorProfiles = 'users';
+  
+  @Deprecated('Use users with profile.role=volunteer instead')
+  static const String volunteerProfiles = 'users';
+  
+  @Deprecated('Use donations instead')
+  static const String foodDonations = 'donations';
+  
+  @Deprecated('Use verifications instead')
+  static const String verificationSubmissions = 'verifications';
+  
+  @Deprecated('Use audit instead')
+  static const String auditLogs = 'audit';
+  
+  @Deprecated('Use security instead')
+  static const String securityLogs = 'security';
+  
+  @Deprecated('Use security instead')
+  static const String securityEvents = 'security';
+  
+  @Deprecated('Use security instead')
+  static const String securityAlerts = 'security';
+  
+  @Deprecated('Use tracking instead')
+  static const String donationTracking = 'tracking';
+  
+  @Deprecated('Use assignments instead')
+  static const String donationAssignments = 'assignments';
+  
+  @Deprecated('Use audit instead')
+  static const String verificationLogs = 'audit';
+  
+  @Deprecated('Use users subcollection instead')
+  static const String userSessions = 'users';
+  
+  @Deprecated('Use users subcollection instead')
+  static const String adminProfiles = 'users';
   
   // Subcollections
-  static const String userNotifications = 'notifications';
+  static const String userNotifications = 'items';
+  static const String tokens = 'tokens';
+  static const String settings = 'settings';
+  static const String branches = 'branches';
+  static const String history = 'history';
+  static const String messages = 'messages';
+  static const String checkpoints = 'checkpoints';
+  static const String locations = 'locations';
+  static const String results = 'results';
+  static const String daily = 'daily';
 }

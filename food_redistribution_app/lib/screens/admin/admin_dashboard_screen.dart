@@ -8,6 +8,9 @@ import '../../models/food_donation.dart';
 import './admin_dashboard_rail.dart';
 import '../../services/verification_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../utils/app_theme.dart';
+import '../../widgets/glass_widgets.dart';
+import '../../widgets/gradient_scaffold.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({Key? key}) : super(key: key);
@@ -39,71 +42,107 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     final provider = context.watch<AdminDashboardProvider>();
     final isDesktop = MediaQuery.of(context).size.width > 900;
 
-    return Scaffold(
-      body: Row(
-        children: [
-          if (isDesktop)
-            AdminDashboardRail(
-              selectedIndex: _selectedIndex,
-              onDestinationSelected: (index) {
-                setState(() => _selectedIndex = index);
-              },
-            ),
-          Expanded(
-            child: Scaffold(
-              appBar: AppBar(
-                title: Text(_getTitle()),
-                elevation: 0,
-                backgroundColor: Colors.transparent,
-                titleTextStyle: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                actions: [
-                  Consumer<ThemeProvider>(
-                    builder: (context, themeProvider, child) {
-                      return IconButton(
-                        icon: Icon(themeProvider.isDarkMode ? Icons.light_mode : Icons.dark_mode),
-                        onPressed: () => themeProvider.toggleTheme(),
-                        tooltip: 'Toggle Theme',
-                      );
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.refresh),
-                    onPressed: () => provider.loadDashboardData(),
-                    tooltip: 'Refresh Data',
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.logout),
-                    onPressed: () => _handleSignOut(context),
-                    tooltip: 'Sign Out',
-                  ),
-                  const SizedBox(width: 8),
-                ],
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppTheme.primaryNavy,
+            AppTheme.primaryNavyLight,
+            AppTheme.primaryNavyMedium,
+          ],
+        ),
+      ),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Row(
+          children: [
+            if (isDesktop)
+              AdminDashboardRail(
+                selectedIndex: _selectedIndex,
+                onDestinationSelected: (index) {
+                  setState(() => _selectedIndex = index);
+                },
               ),
-              body: provider.isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : _buildBody(provider),
-              bottomNavigationBar: !isDesktop
-                  ? BottomNavigationBar(
-                      currentIndex: _selectedIndex,
-                      onTap: (index) => setState(() => _selectedIndex = index),
-                      type: BottomNavigationBarType.fixed,
-                      items: const [
-                        BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Overview'),
-                        BottomNavigationBarItem(icon: Icon(Icons.verified_user), label: 'Verify'),
-                        BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Gov'),
-                        BottomNavigationBarItem(icon: Icon(Icons.swap_calls), label: 'Manual'),
-                        BottomNavigationBarItem(icon: Icon(Icons.analytics), label: 'Stats'),
-                        BottomNavigationBarItem(icon: Icon(Icons.hub), label: 'Matching'),
-                        BottomNavigationBarItem(icon: Icon(Icons.history_edu), label: 'Audit'),
-                      ],
-                    )
-                  : null,
+            Expanded(
+              child: Scaffold(
+                backgroundColor: Colors.transparent,
+                appBar: AppBar(
+                  title: Text(_getTitle()),
+                  elevation: 0,
+                  backgroundColor: Colors.transparent,
+                  titleTextStyle: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.accentTeal,
+                    fontSize: 22,
+                  ),
+                  iconTheme: const IconThemeData(color: Colors.white),
+                  actions: [
+                    Consumer<ThemeProvider>(
+                      builder: (context, themeProvider, child) {
+                        return IconButton(
+                          icon: Icon(
+                            themeProvider.isDarkMode ? Icons.light_mode : Icons.dark_mode,
+                            color: Colors.white.withOpacity(0.8),
+                          ),
+                          onPressed: () => themeProvider.toggleTheme(),
+                          tooltip: 'Toggle Theme',
+                        );
+                      },
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.refresh, color: Colors.white.withOpacity(0.8)),
+                      onPressed: () => provider.loadDashboardData(),
+                      tooltip: 'Refresh Data',
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.logout, color: Colors.white.withOpacity(0.8)),
+                      onPressed: () => _handleSignOut(context),
+                      tooltip: 'Sign Out',
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                ),
+                body: provider.isLoading
+                    ? const Center(child: CircularProgressIndicator(color: AppTheme.accentTeal))
+                    : _buildBody(provider),
+                bottomNavigationBar: !isDesktop
+                    ? Container(
+                        decoration: BoxDecoration(
+                          color: AppTheme.primaryNavy.withOpacity(0.95),
+                          border: Border(
+                            top: BorderSide(
+                              color: AppTheme.accentTeal.withOpacity(0.3),
+                              width: 1,
+                            ),
+                          ),
+                        ),
+                        child: BottomNavigationBar(
+                          currentIndex: _selectedIndex,
+                          onTap: (index) => setState(() => _selectedIndex = index),
+                          type: BottomNavigationBarType.fixed,
+                          backgroundColor: Colors.transparent,
+                          selectedItemColor: AppTheme.accentTeal,
+                          unselectedItemColor: Colors.white.withOpacity(0.5),
+                          selectedLabelStyle: const TextStyle(fontSize: 10),
+                          unselectedLabelStyle: const TextStyle(fontSize: 10),
+                          items: const [
+                            BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Overview'),
+                            BottomNavigationBarItem(icon: Icon(Icons.verified_user), label: 'Verify'),
+                            BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Gov'),
+                            BottomNavigationBarItem(icon: Icon(Icons.swap_calls), label: 'Manual'),
+                            BottomNavigationBarItem(icon: Icon(Icons.analytics), label: 'Stats'),
+                            BottomNavigationBarItem(icon: Icon(Icons.hub), label: 'Matching'),
+                            BottomNavigationBarItem(icon: Icon(Icons.history_edu), label: 'Audit'),
+                          ],
+                        ),
+                      )
+                    : null,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -296,12 +335,23 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       length: 2,
       child: Column(
         children: [
-          const TabBar(
-            tabs: [
-              Tab(text: 'NGO Certificates'),
-              Tab(text: 'High-Volume Donors'),
-            ],
-            labelColor: Colors.blue,
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: TabBar(
+              tabs: const [
+                Tab(text: 'NGO Certificates'),
+                Tab(text: 'High-Volume Donors'),
+              ],
+              labelColor: AppTheme.accentTeal,
+              unselectedLabelColor: Colors.white.withOpacity(0.6),
+              indicatorColor: AppTheme.accentTeal,
+              indicatorSize: TabBarIndicatorSize.tab,
+              dividerColor: Colors.transparent,
+            ),
           ),
           Expanded(
             child: TabBarView(
@@ -319,33 +369,72 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   Widget _buildVerificationList(AdminDashboardProvider provider, UserRole role) {
     final list = (provider.pendingVerifications ?? []).where((v) => v['user'] != null && v['user']['role'] == role.name).toList();
     if (list.isEmpty) {
-      return const Center(child: Text('No pending verifications for this role'));
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.verified_user_outlined, size: 64, color: Colors.white.withOpacity(0.3)),
+            const SizedBox(height: 16),
+            Text(
+              'No pending verifications for this role',
+              style: TextStyle(color: Colors.white.withOpacity(0.6)),
+            ),
+          ],
+        ),
+      );
     }
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: list.length,
       itemBuilder: (context, index) {
         final item = list[index];
-        return Card(
+        return GlassContainer(
           margin: const EdgeInsets.only(bottom: 12),
-          child: ListTile(
-            leading: const CircleAvatar(child: Icon(Icons.description)),
-            title: Text(item['user']['email'] ?? 'No Email'),
-            subtitle: Text('Submitted: ${_formatDate(item['submission']['submittedAt'])}'),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.check_circle, color: Colors.green),
-                  onPressed: () => _handleReview(context, item['id'], VerificationStatus.approved),
+          padding: const EdgeInsets.all(16),
+          borderRadius: 12,
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppTheme.accentTeal.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.cancel, color: Colors.red),
-                  onPressed: () => _handleReview(context, item['id'], VerificationStatus.rejected),
+                child: const Icon(Icons.description, color: AppTheme.accentTeal),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item['user']['email'] ?? 'No Email',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Submitted: ${_formatDate(item['submission']['submittedAt'])}',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.6),
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            onTap: () => Navigator.pushNamed(context, '/admin/verify-user', arguments: item),
+              ),
+              IconButton(
+                icon: const Icon(Icons.check_circle, color: AppTheme.successTeal, size: 28),
+                onPressed: () => _handleReview(context, item['id'], VerificationStatus.approved),
+              ),
+              IconButton(
+                icon: const Icon(Icons.cancel, color: AppTheme.errorCoral, size: 28),
+                onPressed: () => _handleReview(context, item['id'], VerificationStatus.rejected),
+              ),
+            ],
           ),
         );
       },
@@ -358,31 +447,62 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       padding: const EdgeInsets.all(24),
       child: Column(
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: 'Search by email or name...',
-                    prefixIcon: const Icon(Icons.search),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          GlassContainer(
+            padding: const EdgeInsets.all(16),
+            borderRadius: 12,
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _searchController,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: 'Search by email or name...',
+                      hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+                      prefixIcon: Icon(Icons.search, color: Colors.white.withOpacity(0.6)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppTheme.accentTeal),
+                      ),
+                      filled: true,
+                      fillColor: Colors.white.withOpacity(0.05),
+                    ),
+                    onSubmitted: (val) => provider.searchUsers(val),
                   ),
-                  onSubmitted: (val) => provider.searchUsers(val),
                 ),
-              ),
-              const SizedBox(width: 16),
-              ElevatedButton.icon(
-                onPressed: () => provider.searchUsers(_searchController.text),
-                icon: const Icon(Icons.search),
-                label: const Text('Search'),
-              ),
-            ],
+                const SizedBox(width: 16),
+                GradientButton(
+                  onPressed: () => provider.searchUsers(_searchController.text),
+                  text: 'Search',
+                  icon: Icons.search,
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 24),
           Expanded(
             child: (provider.allUsers ?? []).isEmpty 
-              ? const Center(child: Text('Search for users to manage roles and restrictions'))
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.people_outline, size: 64, color: Colors.white.withOpacity(0.3)),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Search for users to manage roles and restrictions',
+                        style: TextStyle(color: Colors.white.withOpacity(0.6)),
+                      ),
+                    ],
+                  ),
+                )
               : ListView.builder(
                   itemCount: provider.allUsers.length,
                   itemBuilder: (context, index) {
@@ -399,26 +519,53 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   // --- TAB 4: MANUAL OVERRIDES ---
   Widget _buildOverridesTab(AdminDashboardProvider provider) {
     if ((provider.unmatchedDonations ?? []).isEmpty) {
-       return const Center(child: Text('All donations are currently matched or non-pending.'));
+       return Center(
+         child: Column(
+           mainAxisAlignment: MainAxisAlignment.center,
+           children: [
+             Icon(Icons.check_circle_outline, size: 64, color: Colors.white.withOpacity(0.3)),
+             const SizedBox(height: 16),
+             Text(
+               'All donations are currently matched or non-pending.',
+               style: TextStyle(color: Colors.white.withOpacity(0.6)),
+             ),
+           ],
+         ),
+       );
     }
     return ListView.builder(
       padding: const EdgeInsets.all(24),
       itemCount: provider.unmatchedDonations.length,
       itemBuilder: (context, index) {
         final donation = provider.unmatchedDonations[index];
-        return Card(
+        return GlassContainer(
           margin: const EdgeInsets.only(bottom: 16),
-          child: ExpansionTile(
-            leading: const Icon(Icons.warning, color: Colors.orange),
-            title: Text(donation.title),
-            subtitle: Text('Status: ${donation.status.name} • Available Until: ${_formatDate(donation.availableUntil)}'),
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Pickup: ${donation.pickupAddress}'),
+          borderRadius: 12,
+          child: Theme(
+            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+            child: ExpansionTile(
+              leading: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppTheme.warningAmber.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(Icons.warning, color: AppTheme.warningAmber),
+              ),
+              title: Text(donation.title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              subtitle: Text(
+                'Status: ${donation.status.name} • Available Until: ${_formatDate(donation.availableUntil)}',
+                style: TextStyle(color: Colors.white.withOpacity(0.6)),
+              ),
+              iconColor: Colors.white.withOpacity(0.6),
+              collapsedIconColor: Colors.white.withOpacity(0.6),
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Pickup: ${donation.pickupAddress}', style: TextStyle(color: Colors.white.withOpacity(0.8))),
                     const SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -436,9 +583,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       ],
                     ),
                   ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
@@ -529,65 +677,85 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   }
 
   Widget _buildMetricCard(String title, String value, IconData icon, Color color) {
-    return Container(
+    return GlassContainer(
       width: 250,
       padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withOpacity(0.3)),
-      ),
+      borderRadius: 16,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: color, size: 32),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: color, size: 28),
+          ),
           const SizedBox(height: 16),
-          Text(value, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
-          Text(title, style: TextStyle(color: Colors.grey.shade600)),
+          Text(value, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white)),
+          const SizedBox(height: 4),
+          Text(title, style: TextStyle(color: Colors.white.withOpacity(0.6))),
         ],
       ),
     );
   }
 
   Widget _buildSectionCard({required String title, required IconData icon, required Widget child}) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(icon, size: 20, color: Theme.of(context).colorScheme.primary),
-                const SizedBox(width: 12),
-                Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-              ],
-            ),
-            const Divider(height: 32),
-            child,
-          ],
-        ),
+    return GlassContainer(
+      padding: const EdgeInsets.all(20),
+      borderRadius: 16,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 20, color: AppTheme.accentTeal),
+              const SizedBox(width: 12),
+              Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white)),
+            ],
+          ),
+          Divider(height: 32, color: Colors.white.withOpacity(0.2)),
+          child,
+        ],
       ),
     );
   }
 
   Widget _buildAuditTile(Map<String, dynamic> log, {bool showDetails = false}) {
-    return ListTile(
-      leading: const Icon(Icons.notification_important_outlined),
-      title: Text(log['eventType'] ?? log['action'] ?? 'System Event'),
-      subtitle: Text('User: ${log['userId'] ?? 'System'} • IP: ${log['ipAddress'] ?? 'N/A'}'),
-      trailing: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.end,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
         children: [
-          Text(_formatDate(log['timestamp']), style: const TextStyle(fontSize: 12)),
-          if (showDetails)
-             Text(log['riskLevel'] ?? 'low', style: TextStyle(
-               color: _getRiskColor(log['riskLevel']),
-               fontSize: 10,
-               fontWeight: FontWeight.bold,
-             )),
+          Icon(Icons.notification_important_outlined, color: Colors.white.withOpacity(0.6), size: 20),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  log['eventType'] ?? log['action'] ?? 'System Event',
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                ),
+                Text(
+                  'User: ${log['userId'] ?? 'System'} • IP: ${log['ipAddress'] ?? 'N/A'}',
+                  style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(_formatDate(log['timestamp']), style: TextStyle(fontSize: 11, color: Colors.white.withOpacity(0.5))),
+              if (showDetails)
+                 Text(log['riskLevel'] ?? 'low', style: TextStyle(
+                   color: _getRiskColor(log['riskLevel']),
+                   fontSize: 10,
+                   fontWeight: FontWeight.bold,
+                 )),
+            ],
+          ),
         ],
       ),
     );
@@ -600,9 +768,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         children: [
           CircleAvatar(radius: 4, backgroundColor: color),
           const SizedBox(width: 12),
-          Text(name),
+          Text(name, style: const TextStyle(color: Colors.white)),
           const Spacer(),
-          Text(status, style: TextStyle(color: color, fontWeight: FontWeight.bold)),
+          Text(status, style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 13)),
         ],
       ),
     );
@@ -629,22 +797,59 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   }
 
   Widget _buildUserGovernanceCard(Map<String, dynamic> user) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        leading: const CircleAvatar(child: Icon(Icons.person)),
-        title: Text(user['email'] ?? user['emailAddress'] ?? 'No Email'),
-        subtitle: Text('Role: ${user['role']} • Status: ${user['status']}'),
-        trailing: PopupMenuButton<String>(
-          onSelected: (val) {
-             if (val == 'suspend') _handleSuspendUser(user['id']);
-          },
-          itemBuilder: (context) => [
-            const PopupMenuItem(value: 'suspend', child: Text('Suspend (7 Days)')),
-            const PopupMenuItem(value: 'restrict', child: Text('Restrict Role')),
-            const PopupMenuItem(value: 'history', child: Text('Audit History')),
-          ],
-        ),
+    return GlassContainer(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      borderRadius: 12,
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppTheme.accentCyan.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(Icons.person, color: AppTheme.accentCyan),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  user['email'] ?? user['emailAddress'] ?? 'No Email',
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Role: ${user['role']} • Status: ${user['status']}',
+                  style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 13),
+                ),
+              ],
+            ),
+          ),
+          PopupMenuButton<String>(
+            icon: Icon(Icons.more_vert, color: Colors.white.withOpacity(0.6)),
+            color: AppTheme.primaryNavyLight,
+            onSelected: (val) {
+               if (val == 'suspend') _handleSuspendUser(user['id']);
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'suspend',
+                child: Text('Suspend (7 Days)', style: TextStyle(color: Colors.white.withOpacity(0.9))),
+              ),
+              PopupMenuItem(
+                value: 'restrict',
+                child: Text('Restrict Role', style: TextStyle(color: Colors.white.withOpacity(0.9))),
+              ),
+              PopupMenuItem(
+                value: 'history',
+                child: Text('Audit History', style: TextStyle(color: Colors.white.withOpacity(0.9))),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

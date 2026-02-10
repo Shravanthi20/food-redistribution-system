@@ -4,6 +4,9 @@ import '../../models/food_donation.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/donation_provider.dart';
 import '../../utils/app_router.dart';
+import '../../utils/app_theme.dart';
+import '../../widgets/gradient_scaffold.dart';
+import '../../widgets/glass_widgets.dart';
 
 class VolunteerDashboard extends StatefulWidget {
   const VolunteerDashboard({Key? key}) : super(key: key);
@@ -20,7 +23,6 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
 
   int selectedIndex = 0;
 
-  // ✅ Time slot feature
   final List<String> timeSlots = [
     "Morning (6AM-12PM)",
     "Afternoon (12PM-5PM)",
@@ -35,10 +37,16 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
     final user = Provider.of<AuthProvider>(context).appUser;
     final donationProvider = Provider.of<DonationProvider>(context, listen: false);
 
-    if (user == null) return const Center(child: CircularProgressIndicator());
+    if (user == null) {
+      return GradientScaffold(
+        body: Center(
+          child: CircularProgressIndicator(color: AppTheme.accentTeal),
+        ),
+      );
+    }
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF7F9FC),
+    return GradientScaffold(
+      showAnimatedBackground: true,
       body: SafeArea(
         child: Column(
           children: [
@@ -51,7 +59,7 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                   children: [
                     _statusCard(),
                     const SizedBox(height: 16),
-                    _newRequestsSection(donationProvider, user.uid), // [NEW]
+                    _newRequestsSection(donationProvider, user.uid),
                     const SizedBox(height: 20),
                     _activeTasksSection(donationProvider, user.uid),
                     const SizedBox(height: 20),
@@ -77,86 +85,102 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: Colors.orange.shade100,
-                borderRadius: BorderRadius.circular(8),
+                color: AppTheme.warningAmber.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: AppTheme.warningAmber.withOpacity(0.3)),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.notification_important, size: 16, color: Colors.orange.shade900),
+                  Icon(Icons.notification_important_rounded, size: 16, color: AppTheme.warningAmber),
                   const SizedBox(width: 8),
                   Text(
-                    "YOU HAVE NEW ASSIGNMENTS!",
+                    "NEW ASSIGNMENTS",
                     style: TextStyle(
-                      color: Colors.orange.shade900, 
-                      fontWeight: FontWeight.bold, 
-                      fontSize: 12
+                      color: AppTheme.warningAmber, 
+                      fontWeight: FontWeight.w600, 
+                      fontSize: 12,
+                      letterSpacing: 0.5,
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 14),
             ...snapshot.data!.map((assignment) {
               final donationId = assignment['donationId'];
               final assignmentId = assignment['assignmentId'];
               
-              // Fetch Donation Details for this assignment
               return StreamBuilder<FoodDonation?>(
                 stream: provider.getDonationStream(donationId),
                 builder: (context, docSnapshot) {
                   if (!docSnapshot.hasData) return const SizedBox.shrink();
                   final donation = docSnapshot.data!;
                   
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(color: Colors.orange, width: 2),
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.orange.withOpacity(0.1),
-                          blurRadius: 8,
-                          offset: const Offset(0, 4)
-                        )
-                      ],
-                    ),
+                  return GlassContainer(
+                    margin: const EdgeInsets.only(bottom: 14),
+                    padding: const EdgeInsets.all(18),
+                    tintColor: AppTheme.warningAmber,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text("MATCHED — ACTION REQUIRED", style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold, fontSize: 12)),
-                        const SizedBox(height: 8),
-                        Text(donation.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                        const SizedBox(height: 4),
-                        Text("${donation.quantity} ${donation.unit} from Anonymous Donor", style: TextStyle(color: Colors.grey[600])),
-                         const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: AppTheme.warningAmber.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            "MATCHED — ACTION REQUIRED",
+                            style: TextStyle(
+                              color: AppTheme.warningAmber,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 11,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          donation.title,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 17,
+                            color: AppTheme.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          "${donation.quantity} ${donation.unit} from Anonymous Donor",
+                          style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+                        ),
+                        const SizedBox(height: 18),
                         Row(
                           children: [
                             Expanded(
-                              child: ElevatedButton(
+                              child: GradientButton(
+                                text: 'Accept',
+                                icon: Icons.check_rounded,
                                 onPressed: () async {
                                   await provider.acceptAssignment(assignmentId, donationId, userId);
                                 },
-                                style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                                child: const Text("Accept"),
                               ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
-                              child: OutlinedButton(
+                              child: GradientButton(
+                                text: 'Decline',
+                                outlined: true,
+                                gradientColors: [AppTheme.errorCoral, AppTheme.errorCoral],
                                 onPressed: () async {
-                                   await provider.rejectAssignment(assignmentId, donationId, userId, "User declined");
+                                  await provider.rejectAssignment(assignmentId, donationId, userId, "User declined");
                                 },
-                                style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
-                                child: const Text("Decline"),
                               ),
                             ),
                           ],
-                        )
+                        ),
                       ],
                     ),
                   );
@@ -174,17 +198,24 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
     return StreamBuilder<List<FoodDonation>>(
       stream: provider.getVolunteerTasksStream(userId),
       builder: (context, snapshot) {
-         if (!snapshot.hasData || snapshot.data!.isEmpty) return const SizedBox.shrink();
-         
-         final tasks = snapshot.data!;
-         return Column(
-           crossAxisAlignment: CrossAxisAlignment.start,
-           children: [
-             const Text("My Active Tasks", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-             const SizedBox(height: 12),
-             ...tasks.map((task) => _taskCard(context, task, isActive: true)).toList(),
-           ],
-         );
+        if (!snapshot.hasData || snapshot.data!.isEmpty) return const SizedBox.shrink();
+        
+        final tasks = snapshot.data!;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "My Active Tasks",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 14),
+            ...tasks.map((task) => _taskCard(context, task, isActive: true)).toList(),
+          ],
+        );
       },
     );
   }
@@ -195,15 +226,29 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _availableTasksHeader(),
-        const SizedBox(height: 12),
+        const SizedBox(height: 14),
         StreamBuilder<List<FoodDonation>>(
           stream: provider.getAvailableDonationsStream(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
+              return Center(
+                child: CircularProgressIndicator(color: AppTheme.accentTeal),
+              );
             }
             if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Center(child: Text("No available tasks nearby."));
+              return GlassContainer(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  children: [
+                    Icon(Icons.inbox_rounded, size: 48, color: AppTheme.textMuted),
+                    const SizedBox(height: 12),
+                    Text(
+                      "No available tasks nearby",
+                      style: TextStyle(color: AppTheme.textSecondary, fontSize: 15),
+                    ),
+                  ],
+                ),
+              );
             }
 
             return Column(
@@ -218,63 +263,80 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
   // ================= HEADER =================
   Widget _topHeader(String name) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       child: Row(
         children: [
-          const CircleAvatar(
-            radius: 22,
-            backgroundImage: AssetImage("assets/images/profile.jpg"),
+          Container(
+            padding: const EdgeInsets.all(3),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                colors: [AppTheme.accentTeal, AppTheme.accentCyan],
+              ),
+            ),
+            child: CircleAvatar(
+              radius: 22,
+              backgroundColor: AppTheme.primaryNavyLight,
+              child: Icon(Icons.person_rounded, color: AppTheme.accentTeal),
+            ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   "Good morning,",
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                  style: TextStyle(fontSize: 12, color: AppTheme.textMuted),
                 ),
                 Text(
                   name,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 17, 
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.textPrimary,
+                  ),
                 ),
               ],
             ),
           ),
-          PopupMenuButton<String>(
-            onSelected: (value) async {
-              if (value == 'profile') {
-                Navigator.pushNamed(context, AppRouter.volunteerProfile);
-              } else if (value == 'logout') {
-                final auth = Provider.of<AuthProvider>(context, listen: false);
-                await auth.signOut();
-                Navigator.pushNamedAndRemoveUntil(context, AppRouter.login, (route) => false);
-              }
+          GlassIconButton(
+            icon: Icons.more_vert_rounded,
+            size: 40,
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                backgroundColor: Colors.transparent,
+                builder: (context) => GlassBottomSheet(
+                  child: ListView(
+                    shrinkWrap: true,
+                    padding: const EdgeInsets.all(20),
+                    children: [
+                      ListTile(
+                        leading: Icon(Icons.person_rounded, color: AppTheme.accentTeal),
+                        title: Text('Edit Profile', style: TextStyle(color: AppTheme.textPrimary)),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.pushNamed(context, AppRouter.volunteerProfile);
+                        },
+                      ),
+                      Divider(color: AppTheme.surfaceGlassBorder),
+                      ListTile(
+                        leading: Icon(Icons.logout_rounded, color: AppTheme.errorCoral),
+                        title: Text('Sign Out', style: TextStyle(color: AppTheme.errorCoral)),
+                        onTap: () async {
+                          Navigator.pop(context);
+                          final auth = Provider.of<AuthProvider>(context, listen: false);
+                          await auth.signOut();
+                          Navigator.pushNamedAndRemoveUntil(context, AppRouter.login, (route) => false);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              );
             },
-            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-              const PopupMenuItem<String>(
-                value: 'profile',
-                child: Row(
-                  children: [
-                    Icon(Icons.person, color: Colors.black54),
-                    SizedBox(width: 8),
-                    Text('Edit Profile'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem<String>(
-                value: 'logout',
-                child: Row(
-                  children: [
-                    Icon(Icons.logout, color: Colors.red),
-                    SizedBox(width: 8),
-                    Text('Sign Out', style: TextStyle(color: Colors.red)),
-                  ],
-                ),
-              ),
-            ],
-            icon: const Icon(Icons.more_vert),
-          )
+          ),
         ],
       ),
     );
@@ -282,12 +344,8 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
 
   // ================= STATUS CARD =================
   Widget _statusCard() {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-      ),
+    return GlassContainer(
+      padding: const EdgeInsets.all(18),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -296,29 +354,58 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
             children: [
               Row(
                 children: [
-                  const Text(
-                    "Current Status: ",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
                   Text(
-                    isOnline ? "Online" : "Offline",
+                    "Status: ",
                     style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: isOnline ? Colors.green : Colors.grey,
+                      fontWeight: FontWeight.w500,
+                      color: AppTheme.textSecondary,
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: isOnline 
+                        ? AppTheme.successTeal.withOpacity(0.15)
+                        : AppTheme.textMuted.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: isOnline ? AppTheme.successTeal : AppTheme.textMuted,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          isOnline ? "Online" : "Offline",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                            color: isOnline ? AppTheme.successTeal : AppTheme.textMuted,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 4),
-              const Text(
+              const SizedBox(height: 8),
+              Text(
                 "Visible to nearby surplus tasks",
-                style: TextStyle(fontSize: 12, color: Colors.grey),
+                style: TextStyle(fontSize: 12, color: AppTheme.textMuted),
               ),
             ],
           ),
           Switch(
             value: isOnline,
-            activeColor: Colors.green,
+            activeColor: AppTheme.successTeal,
+            activeTrackColor: AppTheme.successTeal.withOpacity(0.3),
+            inactiveThumbColor: AppTheme.textMuted,
+            inactiveTrackColor: AppTheme.surfaceGlassDark,
             onChanged: (value) {
               setState(() {
                 isOnline = value;
@@ -335,125 +422,114 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Text(
+        Text(
           "Available Tasks",
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: Colors.green.withOpacity(0.15),
-            borderRadius: BorderRadius.circular(12),
+          style: TextStyle(
+            fontSize: 18, 
+            fontWeight: FontWeight.w600,
+            color: AppTheme.textPrimary,
           ),
-        )
+        ),
+        GlassBadge(text: 'Near You', color: AppTheme.accentTeal),
       ],
     );
   }
 
   // ================= TASK CARD =================
   Widget _taskCard(BuildContext context, FoodDonation task, {bool isActive = false}) {
-    return Container(
+    return GlassContainer(
       margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: isActive ? Border.all(color: Colors.green, width: 2) : null,
-      ),
+      padding: const EdgeInsets.all(18),
+      tintColor: isActive ? AppTheme.successTeal : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(14),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  isActive ? "IN PROGRESS" : "AVAILABLE",
-                  style: TextStyle(
-                    color: isActive ? Colors.green : Colors.blue,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  task.title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    const Icon(Icons.location_on, size: 16, color: Colors.grey),
-                    const SizedBox(width: 4),
-                    Text("~2.5 km", // Placeholder for actual distance calc
-                        style:
-                            const TextStyle(fontSize: 12, color: Colors.grey)),
-                    const SizedBox(width: 14),
-                    const Icon(Icons.timer, size: 16, color: Colors.grey),
-                    const SizedBox(width: 4),
-                    Text(task.isUrgent ? "Urgent" : "Normal",
-                        style:
-                            TextStyle(fontSize: 12, color: task.isUrgent ? Colors.red : Colors.grey)),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  "${task.quantity} ${task.unit} • ${task.foodTypes.map((e) => e.name).join(', ')}",
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
-                ),
-                const SizedBox(height: 14),
-                if (!isActive)
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                             Navigator.pushNamed(
-                               context, 
-                               AppRouter.acceptTask,
-                               arguments: task // Pass donation object
-                             );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: const Text("Accept Task"),
-                        ),
-                      ),
-                    ],
-                  )
-                else
-                   Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                             Navigator.pushNamed(
-                               context, 
-                               AppRouter.taskExecution, 
-                               arguments: {'donationId': task.id}
-                             );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: const Text("Continue Delivery"),
-                        ),
-                      ),
-                    ],
-                  )
-              ],
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            decoration: BoxDecoration(
+              color: isActive 
+                ? AppTheme.successTeal.withOpacity(0.15)
+                : AppTheme.accentCyan.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(8),
             ),
-          )
+            child: Text(
+              isActive ? "IN PROGRESS" : "AVAILABLE",
+              style: TextStyle(
+                color: isActive ? AppTheme.successTeal : AppTheme.accentCyan,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            task.title,
+            style: TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Icon(Icons.location_on_rounded, size: 16, color: AppTheme.textMuted),
+              const SizedBox(width: 4),
+              Text("~2.5 km", style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+              const SizedBox(width: 14),
+              Icon(Icons.schedule_rounded, size: 16, color: AppTheme.textMuted),
+              const SizedBox(width: 4),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: task.isUrgent ? AppTheme.errorCoral.withOpacity(0.15) : Colors.transparent,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  task.isUrgent ? "Urgent" : "Normal",
+                  style: TextStyle(
+                    fontSize: 12, 
+                    fontWeight: task.isUrgent ? FontWeight.w600 : FontWeight.normal,
+                    color: task.isUrgent ? AppTheme.errorCoral : AppTheme.textSecondary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            "${task.quantity} ${task.unit} • ${task.foodTypes.map((e) => e.name).join(', ')}",
+            style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+          ),
+          const SizedBox(height: 16),
+          if (!isActive)
+            GradientButton(
+              text: 'Accept Task',
+              icon: Icons.check_circle_rounded,
+              width: double.infinity,
+              onPressed: () {
+                Navigator.pushNamed(
+                  context, 
+                  AppRouter.acceptTask,
+                  arguments: task,
+                );
+              },
+            )
+          else
+            GradientButton(
+              text: 'Continue Delivery',
+              icon: Icons.local_shipping_rounded,
+              width: double.infinity,
+              gradientColors: [AppTheme.accentCyan, AppTheme.accentCyanSoft],
+              onPressed: () {
+                Navigator.pushNamed(
+                  context, 
+                  AppRouter.taskExecution, 
+                  arguments: {'donationId': task.id},
+                );
+              },
+            ),
         ],
       ),
     );

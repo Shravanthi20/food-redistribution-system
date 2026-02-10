@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // [NEW] for Timestamp
 import '../../models/food_donation.dart';
-import '../../services/user_service.dart';
 import '../../models/user.dart';
 import '../../providers/auth_provider.dart';
 import 'package:provider/provider.dart';
@@ -9,6 +8,7 @@ import '../../providers/donation_provider.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart'; // [NEW]
 import '../../widgets/live_tracking_map.dart'; // [NEW]
 import '../../utils/app_router.dart'; // [NEW]
+import '../../utils/app_theme.dart';
 import '../admin/user_selection_screen.dart';
 import '../../services/location_service.dart'; // Import LocationService
 
@@ -260,22 +260,22 @@ class DonationDetailScreen extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.blue.shade50,
+        color: AppTheme.infoCyan.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.blue.shade200),
+        border: Border.all(color: AppTheme.infoCyan.withOpacity(0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row( // Header
-             children: const [
-               Icon(Icons.location_searching, color: Colors.blue),
-               SizedBox(width: 8),
+             children: [
+               Icon(Icons.location_searching, color: AppTheme.infoCyan),
+               const SizedBox(width: 8),
                Text(
                  'Live Volunteer Location', 
-                 style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)
+                 style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.infoCyan)
                ),
-               Spacer(),
+               const Spacer(),
                // Blink indicator could go here
              ],
           ),
@@ -291,8 +291,6 @@ class DonationDetailScreen extends StatelessWidget {
               }
               
               final data = snapshot.data!;
-              final lat = data['latitude']?.toStringAsFixed(4) ?? '?';
-              final lng = data['longitude']?.toStringAsFixed(4) ?? '?';
               // Calculate last seen
               // final timestamp = data['timestamp'];
 

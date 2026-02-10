@@ -7,6 +7,7 @@
 
 # ---- Documentation ----
 *.md
+!README.md
 
 # ---- Generated / log .txt (keep docs/*.txt and CMakeLists.txt) ----
 analysis*.txt

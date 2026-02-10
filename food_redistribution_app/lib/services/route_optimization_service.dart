@@ -1,5 +1,4 @@
 import 'dart:math';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/firestore_service.dart';
 import '../services/location_service.dart';
 import '../services/audit_service.dart';
@@ -733,6 +732,6 @@ class RouteOptimizationEngine {
   
   /// Store optimization result for analytics
   Future<void> _storeOptimizationResult(OptimizedRoute route) async {
-    await _firestoreService.create('route_optimizations', route.toMap());
+    await _firestoreService.create('route_optimizations', route.id, route.toMap());
   }
 }

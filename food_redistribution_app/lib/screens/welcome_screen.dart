@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../utils/app_theme.dart';
+import '../widgets/gradient_scaffold.dart';
+import '../widgets/glass_widgets.dart';
 import 'auth/donor_registration_screen.dart';
 import 'auth/ngo_registration_screen.dart';
 import 'auth/volunteer_registration_screen.dart';
@@ -8,119 +11,134 @@ class WelcomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.green.shade50,
-              Colors.green.shade100,
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const SizedBox(height: 40),
-                // Logo and Title
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.green.withOpacity(0.3),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
-                      ),
+    return GradientScaffold(
+      showAnimatedBackground: true,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const SizedBox(height: 40),
+              // Glowing Logo
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      AppTheme.accentTeal.withOpacity(0.2),
+                      AppTheme.accentCyan.withOpacity(0.1),
                     ],
                   ),
-                  child: Icon(
-                    Icons.restaurant_menu,
-                    size: 60,
-                    color: Colors.green.shade600,
+                  border: Border.all(
+                    color: AppTheme.accentTeal.withOpacity(0.3),
+                    width: 2,
                   ),
-                ),
-                const SizedBox(height: 30),
-                Text(
-                  'Food Redistribution Platform',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.green.shade800,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  'Reducing food waste, feeding communities',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.green.shade600,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 50),
-                Text(
-                  'Choose your role to get started',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: Colors.green.shade700,
-                  ),
-                ),
-                const SizedBox(height: 30),
-                Expanded(
-                  child: ListView(
-                    children: [
-                      _buildRoleCard(
-                        context,
-                        title: 'Food Donor',
-                        description: 'Share surplus food with those in need',
-                        icon: Icons.volunteer_activism,
-                        color: Colors.blue,
-                        onTap: () => _navigateToRole(context, 'donor'),
-                      ),
-                      const SizedBox(height: 16),
-                      _buildRoleCard(
-                        context,
-                        title: 'NGO Partner',
-                        description: 'Connect with donors to help communities',
-                        icon: Icons.business_center,
-                        color: Colors.orange,
-                        onTap: () => _navigateToRole(context, 'ngo'),
-                      ),
-                      const SizedBox(height: 16),
-                      _buildRoleCard(
-                        context,
-                        title: 'Volunteer',
-                        description: 'Help with food collection and delivery',
-                        icon: Icons.delivery_dining,
-                        color: Colors.green,
-                        onTap: () => _navigateToRole(context, 'volunteer'),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Already have an account? ',
-                      style: TextStyle(color: Colors.green.shade600),
-                    ),
-                    TextButton(
-                      onPressed: () => _navigateToLogin(context),
-                      child: const Text('Sign In'),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.accentTeal.withOpacity(0.3),
+                      blurRadius: 30,
+                      spreadRadius: 5,
                     ),
                   ],
                 ),
-              ],
-            ),
+                child: const Icon(
+                  Icons.restaurant_menu_rounded,
+                  size: 52,
+                  color: AppTheme.accentTeal,
+                ),
+              ),
+              const SizedBox(height: 32),
+              // Title with gradient
+              ShaderMask(
+                shaderCallback: (bounds) => const LinearGradient(
+                  colors: [AppTheme.textPrimary, AppTheme.accentCyanSoft],
+                ).createShader(bounds),
+                child: const Text(
+                  'Food Redistribution',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Reducing waste, feeding communities',
+                style: TextStyle(
+                  fontSize: 15,
+                  color: AppTheme.textSecondary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 48),
+              Text(
+                'Choose your role',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: AppTheme.textTertiary,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Expanded(
+                child: ListView(
+                  children: [
+                    _buildRoleCard(
+                      context,
+                      title: 'Food Donor',
+                      description: 'Share surplus food with those in need',
+                      icon: Icons.volunteer_activism_rounded,
+                      color: AppTheme.accentCyan,
+                      onTap: () => _navigateToRole(context, 'donor'),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildRoleCard(
+                      context,
+                      title: 'NGO Partner',
+                      description: 'Connect with donors to help communities',
+                      icon: Icons.business_center_rounded,
+                      color: AppTheme.warningAmber,
+                      onTap: () => _navigateToRole(context, 'ngo'),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildRoleCard(
+                      context,
+                      title: 'Volunteer',
+                      description: 'Help with food collection and delivery',
+                      icon: Icons.delivery_dining_rounded,
+                      color: AppTheme.successTeal,
+                      onTap: () => _navigateToRole(context, 'volunteer'),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Already have an account? ',
+                    style: TextStyle(color: AppTheme.textSecondary),
+                  ),
+                  TextButton(
+                    onPressed: () => _navigateToLogin(context),
+                    child: Text(
+                      'Sign In',
+                      style: TextStyle(
+                        color: AppTheme.accentTeal,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),
@@ -135,68 +153,65 @@ class WelcomeScreen extends StatelessWidget {
     required Color color,
     required VoidCallback onTap,
   }) {
-    return Card(
-      elevation: 8,
-      shadowColor: color.withOpacity(0.3),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            gradient: LinearGradient(
-              colors: [
-                color.withOpacity(0.1),
-                color.withOpacity(0.05),
+    return GlassContainer(
+      onTap: onTap,
+      padding: const EdgeInsets.all(20),
+      tintColor: color,
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: color.withOpacity(0.3),
+                width: 1,
+              ),
+            ),
+            child: Icon(
+              icon,
+              size: 28,
+              color: color,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  description,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: AppTheme.textSecondary,
+                  ),
+                ),
               ],
             ),
           ),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  icon,
-                  size: 30,
-                  color: color,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: color,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      description,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.arrow_forward_ios,
-                color: color,
-                size: 16,
-              ),
-            ],
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              Icons.arrow_forward_rounded,
+              color: color,
+              size: 18,
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
