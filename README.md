@@ -45,7 +45,7 @@ Document verification is implemented via `lib/services/verification_service.dart
 
 Screenshot (from `assets/screenshots/flutter_04.png`):
 
-![Verification Status - in progress](assets/screenshots/flutter_04.png)
+![Verification Status - in progress](food_redistribution_app/assets/screenshots/flutter_04.png)
 
 ## Useful commands
 
