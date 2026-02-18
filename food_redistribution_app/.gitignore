@@ -156,3 +156,8 @@ test_driver/screenshots/
 dev-workflow.bat
 dev-workflow.sh
 _archive/
+
+# ---- Local Scripts & Cache (Do Not Commit) ----
+run_safe.bat
+clean_safe.bat
+pub_cache/
