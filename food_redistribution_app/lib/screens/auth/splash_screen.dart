@@ -96,8 +96,6 @@ class _SplashScreenState extends State<SplashScreen> {
       case OnboardingState.active:
         _navigateToRoleDashboard(user.role);
         break;
-      default:
-        Navigator.pushReplacementNamed(context, AppRouter.login);
     }
   }
 

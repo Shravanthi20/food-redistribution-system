@@ -469,3 +469,130 @@ function isVolunteerAvailableNow(vol) {
     return false;
 }
 
+/**
+ * Send push notification to user via FCM
+ * @param {string} userId - The recipient user ID
+ * @param {string} title - Notification title
+ * @param {string} body - Notification body/message
+ * @param {Object} data - Additional notification data/payload
+ */
+async function sendPushNotification(userId, title, body, data = {}) {
+    try {
+        // 1. Get user's FCM token from tokens subcollection
+        const tokensSnapshot = await db.collection(Collections.users)
+            .doc(userId)
+            .collection('tokens')
+            .get();
+
+        if (tokensSnapshot.empty) {
+            console.log(`No FCM tokens found for user ${userId}`);
+            return false;
+        }
+
+        const tokens = tokensSnapshot.docs.map(doc => doc.id);
+
+        // 2. Prepare FCM message payload
+        const message = {
+            notification: {
+                title: title,
+                body: body,
+            },
+            data: {
+                ...data,
+                userId: userId,
+                timestamp: new Date().toISOString(),
+            },
+            android: {
+                priority: 'high',
+                notification: {
+                    sound: 'default',
+                    channelId: 'high_importance_channel',
+                    clickAction: 'FLUTTER_NOTIFICATION_CLICK',
+                },
+            },
+            apns: {
+                payload: {
+                    aps: {
+                        alert: {
+                            title: title,
+                            body: body,
+                        },
+                        sound: 'default',
+                        badge: 1,
+                    },
+                },
+            },
+            webpush: {
+                notification: {
+                    title: title,
+                    body: body,
+                    icon: '/icons/notification-icon.png',
+                },
+            },
+        };
+
+        // 3. Send to all tokens (multicast)
+        const sendPromises = tokens.map(token =>
+            admin.messaging().send({
+                ...message,
+                token: token,
+            }).catch(error => {
+                // Handle invalid tokens
+                if (error.code === 'messaging/invalid-registration-token' ||
+                    error.code === 'messaging/registration-token-not-registered' ||
+                    error.code === 'messaging/third-party-auth-error') {
+                    console.log(`Removing invalid token for user ${userId}: ${token}`);
+                    return db.collection(Collections.users)
+                        .doc(userId)
+                        .collection('tokens')
+                        .doc(token)
+                        .delete();
+                }
+                throw error;
+            })
+        );
+
+        const results = await Promise.allSettled(sendPromises);
+        
+        // 4. Log successful sends
+        const successful = results.filter(r => r.status === 'fulfilled').length;
+        console.log(`Push notification sent to ${successful}/${tokens.length} tokens for user ${userId}`);
+
+        // 5. Store notification in database for history/fallback
+        await db.collection(Collections.notifications).add({
+            userId: userId,
+            title: title,
+            body: body,
+            data: data,
+            type: data.type || 'general',
+            read: false,
+            sentAt: admin.firestore.Timestamp.now(),
+            deliveryStatus: successful > 0 ? 'sent' : 'failed',
+            tokenCount: tokens.length,
+            successCount: successful,
+        });
+
+        return successful > 0;
+    } catch (error) {
+        console.error(`Error sending push notification to ${userId}:`, error);
+        
+        // Store failed notification for retry
+        try {
+            await db.collection(Collections.notifications).add({
+                userId: userId,
+                title: title,
+                body: body,
+                data: data,
+                read: false,
+                sentAt: admin.firestore.Timestamp.now(),
+                deliveryStatus: 'failed',
+                error: error.message,
+            });
+        } catch (e) {
+            console.error('Error storing failed notification:', e);
+        }
+        
+        return false;
+    }
+}
+

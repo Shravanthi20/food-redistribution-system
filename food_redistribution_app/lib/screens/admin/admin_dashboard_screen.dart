@@ -10,7 +10,6 @@ import '../../services/verification_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../utils/app_theme.dart';
 import '../../widgets/glass_widgets.dart';
-import '../../widgets/gradient_scaffold.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({Key? key}) : super(key: key);
@@ -288,7 +287,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 _buildMetricCard('Total Users', (provider.systemMetrics['totalUsers'] ?? 0).toString(), Icons.people, Colors.blue),
                 _buildMetricCard('Recent Donations', (provider.systemMetrics['totalDonationsThisMonth'] ?? 0).toString(), Icons.fastfood, Colors.green),
                 _buildMetricCard('Waste Prevented', '${(provider.systemMetrics['wasteReduced'] ?? 0).toStringAsFixed(1)}kg', Icons.delete_outline, Colors.orange),
-                _buildMetricCard('Active Matches', (provider.unmatchedDonations ?? []).length.toString(), Icons.handshake, Colors.purple),
+                _buildMetricCard('Active Matches', provider.unmatchedDonations.length.toString(), Icons.handshake, Colors.purple),
               ],
             );
           },
@@ -303,7 +302,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 title: 'Recent System Activity',
                 icon: Icons.history,
                 child: Column(
-                  children: (provider.auditLogs ?? []).take(6).map((log) => _buildAuditTile(log)).toList(),
+                  children: provider.auditLogs.take(6).map((log) => _buildAuditTile(log)).toList(),
                 ),
               ),
             ),
@@ -317,8 +316,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     _buildHealthItem('Database', 'Operational', Colors.green),
                     _buildHealthItem('Auth Service', 'Operational', Colors.green),
                     _buildHealthItem('Storage', 'Operational', Colors.green),
-                    _buildHealthItem('Regional Analytics', (provider.regionalStats ?? {}).isEmpty ? 'Waiting for Data' : 'Operational', 
-                      (provider.regionalStats ?? {}).isEmpty ? Colors.orange : Colors.green),
+                    _buildHealthItem('Regional Analytics', provider.regionalStats.isEmpty ? 'Waiting for Data' : 'Operational',
+                      provider.regionalStats.isEmpty ? Colors.orange : Colors.green),
                   ],
                 ),
               ),
@@ -367,7 +366,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   }
 
   Widget _buildVerificationList(AdminDashboardProvider provider, UserRole role) {
-    final list = (provider.pendingVerifications ?? []).where((v) => v['user'] != null && v['user']['role'] == role.name).toList();
+    final list = provider.pendingVerifications.where((v) => v['user'] != null && v['user']['role'] == role.name).toList();
     if (list.isEmpty) {
       return Center(
         child: Column(
@@ -489,7 +488,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           ),
           const SizedBox(height: 24),
           Expanded(
-            child: (provider.allUsers ?? []).isEmpty 
+            child: provider.allUsers.isEmpty 
               ? Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -518,7 +517,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
   // --- TAB 4: MANUAL OVERRIDES ---
   Widget _buildOverridesTab(AdminDashboardProvider provider) {
-    if ((provider.unmatchedDonations ?? []).isEmpty) {
+    if (provider.unmatchedDonations.isEmpty) {
        return Center(
          child: Column(
            mainAxisAlignment: MainAxisAlignment.center,
@@ -602,9 +601,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           title: 'Regional Activity Overview',
           icon: Icons.map,
           child: Column(
-            children: (provider.regionalStats ?? {}).isEmpty 
+            children: provider.regionalStats.isEmpty 
               ? [const Center(child: Padding(padding: EdgeInsets.all(16), child: Text('Gathering regional data...')))]
-              : (provider.regionalStats ?? {}).entries.map((entry) => _buildProgressItem(entry.key, entry.value, _getRegionColor(entry.key))).toList(),
+              : provider.regionalStats.entries.map((entry) => _buildProgressItem(entry.key, entry.value, _getRegionColor(entry.key))).toList(),
           ),
         ),
         const SizedBox(height: 24),
@@ -650,7 +649,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           ),
         ),
         Expanded(
-          child: (provider.auditLogs ?? []).isEmpty 
+          child: provider.auditLogs.isEmpty 
             ? const Center(child: Text('No audit logs found matching criteria'))
             : ListView.builder(
                 itemCount: provider.auditLogs.length,

@@ -90,27 +90,27 @@ class AdminDashboardProvider extends ChangeNotifier {
   }
 
   Future<void> _fetchSystemMetrics() async {
-    _systemMetrics = await _analyticsService.getSystemAnalytics() ?? {};
+    _systemMetrics = await _analyticsService.getSystemAnalytics();
   }
 
   Future<void> _fetchVerificationStats() async {
-    _verificationStats = await _verificationService.getVerificationStats() ?? {};
+    _verificationStats = await _verificationService.getVerificationStats();
   }
 
   Future<void> _fetchPendingVerifications() async {
-    _pendingVerifications = await _verificationService.getPendingVerifications() ?? [];
+    _pendingVerifications = await _verificationService.getPendingVerifications();
   }
 
   Future<void> _fetchOpenIssues() async {
-    _openIssues = await _issueService.getFutureOpenIssues() ?? [];
+    _openIssues = await _issueService.getFutureOpenIssues();
   }
 
   Future<void> _fetchAuditLogs() async {
-    _auditLogs = await _auditService.getAuditLogs(limit: 20) ?? [];
+    _auditLogs = await _auditService.getAuditLogs(limit: 20);
   }
 
   Future<void> _fetchSecurityStats() async {
-    _securityStats = await _securityService.getSecurityStats() ?? {};
+    _securityStats = await _securityService.getSecurityStats();
   }
 
   Future<void> _fetchUnmatchedDonations() async {
@@ -119,11 +119,11 @@ class AdminDashboardProvider extends ChangeNotifier {
   }
 
   Future<void> _fetchRegionalStats() async {
-    _regionalStats = await _analyticsService.getRegionalAnalytics() ?? {};
+    _regionalStats = await _analyticsService.getRegionalAnalytics();
   }
 
   Future<void> _fetchDeliveryPerformance() async {
-    _deliveryPerformance = await _analyticsService.getDeliveryPerformance() ?? {};
+    _deliveryPerformance = await _analyticsService.getDeliveryPerformance();
   }
 
   Future<void> _fetchMatchingSessions() async {
