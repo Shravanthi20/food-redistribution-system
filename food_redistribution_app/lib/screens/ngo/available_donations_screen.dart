@@ -388,7 +388,7 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 8),
-                _buildDetailRow('Safety Level', donation.safetyLevel.toString() ?? 'Not specified'),
+                _buildDetailRow('Safety Level', donation.safetyLevel.toString()),
                 _buildDetailRow('Requires Refrigeration', donation.requiresRefrigeration ? 'Yes' : 'No'),
                 
                 const SizedBox(height: 24),

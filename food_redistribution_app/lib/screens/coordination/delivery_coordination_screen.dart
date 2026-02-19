@@ -18,16 +18,25 @@ class DeliveryCoordinationScreen extends StatefulWidget {
 }
 
 class _DeliveryCoordinationScreenState extends State<DeliveryCoordinationScreen> {
-  late VolunteerDispatchService _dispatchService;
-  late RealTimeTrackingService _trackingService;
-  late RouteOptimizationService _routeService;
+  // ignore: unused_field
+  late final VolunteerDispatchService _dispatchService;
+  // ignore: unused_field
+  late final RealTimeTrackingService _trackingService;
+  // ignore: unused_field
+  late final RouteOptimizationService _routeService;
   // late FoodDonationMatchingService _matchingService;
   
   List<DeliveryTask> _activeTasks = [];
+  // ignore: unused_field
   List<MatchingResult> _availableMatches = [];
   DeliveryTask? _selectedTask;
   bool _isLoading = false;
   String _searchQuery = '';
+  
+  // TextControllers for create task dialog
+  final _donationIdController = TextEditingController();
+  final _pickupAddressController = TextEditingController();
+  final _deliveryAddressController = TextEditingController();
   
   @override
   void initState() {
@@ -607,18 +616,21 @@ class _DeliveryCoordinationScreenState extends State<DeliveryCoordinationScreen>
           mainAxisSize: MainAxisSize.min,
           children: [
             CustomTextField(
+              controller: _donationIdController,
               label: 'Donation ID',
-              hint: 'Enter donation identifier',
+              hintText: 'Enter donation identifier',
             ),
             SizedBox(height: 12),
             CustomTextField(
+              controller: _pickupAddressController,
               label: 'Pickup Address',
-              hint: 'Enter pickup location',
+              hintText: 'Enter pickup location',
             ),
             SizedBox(height: 12),
             CustomTextField(
+              controller: _deliveryAddressController,
               label: 'Delivery Address',
-              hint: 'Enter delivery location',
+              hintText: 'Enter delivery location',
             ),
             SizedBox(height: 12),
             DropdownButtonFormField<String>(
