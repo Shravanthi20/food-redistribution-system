@@ -560,6 +560,7 @@ class VolunteerDispatchService {
       'timestamp': DateTime.now(),
     };
 
-    await _firestoreService.create('dispatch_analytics', 'analysis_$taskId', analysis);
+    await _firestoreService.create(
+        'dispatch_analytics', 'analysis_$taskId', analysis);
   }
 }
