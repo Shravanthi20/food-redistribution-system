@@ -144,7 +144,7 @@ class VolunteerDispatchService {
     );
 
     // Store task in database
-    await _firestoreService.create('delivery_tasks', task.toMap());
+    await _firestoreService.create('delivery_tasks', task.id, task.toMap());
 
     await _auditService.logEvent(
       eventType: AuditEventType.dataModification,
@@ -347,16 +347,16 @@ class VolunteerDispatchService {
     // Get all verified and available volunteers
     final volunteerDocs = await _firestoreService.query(
       'volunteer_profiles',
-      where: [
-        {'field': 'verificationStatus', 'operator': '==', 'value': 'verified'},
-        {'field': 'isActive', 'operator': '==', 'value': true},
-        {'field': 'status', 'operator': '==', 'value': 'available'},
-      ],
+      where: {
+        'verificationStatus': 'verified',
+        'isActive': true,
+        'status': 'available',
+      },
     );
 
     final volunteers = <VolunteerProfile>[];
 
-    for (final doc in volunteerDocs) {
+    for (final doc in volunteerDocs.docs) {
       final volunteer =
           VolunteerProfile.fromMap(doc.data() as Map<String, dynamic>);
 
@@ -504,13 +504,13 @@ class VolunteerDispatchService {
   /// Helper functions for data retrieval
   Future<FoodDonation?> _getDonation(String donationId) async {
     final doc = await _firestoreService.get('food_donations', donationId);
-    if (doc == null) return null;
+    if (!doc.exists) return null;
     return FoodDonation.fromMap(doc.data()! as Map<String, dynamic>);
   }
 
   Future<VolunteerProfile?> _getVolunteer(String volunteerId) async {
     final doc = await _firestoreService.get('volunteer_profiles', volunteerId);
-    if (doc == null) return null;
+    if (!doc.exists) return null;
     return VolunteerProfile.fromMap(doc.data()! as Map<String, dynamic>);
   }
 
@@ -560,6 +560,6 @@ class VolunteerDispatchService {
       'timestamp': DateTime.now(),
     };
 
-    await _firestoreService.create('dispatch_analytics', analysis);
+    await _firestoreService.create('dispatch_analytics', 'analysis_$taskId', analysis);
   }
 }

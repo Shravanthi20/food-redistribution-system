@@ -854,7 +854,7 @@ class NotificationDispatchService {
       'dailyTrends': <String, int>{},
     };
 
-    for (final doc in records) {
+    for (final doc in records.docs) {
       final data = doc.data() as Map<String, dynamic>;
       analytics['totalSent'] = (analytics['totalSent'] as int) + 1;
 
@@ -864,11 +864,14 @@ class NotificationDispatchService {
           (analytics['categoryBreakdown'][category] as int? ?? 0) + 1;
 
       // Daily trends
-      final date = (data['sentAt'] as Timestamp).toDate();
-      final dateKey =
-          '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-      analytics['dailyTrends'][dateKey] =
-          (analytics['dailyTrends'][dateKey] as int? ?? 0) + 1;
+      final sentAt = data['sentAt'];
+      if (sentAt is Timestamp) {
+        final date = sentAt.toDate();
+        final dateKey =
+            '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+        analytics['dailyTrends'][dateKey] =
+            (analytics['dailyTrends'][dateKey] as int? ?? 0) + 1;
+      }
     }
 
     return analytics;
