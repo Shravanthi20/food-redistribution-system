@@ -8,30 +8,41 @@ class OfflineTrackingService {
   static const String _offlineUpdatesKey = 'offline_tracking_updates';
   static const String _lastSyncKey = 'last_tracking_sync';
 
-  late SharedPreferences _prefs;
+  SharedPreferences? _prefs;
+  bool _isInitializing = false;
 
-  OfflineTrackingService() {
-    _initializePrefs();
-  }
-
-  Future<void> _initializePrefs() async {
-    _prefs = await SharedPreferences.getInstance();
+  Future<SharedPreferences> get prefs async {
+    if (_prefs != null) return _prefs!;
+    
+    if (!_isInitializing) {
+      _isInitializing = true;
+      _prefs = await SharedPreferences.getInstance();
+      _isInitializing = false;
+    } else {
+      while (_prefs == null) {
+        await Future.delayed(const Duration(milliseconds: 10));
+      }
+    }
+    return _prefs!;
   }
 
   // Store location to phone when no internet
   Future<bool> saveOfflineLocationUpdate(LocationUpdate location) async {
     try {
-      await _prefs.setString(
-        _offlineUpdatesKey,
-        jsonEncode({
-          'latitude': location.latitude,
-          'longitude': location.longitude,
-          'volunteerId': location.volunteerId,
-          'taskId': location.taskId,
-          'timestamp': location.timestamp.toIso8601String(),
-          'status': location.status,
-        }),
-      );
+      final p = await prefs;
+      final existingJson = p.getString(_offlineUpdatesKey);
+      final List<dynamic> updates = existingJson != null ? jsonDecode(existingJson) : [];
+      
+      updates.add({
+        'latitude': location.latitude,
+        'longitude': location.longitude,
+        'volunteerId': location.volunteerId,
+        'taskId': location.taskId,
+        'timestamp': location.timestamp.toIso8601String(),
+        'status': location.status.name,
+      });
+
+      await p.setString(_offlineUpdatesKey, jsonEncode(updates));
       return true;
     } catch (e) {
       debugPrint('Error saving offline location: $e');
@@ -42,14 +53,18 @@ class OfflineTrackingService {
   // Store status changes offline
   Future<bool> saveOfflineStatusUpdate(String taskId, String newStatus) async {
     try {
-      await _prefs.setString(
-        '${_offlineUpdatesKey}_status',
-        jsonEncode({
-          'taskId': taskId,
-          'status': newStatus,
-          'timestamp': DateTime.now().toIso8601String(),
-        }),
-      );
+      final p = await prefs;
+      final key = '${_offlineUpdatesKey}_status';
+      final existingJson = p.getString(key);
+      final List<dynamic> updates = existingJson != null ? jsonDecode(existingJson) : [];
+
+      updates.add({
+        'taskId': taskId,
+        'status': newStatus,
+        'timestamp': DateTime.now().toIso8601String(),
+      });
+
+      await p.setString(key, jsonEncode(updates));
       return true;
     } catch (e) {
       debugPrint('Error saving offline status: $e');
@@ -62,16 +77,19 @@ class OfflineTrackingService {
     try {
       final updates = <Map<String, dynamic>>[];
 
-      // Get location update
-      final locationJson = _prefs.getString(_offlineUpdatesKey);
+      final p = await prefs;
+      // Get location updates
+      final locationJson = p.getString(_offlineUpdatesKey);
       if (locationJson != null) {
-        updates.add(jsonDecode(locationJson) as Map<String, dynamic>);
+        final List<dynamic> decoded = jsonDecode(locationJson);
+        updates.addAll(decoded.cast<Map<String, dynamic>>());
       }
 
-      // Get status update
-      final statusJson = _prefs.getString('${_offlineUpdatesKey}_status');
+      // Get status updates
+      final statusJson = p.getString('${_offlineUpdatesKey}_status');
       if (statusJson != null) {
-        updates.add(jsonDecode(statusJson) as Map<String, dynamic>);
+        final List<dynamic> decoded = jsonDecode(statusJson);
+        updates.addAll(decoded.cast<Map<String, dynamic>>());
       }
 
       return updates;
@@ -84,9 +102,10 @@ class OfflineTrackingService {
   // Mark updates as synced
   Future<bool> markUpdatesSynced() async {
     try {
-      await _prefs.remove(_offlineUpdatesKey);
-      await _prefs.remove('${_offlineUpdatesKey}_status');
-      await _prefs.setString(_lastSyncKey, DateTime.now().toIso8601String());
+      final p = await prefs;
+      await p.remove(_offlineUpdatesKey);
+      await p.remove('${_offlineUpdatesKey}_status');
+      await p.setString(_lastSyncKey, DateTime.now().toIso8601String());
       return true;
     } catch (e) {
       debugPrint('Error marking updates as synced: $e');
@@ -98,8 +117,18 @@ class OfflineTrackingService {
   Future<int> getPendingUpdateCount() async {
     try {
       int count = 0;
-      if (_prefs.getString(_offlineUpdatesKey) != null) count++;
-      if (_prefs.getString('${_offlineUpdatesKey}_status') != null) count++;
+      final p = await prefs;
+      
+      final locationJson = p.getString(_offlineUpdatesKey);
+      if (locationJson != null) {
+        count += (jsonDecode(locationJson) as List).length;
+      }
+      
+      final statusJson = p.getString('${_offlineUpdatesKey}_status');
+      if (statusJson != null) {
+        count += (jsonDecode(statusJson) as List).length;
+      }
+      
       return count;
     } catch (e) {
       debugPrint('Error getting pending count: $e');
@@ -110,8 +139,9 @@ class OfflineTrackingService {
   // Clear synced updates
   Future<bool> clearSyncedUpdates() async {
     try {
-      await _prefs.remove(_offlineUpdatesKey);
-      await _prefs.remove('${_offlineUpdatesKey}_status');
+      final p = await prefs;
+      await p.remove(_offlineUpdatesKey);
+      await p.remove('${_offlineUpdatesKey}_status');
       return true;
     } catch (e) {
       debugPrint('Error clearing synced updates: $e');
@@ -119,3 +149,4 @@ class OfflineTrackingService {
     }
   }
 }
+

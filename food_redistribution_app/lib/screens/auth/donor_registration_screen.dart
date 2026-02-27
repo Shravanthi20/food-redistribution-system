@@ -271,9 +271,10 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SizedBox(
-                        width: 100,
+                      Expanded(
+                        flex: 3,
                         child: DropdownButtonFormField<String>(
+                          isExpanded: true,
                           value: _selectedCountryCode,
                           dropdownColor: AppTheme.primaryNavyLight,
                           style: TextStyle(color: AppTheme.textPrimary),
@@ -287,6 +288,7 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
                       ),
                       const SizedBox(width: 12),
                       Expanded(
+                        flex: 7,
                         child: TextFormField(
                           controller: _phoneController,
                           style: TextStyle(color: AppTheme.textPrimary),

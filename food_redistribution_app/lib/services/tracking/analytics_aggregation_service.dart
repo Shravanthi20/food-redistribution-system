@@ -2,9 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 // Collect data from all deliveries to see patterns and predict trends
 class AnalyticsAggregationService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  late final FirebaseFirestore _firestore;
 
-  AnalyticsAggregationService();
+  AnalyticsAggregationService({FirebaseFirestore? firestore}) {
+    _firestore = firestore ?? FirebaseFirestore.instance;
+  }
 
   // ENHANCED: Exponential Moving Average for trend analysis
   double _calculateEMA({
