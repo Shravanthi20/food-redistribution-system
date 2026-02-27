@@ -9,6 +9,8 @@ import './admin_dashboard_rail.dart';
 import '../../services/verification_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../utils/app_theme.dart';
+import '../../models/enums.dart';
+import 'admin_analytics_screen.dart';
 import '../../widgets/glass_widgets.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
@@ -597,6 +599,23 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
+        // NEW: Link to full predictions screen
+        ElevatedButton.icon(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const AdminAnalyticsScreen()),
+            );
+          },
+          icon: const Icon(Icons.analytics),
+          label: const Text('View Full Analytics & Predictions Dashboard'),
+          style: ElevatedButton.styleFrom(
+            padding: const EdgeInsets.all(16),
+            backgroundColor: AppTheme.accentTeal,
+            foregroundColor: Colors.white,
+          ),
+        ),
+        const SizedBox(height: 24),
         _buildSectionCard(
           title: 'Regional Activity Overview',
           icon: Icons.map,
@@ -885,8 +904,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
 
     if (confirm == true) {
-      await context.read<AuthProvider>().signOut();
-      if (mounted) {
+      if (context.mounted) {
+        await context.read<AuthProvider>().signOut();
+      }
+      if (context.mounted) {
         Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
       }
     }
