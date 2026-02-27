@@ -7,6 +7,9 @@ import 'create_food_request_screen.dart';
 import 'food_request_detail_screen.dart';
 import 'available_donations_screen.dart';
 import 'queries_screen.dart';
+import '../../widgets/gradient_scaffold.dart';
+import '../../widgets/glass_widgets.dart';
+import '../../utils/app_theme.dart';
 
 class NGODashboard extends StatefulWidget {
   const NGODashboard({Key? key}) : super(key: key);
@@ -43,12 +46,13 @@ class _NGODashboardState extends State<NGODashboard> with TickerProviderStateMix
   Widget build(BuildContext context) {
     return Consumer2<NGOProvider, AuthProvider>(
       builder: (context, ngoProvider, authProvider, child) {
-        return Scaffold(
-          appBar: AppBar(
-            title: const Text('NGO Dashboard'),
+        return GradientScaffold(
+          showAnimatedBackground: true,
+          appBar: GlassAppBar(
+            title: 'NGO Dashboard',
             actions: [
               IconButton(
-                icon: const Icon(Icons.refresh),
+                icon: const Icon(Icons.refresh, color: AppTheme.textPrimary),
                 onPressed: () {
                   if (authProvider.firebaseUser != null) {
                     ngoProvider.refreshData(authProvider.firebaseUser!.uid);
@@ -56,7 +60,7 @@ class _NGODashboardState extends State<NGODashboard> with TickerProviderStateMix
                 },
               ),
               IconButton(
-                icon: const Icon(Icons.logout),
+                icon: const Icon(Icons.logout, color: AppTheme.textPrimary),
                 onPressed: () => _showLogoutDialog(context, authProvider),
               ),
             ],
@@ -65,9 +69,12 @@ class _NGODashboardState extends State<NGODashboard> with TickerProviderStateMix
               tabs: const [
                 Tab(icon: Icon(Icons.dashboard), text: 'Overview'),
                 Tab(icon: Icon(Icons.restaurant), text: 'My Requests'),
-                Tab(icon: Icon(Icons.local_shipping), text: 'Available'),
+                Tab(icon: Icon(Icons.local_shipping), text: 'Donations'),
                 Tab(icon: Icon(Icons.help), text: 'Queries'),
               ],
+              labelColor: AppTheme.accentTeal,
+              unselectedLabelColor: AppTheme.textMuted,
+              indicatorColor: AppTheme.accentTeal,
             ),
           ),
           body: ngoProvider.isLoading
@@ -81,10 +88,11 @@ class _NGODashboardState extends State<NGODashboard> with TickerProviderStateMix
                     _buildQueriesTab(ngoProvider, authProvider),
                   ],
                 ),
-          floatingActionButton: FloatingActionButton.extended(
+          floatingActionButton: GlassFAB(
             onPressed: () => _createFoodRequest(context, authProvider),
-            icon: const Icon(Icons.add),
-            label: const Text('Create Request'),
+            icon: Icons.add,
+            extended: true,
+            label: 'Create Request',
           ),
         );
       },
@@ -102,23 +110,25 @@ class _NGODashboardState extends State<NGODashboard> with TickerProviderStateMix
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Welcome card
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Welcome back!',
-                      style: Theme.of(context).textTheme.headlineSmall,
+            GlassContainer(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Welcome back!',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      color: AppTheme.textPrimary,
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Manage your food requests and track donations.',
-                      style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Manage your food requests and track donations.',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppTheme.textSecondary,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
             
@@ -127,7 +137,9 @@ class _NGODashboardState extends State<NGODashboard> with TickerProviderStateMix
             // Statistics cards
             Text(
               'Request Statistics',
-              style: Theme.of(context).textTheme.titleLarge,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                color: AppTheme.textPrimary,
+              ),
             ),
             const SizedBox(height: 12),
             
@@ -191,7 +203,9 @@ class _NGODashboardState extends State<NGODashboard> with TickerProviderStateMix
             // Recent requests
             Text(
               'Recent Requests',
-              style: Theme.of(context).textTheme.titleLarge,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                color: AppTheme.textPrimary,
+              ),
             ),
             const SizedBox(height: 12),
             
@@ -274,51 +288,50 @@ class _NGODashboardState extends State<NGODashboard> with TickerProviderStateMix
   }
 
   Widget _buildStatCard(String title, String value, IconData icon, Color color) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(icon, color: color),
+    return GlassContainer(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                const Spacer(),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              value,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+                child: Icon(icon, color: color),
               ),
+              const Spacer(),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.textPrimary,
             ),
-            const SizedBox(height: 4),
-            Text(
-              title,
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 14,
-              ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            title,
+            style: TextStyle(
+              color: AppTheme.textSecondary,
+              fontSize: 14,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildRequestCard(FoodRequest request, NGOProvider ngoProvider, AuthProvider authProvider) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: GlassListTile(
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
@@ -330,31 +343,9 @@ class _NGODashboardState extends State<NGODashboard> with TickerProviderStateMix
             color: _getStatusColor(request.status),
           ),
         ),
-        title: Text(request.title),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('${request.requiredQuantity} ${request.unit} • ${request.expectedBeneficiaries} beneficiaries'),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                Chip(
-                  label: Text(request.status.name.toUpperCase()),
-                  backgroundColor: _getStatusColor(request.status).withOpacity(0.1),
-                  labelStyle: TextStyle(color: _getStatusColor(request.status)),
-                ),
-                const SizedBox(width: 8),
-                if (request.urgency == RequestUrgency.critical || request.urgency == RequestUrgency.high)
-                  Chip(
-                    label: Text(request.urgency.name.toUpperCase()),
-                    backgroundColor: Colors.red.withOpacity(0.1),
-                    labelStyle: const TextStyle(color: Colors.red),
-                  ),
-              ],
-            ),
-          ],
-        ),
-        trailing: const Icon(Icons.arrow_forward_ios),
+        title: request.title,
+        subtitle: '${request.requiredQuantity} ${request.unit} • ${request.expectedBeneficiaries} beneficiaries\nStatus: ${request.status.name.toUpperCase()}',
+        trailing: Icon(Icons.arrow_forward_ios_rounded, color: AppTheme.textMuted, size: 16),
         onTap: () => Navigator.push(
           context,
           MaterialPageRoute(
@@ -416,9 +407,12 @@ class _NGODashboardState extends State<NGODashboard> with TickerProviderStateMix
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              authProvider.signOut();
+            onPressed: () async {
+              Navigator.pop(context); // Close dialog
+              await authProvider.signOut();
+              if (context.mounted) {
+                Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+              }
             },
             child: const Text('Logout'),
           ),

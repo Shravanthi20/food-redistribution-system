@@ -23,6 +23,7 @@ import '../screens/ngo/clarify_request_screen.dart';
 import '../screens/ngo/reject_donation_screen.dart';
 import '../screens/ngo/inspect_delivery_screen.dart';
 import '../screens/ngo/ngo_dashboard.dart';
+import '../screens/ngo/create_food_request_screen.dart'; // [NEW]
 import '../screens/ngo/update_demand_screen.dart';
 
 // Dashboards
@@ -58,6 +59,7 @@ class AppRouter {
   static const String donorDashboard = '/donor-dashboard';
   static const String donorVerification = '/donor-verification'; // [NEW] Donor verification route
   static const String ngoDashboard = '/ngo-dashboard';
+  static const String ngoCreateRequest = '/ngo/create-request'; // [NEW]
   static const String volunteerDashboard = '/volunteer-dashboard';
   static const String adminDashboard = '/admin-dashboard';
   static const String adminIssues = '/admin-issues';
@@ -145,6 +147,9 @@ class AppRouter {
 
       case ngoDashboard:
         return MaterialPageRoute(builder: (_) => const NGODashboard());
+      
+      case ngoCreateRequest:
+        return MaterialPageRoute(builder: (_) => const CreateFoodRequestScreen());
       
       case documentSubmission:
         return MaterialPageRoute(

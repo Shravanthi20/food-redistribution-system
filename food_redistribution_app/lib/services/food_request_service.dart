@@ -20,12 +20,17 @@ class FoodRequestService {
   }) async {
     try {
       // Validate NGO exists and is verified
-      final ngoDoc = await _firestore.collection(Collections.organizations).doc(ngoId).get();
-      if (!ngoDoc.exists) {
+      final query = await _firestore
+          .collection(Collections.organizations)
+          .where('ownerId', isEqualTo: ngoId)
+          .limit(1)
+          .get();
+
+      if (query.docs.isEmpty) {
         throw Exception('NGO profile not found');
       }
       
-      final ngo = NGOProfile.fromFirestore(ngoDoc);
+      final ngo = NGOProfile.fromFirestore(query.docs.first);
       if (!ngo.isVerified) {
         throw Exception('NGO must be verified to create food requests');
       }
