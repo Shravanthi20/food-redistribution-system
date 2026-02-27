@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import '../../models/tracking/location_tracking_model.dart';
 
 /// Admin Real-Time Tracking Management Screen
 class AdminRealTimeTrackingScreen extends StatefulWidget {
-  const AdminRealTimeTrackingScreen({Key? key}) : super(key: key);
+  const AdminRealTimeTrackingScreen({super.key});
 
   @override
   State<AdminRealTimeTrackingScreen> createState() =>
@@ -120,7 +118,7 @@ class _AdminRealTimeTrackingScreenState
     );
   }
 
-  Query<Object?> _buildQuery() {
+  Stream<QuerySnapshot<Map<String, dynamic>>> _buildQuery() {
     var query = _firestore
         .collection('delivery_tasks')
         .orderBy('updatedAt', descending: true);
@@ -135,7 +133,7 @@ class _AdminRealTimeTrackingScreenState
       query = query.where('status', isEqualTo: 'delivered');
     }
 
-    return query.limit(100);
+    return query.limit(100).snapshots();
   }
 
   Widget _buildTrackingCard(Map<String, dynamic> data, String taskId) {
@@ -176,7 +174,7 @@ class _AdminRealTimeTrackingScreenState
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: _getStatusColor(status).withOpacity(0.2),
+                    color: _getStatusColor(status).withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(4),
                     border: Border.all(color: _getStatusColor(status)),
                   ),
@@ -213,7 +211,7 @@ class _AdminRealTimeTrackingScreenState
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.1),
+                  color: Colors.red.withValues(alpha: 0.1),
                   border: Border.all(color: Colors.red),
                   borderRadius: BorderRadius.circular(4),
                 ),

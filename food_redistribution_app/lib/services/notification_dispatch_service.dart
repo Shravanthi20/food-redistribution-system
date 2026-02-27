@@ -492,10 +492,8 @@ class NotificationDispatchService {
 
       case NotificationChannel.whatsapp:
         return await _sendWhatsAppNotification(recipientId, body, data);
-
-      default:
-        return false;
     }
+    return false;
   }
 
   /// Schedule notification for future delivery
@@ -553,8 +551,8 @@ class NotificationDispatchService {
         final notification = ScheduledNotification(
           id: data['id'],
           templateId: data['templateId'],
-          recipientIds: List<String>.from(data['recipientIds']),
-          data: data['data'],
+          recipientIds: List<String>.from(data['recipientIds'] ?? []),
+          data: data['data'] as Map<String, dynamic>? ?? {},
           scheduledFor: (data['scheduledFor'] as Timestamp).toDate(),
           priority: NotificationPriority.values.firstWhere(
             (p) => p.toString() == data['priority'],
@@ -858,8 +856,7 @@ class NotificationDispatchService {
       final data = doc.data() as Map<String, dynamic>;
       analytics['totalSent'] = (analytics['totalSent'] as int) + 1;
 
-      // Category breakdown
-      final category = data['category'] as String;
+      final category = data['category'] as String? ?? 'unknown';
       analytics['categoryBreakdown'][category] =
           (analytics['categoryBreakdown'][category] as int? ?? 0) + 1;
 
