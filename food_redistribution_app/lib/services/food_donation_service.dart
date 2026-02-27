@@ -61,6 +61,11 @@ class FoodDonationService {
         isUrgent: donation.isUrgent,
       );
 
+      print('--- DEBUG: CREATING DONATION ---');
+      print('DonorID: $donorId');
+      print('HasRole(donor/admin): $hasRole');
+      print('Donation Data: ${donationWithId.toFirestore()}');
+
       // Store in Firestore
       await _firestore
           .collection(Collections.donations)
@@ -69,10 +74,6 @@ class FoodDonationService {
 
       // Log action
       await _logDonationAction('donation_created', donationId, donorId);
-
-      // [REMOVED] Client-Side Matching
-      // Relying on Cloud Functions (functions/index.js) as requested.
-      // _triggerClientSideMatching(donationId, donationWithId);
 
       return donationId;
     } catch (e) {

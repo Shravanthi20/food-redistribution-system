@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:fl_chart/fl_chart.dart';
 import '../../services/tracking/analytics_aggregation_service.dart';
+import '../../widgets/glass_widgets.dart';
+import '../../widgets/gradient_scaffold.dart';
 
 /// Admin Analytics & Predictions Screen
 class AdminAnalyticsScreen extends StatefulWidget {
@@ -48,10 +49,11 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return GradientScaffold(
       appBar: AppBar(
         title: const Text('Analytics & Predictions'),
         elevation: 0,
+        backgroundColor: Colors.transparent,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -120,7 +122,7 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
 
                 final data = snapshot.data!;
 
-                return Card(
+                return GlassContainer(
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Column(
@@ -128,7 +130,7 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
                       children: [
                         const Text(
                           '⏱️ Duration Metrics',
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
                         ),
                         const SizedBox(height: 16),
                         Row(
@@ -175,7 +177,7 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
 
                 final data = snapshot.data!;
 
-                return Card(
+                return GlassContainer(
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Column(
@@ -183,7 +185,7 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
                       children: [
                         Text(
                           '📍 ${_selectedRegion.toUpperCase()} Performance',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
                         ),
                         const SizedBox(height: 16),
                         _buildMetricRow(
@@ -194,8 +196,8 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
                           'Performance Index',
                           '${data['performanceIndex']}%',
                           color: double.parse(data['performanceIndex'] as String) > 80
-                              ? Colors.green
-                              : Colors.orange,
+                              ? Colors.greenAccent
+                              : Colors.orangeAccent,
                         ),
                       ],
                     ),
@@ -230,7 +232,7 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
                 final data = snapshot.data!;
                 final shortfall = (data['shortfall'] as int?) ?? 0;
 
-                return Card(
+                return GlassContainer(
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Column(
@@ -238,7 +240,7 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
                       children: [
                         const Text(
                           '👥 Volunteer Demand Forecast',
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
                         ),
                         const SizedBox(height: 16),
                         _buildMetricRow(
@@ -258,13 +260,13 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: Colors.red.withOpacity(0.1),
-                              border: Border.all(color: Colors.red),
+                              color: Colors.redAccent.withOpacity(0.1),
+                              border: Border.all(color: Colors.redAccent),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
                               '⚠️ SHORTFALL: $shortfall volunteers needed - Action: ${data['recommendAction']?.toString().replaceAll('_', ' ')}',
-                              style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                              style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
                             ),
                           ),
                         ],
@@ -294,7 +296,7 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
                 final data = snapshot.data!;
                 final trend = data['trend'] as String? ?? 'neutral';
 
-                return Card(
+                return GlassContainer(
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Column(
@@ -302,7 +304,7 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
                       children: [
                         const Text(
                           '🍱 Donation Surplus Forecast',
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
                         ),
                         const SizedBox(height: 16),
                         _buildMetricRow(
@@ -317,19 +319,19 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
                           'Trend',
                           trend.toUpperCase(),
                           color: trend == 'increasing'
-                              ? Colors.orange
+                              ? Colors.orangeAccent
                               : trend == 'decreasing'
-                                  ? Colors.green
-                                  : Colors.blue,
+                                  ? Colors.greenAccent
+                                  : Colors.lightBlueAccent,
                         ),
                         _buildMetricRow(
                           'Risk Level',
                           data['riskLevel'].toString().toUpperCase(),
                           color: data['riskLevel'] == 'high'
-                              ? Colors.red
+                              ? Colors.redAccent
                               : data['riskLevel'] == 'medium'
-                                  ? Colors.orange
-                                  : Colors.green,
+                                  ? Colors.orangeAccent
+                                  : Colors.greenAccent,
                         ),
                       ],
                     ),
@@ -358,7 +360,7 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
                   final data = snapshot.data!;
                   final status = data['status'] as String? ?? 'balanced';
 
-                  return Card(
+                  return GlassContainer(
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Column(
@@ -369,15 +371,15 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
                             children: [
                               const Text(
                                 '📊 Supply-Demand Gap',
-                                style: TextStyle(fontWeight: FontWeight.bold),
+                                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
                               ),
                               Chip(
-                                label: Text(status.toUpperCase()),
+                                label: Text(status.toUpperCase(), style: const TextStyle(color: Colors.white)),
                                 backgroundColor: status == 'critical'
-                                    ? Colors.red.withOpacity(0.2)
+                                    ? Colors.redAccent.withOpacity(0.4)
                                     : status == 'warning'
-                                        ? Colors.orange.withOpacity(0.2)
-                                        : Colors.green.withOpacity(0.2),
+                                        ? Colors.orangeAccent.withOpacity(0.4)
+                                        : Colors.greenAccent.withOpacity(0.4),
                               ),
                             ],
                           ),
@@ -394,8 +396,8 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
                             'Gap (%)',
                             data['gapPercentage'].toString(),
                             color: double.parse(data['gapPercentage'] as String) > 20
-                                ? Colors.red
-                                : Colors.orange,
+                                ? Colors.redAccent
+                                : Colors.orangeAccent,
                           ),
                         ],
                       ),
@@ -403,6 +405,119 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
                   );
                 },
               ),
+            const SizedBox(height: 24),
+
+            // NGO Demand Trends
+            FutureBuilder<Map<String, dynamic>>(
+              future: _analyticsService.getNGODemandTrends(days: _selectedMetricDays),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const SizedBox(
+                    height: 150,
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                }
+
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const SizedBox.shrink();
+                }
+
+                final data = snapshot.data!;
+                final totalRequests = data['totalRequests'] as int? ?? 0;
+                final topTypes = (data['topRequestedTypes'] as Map<String, dynamic>?) ?? {};
+
+                return GlassContainer(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          '📈 NGO Demand Trends',
+                          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                        ),
+                        const SizedBox(height: 16),
+                        _buildMetricRow(
+                          'Total Requests (${_selectedMetricDays} days)',
+                          totalRequests.toString(),
+                        ),
+                        if (topTypes.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          const Text('Most Requested Types:', style: TextStyle(fontSize: 12, color: Colors.white70)),
+                          const SizedBox(height: 4),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 4,
+                            children: topTypes.entries.take(3).map((e) {
+                               return Chip(
+                                 label: Text('${e.key}: ${e.value}', style: const TextStyle(fontSize: 10, color: Colors.white)),
+                                 backgroundColor: Colors.white.withOpacity(0.1),
+                                 padding: EdgeInsets.zero,
+                                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                               );
+                            }).toList(),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+
+            // NGO Demand Forecast
+            FutureBuilder<Map<String, dynamic>>(
+              future: _analyticsService.predictNGODemandAdvanced(daysAhead: _selectedMetricDays, region: _selectedRegion),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const SizedBox(
+                    height: 150,
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                }
+
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const SizedBox.shrink();
+                }
+
+                final data = snapshot.data!;
+                final trend = data['trend'] as String? ?? 'neutral';
+
+                return GlassContainer(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          '🎯 NGO Demand Forecast',
+                          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                        ),
+                        const SizedBox(height: 16),
+                        _buildMetricRow(
+                          'Predicted Daily Requests',
+                          data['predictedDailyRequests'].toString(),
+                        ),
+                        _buildMetricRow(
+                          'Total (${_selectedMetricDays} days ahead)',
+                          data['predictedTotalRequests'].toString(),
+                        ),
+                        _buildMetricRow(
+                          'Trend Direction',
+                          trend.toUpperCase(),
+                          color: trend == 'increasing'
+                              ? Colors.orangeAccent
+                              : trend == 'decreasing'
+                                  ? Colors.greenAccent
+                                  : Colors.lightBlueAccent,
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
           ],
         ),
       ),
@@ -414,12 +529,12 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
       children: [
         Text(
           value,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
         ),
         const SizedBox(height: 4),
         Text(
           label,
-          style: const TextStyle(fontSize: 12, color: Colors.grey),
+          style: const TextStyle(fontSize: 12, color: Colors.white70),
           textAlign: TextAlign.center,
         ),
       ],
@@ -432,13 +547,13 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(fontSize: 14)),
+          Text(label, style: const TextStyle(fontSize: 14, color: Colors.white)),
           Text(
             value,
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: color,
+              color: color ?? Colors.white,
             ),
           ),
         ],

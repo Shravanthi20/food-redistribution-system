@@ -196,11 +196,18 @@ class UserService {
             'updatedAt': Timestamp.now(),
           });
         } else if (role == UserRole.ngo.name) {
-          final profileRef = _firestore.collection(Collections.organizations).doc(userId);
-          batch.update(profileRef, {
-            'isVerified': approved,
-            'updatedAt': Timestamp.now(),
-          });
+          final orgQuery = await _firestore
+              .collection(Collections.organizations)
+              .where('ownerId', isEqualTo: userId)
+              .limit(1)
+              .get();
+              
+          if (orgQuery.docs.isNotEmpty) {
+            batch.update(orgQuery.docs.first.reference, {
+              'isVerified': approved,
+              'updatedAt': Timestamp.now(),
+            });
+          }
         } else if (role == UserRole.volunteer.name) {
           final profileRef = _firestore.collection(Collections.users).doc(userId);
           batch.update(profileRef, {
@@ -362,6 +369,16 @@ class UserService {
           return profileDoc.exists ? DonorProfile.fromFirestore(profileDoc) : null;
         
         case 'ngo':
+          final query = await _firestore
+              .collection(Collections.organizations)
+              .where('ownerId', isEqualTo: userId)
+              .limit(1)
+              .get();
+          
+          if (query.docs.isNotEmpty) {
+            return NGOProfile.fromFirestore(query.docs.first);
+          }
+          
           final profileDoc = await _firestore
               .collection(Collections.organizations)
               .doc(userId)

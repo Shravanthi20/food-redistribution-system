@@ -325,10 +325,12 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                         leading: Icon(Icons.logout_rounded, color: AppTheme.errorCoral),
                         title: Text('Sign Out', style: TextStyle(color: AppTheme.errorCoral)),
                         onTap: () async {
-                          Navigator.pop(context);
+                          Navigator.pop(context); // Close bottom sheet
                           final auth = Provider.of<AuthProvider>(context, listen: false);
                           await auth.signOut();
-                          Navigator.pushNamedAndRemoveUntil(context, AppRouter.login, (route) => false);
+                          if (context.mounted) {
+                            Navigator.pushNamedAndRemoveUntil(context, AppRouter.login, (route) => false);
+                          }
                         },
                       ),
                     ],
