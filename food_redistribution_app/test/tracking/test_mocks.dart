@@ -12,7 +12,8 @@ class MockFirestoreService extends Mock implements FirestoreService {}
 
 class MockLocationService extends Mock implements LocationService {}
 
-class MockRealTimeTrackingService extends Mock implements RealTimeTrackingService {}
+class MockRealTimeTrackingService extends Mock
+    implements RealTimeTrackingService {}
 
 class MockTrackingService extends Mock implements TrackingService {}
 
@@ -27,7 +28,8 @@ class FakeFirebaseFirestore extends Fake implements FirebaseFirestore {
   }
 }
 
-class FakeCollectionReference extends Fake implements CollectionReference<Map<String, dynamic>> {
+class FakeCollectionReference extends Fake
+    implements CollectionReference<Map<String, dynamic>> {
   final String path;
   final FakeFirebaseFirestore firestore;
 
@@ -35,16 +37,29 @@ class FakeCollectionReference extends Fake implements CollectionReference<Map<St
 
   @override
   DocumentReference<Map<String, dynamic>> doc([String? id]) {
-    return FakeDocumentReference(path, id ?? 'doc_${DateTime.now().millisecondsSinceEpoch}', firestore);
+    return FakeDocumentReference(
+        path, id ?? 'doc_${DateTime.now().millisecondsSinceEpoch}', firestore);
   }
 
   @override
-  Query<Map<String, dynamic>> where(Object field, {Object? isEqualTo, Object? isNotEqualTo, Object? isLessThan, Object? isLessThanOrEqualTo, Object? isGreaterThan, Object? isGreaterThanOrEqualTo, Object? arrayContains, Iterable<Object?>? arrayContainsAny, bool? isNull, Iterable<Object?>? whereIn, Iterable<Object?>? whereNotIn}) {
+  Query<Map<String, dynamic>> where(Object field,
+      {Object? isEqualTo,
+      Object? isNotEqualTo,
+      Object? isLessThan,
+      Object? isLessThanOrEqualTo,
+      Object? isGreaterThan,
+      Object? isGreaterThanOrEqualTo,
+      Object? arrayContains,
+      Iterable<Object?>? arrayContainsAny,
+      bool? isNull,
+      Iterable<Object?>? whereIn,
+      Iterable<Object?>? whereNotIn}) {
     return FakeQuery(path, firestore);
   }
 }
 
-class FakeDocumentReference extends Fake implements DocumentReference<Map<String, dynamic>> {
+class FakeDocumentReference extends Fake
+    implements DocumentReference<Map<String, dynamic>> {
   final String collectionPath;
   final String docId;
   final FakeFirebaseFirestore firestore;
@@ -55,7 +70,8 @@ class FakeDocumentReference extends Fake implements DocumentReference<Map<String
   String get id => docId;
 
   @override
-  Future<DocumentSnapshot<Map<String, dynamic>>> get([GetOptions? options]) async {
+  Future<DocumentSnapshot<Map<String, dynamic>>> get(
+      [GetOptions? options]) async {
     return FakeDocumentSnapshot(collectionPath, docId, firestore);
   }
 
@@ -72,7 +88,8 @@ class FakeDocumentReference extends Fake implements DocumentReference<Map<String
   }
 }
 
-class FakeDocumentSnapshot extends Fake implements DocumentSnapshot<Map<String, dynamic>> {
+class FakeDocumentSnapshot extends Fake
+    implements DocumentSnapshot<Map<String, dynamic>> {
   final String collectionPath;
   final String docId;
   final FakeFirebaseFirestore firestore;
@@ -80,7 +97,8 @@ class FakeDocumentSnapshot extends Fake implements DocumentSnapshot<Map<String, 
   FakeDocumentSnapshot(this.collectionPath, this.docId, this.firestore);
 
   @override
-  bool get exists => firestore.data[collectionPath]?.containsKey(docId) ?? false;
+  bool get exists =>
+      firestore.data[collectionPath]?.containsKey(docId) ?? false;
 
   @override
   Map<String, dynamic>? data() => firestore.data[collectionPath]?[docId];
@@ -99,7 +117,9 @@ class FakeQuery extends Fake implements Query<Map<String, dynamic>> {
   FakeQuery(this.path, this.firestore);
 
   @override
-  Query<Map<String, dynamic>> orderBy(Object field, {bool descending = false}) => this;
+  Query<Map<String, dynamic>> orderBy(Object field,
+          {bool descending = false}) =>
+      this;
 
   @override
   Future<QuerySnapshot<Map<String, dynamic>>> get([GetOptions? options]) async {
@@ -107,7 +127,8 @@ class FakeQuery extends Fake implements Query<Map<String, dynamic>> {
   }
 }
 
-class FakeQuerySnapshot extends Fake implements QuerySnapshot<Map<String, dynamic>> {
+class FakeQuerySnapshot extends Fake
+    implements QuerySnapshot<Map<String, dynamic>> {
   final String path;
   final FakeFirebaseFirestore firestore;
 
@@ -116,11 +137,14 @@ class FakeQuerySnapshot extends Fake implements QuerySnapshot<Map<String, dynami
   @override
   List<QueryDocumentSnapshot<Map<String, dynamic>>> get docs {
     final colData = firestore.data[path] ?? {};
-    return colData.entries.map((e) => FakeQueryDocumentSnapshot(e.key, e.value)).toList();
+    return colData.entries
+        .map((e) => FakeQueryDocumentSnapshot(e.key, e.value))
+        .toList();
   }
 }
 
-class FakeQueryDocumentSnapshot extends Fake implements QueryDocumentSnapshot<Map<String, dynamic>> {
+class FakeQueryDocumentSnapshot extends Fake
+    implements QueryDocumentSnapshot<Map<String, dynamic>> {
   final String docId;
   final Map<String, dynamic> docData;
 
@@ -382,31 +406,63 @@ extension TrackingAssertions on dynamic {
 class FakeNotificationHandler extends Fake implements NotificationHandler {
   @override
   Future<void> initializeNotifications() async {}
-  
+
   @override
-  Future<bool> sendAssignmentNotification({required String volunteerId, required String taskId, required String donationTitle, required String pickupLocation}) async => true;
-  
+  Future<bool> sendAssignmentNotification(
+          {required String volunteerId,
+          required String taskId,
+          required String donationTitle,
+          required String pickupLocation}) async =>
+      true;
+
   @override
-  Future<bool> sendPickupStartNotification({required String volunteerId, required String volunteerName, required String donationId, required String recipientIds}) async => true;
-  
+  Future<bool> sendPickupStartNotification(
+          {required String volunteerId,
+          required String volunteerName,
+          required String donationId,
+          required String recipientIds}) async =>
+      true;
+
   @override
-  Future<bool> sendDeliveryArrivalNotification({required String volunteerId, required String volunteerName, required String donationId, required String ngoId, required String estimatedArrivalMinutes}) async => true;
-  
+  Future<bool> sendDeliveryArrivalNotification(
+          {required String volunteerId,
+          required String volunteerName,
+          required String donationId,
+          required String ngoId,
+          required String estimatedArrivalMinutes}) async =>
+      true;
+
   @override
-  Future<bool> sendDelayAlertNotification({required String taskId, required String volunteerId, required int delayMinutes, required String severity}) async => true;
-  
+  Future<bool> sendDelayAlertNotification(
+          {required String taskId,
+          required String volunteerId,
+          required int delayMinutes,
+          required String severity}) async =>
+      true;
+
   @override
-  Future<bool> sendReassignmentNotification({required String taskId, required String newVolunteerId, required String newVolunteerName, required String reason, required List<String> recipientIds}) async => true;
-  
+  Future<bool> sendReassignmentNotification(
+          {required String taskId,
+          required String newVolunteerId,
+          required String newVolunteerName,
+          required String reason,
+          required List<String> recipientIds}) async =>
+      true;
+
   @override
-  Future<bool> sendCompletionNotification({required String donationId, required String volunteerId, required String ngoName, required List<String> recipientIds}) async => true;
-  
+  Future<bool> sendCompletionNotification(
+          {required String donationId,
+          required String volunteerId,
+          required String ngoName,
+          required List<String> recipientIds}) async =>
+      true;
+
   @override
   Future<void> subscribeToTopic(String topic) async {}
-  
+
   @override
   Future<void> unsubscribeFromTopic(String topic) async {}
-  
+
   @override
   Future<String?> getFCMToken() async => 'fake_token';
 }

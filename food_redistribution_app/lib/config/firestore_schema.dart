@@ -276,53 +276,53 @@ class FirestoreCollections {
   static const String matching = 'matching';
   static const String adminTasks = 'admin_tasks';
   static const String system = 'system';
-  
+
   // ============================================================
   // LEGACY ALIASES - For backward compatibility during migration
   // These will be deprecated after full migration
   // ============================================================
   @Deprecated('Use organizations instead')
   static const String ngoProfiles = 'organizations';
-  
+
   @Deprecated('Use users with profile.role=donor instead')
   static const String donorProfiles = 'users';
-  
+
   @Deprecated('Use users with profile.role=volunteer instead')
   static const String volunteerProfiles = 'users';
-  
+
   @Deprecated('Use donations instead')
   static const String foodDonations = 'donations';
-  
+
   @Deprecated('Use verifications instead')
   static const String verificationSubmissions = 'verifications';
-  
+
   @Deprecated('Use audit instead')
   static const String auditLogs = 'audit';
-  
+
   @Deprecated('Use security instead')
   static const String securityLogs = 'security';
-  
+
   @Deprecated('Use security instead')
   static const String securityEvents = 'security';
-  
+
   @Deprecated('Use security instead')
   static const String securityAlerts = 'security';
-  
+
   @Deprecated('Use tracking instead')
   static const String donationTracking = 'tracking';
-  
+
   @Deprecated('Use assignments instead')
   static const String donationAssignments = 'assignments';
-  
+
   @Deprecated('Use audit instead')
   static const String verificationLogs = 'audit';
-  
+
   @Deprecated('Use users subcollection instead')
   static const String userSessions = 'users';
-  
+
   @Deprecated('Use users subcollection instead')
   static const String adminProfiles = 'users';
-  
+
   // Subcollections
   static const String userNotifications = 'items';
   static const String tokens = 'tokens';

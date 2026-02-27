@@ -51,7 +51,7 @@ void main() {
   group('Date and Time Utilities Tests', () {
     test('should format dates correctly', () {
       final testDate = DateTime(2024, 1, 15, 14, 30, 0);
-      
+
       expect(AppUtils.formatDate(testDate), isA<String>());
       expect(AppUtils.formatTime(testDate), isA<String>());
       expect(AppUtils.formatDateTime(testDate), isA<String>());
@@ -106,12 +106,14 @@ void main() {
 
     test('should format weight correctly', () {
       expect(AppUtils.formatWeight(5.0), equals('5kg'));
-      expect(AppUtils.formatWeight(0.5), contains('g')); // Should convert to grams
+      expect(
+          AppUtils.formatWeight(0.5), contains('g')); // Should convert to grams
     });
 
     test('should format distance correctly', () {
       expect(AppUtils.formatDistance(5.5), equals('5.5km'));
-      expect(AppUtils.formatDistance(0.5), contains('m')); // Should be in meters
+      expect(
+          AppUtils.formatDistance(0.5), contains('m')); // Should be in meters
     });
   });
 
@@ -142,9 +144,12 @@ void main() {
       final soonExpiring = now.add(const Duration(hours: 6));
       final normalExpiry = now.add(const Duration(hours: 20));
 
-      expect(AppUtils.calculateFoodPriority(almostExpired, 10), equals(Priority.urgent));
-      expect(AppUtils.calculateFoodPriority(soonExpiring, 10), equals(Priority.high));
-      expect(AppUtils.calculateFoodPriority(normalExpiry, 10), equals(Priority.normal));
+      expect(AppUtils.calculateFoodPriority(almostExpired, 10),
+          equals(Priority.urgent));
+      expect(AppUtils.calculateFoodPriority(soonExpiring, 10),
+          equals(Priority.high));
+      expect(AppUtils.calculateFoodPriority(normalExpiry, 10),
+          equals(Priority.normal));
     });
 
     test('should calculate impact score', () {
@@ -168,7 +173,8 @@ void main() {
 
     test('should calculate short distances', () {
       // Two points close together in San Francisco
-      final distance = AppUtils.calculateDistance(37.7749, -122.4194, 37.7849, -122.4094);
+      final distance =
+          AppUtils.calculateDistance(37.7749, -122.4194, 37.7849, -122.4094);
       expect(distance, greaterThan(0));
       expect(distance, lessThan(2.0)); // Should be less than 2 km
     });
@@ -178,7 +184,7 @@ void main() {
     test('should generate random IDs of specified length', () {
       final id1 = AppUtils.generateRandomId(length: 10);
       final id2 = AppUtils.generateRandomId(length: 10);
-      
+
       expect(id1.length, equals(10));
       expect(id2.length, equals(10));
       expect(id1, isNot(equals(id2))); // Should be unique
@@ -194,7 +200,7 @@ void main() {
     test('should correctly identify today', () {
       final now = DateTime.now();
       expect(now.isToday, isTrue);
-      
+
       final yesterday = now.subtract(const Duration(days: 1));
       expect(yesterday.isToday, isFalse);
     });

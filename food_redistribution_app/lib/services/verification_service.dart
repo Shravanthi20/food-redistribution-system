@@ -31,11 +31,12 @@ class VerificationService {
     required Map<String, String> documentInfo, // {type: description/number}
   }) async {
     try {
-      final submissionId = _firestore.collection(Collections.verifications).doc().id;
-      
+      final submissionId =
+          _firestore.collection(Collections.verifications).doc().id;
+
       // Create text-based verification submission
       List<Map<String, dynamic>> submittedDocs = [];
-      
+
       documentInfo.forEach((type, info) {
         submittedDocs.add({
           'type': type,
@@ -43,7 +44,7 @@ class VerificationService {
           'submittedAt': Timestamp.now(),
         });
       });
-      
+
       return await _createSubmission(
         submissionId: submissionId,
         userId: userId,
@@ -64,14 +65,17 @@ class VerificationService {
     required String documentType,
   }) async {
     try {
-      final submissionId = _firestore.collection(Collections.verifications).doc().id;
-      
-      List<Map<String, dynamic>> submittedDocs = [{
-        'type': documentType,
-        'information': documentUrl,
-        'submittedAt': Timestamp.now(),
-      }];
-      
+      final submissionId =
+          _firestore.collection(Collections.verifications).doc().id;
+
+      List<Map<String, dynamic>> submittedDocs = [
+        {
+          'type': documentType,
+          'information': documentUrl,
+          'submittedAt': Timestamp.now(),
+        }
+      ];
+
       return await _createSubmission(
         submissionId: submissionId,
         userId: userId,
@@ -91,7 +95,10 @@ class VerificationService {
     required List<Map<String, dynamic>> submittedDocs,
   }) async {
     // Create verification submission
-    await _firestore.collection(Collections.verifications).doc(submissionId).set({
+    await _firestore
+        .collection(Collections.verifications)
+        .doc(submissionId)
+        .set({
       'userId': userId,
       'userRole': userRole.name,
       'documentInfo': submittedDocs,
@@ -101,13 +108,13 @@ class VerificationService {
       'reviewedAt': null,
       'notes': null,
     });
-    
+
     // Update user onboarding state
     await _firestore.collection(Collections.users).doc(userId).update({
       'onboardingState': OnboardingState.documentSubmitted.name,
       'updatedAt': Timestamp.now(),
     });
-    
+
     // Add to admin review queue
     await _firestore.collection(Collections.adminTasks).add({
       'type': 'document_verification',
@@ -118,16 +125,16 @@ class VerificationService {
       'status': 'pending',
       'createdAt': Timestamp.now(),
     });
-    
+
     // Notify admins
     await _notifyAdminsOfSubmission(submissionId, userRole);
-    
+
     // Log verification event
     await _logVerificationEvent('documents_submitted', userId, {
       'submissionId': submissionId,
       'documentCount': submittedDocs.length,
     });
-    
+
     return submissionId;
   }
 
@@ -148,8 +155,9 @@ class VerificationService {
         userId = submissionId.replaceFirst('legacy_', '');
       } else {
         // Update submission records
-        final submissionRef = _firestore.collection(Collections.verifications).doc(submissionId);
-        
+        final submissionRef =
+            _firestore.collection(Collections.verifications).doc(submissionId);
+
         // Get submission data to update user
         final submissionDoc = await submissionRef.get();
         if (!submissionDoc.exists) {
@@ -173,7 +181,7 @@ class VerificationService {
             .where('submissionId', isEqualTo: submissionId)
             .where('status', isEqualTo: 'pending')
             .get();
-        
+
         for (var doc in taskQuery.docs) {
           batch.update(doc.reference, {
             'status': 'completed',
@@ -182,7 +190,7 @@ class VerificationService {
           });
         }
       }
-      
+
       // Update user status based on decision
       final userRef = _firestore.collection(Collections.users).doc(userId);
       switch (decision) {
@@ -214,12 +222,12 @@ class VerificationService {
         default:
           break;
       }
-      
+
       await batch.commit();
-      
+
       // Send notification to user
       await _notifyUserOfDecision(userId, decision, notes);
-      
+
       // Log verification event
       await _logVerificationEvent('documents_reviewed', userId, {
         'submissionId': submissionId,
@@ -237,47 +245,50 @@ class VerificationService {
   Future<List<Map<String, dynamic>>> getPendingVerifications() async {
     try {
       print('Fetching pending verifications...');
-      
+
       // Attempt to get from submissions collection
       // TEMPORARY: Removed .orderBy('submittedAt') to avoid indexing requirements until verified
       final query = await _firestore
           .collection(Collections.verifications)
           .where('status', isEqualTo: VerificationStatus.pending.name)
           .get();
-      
+
       List<Map<String, dynamic>> submissions = [];
-      Set<String> processedUserIds = {}; // Track to avoid duplicates if falling back
-      
+      Set<String> processedUserIds =
+          {}; // Track to avoid duplicates if falling back
+
       for (var doc in query.docs) {
         final data = doc.data();
         final userId = data['userId'];
         processedUserIds.add(userId);
-        
+
         // Get user details
-        final userDoc = await _firestore.collection(Collections.users).doc(userId).get();
+        final userDoc =
+            await _firestore.collection(Collections.users).doc(userId).get();
         final userData = userDoc.exists ? userDoc.data() : {};
-        
+
         submissions.add({
           'id': doc.id,
           'submission': data,
           'user': userData,
         });
       }
-      
+
       print('Found ${submissions.length} formal submissions.');
 
       // FALLBACK: Look for users with onboardingState == 'documentSubmitted' but no submission record
       // This handles NGOs created before the sync was implemented.
       final fallbackQuery = await _firestore
           .collection(Collections.users)
-          .where('onboardingState', isEqualTo: OnboardingState.documentSubmitted.name)
+          .where('onboardingState',
+              isEqualTo: OnboardingState.documentSubmitted.name)
           .get();
-      
+
       int fallbackCount = 0;
       for (var userDoc in fallbackQuery.docs) {
         if (!processedUserIds.contains(userDoc.id)) {
           final userData = userDoc.data();
-          
+
           // Synthetic submission for the UI
           final syntheticSubmission = {
             'userId': userDoc.id,
@@ -293,7 +304,7 @@ class VerificationService {
             'submittedAt': userData['updatedAt'] ?? Timestamp.now(),
             'notes': 'Auto-recovered from legacy status',
           };
-          
+
           submissions.add({
             'id': 'legacy_${userDoc.id}',
             'submission': syntheticSubmission,
@@ -304,31 +315,32 @@ class VerificationService {
       }
 
       if (fallbackCount > 0) {
-        print('Recovered $fallbackCount legacy verifications from users collection.');
+        print(
+            'Recovered $fallbackCount legacy verifications from users collection.');
       }
-      
+
       return submissions;
     } catch (e) {
       print('ERROR in getPendingVerifications: $e');
       if (e.toString().contains('index')) {
-        print('CRITICAL: Firestore Composite Index may be missing. Check the link in the error above.');
+        print(
+            'CRITICAL: Firestore Composite Index may be missing. Check the link in the error above.');
       }
       return [];
     }
   }
 
   // Get verification history for user
-  Future<List<Map<String, dynamic>>> getUserVerificationHistory(String userId) async {
+  Future<List<Map<String, dynamic>>> getUserVerificationHistory(
+      String userId) async {
     try {
       final query = await _firestore
           .collection(Collections.verifications)
           .where('userId', isEqualTo: userId)
           .orderBy('submittedAt', descending: true)
           .get();
-      
-      return query.docs
-          .map((doc) => {'id': doc.id, ...doc.data()})
-          .toList();
+
+      return query.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList();
     } catch (e) {
       print('Error getting verification history: $e');
       return [];
@@ -342,30 +354,32 @@ class VerificationService {
           .collection(Collections.verifications)
           .where('status', isEqualTo: VerificationStatus.pending.name)
           .get();
-      
+
       final approved = await _firestore
           .collection(Collections.verifications)
           .where('status', isEqualTo: VerificationStatus.approved.name)
           .get();
-      
+
       final rejected = await _firestore
           .collection(Collections.verifications)
           .where('status', isEqualTo: VerificationStatus.rejected.name)
           .get();
-      
+
       final thisMonth = DateTime.now().subtract(const Duration(days: 30));
       final recentSubmissions = await _firestore
           .collection(Collections.verifications)
           .where('submittedAt', isGreaterThan: Timestamp.fromDate(thisMonth))
           .get();
-      
+
       return {
         'pendingCount': pending.docs.length,
         'approvedCount': approved.docs.length,
         'rejectedCount': rejected.docs.length,
         'submissionsThisMonth': recentSubmissions.docs.length,
-        'approvalRate': (approved.docs.length + rejected.docs.length) > 0 
-            ? (approved.docs.length / (approved.docs.length + rejected.docs.length)) * 100 
+        'approvalRate': (approved.docs.length + rejected.docs.length) > 0
+            ? (approved.docs.length /
+                    (approved.docs.length + rejected.docs.length)) *
+                100
             : 0,
         'generatedAt': Timestamp.now(),
       };
@@ -389,19 +403,21 @@ class VerificationService {
     }
   }
 
-  Future<void> _notifyAdminsOfSubmission(String submissionId, UserRole userRole) async {
+  Future<void> _notifyAdminsOfSubmission(
+      String submissionId, UserRole userRole) async {
     try {
       // Get all admin users
       final adminQuery = await _firestore
           .collection(Collections.users)
           .where('role', isEqualTo: UserRole.admin.name)
           .get();
-      
+
       for (var doc in adminQuery.docs) {
         await _notificationService.sendNotification(
           userId: doc.id,
           title: 'New Verification Submission',
-          message: 'A ${userRole.name} has submitted documents for verification',
+          message:
+              'A ${userRole.name} has submitted documents for verification',
           type: 'verification_request',
           data: {'submissionId': submissionId},
         );
@@ -411,27 +427,31 @@ class VerificationService {
     }
   }
 
-  Future<void> _notifyUserOfDecision(String userId, VerificationStatus decision, String? notes) async {
+  Future<void> _notifyUserOfDecision(
+      String userId, VerificationStatus decision, String? notes) async {
     String title, message;
-    
+
     switch (decision) {
       case VerificationStatus.approved:
         title = 'Account Verified!';
-        message = 'Your documents have been approved. You can now access all features.';
+        message =
+            'Your documents have been approved. You can now access all features.';
         break;
       case VerificationStatus.rejected:
         title = 'Verification Rejected';
-        message = 'Your documents were rejected. Please review the feedback and resubmit.';
+        message =
+            'Your documents were rejected. Please review the feedback and resubmit.';
         break;
       case VerificationStatus.clarificationNeeded:
         title = 'Clarification Needed';
-        message = 'Please provide additional information for your verification.';
+        message =
+            'Please provide additional information for your verification.';
         break;
       default:
         title = 'Verification Update';
         message = 'Your verification status has been updated.';
     }
-    
+
     await _notificationService.sendNotification(
       userId: userId,
       title: title,
@@ -444,7 +464,8 @@ class VerificationService {
     );
   }
 
-  Future<void> _logVerificationEvent(String event, String userId, Map<String, dynamic> data) async {
+  Future<void> _logVerificationEvent(
+      String event, String userId, Map<String, dynamic> data) async {
     await _firestore.collection(Collections.verifications).add({
       'event': event,
       'userId': userId,
@@ -454,12 +475,14 @@ class VerificationService {
   }
 
   // Submit donor verification with file uploads
-  Future<String> submitDonorVerification(String userId, Map<String, dynamic> submissionData) async {
+  Future<String> submitDonorVerification(
+      String userId, Map<String, dynamic> submissionData) async {
     try {
       print('Submitting donor verification for user: $userId');
-      
-      final submissionId = _firestore.collection(Collections.verifications).doc().id;
-      
+
+      final submissionId =
+          _firestore.collection(Collections.verifications).doc().id;
+
       // Convert submission data to document format
       List<Map<String, dynamic>> submittedDocs = [];
       submissionData.forEach((docType, data) {
@@ -472,7 +495,10 @@ class VerificationService {
       });
 
       // Create verification submission
-      await _firestore.collection(Collections.verifications).doc(submissionId).set({
+      await _firestore
+          .collection(Collections.verifications)
+          .doc(submissionId)
+          .set({
         'userId': userId,
         'userRole': UserRole.donor.name,
         'documentInfo': submittedDocs,

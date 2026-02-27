@@ -1,8 +1,8 @@
 /// Firebase Schema Configuration
-/// 
+///
 /// This file defines all collection names and document structures
 /// for the Food Redistribution App's Firestore database.
-/// 
+///
 /// SCHEMA VERSION: 2.0
 /// Last Updated: 2026-02-10
 
@@ -17,16 +17,16 @@ class Collections {
   static const String deliveries = 'deliveries';
   static const String requests = 'requests';
   static const String assignments = 'assignments';
-  
+
   // Tracking & notifications
   static const String tracking = 'tracking';
   static const String notifications = 'notifications';
-  
+
   // Verification & audit
   static const String verifications = 'verifications';
   static const String audit = 'audit';
   static const String security = 'security';
-  
+
   // Analytics & system
   static const String analytics = 'analytics';
   static const String matching = 'matching';
@@ -39,26 +39,26 @@ class Subcollections {
   // User subcollections
   static const String tokens = 'tokens';
   static const String settings = 'settings';
-  
+
   // Organization subcollections
   static const String branches = 'branches';
-  
+
   // Donation subcollections
   static const String history = 'history';
   static const String messages = 'messages';
-  
+
   // Delivery subcollections
   static const String checkpoints = 'checkpoints';
-  
+
   // Tracking subcollections
   static const String locations = 'locations';
-  
+
   // Notification subcollections
   static const String items = 'items';
-  
+
   // Matching subcollections
   static const String results = 'results';
-  
+
   // Analytics subcollections
   static const String daily = 'daily';
 }
@@ -70,7 +70,7 @@ class Fields {
   static const String createdAt = 'createdAt';
   static const String updatedAt = 'updatedAt';
   static const String status = 'status';
-  
+
   // User fields
   static const String userId = 'userId';
   static const String email = 'email';
@@ -82,13 +82,13 @@ class Fields {
   static const String phone = 'phone';
   static const String location = 'location';
   static const String isVerified = 'isVerified';
-  
+
   // Location fields
   static const String latitude = 'latitude';
   static const String longitude = 'longitude';
   static const String geohash = 'geohash';
   static const String address = 'address';
-  
+
   // Donation fields
   static const String donorId = 'donorId';
   static const String ngoId = 'ngoId';
@@ -101,18 +101,18 @@ class Fields {
   static const String expiresAt = 'expiresAt';
   static const String pickupLocation = 'pickupLocation';
   static const String isUrgent = 'isUrgent';
-  
+
   // Delivery fields
   static const String donationId = 'donationId';
   static const String pickupTime = 'pickupTime';
   static const String deliveryTime = 'deliveryTime';
-  
+
   // Assignment fields
   static const String assigneeId = 'assigneeId';
   static const String type = 'type';
   static const String score = 'score';
   static const String expiresAtField = 'expiresAt';
-  
+
   // Organization fields
   static const String ownerId = 'ownerId';
   static const String organizationName = 'organizationName';
@@ -121,9 +121,9 @@ class Fields {
 }
 
 /// Schema structure documentation
-/// 
+///
 /// ## Collections Overview
-/// 
+///
 /// ### /users/{userId}
 /// Unified user document containing core auth info and role-specific profile data.
 /// ```
@@ -152,7 +152,7 @@ class Fields {
 ///   }
 /// }
 /// ```
-/// 
+///
 /// ### /organizations/{orgId}
 /// NGO organization profiles (separate for multi-user orgs).
 /// ```
@@ -175,7 +175,7 @@ class Fields {
 ///   createdAt: timestamp
 /// }
 /// ```
-/// 
+///
 /// ### /donations/{donationId}
 /// Food donation listings.
 /// ```
@@ -204,7 +204,7 @@ class Fields {
 ///   updatedAt: timestamp
 /// }
 /// ```
-/// 
+///
 /// ### /deliveries/{deliveryId}
 /// Active delivery tasks linking donation, volunteer, and NGO.
 /// ```
@@ -225,7 +225,7 @@ class Fields {
 ///   createdAt: timestamp
 /// }
 /// ```
-/// 
+///
 /// ### /requests/{requestId}
 /// NGO food requests/demands.
 /// ```
@@ -242,7 +242,7 @@ class Fields {
 ///   createdAt: timestamp
 /// }
 /// ```
-/// 
+///
 /// ### /assignments/{assignmentId}
 /// Matching assignments for NGOs and volunteers.
 /// ```
@@ -257,7 +257,7 @@ class Fields {
 ///   respondedAt: timestamp?
 /// }
 /// ```
-/// 
+///
 /// ### /tracking/{volunteerId}/locations/{locationId}
 /// Real-time location updates.
 /// ```
@@ -272,7 +272,7 @@ class Fields {
 ///   status: 'idle' | 'enRoute' | 'atPickup' | 'inTransit' | 'nearDelivery' | 'delivered'
 /// }
 /// ```
-/// 
+///
 /// ### /notifications/{userId}/items/{notificationId}
 /// User notifications.
 /// ```
@@ -285,7 +285,7 @@ class Fields {
 ///   createdAt: timestamp
 /// }
 /// ```
-/// 
+///
 /// ### /verifications/{verificationId}
 /// Document verification submissions.
 /// ```

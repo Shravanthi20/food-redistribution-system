@@ -7,7 +7,14 @@ import 'package:food_redistribution_app/main.dart' as app;
 import 'package:firebase_core_platform_interface/firebase_core_platform_interface.dart';
 
 class MockFirebaseAppPlatform extends FirebaseAppPlatform {
-  MockFirebaseAppPlatform() : super(defaultFirebaseAppName, const FirebaseOptions(apiKey: '1', appId: '1', messagingSenderId: '1', projectId: '1'));
+  MockFirebaseAppPlatform()
+      : super(
+            defaultFirebaseAppName,
+            const FirebaseOptions(
+                apiKey: '1',
+                appId: '1',
+                messagingSenderId: '1',
+                projectId: '1'));
 }
 
 class MockFirebasePlatform extends FirebasePlatform {
@@ -19,10 +26,11 @@ class MockFirebasePlatform extends FirebasePlatform {
   }
 
   @override
-  Future<FirebaseAppPlatform> initializeApp({String? name, FirebaseOptions? options}) async {
+  Future<FirebaseAppPlatform> initializeApp(
+      {String? name, FirebaseOptions? options}) async {
     return MockFirebaseAppPlatform();
   }
-  
+
   @override
   List<FirebaseAppPlatform> get apps => [app()];
 }
@@ -32,26 +40,35 @@ void main() {
   FirebasePlatform.instance = MockFirebasePlatform();
 
   setUpAll(() async {
-    const MethodChannel pathChannel = MethodChannel('plugins.flutter.io/path_provider');
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(pathChannel, (MethodCall methodCall) async {
+    const MethodChannel pathChannel =
+        MethodChannel('plugins.flutter.io/path_provider');
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(pathChannel, (MethodCall methodCall) async {
       return '.';
     });
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
-        'dev.flutter.pigeon.firebase_auth_platform_interface.FirebaseAuthHostApi.registerIdTokenListener',
-        (ByteData? message) async { return const StandardMessageCodec().encodeMessage(<Object?>['mock_id']); });
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
-        'dev.flutter.pigeon.firebase_auth_platform_interface.FirebaseAuthHostApi.registerAuthStateListener',
-        (ByteData? message) async { return const StandardMessageCodec().encodeMessage(<Object?>['mock_id']); });
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMessageHandler(
+            'dev.flutter.pigeon.firebase_auth_platform_interface.FirebaseAuthHostApi.registerIdTokenListener',
+            (ByteData? message) async {
+      return const StandardMessageCodec().encodeMessage(<Object?>['mock_id']);
+    });
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMessageHandler(
+            'dev.flutter.pigeon.firebase_auth_platform_interface.FirebaseAuthHostApi.registerAuthStateListener',
+            (ByteData? message) async {
+      return const StandardMessageCodec().encodeMessage(<Object?>['mock_id']);
+    });
 
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
-        const MethodChannel('mock_id'),
-        (MethodCall methodCall) async { return null; });
-        
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(const MethodChannel('mock_id'),
+            (MethodCall methodCall) async {
+      return null;
+    });
+
     await Firebase.initializeApp();
   });
 
   group('Food Redistribution App Integration Tests', () {
-    
     setUp(() {
       final binding = TestWidgetsFlutterBinding.ensureInitialized();
       binding.window.physicalSizeTestValue = const Size(1080, 2400);
@@ -64,7 +81,8 @@ void main() {
       binding.window.clearDevicePixelRatioTestValue();
     });
 
-    testWidgets('should complete user onboarding flow', skip: true, (WidgetTester tester) async {
+    testWidgets('should complete user onboarding flow', skip: true,
+        (WidgetTester tester) async {
       await tester.pumpWidget(const app.FoodRedistributionApp());
       await tester.pumpAndSettle();
 
@@ -76,10 +94,12 @@ void main() {
       await tester.pumpAndSettle();
 
       // Should navigate to donor dashboard or registration
-      expect(find.textContaining(RegExp(r'donor', caseSensitive: false)), findsAtLeastNWidgets(1));
+      expect(find.textContaining(RegExp(r'donor', caseSensitive: false)),
+          findsAtLeastNWidgets(1));
     });
 
-    testWidgets('should handle navigation between screens', (WidgetTester tester) async {
+    testWidgets('should handle navigation between screens',
+        (WidgetTester tester) async {
       await tester.pumpWidget(const app.FoodRedistributionApp());
       await tester.pumpAndSettle();
 
@@ -91,7 +111,10 @@ void main() {
       await tester.pumpAndSettle();
 
       // Should show NGO-related content
-      expect(find.textContaining(RegExp(r'ngo|organization', caseSensitive: false)), findsAtLeastNWidgets(1));
+      expect(
+          find.textContaining(
+              RegExp(r'ngo|organization', caseSensitive: false)),
+          findsAtLeastNWidgets(1));
 
       // Navigate back if possible
       final backButton = find.byIcon(Icons.arrow_back_ios_new_rounded);
@@ -102,7 +125,8 @@ void main() {
       }
     });
 
-    testWidgets('should handle volunteer registration flow', (WidgetTester tester) async {
+    testWidgets('should handle volunteer registration flow',
+        (WidgetTester tester) async {
       await tester.pumpWidget(const app.FoodRedistributionApp());
       await tester.pumpAndSettle();
 
@@ -111,11 +135,12 @@ void main() {
       await tester.pumpAndSettle();
 
       // Should navigate to volunteer-specific screen
-      expect(find.textContaining(RegExp(r'volunteer', caseSensitive: false)), 
-             findsAtLeastNWidgets(1));
+      expect(find.textContaining(RegExp(r'volunteer', caseSensitive: false)),
+          findsAtLeastNWidgets(1));
     });
 
-    testWidgets('should handle scroll behavior in welcome screen', (WidgetTester tester) async {
+    testWidgets('should handle scroll behavior in welcome screen',
+        (WidgetTester tester) async {
       await tester.pumpWidget(const app.FoodRedistributionApp());
       await tester.pumpAndSettle();
 
@@ -137,7 +162,8 @@ void main() {
       expect(find.text('Food Redistribution'), findsOneWidget);
     });
 
-    testWidgets('should handle app state preservation', skip: true, (WidgetTester tester) async {
+    testWidgets('should handle app state preservation', skip: true,
+        (WidgetTester tester) async {
       await tester.pumpWidget(const app.FoodRedistributionApp());
       await tester.pumpAndSettle();
 
@@ -159,7 +185,8 @@ void main() {
       expect(find.text('Food Redistribution'), findsOneWidget);
     });
 
-    testWidgets('should handle different screen orientations', (WidgetTester tester) async {
+    testWidgets('should handle different screen orientations',
+        (WidgetTester tester) async {
       await tester.pumpWidget(const app.FoodRedistributionApp());
       await tester.pumpAndSettle();
 
@@ -178,19 +205,21 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgets('should handle accessibility features', (WidgetTester tester) async {
+    testWidgets('should handle accessibility features',
+        (WidgetTester tester) async {
       await tester.pumpWidget(const app.FoodRedistributionApp());
       await tester.pumpAndSettle();
-      
+
       // Accessibility features not implemented directly with Semantic labels in code,
       // Focus management via tab is present implicitly
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pumpAndSettle();
-      
+
       expect(find.byType(MaterialApp), findsOneWidget);
     });
 
-    testWidgets('should handle network error states', (WidgetTester tester) async {
+    testWidgets('should handle network error states',
+        (WidgetTester tester) async {
       await tester.pumpWidget(const app.FoodRedistributionApp());
       await tester.pumpAndSettle();
 
@@ -205,7 +234,8 @@ void main() {
       expect(find.byType(MaterialApp), findsOneWidget);
     });
 
-    testWidgets('should maintain performance with animations', (WidgetTester tester) async {
+    testWidgets('should maintain performance with animations',
+        (WidgetTester tester) async {
       await tester.pumpWidget(const app.FoodRedistributionApp());
       await tester.pumpAndSettle();
 
@@ -213,7 +243,7 @@ void main() {
       for (int i = 0; i < 5; i++) {
         await tester.tap(find.text('Food Donor'));
         await tester.pump(const Duration(milliseconds: 100));
-        
+
         final backButton = find.byIcon(Icons.arrow_back_ios_new_rounded);
         if (backButton.evaluate().isNotEmpty) {
           await tester.tap(backButton);
@@ -246,8 +276,8 @@ void main() {
       await tester.pumpAndSettle();
 
       // Should handle role switching correctly
-      expect(find.textContaining(RegExp(r'volunteer', caseSensitive: false)), 
-             findsAtLeastNWidgets(1));
+      expect(find.textContaining(RegExp(r'volunteer', caseSensitive: false)),
+          findsAtLeastNWidgets(1));
     });
 
     testWidgets('should validate app theming', (WidgetTester tester) async {
@@ -255,14 +285,16 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify Material Design 3 theming
-      final materialApp = tester.widget<MaterialApp>(find.byType(MaterialApp).first);
+      final materialApp =
+          tester.widget<MaterialApp>(find.byType(MaterialApp).first);
       expect(materialApp.theme?.useMaterial3, isTrue);
 
       // Check for consistent color scheme
       expect(find.text('Food Redistribution'), findsOneWidget);
     });
 
-    testWidgets('should handle deep linking scenarios', (WidgetTester tester) async {
+    testWidgets('should handle deep linking scenarios',
+        (WidgetTester tester) async {
       await tester.pumpWidget(const app.FoodRedistributionApp());
       await tester.pumpAndSettle();
 
@@ -278,7 +310,8 @@ void main() {
     });
 
     group('Error Handling Tests', () {
-      testWidgets('should handle widget build errors gracefully', (WidgetTester tester) async {
+      testWidgets('should handle widget build errors gracefully',
+          (WidgetTester tester) async {
         await tester.pumpWidget(const app.FoodRedistributionApp());
         await tester.pumpAndSettle();
 
@@ -287,7 +320,8 @@ void main() {
         expect(tester.takeException(), isNull);
       });
 
-      testWidgets('should display error boundaries when needed', (WidgetTester tester) async {
+      testWidgets('should display error boundaries when needed',
+          (WidgetTester tester) async {
         await tester.pumpWidget(const app.FoodRedistributionApp());
         await tester.pumpAndSettle();
 
@@ -298,20 +332,22 @@ void main() {
     });
 
     group('Performance Tests', () {
-      testWidgets('should load within acceptable time', (WidgetTester tester) async {
+      testWidgets('should load within acceptable time',
+          (WidgetTester tester) async {
         final stopwatch = Stopwatch()..start();
-        
+
         await tester.pumpWidget(const app.FoodRedistributionApp());
         await tester.pumpAndSettle();
-        
+
         stopwatch.stop();
-        
+
         // App should load within 3 seconds
         expect(stopwatch.elapsedMilliseconds, lessThan(3000));
         expect(find.text('Food Redistribution'), findsOneWidget);
       });
 
-      testWidgets('should handle memory efficiently', (WidgetTester tester) async {
+      testWidgets('should handle memory efficiently',
+          (WidgetTester tester) async {
         await tester.pumpWidget(const app.FoodRedistributionApp());
         await tester.pumpAndSettle();
 
@@ -333,7 +369,8 @@ void main() {
     });
 
     group('User Experience Tests', () {
-      testWidgets('should provide smooth animations', (WidgetTester tester) async {
+      testWidgets('should provide smooth animations',
+          (WidgetTester tester) async {
         await tester.pumpWidget(const app.FoodRedistributionApp());
         await tester.pumpAndSettle();
 
@@ -347,7 +384,8 @@ void main() {
         expect(find.byType(MaterialApp), findsOneWidget);
       });
 
-      testWidgets('should maintain UI consistency', (WidgetTester tester) async {
+      testWidgets('should maintain UI consistency',
+          (WidgetTester tester) async {
         await tester.pumpWidget(const app.FoodRedistributionApp());
         await tester.pumpAndSettle();
 

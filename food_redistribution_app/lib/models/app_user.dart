@@ -52,21 +52,20 @@ class AppUser {
       phoneNumber: json['phone_number'],
       profileImageUrl: json['profile_image_url'],
       createdAt: DateTime.parse(json['created_at']),
-      updatedAt: json['updated_at'] != null 
-        ? DateTime.parse(json['updated_at']) 
-        : null,
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'])
+          : null,
       isVerified: json['is_verified'] ?? false,
       isActive: json['is_active'] ?? true,
-      address: json['address'] != null 
-        ? Location.fromJson(json['address']) 
-        : null,
+      address:
+          json['address'] != null ? Location.fromJson(json['address']) : null,
       preferences: Map<String, dynamic>.from(json['preferences'] ?? {}),
       certifications: List<String>.from(json['certifications'] ?? []),
       rating: json['rating']?.toDouble(),
       completedTasks: json['completed_tasks'] ?? 0,
-      lastLoginAt: json['last_login_at'] != null 
-        ? DateTime.parse(json['last_login_at']) 
-        : null,
+      lastLoginAt: json['last_login_at'] != null
+          ? DateTime.parse(json['last_login_at'])
+          : null,
     );
   }
 
@@ -236,7 +235,9 @@ class Location {
   }
 
   String get fullAddress {
-    final parts = [address, city, state, zipCode].where((part) => part != null && part.isNotEmpty).toList();
+    final parts = [address, city, state, zipCode]
+        .where((part) => part != null && part.isNotEmpty)
+        .toList();
     return parts.join(', ');
   }
 
@@ -244,19 +245,21 @@ class Location {
   /// Returns distance in kilometers
   double distanceTo(Location other) {
     const double earthRadius = 6371.0; // km
-    
+
     // Convert to radians
     final lat1Rad = latitude * math.pi / 180;
     final lat2Rad = other.latitude * math.pi / 180;
     final deltaLat = (other.latitude - latitude) * math.pi / 180;
     final deltaLon = (other.longitude - longitude) * math.pi / 180;
-    
+
     // Haversine formula
     final a = math.sin(deltaLat / 2) * math.sin(deltaLat / 2) +
-              math.cos(lat1Rad) * math.cos(lat2Rad) *
-              math.sin(deltaLon / 2) * math.sin(deltaLon / 2);
+        math.cos(lat1Rad) *
+            math.cos(lat2Rad) *
+            math.sin(deltaLon / 2) *
+            math.sin(deltaLon / 2);
     final c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
-    
+
     return earthRadius * c;
   }
 }

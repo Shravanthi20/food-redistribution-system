@@ -13,13 +13,16 @@ import '../admin/user_selection_screen.dart';
 import '../../services/location_service.dart'; // Import LocationService
 
 class DonationDetailScreen extends StatelessWidget {
-  final FoodDonation initialDonation; // Renamed from donation to initialDonation
+  final FoodDonation
+      initialDonation; // Renamed from donation to initialDonation
 
-  const DonationDetailScreen({Key? key, required this.initialDonation}) : super(key: key);
+  const DonationDetailScreen({Key? key, required this.initialDonation})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final donationProvider = Provider.of<DonationProvider>(context, listen: false);
+    final donationProvider =
+        Provider.of<DonationProvider>(context, listen: false);
 
     return Scaffold(
       appBar: AppBar(
@@ -31,12 +34,14 @@ class DonationDetailScreen extends StatelessWidget {
         stream: donationProvider.getDonationStream(initialDonation.id),
         initialData: initialDonation,
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting && snapshot.data == null) {
+          if (snapshot.connectionState == ConnectionState.waiting &&
+              snapshot.data == null) {
             return const Center(child: CircularProgressIndicator());
           }
-          
+
           if (!snapshot.hasData || snapshot.data == null) {
-             return const Center(child: Text('Donation not found')); // Handle deletion
+            return const Center(
+                child: Text('Donation not found')); // Handle deletion
           }
 
           final donation = snapshot.data!;
@@ -49,21 +54,21 @@ class DonationDetailScreen extends StatelessWidget {
                 initialData: true,
                 builder: (context, connSnapshot) {
                   if (connSnapshot.hasData && connSnapshot.data == false) {
-                     return Container(
-                       color: Colors.red,
-                       padding: const EdgeInsets.all(8),
-                       width: double.infinity,
-                       child: const Text(
-                         'You are offline. Changes will sync when you reconnect.',
-                         style: TextStyle(color: Colors.white),
-                         textAlign: TextAlign.center,
-                       ),
-                     );
+                    return Container(
+                      color: Colors.red,
+                      padding: const EdgeInsets.all(8),
+                      width: double.infinity,
+                      child: const Text(
+                        'You are offline. Changes will sync when you reconnect.',
+                        style: TextStyle(color: Colors.white),
+                        textAlign: TextAlign.center,
+                      ),
+                    );
                   }
                   return const SizedBox.shrink();
                 },
               ),
-              
+
               Expanded(
                 child: SingleChildScrollView(
                   child: Column(
@@ -72,7 +77,8 @@ class DonationDetailScreen extends StatelessWidget {
                       // Status Header
                       Container(
                         padding: const EdgeInsets.all(20),
-                        color: _getStatusColor(donation.status).withOpacity(0.1),
+                        color:
+                            _getStatusColor(donation.status).withOpacity(0.1),
                         child: Column(
                           children: [
                             Icon(
@@ -83,15 +89,19 @@ class DonationDetailScreen extends StatelessWidget {
                             const SizedBox(height: 12),
                             Text(
                               _getStatusDisplayName(donation.status),
-                              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                color: _getStatusColor(donation.status),
-                                fontWeight: FontWeight.bold,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .headlineSmall
+                                  ?.copyWith(
+                                    color: _getStatusColor(donation.status),
+                                    fontWeight: FontWeight.bold,
+                                  ),
                             ),
                             if (donation.isUrgent) ...[
                               const SizedBox(height: 8),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 8),
                                 decoration: BoxDecoration(
                                   color: Colors.red,
                                   borderRadius: BorderRadius.circular(20),
@@ -115,8 +125,10 @@ class DonationDetailScreen extends StatelessWidget {
                         'Basic Information',
                         [
                           _buildInfoRow(Icons.title, 'Title', donation.title),
-                          _buildInfoRow(Icons.description, 'Description', donation.description),
-                          _buildInfoRow(Icons.restaurant, 'Quantity', '${donation.quantity} ${donation.unit}'),
+                          _buildInfoRow(Icons.description, 'Description',
+                              donation.description),
+                          _buildInfoRow(Icons.restaurant, 'Quantity',
+                              '${donation.quantity} ${donation.unit}'),
                         ],
                       ),
 
@@ -127,15 +139,24 @@ class DonationDetailScreen extends StatelessWidget {
                         context,
                         'Food Details',
                         [
-                          _buildChipRow('Food Types', donation.foodTypes.map((t) => _getFoodTypeDisplayName(t)).toList()),
-                          if (donation.isVegetarian || donation.isVegan || donation.isHalal)
+                          _buildChipRow(
+                              'Food Types',
+                              donation.foodTypes
+                                  .map((t) => _getFoodTypeDisplayName(t))
+                                  .toList()),
+                          if (donation.isVegetarian ||
+                              donation.isVegan ||
+                              donation.isHalal)
                             _buildChipRow('Dietary', [
                               if (donation.isVegan) 'Vegan',
-                              if (donation.isVegetarian && !donation.isVegan) 'Vegetarian',
+                              if (donation.isVegetarian && !donation.isVegan)
+                                'Vegetarian',
                               if (donation.isHalal) 'Halal',
                             ]),
-                          if (donation.allergenInfo != null && donation.allergenInfo!.isNotEmpty)
-                            _buildInfoRow(Icons.warning_amber, 'Allergen Info', donation.allergenInfo!),
+                          if (donation.allergenInfo != null &&
+                              donation.allergenInfo!.isNotEmpty)
+                            _buildInfoRow(Icons.warning_amber, 'Allergen Info',
+                                donation.allergenInfo!),
                         ],
                       ),
 
@@ -146,8 +167,14 @@ class DonationDetailScreen extends StatelessWidget {
                         context,
                         'Safety & Storage',
                         [
-                          _buildInfoRow(Icons.shield, 'Safety Level', _getSafetyLevelDisplayName(donation.safetyLevel)),
-                          _buildInfoRow(Icons.ac_unit, 'Refrigeration', donation.requiresRefrigeration ? 'Required' : 'Not Required'),
+                          _buildInfoRow(Icons.shield, 'Safety Level',
+                              _getSafetyLevelDisplayName(donation.safetyLevel)),
+                          _buildInfoRow(
+                              Icons.ac_unit,
+                              'Refrigeration',
+                              donation.requiresRefrigeration
+                                  ? 'Required'
+                                  : 'Not Required'),
                         ],
                       ),
 
@@ -158,10 +185,16 @@ class DonationDetailScreen extends StatelessWidget {
                         context,
                         'Time Information',
                         [
-                          _buildInfoRow(Icons.schedule, 'Prepared At', _formatDateTime(donation.preparedAt)),
-                          _buildInfoRow(Icons.alarm, 'Expires At', _formatDateTime(donation.expiresAt)),
-                          _buildInfoRow(Icons.access_time, 'Available From', _formatDateTime(donation.availableFrom)),
-                          _buildInfoRow(Icons.access_time_filled, 'Available Until', _formatDateTime(donation.availableUntil)),
+                          _buildInfoRow(Icons.schedule, 'Prepared At',
+                              _formatDateTime(donation.preparedAt)),
+                          _buildInfoRow(Icons.alarm, 'Expires At',
+                              _formatDateTime(donation.expiresAt)),
+                          _buildInfoRow(Icons.access_time, 'Available From',
+                              _formatDateTime(donation.availableFrom)),
+                          _buildInfoRow(
+                              Icons.access_time_filled,
+                              'Available Until',
+                              _formatDateTime(donation.availableUntil)),
                         ],
                       ),
 
@@ -172,10 +205,16 @@ class DonationDetailScreen extends StatelessWidget {
                         context,
                         'Pickup Information',
                         [
-                          _buildInfoRow(Icons.location_on, 'Address', donation.pickupAddress),
-                          _buildInfoRow(Icons.phone, 'Contact Phone', donation.donorContactPhone),
-                          if (donation.specialInstructions != null && donation.specialInstructions!.isNotEmpty)
-                            _buildInfoRow(Icons.info_outline, 'Special Instructions', donation.specialInstructions!),
+                          _buildInfoRow(Icons.location_on, 'Address',
+                              donation.pickupAddress),
+                          _buildInfoRow(Icons.phone, 'Contact Phone',
+                              donation.donorContactPhone),
+                          if (donation.specialInstructions != null &&
+                              donation.specialInstructions!.isNotEmpty)
+                            _buildInfoRow(
+                                Icons.info_outline,
+                                'Special Instructions',
+                                donation.specialInstructions!),
                         ],
                       ),
 
@@ -183,55 +222,66 @@ class DonationDetailScreen extends StatelessWidget {
 
                       // Tracking & Live Location
                       if (donation.status != DonationStatus.listed) ...[
-                         _buildSection(
+                        _buildSection(
                           context,
                           'Tracking',
                           [
                             if (donation.assignedNGOId != null)
-                              _buildInfoRow(Icons.business, 'Assigned NGO', donation.assignedNGOId!),
+                              _buildInfoRow(Icons.business, 'Assigned NGO',
+                                  donation.assignedNGOId!),
                             if (donation.assignedVolunteerId != null)
-                              _buildInfoRow(Icons.person, 'Assigned Volunteer', donation.assignedVolunteerId!),
-                            _buildInfoRow(Icons.calendar_today, 'Created At', _formatDateTime(donation.createdAt)),
+                              _buildInfoRow(Icons.person, 'Assigned Volunteer',
+                                  donation.assignedVolunteerId!),
+                            _buildInfoRow(Icons.calendar_today, 'Created At',
+                                _formatDateTime(donation.createdAt)),
                             if (donation.updatedAt != null)
-                              _buildInfoRow(Icons.update, 'Updated At', _formatDateTime(donation.updatedAt!)),
+                              _buildInfoRow(Icons.update, 'Updated At',
+                                  _formatDateTime(donation.updatedAt!)),
                           ],
                         ),
                         // Live Tracking Section
-                        if (donation.status == DonationStatus.inTransit && donation.assignedVolunteerId != null)
+                        if (donation.status == DonationStatus.inTransit &&
+                            donation.assignedVolunteerId != null)
                           _buildLiveTracking(context, donation),
                       ],
 
-
                       const SizedBox(height: 24),
-                      
+
                       // Admin Controls
                       Consumer<AuthProvider>(
                         builder: (context, auth, _) {
-                          if (auth.appUser?.role != UserRole.admin) return const SizedBox.shrink();
-                          
+                          if (auth.appUser?.role != UserRole.admin)
+                            return const SizedBox.shrink();
+
                           return _buildSection(
                             context,
                             'Admin Controls',
                             [
                               if (donation.status == DonationStatus.listed)
                                 OutlinedButton.icon(
-                                  icon: const Icon(Icons.bolt, color: Colors.orange),
+                                  icon: const Icon(Icons.bolt,
+                                      color: Colors.orange),
                                   label: const Text('Force Match NGO'),
-                                  onPressed: () => _forceMatchNGO(context, donation),
+                                  onPressed: () =>
+                                      _forceMatchNGO(context, donation),
                                   style: OutlinedButton.styleFrom(
                                     foregroundColor: Colors.orange,
-                                    side: const BorderSide(color: Colors.orange),
+                                    side:
+                                        const BorderSide(color: Colors.orange),
                                   ),
                                 ),
-                              
-                              if (donation.status == DonationStatus.matched || donation.status == DonationStatus.pickedUp)
+                              if (donation.status == DonationStatus.matched ||
+                                  donation.status == DonationStatus.pickedUp)
                                 OutlinedButton.icon(
-                                  icon: const Icon(Icons.person_search, color: Colors.purple),
+                                  icon: const Icon(Icons.person_search,
+                                      color: Colors.purple),
                                   label: const Text('Reassign Volunteer'),
-                                  onPressed: () => _reassignVolunteer(context, donation),
-                                   style: OutlinedButton.styleFrom(
+                                  onPressed: () =>
+                                      _reassignVolunteer(context, donation),
+                                  style: OutlinedButton.styleFrom(
                                     foregroundColor: Colors.purple,
-                                    side: const BorderSide(color: Colors.purple),
+                                    side:
+                                        const BorderSide(color: Colors.purple),
                                   ),
                                 ),
                             ],
@@ -248,14 +298,15 @@ class DonationDetailScreen extends StatelessWidget {
           );
         },
       ),
-      bottomNavigationBar: _buildBottomBar(context, initialDonation), // Note: using initialData context for brevity, but ideally this would update with stream data too if status changes interactively affect available actions. Assuming Read-Only for now due to complexity.
+      bottomNavigationBar: _buildBottomBar(context,
+          initialDonation), // Note: using initialData context for brevity, but ideally this would update with stream data too if status changes interactively affect available actions. Assuming Read-Only for now due to complexity.
     );
   }
 
   Widget _buildLiveTracking(BuildContext context, FoodDonation donation) {
     // NOTE: In a real app, you would inject the LocationService properly.
-    final LocationService _locationService = LocationService(); 
-    
+    final LocationService _locationService = LocationService();
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       padding: const EdgeInsets.all(16),
@@ -267,48 +318,52 @@ class DonationDetailScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row( // Header
-             children: [
-               Icon(Icons.location_searching, color: AppTheme.infoCyan),
-               const SizedBox(width: 8),
-               Text(
-                 'Live Volunteer Location', 
-                 style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.infoCyan)
-               ),
-               const Spacer(),
-               // Blink indicator could go here
-             ],
+          Row(
+            // Header
+            children: [
+              Icon(Icons.location_searching, color: AppTheme.infoCyan),
+              const SizedBox(width: 8),
+              Text('Live Volunteer Location',
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold, color: AppTheme.infoCyan)),
+              const Spacer(),
+              // Blink indicator could go here
+            ],
           ),
           const SizedBox(height: 12),
           StreamBuilder<Map<String, dynamic>>(
-            stream: _locationService.getUserLocationStream(donation.assignedVolunteerId!),
+            stream: _locationService
+                .getUserLocationStream(donation.assignedVolunteerId!),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Text('Locating volunteer...');
               }
               if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                 return const Text('Volunteer location unavailable');
+                return const Text('Volunteer location unavailable');
               }
-              
+
               final data = snapshot.data!;
               // Calculate last seen
               // final timestamp = data['timestamp'];
 
-                  return Column(
-                    children: [
-                       LiveTrackingMap(
-                         pickupLocation: _parseGeoPoint(donation.pickupLocation) ?? const LatLng(0, 0),
-                         dropoffLocation: const LatLng(37.7749, -122.4194), // Placeholder for NGO location until fetched
-                         volunteerLocation: LatLng(
-                            (data['latitude'] as num).toDouble(),
-                            (data['longitude'] as num).toDouble(),
-                         ),
-                         status: donation.status,
-                       ),
-                       const SizedBox(height: 8),
-                       Text('Last update: ${_formatTime(data['timestamp'])}', style: const TextStyle(color: Colors.grey, fontSize: 12)),
-                    ],
-                  );
+              return Column(
+                children: [
+                  LiveTrackingMap(
+                    pickupLocation: _parseGeoPoint(donation.pickupLocation) ??
+                        const LatLng(0, 0),
+                    dropoffLocation: const LatLng(37.7749,
+                        -122.4194), // Placeholder for NGO location until fetched
+                    volunteerLocation: LatLng(
+                      (data['latitude'] as num).toDouble(),
+                      (data['longitude'] as num).toDouble(),
+                    ),
+                    status: donation.status,
+                  ),
+                  const SizedBox(height: 8),
+                  Text('Last update: ${_formatTime(data['timestamp'])}',
+                      style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                ],
+              );
             },
           ),
         ],
@@ -316,7 +371,8 @@ class DonationDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSection(BuildContext context, String title, List<Widget> children) {
+  Widget _buildSection(
+      BuildContext context, String title, List<Widget> children) {
     return Padding(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -325,8 +381,8 @@ class DonationDetailScreen extends StatelessWidget {
           Text(
             title,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const SizedBox(height: 16),
           ...children,
@@ -400,8 +456,9 @@ class DonationDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget? _buildBottomBar(BuildContext context, FoodDonation donation) { // Using pure donation for bottom bar static check for now
-    if (donation.status != DonationStatus.listed && 
+  Widget? _buildBottomBar(BuildContext context, FoodDonation donation) {
+    // Using pure donation for bottom bar static check for now
+    if (donation.status != DonationStatus.listed &&
         donation.status != DonationStatus.matched) {
       return null;
     }
@@ -434,11 +491,11 @@ class DonationDetailScreen extends StatelessWidget {
             Expanded(
               child: ElevatedButton.icon(
                 onPressed: () {
-                   Navigator.pushNamed(
-                     context, 
-                     AppRouter.issueReporting,
-                     arguments: {'donationId': donation.id},
-                   );
+                  Navigator.pushNamed(
+                    context,
+                    AppRouter.issueReporting,
+                    arguments: {'donationId': donation.id},
+                  );
                 },
                 icon: const Icon(Icons.report_problem),
                 label: const Text('Report Issue'),
@@ -530,12 +587,13 @@ class DonationDetailScreen extends StatelessWidget {
     return '${dateTime.day}/${dateTime.month}/${dateTime.year} ${dateTime.hour}:${dateTime.minute.toString().padLeft(2, '0')}';
   }
 
-  Future<void> _forceMatchNGO(BuildContext context, FoodDonation donation) async {
+  Future<void> _forceMatchNGO(
+      BuildContext context, FoodDonation donation) async {
     final ngoId = await Navigator.push<String>(
       context,
       MaterialPageRoute(
         builder: (_) => UserSelectionScreen(
-          role: UserRole.ngo, 
+          role: UserRole.ngo,
           title: 'Select NGO (Sorted by Distance)',
           origin: _parseGeoPoint(donation.pickupLocation),
         ),
@@ -545,15 +603,16 @@ class DonationDetailScreen extends StatelessWidget {
     if (ngoId != null && context.mounted) {
       try {
         final authProvider = Provider.of<AuthProvider>(context, listen: false);
-        final donationProvider = Provider.of<DonationProvider>(context, listen: false);
-        
+        final donationProvider =
+            Provider.of<DonationProvider>(context, listen: false);
+
         await donationProvider.foodDonationService.forceAssignNGO(
-          donationId: donation.id, 
-          adminId: authProvider.user!.uid, 
+          donationId: donation.id,
+          adminId: authProvider.user!.uid,
           ngoId: ngoId,
           reason: 'Manual Admin Override',
         );
-        
+
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('NGO assigned successfully')),
@@ -570,12 +629,13 @@ class DonationDetailScreen extends StatelessWidget {
     }
   }
 
-  Future<void> _reassignVolunteer(BuildContext context, FoodDonation donation) async {
+  Future<void> _reassignVolunteer(
+      BuildContext context, FoodDonation donation) async {
     final volId = await Navigator.push<String>(
       context,
       MaterialPageRoute(
         builder: (_) => UserSelectionScreen(
-          role: UserRole.volunteer, 
+          role: UserRole.volunteer,
           title: 'Select Volunteer (Sorted by Distance)',
           origin: _parseGeoPoint(donation.pickupLocation),
         ),
@@ -583,17 +643,18 @@ class DonationDetailScreen extends StatelessWidget {
     );
 
     if (volId != null && context.mounted) {
-       try {
+      try {
         final authProvider = Provider.of<AuthProvider>(context, listen: false);
-        final donationProvider = Provider.of<DonationProvider>(context, listen: false);
-        
+        final donationProvider =
+            Provider.of<DonationProvider>(context, listen: false);
+
         await donationProvider.foodDonationService.forceAssignVolunteer(
-          donationId: donation.id, 
-          adminId: authProvider.user!.uid, 
+          donationId: donation.id,
+          adminId: authProvider.user!.uid,
           volunteerId: volId,
           reason: 'Manual Admin Override',
         );
-        
+
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Volunteer reassigned successfully')),

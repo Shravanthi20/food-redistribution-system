@@ -36,12 +36,13 @@ class _CreateDonationScreenState extends State<CreateDonationScreen> {
   final _contactPhoneController = TextEditingController();
   final _estimatedMealsController = TextEditingController();
   final _estimatedPeopleController = TextEditingController();
-  
+
   List<FoodType> _selectedFoodTypes = [];
   DateTime _preparedAt = DateTime.now();
   DateTime _expiresAt = DateTime.now().add(const Duration(hours: 4));
   DateTime _availableFrom = DateTime.now();
-  DateTime _availableUntil = DateTime.now().add(const Duration(hours: 4)); // Match expiresAt by default
+  DateTime _availableUntil = DateTime.now()
+      .add(const Duration(hours: 4)); // Match expiresAt by default
   FoodSafetyLevel _safetyLevel = FoodSafetyLevel.high;
   bool _requiresRefrigeration = false;
   bool _isVegetarian = false;
@@ -89,8 +90,9 @@ class _CreateDonationScreenState extends State<CreateDonationScreen> {
     }
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final donationProvider = Provider.of<DonationProvider>(context, listen: false);
-    
+    final donationProvider =
+        Provider.of<DonationProvider>(context, listen: false);
+
     final userId = authProvider.appUser?.uid;
     if (userId == null) return;
 
@@ -111,20 +113,29 @@ class _CreateDonationScreenState extends State<CreateDonationScreen> {
       isVegetarian: _isVegetarian,
       isVegan: _isVegan,
       isHalal: _isHalal,
-      allergenInfo: _allergenController.text.trim().isEmpty ? null : _allergenController.text.trim(),
-      specialInstructions: _instructionsController.text.trim().isEmpty ? null : _instructionsController.text.trim(),
+      allergenInfo: _allergenController.text.trim().isEmpty
+          ? null
+          : _allergenController.text.trim(),
+      specialInstructions: _instructionsController.text.trim().isEmpty
+          ? null
+          : _instructionsController.text.trim(),
       images: [],
       // TODO: Implement actual map picker. Using placeholder coordinates for now.
       pickupLocation: {
-        'latitude': 37.7749, // Default to San Francisco or user's current loc if available
+        'latitude':
+            37.7749, // Default to San Francisco or user's current loc if available
         'longitude': -122.4194,
         'address': _pickupAddressController.text.trim(),
       },
       pickupAddress: _pickupAddressController.text.trim(),
       donorContactPhone: _contactPhoneController.text.trim(),
       status: DonationStatus.listed,
-      estimatedMeals: _estimatedMealsController.text.trim().isEmpty ? 0 : int.parse(_estimatedMealsController.text.trim()),
-      estimatedPeopleServed: _estimatedPeopleController.text.trim().isEmpty ? 0 : int.parse(_estimatedPeopleController.text.trim()),
+      estimatedMeals: _estimatedMealsController.text.trim().isEmpty
+          ? 0
+          : int.parse(_estimatedMealsController.text.trim()),
+      estimatedPeopleServed: _estimatedPeopleController.text.trim().isEmpty
+          ? 0
+          : int.parse(_estimatedPeopleController.text.trim()),
       createdAt: DateTime.now(),
       isUrgent: _isUrgent,
     );
@@ -174,8 +185,8 @@ class _CreateDonationScreenState extends State<CreateDonationScreen> {
                     Text(
                       'Basic Information',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                     const SizedBox(height: 16),
 
@@ -252,7 +263,9 @@ class _CreateDonationScreenState extends State<CreateDonationScreen> {
                             keyboardType: TextInputType.number,
                             hintText: 'Approx. meals',
                             validator: (value) {
-                              if (value != null && value.isNotEmpty && int.tryParse(value) == null) {
+                              if (value != null &&
+                                  value.isNotEmpty &&
+                                  int.tryParse(value) == null) {
                                 return 'Invalid number';
                               }
                               return null;
@@ -267,7 +280,9 @@ class _CreateDonationScreenState extends State<CreateDonationScreen> {
                             keyboardType: TextInputType.number,
                             hintText: 'Approx. people',
                             validator: (value) {
-                              if (value != null && value.isNotEmpty && int.tryParse(value) == null) {
+                              if (value != null &&
+                                  value.isNotEmpty &&
+                                  int.tryParse(value) == null) {
                                 return 'Invalid number';
                               }
                               return null;
@@ -282,11 +297,11 @@ class _CreateDonationScreenState extends State<CreateDonationScreen> {
                     Text(
                       'Food Types',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                     const SizedBox(height: 16),
-                    
+
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
@@ -313,8 +328,8 @@ class _CreateDonationScreenState extends State<CreateDonationScreen> {
                     Text(
                       'Dietary Information',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                     const SizedBox(height: 16),
 
@@ -360,8 +375,8 @@ class _CreateDonationScreenState extends State<CreateDonationScreen> {
                     Text(
                       'Safety & Storage',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                     const SizedBox(height: 16),
 
@@ -413,8 +428,8 @@ class _CreateDonationScreenState extends State<CreateDonationScreen> {
                     Text(
                       'Time Information',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                     const SizedBox(height: 16),
 
@@ -450,8 +465,8 @@ class _CreateDonationScreenState extends State<CreateDonationScreen> {
                     Text(
                       'Pickup Information',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                     const SizedBox(height: 16),
 
@@ -510,7 +525,8 @@ class _CreateDonationScreenState extends State<CreateDonationScreen> {
     );
   }
 
-  Widget _buildDateTimePicker(String label, DateTime value, Function(DateTime) onChanged) {
+  Widget _buildDateTimePicker(
+      String label, DateTime value, Function(DateTime) onChanged) {
     return InkWell(
       onTap: () async {
         final date = await showDatePicker(

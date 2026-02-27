@@ -15,7 +15,8 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStateMixin {
+class _LoginScreenState extends State<LoginScreen>
+    with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -37,7 +38,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.1),
       end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _animationController, curve: Curves.easeOut));
+    ).animate(
+        CurvedAnimation(parent: _animationController, curve: Curves.easeOut));
     _animationController.forward();
   }
 
@@ -53,7 +55,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     if (!_formKey.currentState!.validate()) return;
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    
+
     // Hide keyboard
     FocusScope.of(context).unfocus();
 
@@ -72,27 +74,28 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   }
 
   void _navigateBasedOnUser(dynamic user) {
-     // Admin users bypass all verification/onboarding - go directly to dashboard
-     if (user.role == UserRole.admin) {
-       Navigator.pushReplacementNamed(context, AppRouter.adminDashboard);
-       return;
-     }
-     
+    // Admin users bypass all verification/onboarding - go directly to dashboard
+    if (user.role == UserRole.admin) {
+      Navigator.pushReplacementNamed(context, AppRouter.adminDashboard);
+      return;
+    }
+
     if (user.role == UserRole.ngo) {
-       switch(user.onboardingState) {
-         case OnboardingState.registered:
-           Navigator.pushReplacementNamed(context, AppRouter.documentSubmission);
-           return;
-         case OnboardingState.documentSubmitted:
-           Navigator.pushReplacementNamed(context, AppRouter.verificationPending);
-           return;
-         case OnboardingState.verified:
-         case OnboardingState.active:
-           _navigateToRoleDashboard(user.role);
-           return;
-         default:
-           break;
-       }
+      switch (user.onboardingState) {
+        case OnboardingState.registered:
+          Navigator.pushReplacementNamed(context, AppRouter.documentSubmission);
+          return;
+        case OnboardingState.documentSubmitted:
+          Navigator.pushReplacementNamed(
+              context, AppRouter.verificationPending);
+          return;
+        case OnboardingState.verified:
+        case OnboardingState.active:
+          _navigateToRoleDashboard(user.role);
+          return;
+        default:
+          break;
+      }
     }
 
     // Default existing logic for others (Donor, Volunteer, Admin)
@@ -100,14 +103,14 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       case OnboardingState.registered:
         // Donors are now active by default, so they won't hit this unless logic matches.
         // Volunteers might still hit this.
-         Navigator.pushReplacementNamed(
+        Navigator.pushReplacementNamed(
           context,
           AppRouter.onboarding,
           arguments: {'userRole': user.role},
         );
         break;
       case OnboardingState.documentSubmitted:
-         Navigator.pushReplacementNamed(
+        Navigator.pushReplacementNamed(
           context,
           AppRouter.onboarding,
           arguments: {'userRole': user.role},
@@ -207,11 +210,14 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                             ),
                           ),
                           const SizedBox(height: 32),
-                          
+
                           // Title with gradient text effect
                           ShaderMask(
                             shaderCallback: (bounds) => const LinearGradient(
-                              colors: [AppTheme.textPrimary, AppTheme.accentCyanSoft],
+                              colors: [
+                                AppTheme.textPrimary,
+                                AppTheme.accentCyanSoft
+                              ],
                             ).createShader(bounds),
                             child: const Text(
                               'Welcome Back',
@@ -245,11 +251,14 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                     controller: _emailController,
                                     label: 'Email',
                                     hintText: 'your@email.com',
-                                    prefixIcon: const Icon(Icons.email_outlined, color: AppTheme.textSecondary),
+                                    prefixIcon: const Icon(Icons.email_outlined,
+                                        color: AppTheme.textSecondary),
                                     keyboardType: TextInputType.emailAddress,
                                     validator: (v) {
-                                      if (v == null || v.isEmpty) return 'Email is required';
-                                      if (!v.contains('@')) return 'Enter a valid email';
+                                      if (v == null || v.isEmpty)
+                                        return 'Email is required';
+                                      if (!v.contains('@'))
+                                        return 'Enter a valid email';
                                       return null;
                                     },
                                   ),
@@ -258,16 +267,22 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                     controller: _passwordController,
                                     label: 'Password',
                                     hintText: '••••••••',
-                                    prefixIcon: const Icon(Icons.lock_outline, color: AppTheme.textSecondary),
+                                    prefixIcon: const Icon(Icons.lock_outline,
+                                        color: AppTheme.textSecondary),
                                     obscureText: _obscurePassword,
                                     suffixIcon: IconButton(
                                       icon: Icon(
-                                        _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                                        _obscurePassword
+                                            ? Icons.visibility_outlined
+                                            : Icons.visibility_off_outlined,
                                         color: AppTheme.textMuted,
                                       ),
-                                      onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                                      onPressed: () => setState(() =>
+                                          _obscurePassword = !_obscurePassword),
                                     ),
-                                    validator: (v) => v!.isEmpty ? 'Password is required' : null,
+                                    validator: (v) => v!.isEmpty
+                                        ? 'Password is required'
+                                        : null,
                                   ),
                                   const SizedBox(height: 12),
                                   Align(
@@ -276,7 +291,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                       onPressed: _navigateToForgotPassword,
                                       child: Text(
                                         'Forgot Password?',
-                                        style: TextStyle(color: AppTheme.accentTeal),
+                                        style: TextStyle(
+                                            color: AppTheme.accentTeal),
                                       ),
                                     ),
                                   ),
@@ -291,7 +307,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                               ),
                             ),
                           ),
-                          
+
                           const SizedBox(height: 32),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -301,7 +317,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                 style: TextStyle(color: AppTheme.textSecondary),
                               ),
                               TextButton(
-                                onPressed: () => Navigator.pushNamed(context, AppRouter.roleSelection),
+                                onPressed: () => Navigator.pushNamed(
+                                    context, AppRouter.roleSelection),
                                 child: Text(
                                   'Create Account',
                                   style: TextStyle(
@@ -351,7 +368,7 @@ class _ForgotPasswordFormState extends State<_ForgotPasswordForm> {
     try {
       await Provider.of<AuthProvider>(context, listen: false)
           .sendPasswordResetEmail(_emailResetController.text.trim());
-      
+
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
@@ -359,7 +376,8 @@ class _ForgotPasswordFormState extends State<_ForgotPasswordForm> {
             content: Text('Reset link sent! Check your email.'),
             backgroundColor: AppTheme.successTeal,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         );
       }
@@ -370,7 +388,8 @@ class _ForgotPasswordFormState extends State<_ForgotPasswordForm> {
             content: Text('Error: $e'),
             backgroundColor: AppTheme.errorCoral,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         );
       }
@@ -406,7 +425,8 @@ class _ForgotPasswordFormState extends State<_ForgotPasswordForm> {
           child: GlassTextField(
             controller: _emailResetController,
             label: 'Email Address',
-            prefixIcon: Icon(Icons.email_outlined, color: AppTheme.textSecondary),
+            prefixIcon:
+                Icon(Icons.email_outlined, color: AppTheme.textSecondary),
             keyboardType: TextInputType.emailAddress,
             validator: (v) {
               if (v == null || v.isEmpty) return 'Email is required';

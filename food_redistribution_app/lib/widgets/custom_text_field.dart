@@ -31,8 +31,9 @@ class CustomTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark || useGlassStyle;
-    
+    final isDark =
+        Theme.of(context).brightness == Brightness.dark || useGlassStyle;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -64,17 +65,22 @@ class CustomTextField extends StatelessWidget {
             suffixIcon: suffixIcon,
             errorMaxLines: 2,
             filled: true,
-            fillColor: isDark ? Colors.white.withOpacity(0.1) : Colors.grey.shade100,
+            fillColor:
+                isDark ? Colors.white.withOpacity(0.1) : Colors.grey.shade100,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: isDark ? Colors.white.withOpacity(0.3) : Colors.grey.shade300,
+                color: isDark
+                    ? Colors.white.withOpacity(0.3)
+                    : Colors.grey.shade300,
               ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: isDark ? Colors.white.withOpacity(0.3) : Colors.grey.shade300,
+                color: isDark
+                    ? Colors.white.withOpacity(0.3)
+                    : Colors.grey.shade300,
               ),
             ),
             focusedBorder: OutlineInputBorder(

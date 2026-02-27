@@ -14,23 +14,24 @@ class AnalyticsAggregationService {
     int period = 7,
   }) {
     if (values.isEmpty) return 0;
-    
+
     double multiplier = 2.0 / (period + 1);
     double ema = values.first;
-    
+
     for (int i = 1; i < values.length; i++) {
       ema = (values[i] * multiplier) + (ema * (1 - multiplier));
     }
-    
+
     return ema;
   }
 
   // ENHANCED: Calculate standard deviation for volatility
   double _calculateStdDev(List<double> values) {
     if (values.length < 2) return 0;
-    
+
     double mean = values.reduce((a, b) => a + b) / values.length;
-    double sumSquares = values.fold(0.0, (sum, val) => sum + ((val - mean) * (val - mean)));
+    double sumSquares =
+        values.fold(0.0, (sum, val) => sum + ((val - mean) * (val - mean)));
     return sumSquares / (values.length - 1);
   }
 
@@ -38,22 +39,33 @@ class AnalyticsAggregationService {
   Map<String, dynamic> _analyzeSeasonality(List<Map<String, dynamic>> docs) {
     Map<int, int> dayOfWeekCounts = {};
     Map<int, int> hourCounts = {};
-    
+
     for (var doc in docs) {
       final timestamp = doc['createdAt'] as Timestamp?;
       if (timestamp != null) {
         final date = timestamp.toDate();
-        dayOfWeekCounts[date.weekday] = (dayOfWeekCounts[date.weekday] ?? 0) + 1;
+        dayOfWeekCounts[date.weekday] =
+            (dayOfWeekCounts[date.weekday] ?? 0) + 1;
         hourCounts[date.hour] = (hourCounts[date.hour] ?? 0) + 1;
       }
     }
-    
+
     // Find peak day and hour
-    final peakDay = dayOfWeekCounts.entries.reduce((a, b) => a.value > b.value ? a : b).key;
-    final peakHour = hourCounts.entries.reduce((a, b) => a.value > b.value ? a : b).key;
-    
+    final peakDay =
+        dayOfWeekCounts.entries.reduce((a, b) => a.value > b.value ? a : b).key;
+    final peakHour =
+        hourCounts.entries.reduce((a, b) => a.value > b.value ? a : b).key;
+
     return {
-      'peakDayOfWeek': ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][peakDay - 1],
+      'peakDayOfWeek': [
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+        'Sunday'
+      ][peakDay - 1],
       'peakHour': peakHour,
       'dayDistribution': dayOfWeekCounts,
       'hourDistribution': hourCounts,
@@ -101,7 +113,8 @@ class AnalyticsAggregationService {
         'totalDeliveries': total,
         'completedDeliveries': completed,
         'averageDuration': total > 0 ? (totalDuration ~/ total) : 0,
-        'successRate': total > 0 ? (completed / total * 100).toStringAsFixed(2) : 0.0,
+        'successRate':
+            total > 0 ? (completed / total * 100).toStringAsFixed(2) : 0.0,
       };
     } catch (e) {
       print('Error getting volunteer stats: $e');
@@ -117,7 +130,8 @@ class AnalyticsAggregationService {
       final startDate = DateTime.now().subtract(Duration(days: days)).toUtc();
       final snapshot = await _firestore
           .collection('delivery_tasks')
-          .where('createdAt', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
+          .where('createdAt',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
           .get();
 
       if (snapshot.docs.isEmpty) {
@@ -202,7 +216,8 @@ class AnalyticsAggregationService {
   }
 
   // Regional performance analytics
-  Future<Map<String, dynamic>> getRegionalStats({required String region}) async {
+  Future<Map<String, dynamic>> getRegionalStats(
+      {required String region}) async {
     try {
       final snapshot = await _firestore
           .collection('delivery_tasks')
@@ -225,7 +240,9 @@ class AnalyticsAggregationService {
         }
       }
 
-      final performanceIndex = snapshot.docs.length > 0 ? (onTimeDeliveries / snapshot.docs.length * 100) : 0;
+      final performanceIndex = snapshot.docs.length > 0
+          ? (onTimeDeliveries / snapshot.docs.length * 100)
+          : 0;
 
       return {
         'region': region,
@@ -239,14 +256,16 @@ class AnalyticsAggregationService {
   }
 
   // Predict volunteer demand for next N days
-  Future<Map<String, dynamic>> predictVolunteerDemand({required int days}) async {
+  Future<Map<String, dynamic>> predictVolunteerDemand(
+      {required int days}) async {
     try {
       final startDate = DateTime.now();
       final endDate = DateTime.now().add(Duration(days: days));
 
       final snapshot = await _firestore
           .collection('donations')
-          .where('createdAt', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
+          .where('createdAt',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
           .where('createdAt', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
           .get();
 
@@ -270,7 +289,8 @@ class AnalyticsAggregationService {
       final startDate = DateTime.now().subtract(Duration(days: days)).toUtc();
       final snapshot = await _firestore
           .collection('donations')
-          .where('createdAt', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
+          .where('createdAt',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
           .get();
 
       if (snapshot.docs.isEmpty) {
@@ -322,7 +342,8 @@ class AnalyticsAggregationService {
         }
       }
 
-      final delayPercentage = (delays / snapshot.docs.length * 100).toStringAsFixed(2);
+      final delayPercentage =
+          (delays / snapshot.docs.length * 100).toStringAsFixed(2);
       final riskLevel = double.parse(delayPercentage) > 20 ? 'high' : 'low';
 
       return {
@@ -343,10 +364,12 @@ class AnalyticsAggregationService {
     int historicalDays = 60,
   }) async {
     try {
-      final startDate = DateTime.now().subtract(Duration(days: historicalDays)).toUtc();
+      final startDate =
+          DateTime.now().subtract(Duration(days: historicalDays)).toUtc();
       final snapshot = await _firestore
           .collection('donations')
-          .where('createdAt', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
+          .where('createdAt',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
           .get();
 
       if (snapshot.docs.isEmpty) {
@@ -379,23 +402,42 @@ class AnalyticsAggregationService {
 
       // Calculate EMA for smoothed trend
       final ema = _calculateEMA(values: donationTrend, period: 7);
-      
+
       // Calculate velocity (trend direction)
       final recentAvg = donationTrend.sublist(0, 7).reduce((a, b) => a + b) / 7;
-      final olderAvg = donationTrend.sublist(30, 37).reduce((a, b) => a + b) / 7;
-      final trend = recentAvg > olderAvg ? 'increasing' : recentAvg < olderAvg ? 'decreasing' : 'neutral';
+      final olderAvg =
+          donationTrend.sublist(30, 37).reduce((a, b) => a + b) / 7;
+      final trend = recentAvg > olderAvg
+          ? 'increasing'
+          : recentAvg < olderAvg
+              ? 'decreasing'
+              : 'neutral';
 
       // Simple linear projection
-      final predictedDaily = (ema * (trend == 'increasing' ? 1.15 : trend == 'decreasing' ? 0.85 : 1.0)).toInt();
+      final predictedDaily = (ema *
+              (trend == 'increasing'
+                  ? 1.15
+                  : trend == 'decreasing'
+                      ? 0.85
+                      : 1.0))
+          .toInt();
       final predictedTotal = (predictedDaily * daysAhead).toInt();
 
       // Seasonality-based risk
-      final seasonality = _analyzeSeasonality(snapshot.docs.map((d) => d.data()).toList());
+      final seasonality =
+          _analyzeSeasonality(snapshot.docs.map((d) => d.data()).toList());
       final peakDay = seasonality['peakDayOfWeek'];
-      
+
       // Check if prediction falls on peak day
-      final isPeakPeriod = DateTime.now().add(Duration(days: daysAhead)).toString().contains(peakDay.toString());
-      final riskLevel = isPeakPeriod ? 'high' : trend == 'increasing' ? 'medium' : 'low';
+      final isPeakPeriod = DateTime.now()
+          .add(Duration(days: daysAhead))
+          .toString()
+          .contains(peakDay.toString());
+      final riskLevel = isPeakPeriod
+          ? 'high'
+          : trend == 'increasing'
+              ? 'medium'
+              : 'low';
 
       return {
         'period': '$daysAhead days ahead',
@@ -406,7 +448,8 @@ class AnalyticsAggregationService {
         'riskLevel': riskLevel,
         'seasonalFactor': seasonality['peakDayOfWeek'],
         'emaValue': (ema * 100).toStringAsFixed(2),
-        'volatility': (_calculateStdDev(donationTrend) * 100).toStringAsFixed(2),
+        'volatility':
+            (_calculateStdDev(donationTrend) * 100).toStringAsFixed(2),
       };
     } catch (e) {
       print('Error predicting surplus: $e');
@@ -420,12 +463,14 @@ class AnalyticsAggregationService {
     int historicalDays = 30,
   }) async {
     try {
-      final startDate = DateTime.now().subtract(Duration(days: historicalDays)).toUtc();
+      final startDate =
+          DateTime.now().subtract(Duration(days: historicalDays)).toUtc();
       final endDate = DateTime.now();
 
       final donationsSnapshot = await _firestore
           .collection('donations')
-          .where('createdAt', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
+          .where('createdAt',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
           .where('createdAt', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
           .get();
 
@@ -467,9 +512,11 @@ class AnalyticsAggregationService {
 
       // Estimate volunteers needed (1 volunteer per ~3 donations, adjusted by batch efficiency)
       final predictedDailyDemand = (ema).toInt();
-      final requiredVolunteers = ((predictedDailyDemand / 3) * 1.2).ceil(); // 1.2 = buffer factor
+      final requiredVolunteers =
+          ((predictedDailyDemand / 3) * 1.2).ceil(); // 1.2 = buffer factor
       final currentVolunteerCount = volunteersSnapshot.size;
-      final shortfall = (requiredVolunteers - currentVolunteerCount).clamp(0, 999);
+      final shortfall =
+          (requiredVolunteers - currentVolunteerCount).clamp(0, 999);
 
       // Get availability pattern
       Map<String, int> availabilitySlots = {};
@@ -477,7 +524,8 @@ class AnalyticsAggregationService {
         final availHours = doc.data()['availabilityHours'] as List?;
         if (availHours != null) {
           for (var slot in availHours) {
-            availabilitySlots[slot as String] = (availabilitySlots[slot as String] ?? 0) + 1;
+            availabilitySlots[slot as String] =
+                (availabilitySlots[slot as String] ?? 0) + 1;
           }
         }
       }
@@ -488,7 +536,11 @@ class AnalyticsAggregationService {
         'requiredVolunteers': requiredVolunteers,
         'currentVolunteerCount': currentVolunteerCount,
         'shortfall': shortfall,
-        'recommendAction': shortfall > 2 ? 'urgent_recruitment' : shortfall > 0 ? 'plan_recruitment' : 'sufficient',
+        'recommendAction': shortfall > 2
+            ? 'urgent_recruitment'
+            : shortfall > 0
+                ? 'plan_recruitment'
+                : 'sufficient',
         'confidence': 0.85,
         'availabilityDistribution': availabilitySlots,
         'criticalTimeSlots': availabilitySlots.entries
@@ -545,7 +597,9 @@ class AnalyticsAggregationService {
       }
 
       final gap = totalSupplyWeight - totalCapacity;
-      final gapPercentage = totalCapacity > 0 ? ((gap / totalCapacity) * 100).toStringAsFixed(2) : '0';
+      final gapPercentage = totalCapacity > 0
+          ? ((gap / totalCapacity) * 100).toStringAsFixed(2)
+          : '0';
 
       return {
         'region': region,
@@ -553,7 +607,11 @@ class AnalyticsAggregationService {
         'totalNGOCapacity': (totalCapacity).toStringAsFixed(2),
         'supplyDemandGap': (gap).toStringAsFixed(2),
         'gapPercentage': gapPercentage,
-        'status': double.parse(gapPercentage) > 20 ? 'critical' : double.parse(gapPercentage) > 10 ? 'warning' : 'balanced',
+        'status': double.parse(gapPercentage) > 20
+            ? 'critical'
+            : double.parse(gapPercentage) > 10
+                ? 'warning'
+                : 'balanced',
         'activeNGOs': totalNGOs,
         'pendingDonations': totalDonations,
       };
@@ -606,7 +664,8 @@ class AnalyticsAggregationService {
       durations.sort();
       final median = durations[durations.length ~/ 2];
       final mean = durations.reduce((a, b) => a + b) ~/ durations.length;
-      final stdDev = _calculateStdDev(durations.map((d) => d.toDouble()).toList());
+      final stdDev =
+          _calculateStdDev(durations.map((d) => d.toDouble()).toList());
 
       // Confidence based on consistency (lower stdDev = higher confidence)
       double confidence = (1 - (stdDev / mean)).clamp(0, 1);
@@ -631,7 +690,8 @@ class AnalyticsAggregationService {
       final startDate = DateTime.now().subtract(Duration(days: days)).toUtc();
       final snapshot = await _firestore
           .collection('requests')
-          .where('createdAt', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
+          .where('createdAt',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
           .get();
 
       if (snapshot.docs.isEmpty) {
@@ -644,18 +704,18 @@ class AnalyticsAggregationService {
 
       Map<String, int> requestedFoodTypes = {};
       Map<String, int> demandByRegion = {};
-      
+
       for (var doc in snapshot.docs) {
         final data = doc.data();
-        
+
         // Analyze food types
         final types = data['foodTypes'] as List<dynamic>? ?? [];
         for (var type in types) {
-           final typeStr = type.toString();
-           requestedFoodTypes[typeStr] = (requestedFoodTypes[typeStr] ?? 0) + 1;
+          final typeStr = type.toString();
+          requestedFoodTypes[typeStr] = (requestedFoodTypes[typeStr] ?? 0) + 1;
         }
 
-        // We assume NGOs might have regions attached or we can look it up, 
+        // We assume NGOs might have regions attached or we can look it up,
         // for simplicity we extract from the request if available or group by ngoId
         final region = data['region'] as String? ?? 'general';
         demandByRegion[region] = (demandByRegion[region] ?? 0) + 1;
@@ -680,14 +740,14 @@ class AnalyticsAggregationService {
     int historicalDays = 60,
   }) async {
     try {
-      final startDate = DateTime.now().subtract(Duration(days: historicalDays)).toUtc();
-      
-      var query = _firestore
-          .collection('requests')
-          .where('createdAt', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate));
-          
+      final startDate =
+          DateTime.now().subtract(Duration(days: historicalDays)).toUtc();
+
+      var query = _firestore.collection('requests').where('createdAt',
+          isGreaterThanOrEqualTo: Timestamp.fromDate(startDate));
+
       if (region != 'all') {
-         query = query.where('region', isEqualTo: region);
+        query = query.where('region', isEqualTo: region);
       }
 
       final snapshot = await query.get();
@@ -723,14 +783,24 @@ class AnalyticsAggregationService {
 
       // Calculate EMA for smoothed trend
       final ema = _calculateEMA(values: demandTrend, period: 7);
-      
+
       // Calculate velocity (trend direction)
       final recentAvg = demandTrend.sublist(0, 7).reduce((a, b) => a + b) / 7;
       final olderAvg = demandTrend.sublist(30, 37).reduce((a, b) => a + b) / 7;
-      final trend = recentAvg > olderAvg ? 'increasing' : recentAvg < olderAvg ? 'decreasing' : 'neutral';
+      final trend = recentAvg > olderAvg
+          ? 'increasing'
+          : recentAvg < olderAvg
+              ? 'decreasing'
+              : 'neutral';
 
       // Advanced projection
-      final predictedDaily = (ema * (trend == 'increasing' ? 1.15 : trend == 'decreasing' ? 0.85 : 1.0)).toInt();
+      final predictedDaily = (ema *
+              (trend == 'increasing'
+                  ? 1.15
+                  : trend == 'decreasing'
+                      ? 0.85
+                      : 1.0))
+          .toInt();
       final predictedTotal = (predictedDaily * daysAhead).toInt();
 
       return {
@@ -739,7 +809,8 @@ class AnalyticsAggregationService {
         'predictedDailyRequests': predictedDaily,
         'predictedTotalRequests': predictedTotal,
         'trend': trend,
-        'confidence': 0.78, // Slightly lower confidence for demand forecasting generally
+        'confidence':
+            0.78, // Slightly lower confidence for demand forecasting generally
         'emaValue': (ema * 100).toStringAsFixed(2),
         'volatility': (_calculateStdDev(demandTrend) * 100).toStringAsFixed(2),
       };
@@ -752,33 +823,37 @@ class AnalyticsAggregationService {
   // NEW: Generate Summary Reports for Admin Review
   Future<Map<String, dynamic>> generateSummaryReport() async {
     try {
-       // Combine high-level metrics across all systems into a single summary report
-       final recentDays = 30; // standard monthly report
-       
-       final surplusTrends = await getSurplusTrends(days: recentDays);
-       final volunteerDemand = await predictVolunteerDemandAdvanced(daysAhead: 7);
-       final ngoTrends = await getNGODemandTrends(days: recentDays);
-       
-       // Gather all regional risks
-       final regions = await _firestore.collection('delivery_tasks').get()
-          .then((s) => s.docs.map((d) => d.data()['region'] as String?).where((r) => r != null).toSet());
-       
-       List<Map<String, dynamic>> highRiskRegions = [];
-       for (var r in regions) {
-         final risk = await getRegionalRiskIndicators(r!);
-         if (risk['riskLevel'] == 'high') {
-            highRiskRegions.add(risk);
-         }
-       }
-       
-       return {
-         'generatedAt': Timestamp.now(),
-         'reportPeriod': 'Last $recentDays days',
-         'surplusSummary': surplusTrends,
-         'volunteerSummary': volunteerDemand,
-         'ngoDemandSummary': ngoTrends,
-         'highRiskRegions': highRiskRegions,
-       };
+      // Combine high-level metrics across all systems into a single summary report
+      final recentDays = 30; // standard monthly report
+
+      final surplusTrends = await getSurplusTrends(days: recentDays);
+      final volunteerDemand =
+          await predictVolunteerDemandAdvanced(daysAhead: 7);
+      final ngoTrends = await getNGODemandTrends(days: recentDays);
+
+      // Gather all regional risks
+      final regions = await _firestore.collection('delivery_tasks').get().then(
+          (s) => s.docs
+              .map((d) => d.data()['region'] as String?)
+              .where((r) => r != null)
+              .toSet());
+
+      List<Map<String, dynamic>> highRiskRegions = [];
+      for (var r in regions) {
+        final risk = await getRegionalRiskIndicators(r!);
+        if (risk['riskLevel'] == 'high') {
+          highRiskRegions.add(risk);
+        }
+      }
+
+      return {
+        'generatedAt': Timestamp.now(),
+        'reportPeriod': 'Last $recentDays days',
+        'surplusSummary': surplusTrends,
+        'volunteerSummary': volunteerDemand,
+        'ngoDemandSummary': ngoTrends,
+        'highRiskRegions': highRiskRegions,
+      };
     } catch (e) {
       print('Error generating summary report: $e');
       return {};

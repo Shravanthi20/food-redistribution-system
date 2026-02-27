@@ -13,7 +13,7 @@ class OfflineTrackingService {
 
   Future<SharedPreferences> get prefs async {
     if (_prefs != null) return _prefs!;
-    
+
     if (!_isInitializing) {
       _isInitializing = true;
       _prefs = await SharedPreferences.getInstance();
@@ -31,8 +31,9 @@ class OfflineTrackingService {
     try {
       final p = await prefs;
       final existingJson = p.getString(_offlineUpdatesKey);
-      final List<dynamic> updates = existingJson != null ? jsonDecode(existingJson) : [];
-      
+      final List<dynamic> updates =
+          existingJson != null ? jsonDecode(existingJson) : [];
+
       updates.add({
         'latitude': location.latitude,
         'longitude': location.longitude,
@@ -56,7 +57,8 @@ class OfflineTrackingService {
       final p = await prefs;
       final key = '${_offlineUpdatesKey}_status';
       final existingJson = p.getString(key);
-      final List<dynamic> updates = existingJson != null ? jsonDecode(existingJson) : [];
+      final List<dynamic> updates =
+          existingJson != null ? jsonDecode(existingJson) : [];
 
       updates.add({
         'taskId': taskId,
@@ -118,17 +120,17 @@ class OfflineTrackingService {
     try {
       int count = 0;
       final p = await prefs;
-      
+
       final locationJson = p.getString(_offlineUpdatesKey);
       if (locationJson != null) {
         count += (jsonDecode(locationJson) as List).length;
       }
-      
+
       final statusJson = p.getString('${_offlineUpdatesKey}_status');
       if (statusJson != null) {
         count += (jsonDecode(statusJson) as List).length;
       }
-      
+
       return count;
     } catch (e) {
       debugPrint('Error getting pending count: $e');
@@ -149,4 +151,3 @@ class OfflineTrackingService {
     }
   }
 }
-

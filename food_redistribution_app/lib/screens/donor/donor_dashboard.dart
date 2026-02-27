@@ -29,8 +29,9 @@ class _DonorDashboardState extends State<DonorDashboard> {
 
   Future<void> _loadDonations() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final donationProvider = Provider.of<DonationProvider>(context, listen: false);
-    
+    final donationProvider =
+        Provider.of<DonationProvider>(context, listen: false);
+
     final userId = authProvider.appUser?.uid;
     if (userId != null) {
       await donationProvider.loadMyDonations(userId);
@@ -39,9 +40,9 @@ class _DonorDashboardState extends State<DonorDashboard> {
 
   Future<void> _checkVerificationStatus() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    
+
     final statusChanged = await authProvider.checkAndUpdateVerificationStatus();
-    
+
     if (statusChanged && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -54,7 +55,8 @@ class _DonorDashboardState extends State<DonorDashboard> {
           ),
           backgroundColor: AppTheme.successTeal,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           duration: Duration(seconds: 5),
         ),
       );
@@ -83,17 +85,20 @@ class _DonorDashboardState extends State<DonorDashboard> {
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context, false),
-                    child: Text('Cancel', style: TextStyle(color: AppTheme.textMuted)),
+                    child: Text('Cancel',
+                        style: TextStyle(color: AppTheme.textMuted)),
                   ),
                   TextButton(
                     onPressed: () => Navigator.pop(context, true),
-                    child: Text('Sign Out', style: TextStyle(color: AppTheme.errorCoral)),
+                    child: Text('Sign Out',
+                        style: TextStyle(color: AppTheme.errorCoral)),
                   ),
                 ],
               );
 
               if (confirmed == true && mounted) {
-                final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                final authProvider =
+                    Provider.of<AuthProvider>(context, listen: false);
                 await authProvider.signOut();
                 Navigator.pushReplacementNamed(context, AppRouter.login);
               }
@@ -113,7 +118,8 @@ class _DonorDashboardState extends State<DonorDashboard> {
             );
           }
 
-          final donationProvider = Provider.of<DonationProvider>(context, listen: false);
+          final donationProvider =
+              Provider.of<DonationProvider>(context, listen: false);
 
           return StreamBuilder<List<FoodDonation>>(
             stream: donationProvider.getMyDonationsStream(user.uid),
@@ -125,19 +131,23 @@ class _DonorDashboardState extends State<DonorDashboard> {
               }
 
               final myDonations = snapshot.data ?? [];
-              
-              final activeCount = myDonations.where((d) => 
-                d.status == DonationStatus.listed || 
-                d.status == DonationStatus.matched
-              ).length;
-              
-              final deliveredCount = myDonations.where((d) => d.status == DonationStatus.delivered).length;
-              
-              final inProgressCount = myDonations.where((d) => 
-                 d.status == DonationStatus.matched ||
-                 d.status == DonationStatus.pickedUp ||
-                 d.status == DonationStatus.inTransit
-              ).length;
+
+              final activeCount = myDonations
+                  .where((d) =>
+                      d.status == DonationStatus.listed ||
+                      d.status == DonationStatus.matched)
+                  .length;
+
+              final deliveredCount = myDonations
+                  .where((d) => d.status == DonationStatus.delivered)
+                  .length;
+
+              final inProgressCount = myDonations
+                  .where((d) =>
+                      d.status == DonationStatus.matched ||
+                      d.status == DonationStatus.pickedUp ||
+                      d.status == DonationStatus.inTransit)
+                  .length;
 
               return SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
@@ -146,11 +156,13 @@ class _DonorDashboardState extends State<DonorDashboard> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Verification Status Banner
-                    if (user.onboardingState == OnboardingState.documentSubmitted)
+                    if (user.onboardingState ==
+                        OnboardingState.documentSubmitted)
                       _buildVerificationPendingBanner(),
-                    if (user.onboardingState == OnboardingState.documentSubmitted)
+                    if (user.onboardingState ==
+                        OnboardingState.documentSubmitted)
                       const SizedBox(height: 20),
-                    
+
                     // Welcome Card
                     GlassContainer(
                       padding: const EdgeInsets.all(24),
@@ -217,7 +229,8 @@ class _DonorDashboardState extends State<DonorDashboard> {
                             ),
                             child: Row(
                               children: [
-                                Icon(Icons.eco_rounded, color: AppTheme.successTeal, size: 20),
+                                Icon(Icons.eco_rounded,
+                                    color: AppTheme.successTeal, size: 20),
                                 const SizedBox(width: 10),
                                 Expanded(
                                   child: Text(
@@ -247,7 +260,7 @@ class _DonorDashboardState extends State<DonorDashboard> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    
+
                     Row(
                       children: [
                         Expanded(
@@ -270,7 +283,7 @@ class _DonorDashboardState extends State<DonorDashboard> {
                       ],
                     ),
                     const SizedBox(height: 12),
-                    
+
                     Row(
                       children: [
                         Expanded(
@@ -304,7 +317,7 @@ class _DonorDashboardState extends State<DonorDashboard> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    
+
                     _buildActionCard(
                       'Create New Donation',
                       'Post surplus food for redistribution',
@@ -312,11 +325,12 @@ class _DonorDashboardState extends State<DonorDashboard> {
                       AppTheme.successTeal,
                       () => Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const CreateDonationScreen()),
+                        MaterialPageRoute(
+                            builder: (context) => const CreateDonationScreen()),
                       ),
                     ),
                     const SizedBox(height: 12),
-                    
+
                     _buildActionCard(
                       'My Donations',
                       'View and manage all your donations',
@@ -324,17 +338,19 @@ class _DonorDashboardState extends State<DonorDashboard> {
                       AppTheme.accentCyan,
                       () => Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const DonationListScreen()),
+                        MaterialPageRoute(
+                            builder: (context) => const DonationListScreen()),
                       ),
                     ),
                     const SizedBox(height: 12),
-                    
+
                     _buildActionCard(
                       'Impact Report',
                       'See your contribution statistics',
                       Icons.analytics_rounded,
                       AppTheme.infoCyan,
-                      () => Navigator.pushNamed(context, AppRouter.impactReports),
+                      () =>
+                          Navigator.pushNamed(context, AppRouter.impactReports),
                     ),
                     const SizedBox(height: 28),
 
@@ -354,7 +370,9 @@ class _DonorDashboardState extends State<DonorDashboard> {
                           TextButton(
                             onPressed: () => Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => const DonationListScreen()),
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      const DonationListScreen()),
                             ),
                             child: Text(
                               'View All',
@@ -364,15 +382,16 @@ class _DonorDashboardState extends State<DonorDashboard> {
                         ],
                       ),
                       const SizedBox(height: 12),
-                      
                       ...myDonations.take(3).map((donation) {
                         return GlassListTile(
                           title: donation.title,
-                          subtitle: '${donation.quantity} ${donation.unit} • ${_getStatusDisplayName(donation.status)}',
+                          subtitle:
+                              '${donation.quantity} ${donation.unit} • ${_getStatusDisplayName(donation.status)}',
                           leading: Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: _getStatusColor(donation.status).withOpacity(0.15),
+                              color: _getStatusColor(donation.status)
+                                  .withOpacity(0.15),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Icon(
@@ -387,7 +406,7 @@ class _DonorDashboardState extends State<DonorDashboard> {
                             color: AppTheme.textMuted,
                           ),
                           onTap: () => Navigator.pushNamed(
-                            context, 
+                            context,
                             AppRouter.donationDetail,
                             arguments: donation,
                           ),
@@ -405,7 +424,8 @@ class _DonorDashboardState extends State<DonorDashboard> {
         onPressed: () async {
           final result = await Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const CreateDonationScreen()),
+            MaterialPageRoute(
+                builder: (context) => const CreateDonationScreen()),
           );
           if (result == true) _loadDonations();
         },
@@ -416,7 +436,8 @@ class _DonorDashboardState extends State<DonorDashboard> {
     );
   }
 
-  Widget _buildActionCard(String title, String subtitle, IconData icon, Color color, VoidCallback onTap) {
+  Widget _buildActionCard(String title, String subtitle, IconData icon,
+      Color color, VoidCallback onTap) {
     return GlassContainer(
       onTap: onTap,
       padding: const EdgeInsets.all(18),
@@ -568,7 +589,8 @@ class _DonorDashboardState extends State<DonorDashboard> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.schedule_rounded, color: AppTheme.textMuted, size: 14),
+                Icon(Icons.schedule_rounded,
+                    color: AppTheme.textMuted, size: 14),
                 const SizedBox(width: 6),
                 Text(
                   'Usually takes 24-48 hours',

@@ -11,20 +11,21 @@ class DocumentSubmissionScreen extends StatefulWidget {
   const DocumentSubmissionScreen({Key? key}) : super(key: key);
 
   @override
-  State<DocumentSubmissionScreen> createState() => _DocumentSubmissionScreenState();
+  State<DocumentSubmissionScreen> createState() =>
+      _DocumentSubmissionScreenState();
 }
 
 class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final VerificationService _verificationService = VerificationService();
-  
+
   bool _isSubmitting = false;
   UserRole? _userRole;
-  
+
   // Document form data
   final Map<String, TextEditingController> _documentControllers = {};
   final Map<String, String> _documentInfo = {};
-  
+
   // Document requirements by role
   final Map<UserRole, List<Map<String, String>>> _documentRequirements = {
     UserRole.ngo: [
@@ -36,7 +37,8 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
       {
         'type': 'Tax Exemption Certificate',
         'description': 'Tax exemption certificate number (if applicable)',
-        'hint': 'Enter tax exemption certificate number or write "Not Applicable"...'
+        'hint':
+            'Enter tax exemption certificate number or write "Not Applicable"...'
       },
       {
         'type': 'Food Safety Certificate',
@@ -46,7 +48,8 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
       {
         'type': 'Organization Address Proof',
         'description': 'Official address verification document details',
-        'hint': 'Enter utility bill details, lease agreement, or address proof...'
+        'hint':
+            'Enter utility bill details, lease agreement, or address proof...'
       },
       {
         'type': 'Authorized Representative ID',
@@ -57,7 +60,8 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
     UserRole.donor: [
       {
         'type': 'Business License',
-        'description': 'Business registration or license details (if applicable)',
+        'description':
+            'Business registration or license details (if applicable)',
         'hint': 'Enter business license number or write "Individual Donor"...'
       },
       {
@@ -111,7 +115,7 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
   void _initializeUserRole() {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     _userRole = authProvider.appUser?.role;
-    
+
     if (_userRole != null && _documentRequirements.containsKey(_userRole)) {
       for (final doc in _documentRequirements[_userRole]!) {
         final type = doc['type']!;
@@ -137,9 +141,11 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CircularProgressIndicator(color: AppTheme.accentTeal, strokeWidth: 3),
+              CircularProgressIndicator(
+                  color: AppTheme.accentTeal, strokeWidth: 3),
               const SizedBox(height: 16),
-              Text('Loading...', style: TextStyle(color: AppTheme.textSecondary)),
+              Text('Loading...',
+                  style: TextStyle(color: AppTheme.textSecondary)),
             ],
           ),
         ),
@@ -212,9 +218,9 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Information Note
               GlassContainer(
                 tintColor: AppTheme.infoCyan,
@@ -261,9 +267,9 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 28),
-              
+
               // Document Forms Header
               Row(
                 children: [
@@ -301,14 +307,18 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 20),
-              
-              ...documents.asMap().entries.map((entry) => 
-                _buildDocumentCard(entry.value, entry.key + 1)).toList(),
-              
+
+              ...documents
+                  .asMap()
+                  .entries
+                  .map(
+                      (entry) => _buildDocumentCard(entry.value, entry.key + 1))
+                  .toList(),
+
               const SizedBox(height: 24),
-              
+
               // Additional Information
               GlassCard(
                 child: Column(
@@ -339,7 +349,8 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
                         ),
                         const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
                             color: AppTheme.textTertiary.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(8),
@@ -359,21 +370,25 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
                       maxLines: 3,
                       style: TextStyle(color: AppTheme.textPrimary),
                       decoration: InputDecoration(
-                        hintText: 'Any additional information that might help with verification...',
+                        hintText:
+                            'Any additional information that might help with verification...',
                         hintStyle: TextStyle(color: AppTheme.textTertiary),
                         filled: true,
                         fillColor: AppTheme.surfaceGlass,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: AppTheme.surfaceGlassBorder),
+                          borderSide:
+                              BorderSide(color: AppTheme.surfaceGlassBorder),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: AppTheme.surfaceGlassBorder),
+                          borderSide:
+                              BorderSide(color: AppTheme.surfaceGlassBorder),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: AppTheme.accentTeal, width: 1.5),
+                          borderSide: BorderSide(
+                              color: AppTheme.accentTeal, width: 1.5),
                         ),
                       ),
                       onSaved: (value) {
@@ -388,25 +403,28 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 32),
-              
+
               // Submit Button
               GradientButton(
-                text: _isSubmitting ? 'Submitting...' : 'Submit for Verification',
+                text:
+                    _isSubmitting ? 'Submitting...' : 'Submit for Verification',
                 icon: _isSubmitting ? null : Icons.send_rounded,
                 onPressed: _isSubmitting ? null : _submitDocuments,
                 isLoading: _isSubmitting,
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               // Cancel Button
               SizedBox(
                 width: double.infinity,
                 child: TextButton.icon(
-                  onPressed: _isSubmitting ? null : () => Navigator.pop(context),
-                  icon: Icon(Icons.schedule_rounded, color: AppTheme.textSecondary),
+                  onPressed:
+                      _isSubmitting ? null : () => Navigator.pop(context),
+                  icon: Icon(Icons.schedule_rounded,
+                      color: AppTheme.textSecondary),
                   label: Text(
                     'Submit Later',
                     style: TextStyle(
@@ -419,7 +437,7 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 32),
             ],
           ),
@@ -515,7 +533,8 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
               style: TextStyle(color: AppTheme.textPrimary),
               decoration: InputDecoration(
                 hintText: hint,
-                hintStyle: TextStyle(color: AppTheme.textTertiary, fontSize: 13),
+                hintStyle:
+                    TextStyle(color: AppTheme.textTertiary, fontSize: 13),
                 filled: true,
                 fillColor: AppTheme.surfaceGlass,
                 border: OutlineInputBorder(
@@ -528,7 +547,8 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: AppTheme.accentTeal, width: 1.5),
+                  borderSide:
+                      BorderSide(color: AppTheme.accentTeal, width: 1.5),
                 ),
                 errorBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -538,9 +558,10 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(color: AppTheme.errorRed, width: 1.5),
                 ),
-                prefixIcon: Icon(Icons.description_outlined, 
+                prefixIcon: Icon(Icons.description_outlined,
                     size: 20, color: AppTheme.textTertiary),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               ),
               maxLines: 2,
               validator: (value) {
@@ -569,9 +590,9 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
 
   Future<void> _submitDocuments() async {
     if (!_formKey.currentState!.validate()) return;
-    
+
     _formKey.currentState!.save();
-    
+
     for (final doc in _documentRequirements[_userRole] ?? []) {
       final type = doc['type']!;
       final controller = _documentControllers[type];
@@ -579,24 +600,26 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
         _documentInfo[type] = controller.text.trim();
       }
     }
-    
+
     final documents = _documentRequirements[_userRole] ?? [];
     List<String> missingDocs = [];
-    
+
     for (final doc in documents) {
       final type = doc['type']!;
-      if (!_documentInfo.containsKey(type) || _documentInfo[type]!.trim().isEmpty) {
+      if (!_documentInfo.containsKey(type) ||
+          _documentInfo[type]!.trim().isEmpty) {
         missingDocs.add(type);
       }
     }
-    
+
     if (missingDocs.isNotEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Please fill out: ${missingDocs.join(", ")}'),
           backgroundColor: AppTheme.warningAmber,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
       );
       return;
@@ -606,13 +629,13 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
 
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      
+
       if (authProvider.firebaseUser?.uid == null) {
         throw Exception('User not authenticated. Please login again.');
       }
-      
+
       print('Submitting verification with data: $_documentInfo');
-      
+
       final submissionId = await _verificationService.submitVerificationInfo(
         userId: authProvider.firebaseUser!.uid,
         userRole: _userRole!,
@@ -627,10 +650,11 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
             content: const Text('Documents submitted successfully!'),
             backgroundColor: AppTheme.successTeal,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         );
-        
+
         Navigator.pushReplacementNamed(context, '/verification-pending');
       }
     } catch (e) {
@@ -641,7 +665,8 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
             content: Text('Error: ${e.toString()}'),
             backgroundColor: AppTheme.errorRed,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         );
       }

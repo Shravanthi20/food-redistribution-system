@@ -49,11 +49,12 @@ class GradientScaffold extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: gradientColors ?? [
-              AppTheme.gradientStart,
-              AppTheme.gradientMiddle,
-              AppTheme.gradientEnd,
-            ],
+            colors: gradientColors ??
+                [
+                  AppTheme.gradientStart,
+                  AppTheme.gradientMiddle,
+                  AppTheme.gradientEnd,
+                ],
             stops: const [0.0, 0.5, 1.0],
           ),
         ),
@@ -189,8 +190,8 @@ class GlassAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Size get preferredSize => Size.fromHeight(
-    kToolbarHeight + (bottom?.preferredSize.height ?? 0),
-  );
+        kToolbarHeight + (bottom?.preferredSize.height ?? 0),
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -312,9 +313,11 @@ class GlassDialog extends StatelessWidget {
                   ),
                 )
               : null,
-          titlePadding: titlePadding ?? const EdgeInsets.fromLTRB(24, 24, 24, 0),
+          titlePadding:
+              titlePadding ?? const EdgeInsets.fromLTRB(24, 24, 24, 0),
           content: content,
-          contentPadding: contentPadding ?? const EdgeInsets.fromLTRB(24, 16, 24, 16),
+          contentPadding:
+              contentPadding ?? const EdgeInsets.fromLTRB(24, 16, 24, 16),
           actions: actions,
           actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         ),

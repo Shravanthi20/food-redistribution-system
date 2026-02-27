@@ -8,7 +8,7 @@ class DispatchCriteria {
   final bool requiresExperience;
   final DispatchPriority priority;
   final DateTime? requiredBy;
-  
+
   const DispatchCriteria({
     this.maxDistance = 25.0,
     this.allowedTransport = const [VehicleType.car, VehicleType.motorcycle],
@@ -29,7 +29,7 @@ class DispatchResult {
   final String reasoning;
   final DateTime estimatedArrival;
   final Map<String, dynamic> metadata;
-  
+
   DispatchResult({
     required this.volunteerId,
     required this.taskId,
@@ -72,7 +72,7 @@ class DeliveryTask {
   final int estimatedVolume;
   final DeliveryStatus status;
   final String? assignedVolunteerId;
-  
+
   DeliveryTask({
     required this.id,
     required this.donationId,
@@ -117,13 +117,18 @@ class DeliveryTask {
       deliveryAddress: map['deliveryAddress'] ?? '',
       pickupLocation: Map<String, double>.from(map['pickupLocation'] ?? {}),
       deliveryLocation: Map<String, double>.from(map['deliveryLocation'] ?? {}),
-      scheduledTime: map['scheduledTime'] != null ? DateTime.parse(map['scheduledTime']) : DateTime.now(),
-      priority: DispatchPriority.values.firstWhere((e) => e.name == map['priority'], orElse: () => DispatchPriority.scheduled),
+      scheduledTime: map['scheduledTime'] != null
+          ? DateTime.parse(map['scheduledTime'])
+          : DateTime.now(),
+      priority: DispatchPriority.values.firstWhere(
+          (e) => e.name == map['priority'],
+          orElse: () => DispatchPriority.scheduled),
       specialInstructions: map['specialInstructions'],
       requiredSkills: List<String>.from(map['requiredSkills'] ?? []),
       estimatedWeight: (map['estimatedWeight'] as num?)?.toDouble() ?? 0.0,
       estimatedVolume: map['estimatedVolume'] ?? 0,
-      status: DeliveryStatus.values.firstWhere((e) => e.name == map['status'], orElse: () => DeliveryStatus.pending),
+      status: DeliveryStatus.values.firstWhere((e) => e.name == map['status'],
+          orElse: () => DeliveryStatus.pending),
       assignedVolunteerId: map['assignedVolunteerId'],
     );
   }

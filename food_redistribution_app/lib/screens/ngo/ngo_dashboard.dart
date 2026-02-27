@@ -18,18 +18,19 @@ class NGODashboard extends StatefulWidget {
   State<NGODashboard> createState() => _NGODashboardState();
 }
 
-class _NGODashboardState extends State<NGODashboard> with TickerProviderStateMixin {
+class _NGODashboardState extends State<NGODashboard>
+    with TickerProviderStateMixin {
   late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
-    
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final ngoProvider = Provider.of<NGOProvider>(context, listen: false);
-      
+
       if (authProvider.firebaseUser != null) {
         ngoProvider.loadNGOData(authProvider.firebaseUser!.uid);
       }
@@ -101,9 +102,9 @@ class _NGODashboardState extends State<NGODashboard> with TickerProviderStateMix
 
   Widget _buildOverviewTab(NGOProvider ngoProvider, AuthProvider authProvider) {
     final stats = ngoProvider.dashboardStats;
-    
+
     return RefreshIndicator(
-        onRefresh: () => ngoProvider.refreshData(authProvider.firebaseUser!.uid),
+      onRefresh: () => ngoProvider.refreshData(authProvider.firebaseUser!.uid),
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -118,31 +119,31 @@ class _NGODashboardState extends State<NGODashboard> with TickerProviderStateMix
                   Text(
                     'Welcome back!',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: AppTheme.textPrimary,
-                    ),
+                          color: AppTheme.textPrimary,
+                        ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Manage your food requests and track donations.',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppTheme.textSecondary,
-                    ),
+                          color: AppTheme.textSecondary,
+                        ),
                   ),
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Statistics cards
             Text(
               'Request Statistics',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: AppTheme.textPrimary,
-              ),
+                    color: AppTheme.textPrimary,
+                  ),
             ),
             const SizedBox(height: 12),
-            
+
             Row(
               children: [
                 Expanded(
@@ -164,9 +165,9 @@ class _NGODashboardState extends State<NGODashboard> with TickerProviderStateMix
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 12),
-            
+
             Row(
               children: [
                 Expanded(
@@ -188,30 +189,30 @@ class _NGODashboardState extends State<NGODashboard> with TickerProviderStateMix
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 12),
-            
+
             _buildStatCard(
               'Total Beneficiaries',
               '${stats['totalBeneficiaries'] ?? 0}',
               Icons.people,
               Colors.purple,
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Recent requests
             Text(
               'Recent Requests',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: AppTheme.textPrimary,
-              ),
+                    color: AppTheme.textPrimary,
+                  ),
             ),
             const SizedBox(height: 12),
-            
-            ...ngoProvider.myRequests.take(3).map((request) => 
-              _buildRequestCard(request, ngoProvider, authProvider)),
-            
+
+            ...ngoProvider.myRequests.take(3).map((request) =>
+                _buildRequestCard(request, ngoProvider, authProvider)),
+
             if (ngoProvider.myRequests.length > 3)
               TextButton(
                 onPressed: () => _tabController.animateTo(1),
@@ -223,7 +224,8 @@ class _NGODashboardState extends State<NGODashboard> with TickerProviderStateMix
     );
   }
 
-  Widget _buildMyRequestsTab(NGOProvider ngoProvider, AuthProvider authProvider) {
+  Widget _buildMyRequestsTab(
+      NGOProvider ngoProvider, AuthProvider authProvider) {
     return DefaultTabController(
       length: 4,
       child: Column(
@@ -239,10 +241,14 @@ class _NGODashboardState extends State<NGODashboard> with TickerProviderStateMix
           Expanded(
             child: TabBarView(
               children: [
-                _buildRequestsList(ngoProvider.myRequests, ngoProvider, authProvider),
-                _buildRequestsList(ngoProvider.pendingRequests, ngoProvider, authProvider),
-                _buildRequestsList(ngoProvider.matchedRequests, ngoProvider, authProvider),
-                _buildRequestsList(ngoProvider.urgentRequests, ngoProvider, authProvider),
+                _buildRequestsList(
+                    ngoProvider.myRequests, ngoProvider, authProvider),
+                _buildRequestsList(
+                    ngoProvider.pendingRequests, ngoProvider, authProvider),
+                _buildRequestsList(
+                    ngoProvider.matchedRequests, ngoProvider, authProvider),
+                _buildRequestsList(
+                    ngoProvider.urgentRequests, ngoProvider, authProvider),
               ],
             ),
           ),
@@ -251,7 +257,8 @@ class _NGODashboardState extends State<NGODashboard> with TickerProviderStateMix
     );
   }
 
-  Widget _buildAvailableDonationsTab(NGOProvider ngoProvider, AuthProvider authProvider) {
+  Widget _buildAvailableDonationsTab(
+      NGOProvider ngoProvider, AuthProvider authProvider) {
     return AvailableDonationsScreen();
   }
 
@@ -259,7 +266,8 @@ class _NGODashboardState extends State<NGODashboard> with TickerProviderStateMix
     return const QueriesScreen();
   }
 
-  Widget _buildRequestsList(List<FoodRequest> requests, NGOProvider ngoProvider, AuthProvider authProvider) {
+  Widget _buildRequestsList(List<FoodRequest> requests, NGOProvider ngoProvider,
+      AuthProvider authProvider) {
     if (requests.isEmpty) {
       return const Center(
         child: Column(
@@ -287,7 +295,8 @@ class _NGODashboardState extends State<NGODashboard> with TickerProviderStateMix
     );
   }
 
-  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
+  Widget _buildStatCard(
+      String title, String value, IconData icon, Color color) {
     return GlassContainer(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -328,7 +337,8 @@ class _NGODashboardState extends State<NGODashboard> with TickerProviderStateMix
     );
   }
 
-  Widget _buildRequestCard(FoodRequest request, NGOProvider ngoProvider, AuthProvider authProvider) {
+  Widget _buildRequestCard(
+      FoodRequest request, NGOProvider ngoProvider, AuthProvider authProvider) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: GlassListTile(
@@ -344,12 +354,15 @@ class _NGODashboardState extends State<NGODashboard> with TickerProviderStateMix
           ),
         ),
         title: request.title,
-        subtitle: '${request.requiredQuantity} ${request.unit} • ${request.expectedBeneficiaries} beneficiaries\nStatus: ${request.status.name.toUpperCase()}',
-        trailing: Icon(Icons.arrow_forward_ios_rounded, color: AppTheme.textMuted, size: 16),
+        subtitle:
+            '${request.requiredQuantity} ${request.unit} • ${request.expectedBeneficiaries} beneficiaries\nStatus: ${request.status.name.toUpperCase()}',
+        trailing: Icon(Icons.arrow_forward_ios_rounded,
+            color: AppTheme.textMuted, size: 16),
         onTap: () => Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => FoodRequestDetailScreen(requestId: request.id),
+            builder: (context) =>
+                FoodRequestDetailScreen(requestId: request.id),
           ),
         ),
       ),
@@ -411,7 +424,8 @@ class _NGODashboardState extends State<NGODashboard> with TickerProviderStateMix
               Navigator.pop(context); // Close dialog
               await authProvider.signOut();
               if (context.mounted) {
-                Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+                Navigator.of(context)
+                    .pushNamedAndRemoveUntil('/login', (route) => false);
               }
             },
             child: const Text('Logout'),

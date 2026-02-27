@@ -8,7 +8,8 @@ class RBACMiddleware {
   static final AuthService _authService = AuthService();
 
   // Route guard - check if user can access route
-  static Future<bool> canAccessRoute(String routeName, UserRole? userRole) async {
+  static Future<bool> canAccessRoute(
+      String routeName, UserRole? userRole) async {
     if (userRole == null) return false;
 
     // Admin routes
@@ -101,8 +102,9 @@ class _ProtectedRouteState extends State<ProtectedRoute> {
       }
 
       // Check role authorization
-      final hasAccess = widget.allowedRoles.contains(user.role) || user.role == UserRole.admin;
-      
+      final hasAccess = widget.allowedRoles.contains(user.role) ||
+          user.role == UserRole.admin;
+
       setState(() {
         isLoading = false;
         isAuthorized = hasAccess;
@@ -128,11 +130,11 @@ class _ProtectedRouteState extends State<ProtectedRoute> {
     }
 
     if (!isAuthorized) {
-      return widget.unauthorizedWidget ?? 
-        UnauthorizedWidget(
-          currentUser: currentUser,
-          requiredRoles: widget.allowedRoles,
-        );
+      return widget.unauthorizedWidget ??
+          UnauthorizedWidget(
+            currentUser: currentUser,
+            requiredRoles: widget.allowedRoles,
+          );
     }
 
     return widget.child;
@@ -189,9 +191,9 @@ class UnauthorizedWidget extends StatelessWidget {
               Text(
                 'Access Denied',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: Colors.red.shade700,
-                  fontWeight: FontWeight.bold,
-                ),
+                      color: Colors.red.shade700,
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               const SizedBox(height: 16),
               Text(

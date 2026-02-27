@@ -15,12 +15,15 @@ import 'package:firebase_core_platform_interface/firebase_core_platform_interfac
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MockFirebaseAppPlatform extends FirebaseAppPlatform {
-  MockFirebaseAppPlatform() : super('test_app', const FirebaseOptions(
-    apiKey: 'test_key',
-    appId: 'test_id',
-    messagingSenderId: 'test_sender_id',
-    projectId: 'test_project_id',
-  ));
+  MockFirebaseAppPlatform()
+      : super(
+            'test_app',
+            const FirebaseOptions(
+              apiKey: 'test_key',
+              appId: 'test_id',
+              messagingSenderId: 'test_sender_id',
+              projectId: 'test_project_id',
+            ));
 }
 
 class MockFirebasePlatform extends FirebasePlatform {
@@ -32,10 +35,11 @@ class MockFirebasePlatform extends FirebasePlatform {
   }
 
   @override
-  Future<FirebaseAppPlatform> initializeApp({String? name, FirebaseOptions? options}) async {
+  Future<FirebaseAppPlatform> initializeApp(
+      {String? name, FirebaseOptions? options}) async {
     return MockFirebaseAppPlatform();
   }
-  
+
   @override
   List<FirebaseAppPlatform> get apps => [app()];
 }
@@ -77,7 +81,9 @@ void main() {
       await offlineService.clearSyncedUpdates();
     });
 
-    test('Complete flow: donation created → volunteer assigned → pickup → delivery', () async {
+    test(
+        'Complete flow: donation created → volunteer assigned → pickup → delivery',
+        () async {
       const donationId = 'donation_test_001';
       const volunteerId = 'volunteer_test_001';
       const ngoId = 'ngo_test_001';
@@ -108,7 +114,10 @@ void main() {
         longitude: pickupLocation.longitude,
         accuracy: pickupLocation.accuracy,
       );
-      expect(trackingProvider.locationHistory.any((l) => l.latitude == pickupLocation.latitude), true);
+      expect(
+          trackingProvider.locationHistory
+              .any((l) => l.latitude == pickupLocation.latitude),
+          true);
 
       trackingProvider.setOnlineStatus(false);
       expect(trackingProvider.isOnline, false);
@@ -159,7 +168,8 @@ void main() {
       await trackingProvider.stopTracking(volunteerId);
       expect(trackingProvider.isTracking, false);
 
-      final volunteerStats = await analyticsService.getVolunteerDeliveryStats(volunteerId);
+      final volunteerStats =
+          await analyticsService.getVolunteerDeliveryStats(volunteerId);
       expect(volunteerStats, isNotNull);
     });
 
@@ -272,7 +282,7 @@ void main() {
         longitude: update1.longitude,
         accuracy: update1.accuracy,
       );
-      
+
       // Small delay to ensure distinct timestamps
       await Future.delayed(const Duration(milliseconds: 100));
 

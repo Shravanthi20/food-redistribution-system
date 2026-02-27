@@ -12,12 +12,13 @@ class DonorRegistrationScreen extends StatefulWidget {
   const DonorRegistrationScreen({Key? key}) : super(key: key);
 
   @override
-  State<DonorRegistrationScreen> createState() => _DonorRegistrationScreenState();
+  State<DonorRegistrationScreen> createState() =>
+      _DonorRegistrationScreenState();
 }
 
 class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
   final _formKey = GlobalKey<FormState>();
-  
+
   // Controllers
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -38,23 +39,88 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
   // Data for Pickers
   final Map<String, List<String>> _countryStates = {
     'India': [
-      'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
-      'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka',
-      'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram',
-      'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu',
-      'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal', 'Delhi',
+      'Andhra Pradesh',
+      'Arunachal Pradesh',
+      'Assam',
+      'Bihar',
+      'Chhattisgarh',
+      'Goa',
+      'Gujarat',
+      'Haryana',
+      'Himachal Pradesh',
+      'Jharkhand',
+      'Karnataka',
+      'Kerala',
+      'Madhya Pradesh',
+      'Maharashtra',
+      'Manipur',
+      'Meghalaya',
+      'Mizoram',
+      'Nagaland',
+      'Odisha',
+      'Punjab',
+      'Rajasthan',
+      'Sikkim',
+      'Tamil Nadu',
+      'Telangana',
+      'Tripura',
+      'Uttar Pradesh',
+      'Uttarakhand',
+      'West Bengal',
+      'Delhi',
       'Other'
     ],
     'USA': [
-      'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado',
-      'Connecticut', 'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho',
-      'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana', 'Maine',
-      'Maryland', 'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi',
-      'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey',
-      'New Mexico', 'New York', 'North Carolina', 'North Dakota', 'Ohio',
-      'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island', 'South Carolina',
-      'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont', 'Virginia',
-      'Washington', 'West Virginia', 'Wisconsin', 'Wyoming'
+      'Alabama',
+      'Alaska',
+      'Arizona',
+      'Arkansas',
+      'California',
+      'Colorado',
+      'Connecticut',
+      'Delaware',
+      'Florida',
+      'Georgia',
+      'Hawaii',
+      'Idaho',
+      'Illinois',
+      'Indiana',
+      'Iowa',
+      'Kansas',
+      'Kentucky',
+      'Louisiana',
+      'Maine',
+      'Maryland',
+      'Massachusetts',
+      'Michigan',
+      'Minnesota',
+      'Mississippi',
+      'Missouri',
+      'Montana',
+      'Nebraska',
+      'Nevada',
+      'New Hampshire',
+      'New Jersey',
+      'New Mexico',
+      'New York',
+      'North Carolina',
+      'North Dakota',
+      'Ohio',
+      'Oklahoma',
+      'Oregon',
+      'Pennsylvania',
+      'Rhode Island',
+      'South Carolina',
+      'South Dakota',
+      'Tennessee',
+      'Texas',
+      'Utah',
+      'Vermont',
+      'Virginia',
+      'Washington',
+      'West Virginia',
+      'Wisconsin',
+      'Wyoming'
     ],
   };
 
@@ -154,13 +220,16 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
     );
   }
 
-  InputDecoration _buildInputDecoration(String label, {IconData? prefixIcon, String? hintText, Widget? suffixIcon}) {
+  InputDecoration _buildInputDecoration(String label,
+      {IconData? prefixIcon, String? hintText, Widget? suffixIcon}) {
     return InputDecoration(
       labelText: label,
       hintText: hintText,
       labelStyle: TextStyle(color: AppTheme.textSecondary),
       hintStyle: TextStyle(color: AppTheme.textTertiary),
-      prefixIcon: prefixIcon != null ? Icon(prefixIcon, color: AppTheme.textTertiary, size: 20) : null,
+      prefixIcon: prefixIcon != null
+          ? Icon(prefixIcon, color: AppTheme.textTertiary, size: 20)
+          : null,
       suffixIcon: suffixIcon,
       filled: true,
       fillColor: AppTheme.surfaceGlass,
@@ -220,7 +289,8 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
                     controller: _emailController,
                     style: TextStyle(color: AppTheme.textPrimary),
                     keyboardType: TextInputType.emailAddress,
-                    decoration: _buildInputDecoration('Email Address', prefixIcon: Icons.email_outlined),
+                    decoration: _buildInputDecoration('Email Address',
+                        prefixIcon: Icons.email_outlined),
                     validator: (value) {
                       if (value == null || value.isEmpty) return 'Required';
                       if (!value.contains('@')) return 'Invalid email';
@@ -237,14 +307,17 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
                       prefixIcon: Icons.lock_outline_rounded,
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                          _obscurePassword
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
                           color: AppTheme.textTertiary,
                         ),
-                        onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                        onPressed: () => setState(
+                            () => _obscurePassword = !_obscurePassword),
                       ),
                     ),
-                    validator: (value) => (value != null && value.length < 6) 
-                        ? 'Min 6 characters' 
+                    validator: (value) => (value != null && value.length < 6)
+                        ? 'Min 6 characters'
                         : null,
                   ),
                   const SizedBox(height: 16),
@@ -257,14 +330,17 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
                       prefixIcon: Icons.lock_outline_rounded,
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _obscureConfirmPassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                          _obscureConfirmPassword
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
                           color: AppTheme.textTertiary,
                         ),
-                        onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+                        onPressed: () => setState(() =>
+                            _obscureConfirmPassword = !_obscureConfirmPassword),
                       ),
                     ),
-                    validator: (value) => (value != _passwordController.text) 
-                        ? 'Passwords do not match' 
+                    validator: (value) => (value != _passwordController.text)
+                        ? 'Passwords do not match'
                         : null,
                   ),
                   const SizedBox(height: 16),
@@ -279,11 +355,16 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
                           dropdownColor: AppTheme.primaryNavyLight,
                           style: TextStyle(color: AppTheme.textPrimary),
                           decoration: _buildInputDecoration('Code'),
-                          items: _countryCodes.map((code) => DropdownMenuItem(
-                            value: code,
-                            child: Text(code, style: TextStyle(color: AppTheme.textPrimary)),
-                          )).toList(),
-                          onChanged: (val) => setState(() => _selectedCountryCode = val!),
+                          items: _countryCodes
+                              .map((code) => DropdownMenuItem(
+                                    value: code,
+                                    child: Text(code,
+                                        style: TextStyle(
+                                            color: AppTheme.textPrimary)),
+                                  ))
+                              .toList(),
+                          onChanged: (val) =>
+                              setState(() => _selectedCountryCode = val!),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -293,7 +374,8 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
                           controller: _phoneController,
                           style: TextStyle(color: AppTheme.textPrimary),
                           keyboardType: TextInputType.phone,
-                          decoration: _buildInputDecoration('Phone Number', prefixIcon: Icons.phone_outlined),
+                          decoration: _buildInputDecoration('Phone Number',
+                              prefixIcon: Icons.phone_outlined),
                           validator: (v) => v!.isEmpty ? 'Required' : null,
                         ),
                       ),
@@ -310,27 +392,32 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
                     value: _selectedDonorType,
                     dropdownColor: AppTheme.primaryNavyLight,
                     style: TextStyle(color: AppTheme.textPrimary),
-                    decoration: _buildInputDecoration('Business Type', prefixIcon: Icons.category_outlined),
+                    decoration: _buildInputDecoration('Business Type',
+                        prefixIcon: Icons.category_outlined),
                     items: DonorType.values.map((type) {
                       return DropdownMenuItem(
                         value: type,
-                        child: Text(_getDonorTypeDisplayName(type), style: TextStyle(color: AppTheme.textPrimary)),
+                        child: Text(_getDonorTypeDisplayName(type),
+                            style: TextStyle(color: AppTheme.textPrimary)),
                       );
                     }).toList(),
-                    onChanged: (val) => setState(() => _selectedDonorType = val!),
+                    onChanged: (val) =>
+                        setState(() => _selectedDonorType = val!),
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _businessNameController,
                     style: TextStyle(color: AppTheme.textPrimary),
-                    decoration: _buildInputDecoration('Business Name', prefixIcon: Icons.business_rounded),
+                    decoration: _buildInputDecoration('Business Name',
+                        prefixIcon: Icons.business_rounded),
                     validator: (v) => v!.isEmpty ? 'Required' : null,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _registrationNumberController,
                     style: TextStyle(color: AppTheme.textPrimary),
-                    decoration: _buildInputDecoration('Registration Number', prefixIcon: Icons.numbers_rounded),
+                    decoration: _buildInputDecoration('Registration Number',
+                        prefixIcon: Icons.numbers_rounded),
                     validator: (v) => v!.isEmpty ? 'Required' : null,
                   ),
                   const SizedBox(height: 16),
@@ -355,11 +442,16 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
                     value: _selectedCountry,
                     dropdownColor: AppTheme.primaryNavyLight,
                     style: TextStyle(color: AppTheme.textPrimary),
-                    decoration: _buildInputDecoration('Country', prefixIcon: Icons.public_rounded),
-                    items: _countryStates.keys.map((country) => DropdownMenuItem(
-                      value: country,
-                      child: Text(country, style: TextStyle(color: AppTheme.textPrimary)),
-                    )).toList(),
+                    decoration: _buildInputDecoration('Country',
+                        prefixIcon: Icons.public_rounded),
+                    items: _countryStates.keys
+                        .map((country) => DropdownMenuItem(
+                              value: country,
+                              child: Text(country,
+                                  style:
+                                      TextStyle(color: AppTheme.textPrimary)),
+                            ))
+                        .toList(),
                     onChanged: (val) {
                       setState(() {
                         _selectedCountry = val;
@@ -373,28 +465,37 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
                     value: _selectedState,
                     dropdownColor: AppTheme.primaryNavyLight,
                     style: TextStyle(color: AppTheme.textPrimary),
-                    decoration: _buildInputDecoration('State', prefixIcon: Icons.map_outlined),
-                    items: _selectedCountry == null 
-                      ? [] 
-                      : _countryStates[_selectedCountry]!.map((state) => DropdownMenuItem(
-                          value: state,
-                          child: Text(state, style: TextStyle(color: AppTheme.textPrimary)),
-                        )).toList(),
-                    onChanged: _selectedCountry == null ? null : (val) => setState(() => _selectedState = val),
+                    decoration: _buildInputDecoration('State',
+                        prefixIcon: Icons.map_outlined),
+                    items: _selectedCountry == null
+                        ? []
+                        : _countryStates[_selectedCountry]!
+                            .map((state) => DropdownMenuItem(
+                                  value: state,
+                                  child: Text(state,
+                                      style: TextStyle(
+                                          color: AppTheme.textPrimary)),
+                                ))
+                            .toList(),
+                    onChanged: _selectedCountry == null
+                        ? null
+                        : (val) => setState(() => _selectedState = val),
                     validator: (v) => v == null ? 'Required' : null,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _cityController,
                     style: TextStyle(color: AppTheme.textPrimary),
-                    decoration: _buildInputDecoration('City', prefixIcon: Icons.location_city_rounded),
+                    decoration: _buildInputDecoration('City',
+                        prefixIcon: Icons.location_city_rounded),
                     validator: (v) => v!.isEmpty ? 'Required' : null,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _addressController,
                     style: TextStyle(color: AppTheme.textPrimary),
-                    decoration: _buildInputDecoration('Street Address', prefixIcon: Icons.home_outlined),
+                    decoration: _buildInputDecoration('Street Address',
+                        prefixIcon: Icons.home_outlined),
                     maxLines: 2,
                     validator: (v) => v!.isEmpty ? 'Required' : null,
                   ),
@@ -403,7 +504,8 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
                     controller: _zipCodeController,
                     style: TextStyle(color: AppTheme.textPrimary),
                     keyboardType: TextInputType.number,
-                    decoration: _buildInputDecoration('ZIP / Postal Code', prefixIcon: Icons.pin_drop_outlined),
+                    decoration: _buildInputDecoration('ZIP / Postal Code',
+                        prefixIcon: Icons.pin_drop_outlined),
                     validator: (v) => v!.isEmpty ? 'Required' : null,
                   ),
                 ],
@@ -430,7 +532,9 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
                         label: Text(
                           foodType,
                           style: TextStyle(
-                            color: isSelected ? Colors.white : AppTheme.textSecondary,
+                            color: isSelected
+                                ? Colors.white
+                                : AppTheme.textSecondary,
                             fontSize: 13,
                           ),
                         ),
@@ -439,13 +543,15 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
                         backgroundColor: AppTheme.surfaceGlass,
                         checkmarkColor: Colors.white,
                         side: BorderSide(
-                          color: isSelected ? AppTheme.accentTeal : AppTheme.surfaceGlassBorder,
+                          color: isSelected
+                              ? AppTheme.accentTeal
+                              : AppTheme.surfaceGlassBorder,
                         ),
                         onSelected: (selected) {
                           setState(() {
-                            selected 
-                              ? _selectedFoodTypes.add(foodType) 
-                              : _selectedFoodTypes.remove(foodType);
+                            selected
+                                ? _selectedFoodTypes.add(foodType)
+                                : _selectedFoodTypes.remove(foodType);
                           });
                         },
                       );
@@ -478,9 +584,11 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('Already have an account?', style: TextStyle(color: AppTheme.textSecondary)),
+                  Text('Already have an account?',
+                      style: TextStyle(color: AppTheme.textSecondary)),
                   TextButton(
-                    onPressed: () => Navigator.pushReplacementNamed(context, AppRouter.login),
+                    onPressed: () => Navigator.pushReplacementNamed(
+                        context, AppRouter.login),
                     child: Text(
                       'Sign In',
                       style: TextStyle(
@@ -499,7 +607,8 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
     );
   }
 
-  Widget _buildCheckboxTile(String title, IconData icon, bool value, ValueChanged<bool?> onChanged) {
+  Widget _buildCheckboxTile(
+      String title, IconData icon, bool value, ValueChanged<bool?> onChanged) {
     return InkWell(
       onTap: () => onChanged(!value),
       borderRadius: BorderRadius.circular(8),
@@ -519,7 +628,8 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
                 ),
               ),
               child: value
-                  ? const Icon(Icons.check_rounded, color: Colors.white, size: 16)
+                  ? const Icon(Icons.check_rounded,
+                      color: Colors.white, size: 16)
                   : null,
             ),
             const SizedBox(width: 14),
@@ -561,9 +671,9 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
           child: Text(
             'Join the Movement',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
           ),
         ),
         const SizedBox(height: 8),
@@ -617,14 +727,22 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
 
   String _getDonorTypeDisplayName(DonorType type) {
     switch (type) {
-      case DonorType.restaurant: return 'Restaurant';
-      case DonorType.supermarket: return 'Grocery Store';
-      case DonorType.catering: return 'Catering Service';
-      case DonorType.hotel: return 'Hotel';
-      case DonorType.institutional: return 'Institutional Kitchen';
-      case DonorType.bakery: return 'Bakery';
-      case DonorType.individual: return 'Individual';
-      case DonorType.other: return 'Other';
+      case DonorType.restaurant:
+        return 'Restaurant';
+      case DonorType.supermarket:
+        return 'Grocery Store';
+      case DonorType.catering:
+        return 'Catering Service';
+      case DonorType.hotel:
+        return 'Hotel';
+      case DonorType.institutional:
+        return 'Institutional Kitchen';
+      case DonorType.bakery:
+        return 'Bakery';
+      case DonorType.individual:
+        return 'Individual';
+      case DonorType.other:
+        return 'Other';
     }
   }
 }

@@ -13,14 +13,16 @@ class ImpactReportsScreen extends StatefulWidget {
 
 class _ImpactReportsScreenState extends State<ImpactReportsScreen> {
   String _selectedPeriod = 'This Month';
-  
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final user = Provider.of<AuthProvider>(context, listen: false).firebaseUser;
+      final user =
+          Provider.of<AuthProvider>(context, listen: false).firebaseUser;
       if (user != null) {
-        Provider.of<DonationProvider>(context, listen: false).loadMyDonations(user.uid);
+        Provider.of<DonationProvider>(context, listen: false)
+            .loadMyDonations(user.uid);
       }
     });
   }
@@ -47,13 +49,12 @@ class _ImpactReportsScreenState extends State<ImpactReportsScreen> {
         startDate = DateTime(2000);
     }
 
-    final filteredDonations = donations.where((d) => 
-      d.createdAt.isAfter(startDate)
-    ).toList();
+    final filteredDonations =
+        donations.where((d) => d.createdAt.isAfter(startDate)).toList();
 
-    final delivered = filteredDonations.where((d) => 
-      d.status == DonationStatus.delivered
-    ).toList();
+    final delivered = filteredDonations
+        .where((d) => d.status == DonationStatus.delivered)
+        .toList();
 
     int totalMeals = 0;
     int totalPeople = 0;
@@ -68,9 +69,8 @@ class _ImpactReportsScreenState extends State<ImpactReportsScreen> {
     }
 
     // Calculate completion rate
-    double completionRate = totalDonations > 0 
-      ? (completedDonations / totalDonations) * 100 
-      : 0;
+    double completionRate =
+        totalDonations > 0 ? (completedDonations / totalDonations) * 100 : 0;
 
     // Calculate CO2 saved (approximate: 1kg food = 2.5kg CO2)
     double co2Saved = totalWeight * 2.5;
@@ -104,7 +104,8 @@ class _ImpactReportsScreenState extends State<ImpactReportsScreen> {
 
           return RefreshIndicator(
             onRefresh: () async {
-              final user = Provider.of<AuthProvider>(context, listen: false).firebaseUser;
+              final user = Provider.of<AuthProvider>(context, listen: false)
+                  .firebaseUser;
               if (user != null) {
                 await provider.loadMyDonations(user.uid);
               }
@@ -125,7 +126,7 @@ class _ImpactReportsScreenState extends State<ImpactReportsScreen> {
                   Colors.blue,
                 ),
                 const SizedBox(height: 12),
-                
+
                 _buildStatCard(
                   context,
                   'Completed Deliveries',
@@ -185,8 +186,8 @@ class _ImpactReportsScreenState extends State<ImpactReportsScreen> {
                   Text(
                     'Donation Breakdown',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                   const SizedBox(height: 16),
                   _buildDonationBreakdown(stats['donations']),
@@ -198,8 +199,8 @@ class _ImpactReportsScreenState extends State<ImpactReportsScreen> {
                   Text(
                     'Recent Impact',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                   const SizedBox(height: 16),
                   _buildImpactTimeline(stats['donations']),
@@ -222,14 +223,20 @@ class _ImpactReportsScreenState extends State<ImpactReportsScreen> {
             Text(
               'Time Period',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 12),
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: ['This Week', 'This Month', 'Last 3 Months', 'This Year', 'All Time']
+              children: [
+                'This Week',
+                'This Month',
+                'Last 3 Months',
+                'This Year',
+                'All Time'
+              ]
                   .map((period) => ChoiceChip(
                         label: Text(period),
                         selected: _selectedPeriod == period,
@@ -278,16 +285,16 @@ class _ImpactReportsScreenState extends State<ImpactReportsScreen> {
                   Text(
                     title,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey[600],
-                    ),
+                          color: Colors.grey[600],
+                        ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     value,
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: color,
-                    ),
+                          fontWeight: FontWeight.bold,
+                          color: color,
+                        ),
                   ),
                 ],
               ),
@@ -299,9 +306,8 @@ class _ImpactReportsScreenState extends State<ImpactReportsScreen> {
   }
 
   Widget _buildDonationBreakdown(List<FoodDonation> donations) {
-    final deliveredDonations = donations.where((d) => 
-      d.status == DonationStatus.delivered
-    ).toList();
+    final deliveredDonations =
+        donations.where((d) => d.status == DonationStatus.delivered).toList();
 
     if (deliveredDonations.isEmpty) {
       return const Card(
@@ -369,7 +375,8 @@ class _ImpactReportsScreenState extends State<ImpactReportsScreen> {
     final deliveredDonations = donations
         .where((d) => d.status == DonationStatus.delivered)
         .toList()
-      ..sort((a, b) => b.deliveredAt?.compareTo(a.deliveredAt ?? DateTime.now()) ?? 0);
+      ..sort((a, b) =>
+          b.deliveredAt?.compareTo(a.deliveredAt ?? DateTime.now()) ?? 0);
 
     if (deliveredDonations.isEmpty) {
       return const Card(
@@ -387,7 +394,8 @@ class _ImpactReportsScreenState extends State<ImpactReportsScreen> {
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         padding: const EdgeInsets.all(16),
-        itemCount: deliveredDonations.length > 10 ? 10 : deliveredDonations.length,
+        itemCount:
+            deliveredDonations.length > 10 ? 10 : deliveredDonations.length,
         separatorBuilder: (context, index) => const Divider(height: 24),
         itemBuilder: (context, index) {
           final donation = deliveredDonations[index];
@@ -434,7 +442,8 @@ class _ImpactReportsScreenState extends State<ImpactReportsScreen> {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        Icon(Icons.restaurant, size: 16, color: Colors.grey[600]),
+                        Icon(Icons.restaurant,
+                            size: 16, color: Colors.grey[600]),
                         const SizedBox(width: 4),
                         Text(
                           '${donation.estimatedMeals} meals',
@@ -453,7 +462,8 @@ class _ImpactReportsScreenState extends State<ImpactReportsScreen> {
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          Icon(Icons.business, size: 16, color: Colors.blue[600]),
+                          Icon(Icons.business,
+                              size: 16, color: Colors.blue[600]),
                           const SizedBox(width: 4),
                           Text(
                             donation.ngoName ?? 'NGO',
@@ -476,8 +486,20 @@ class _ImpactReportsScreenState extends State<ImpactReportsScreen> {
   }
 
   String _getMonthName(int month) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
-                    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
+    ];
     return months[month - 1];
   }
 }

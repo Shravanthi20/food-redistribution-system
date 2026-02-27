@@ -28,7 +28,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
     (_) => TextEditingController(),
   );
   final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
-  
+
   bool _isLoading = false;
   bool _canResend = false;
   int _resendTimer = 60;
@@ -121,7 +121,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
     try {
       widget.onResendOTP?.call(widget.verificationId, widget.resendToken);
       _startResendTimer();
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -169,7 +169,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: 20),
-              
+
               // Phone Icon
               Container(
                 width: 80,
@@ -184,39 +184,39 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
                   color: Theme.of(context).colorScheme.primary,
                 ),
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Title
               Text(
                 'Verification Code',
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               // Subtitle
               Text(
                 'We have sent a verification code to',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[600],
-                ),
+                      color: Colors.grey[600],
+                    ),
                 textAlign: TextAlign.center,
               ),
-              
+
               const SizedBox(height: 4),
-              
+
               Text(
                 widget.phoneNumber,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
-              
+
               const SizedBox(height: 40),
-              
+
               // OTP Input Fields
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -269,9 +269,9 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
                   );
                 }),
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Error Message
               if (_errorMessage != null)
                 Container(
@@ -286,7 +286,8 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.error_outline, color: Colors.red[700], size: 16),
+                      Icon(Icons.error_outline,
+                          color: Colors.red[700], size: 16),
                       const SizedBox(width: 8),
                       Text(
                         _errorMessage!,
@@ -295,9 +296,9 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
                     ],
                   ),
                 ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Verify Button
               SizedBox(
                 width: double.infinity,
@@ -315,7 +316,8 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
                           height: 24,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         )
                       : const Text(
@@ -327,17 +329,17 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
                         ),
                 ),
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Clear Button
               TextButton(
                 onPressed: _clearOTP,
                 child: const Text('Clear'),
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Resend Section
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -364,9 +366,9 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
                     ),
                 ],
               ),
-              
+
               const SizedBox(height: 40),
-              
+
               // Security Note
               Container(
                 padding: const EdgeInsets.all(16),
