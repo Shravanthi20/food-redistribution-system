@@ -3,19 +3,22 @@ import 'package:fl_chart/fl_chart.dart';
 
 class LogisticsManagementDashboard extends StatefulWidget {
   @override
-  _LogisticsManagementDashboardState createState() => _LogisticsManagementDashboardState();
+  _LogisticsManagementDashboardState createState() =>
+      _LogisticsManagementDashboardState();
 }
 
-class _LogisticsManagementDashboardState extends State<LogisticsManagementDashboard> {
+class _LogisticsManagementDashboardState
+    extends State<LogisticsManagementDashboard> {
   String _selectedTimeRange = '24h';
   bool _isLoading = false;
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: Text('Logistics Management', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text('Logistics Management',
+            style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black87,
         elevation: 0,
@@ -44,7 +47,7 @@ class _LogisticsManagementDashboardState extends State<LogisticsManagementDashbo
       ),
     );
   }
-  
+
   Widget _buildTimeRangeSelector() {
     return Padding(
       padding: EdgeInsets.only(right: 8),
@@ -58,49 +61,71 @@ class _LogisticsManagementDashboardState extends State<LogisticsManagementDashbo
       ),
     );
   }
-  
+
   Widget _buildKPICards() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Key Performance Indicators', 
-             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        Text('Key Performance Indicators',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
         SizedBox(height: 12),
         Row(
           children: [
-            Expanded(child: _buildKPICard('Total Deliveries', '247', '+12%', Colors.blue, Icons.local_shipping)),
+            Expanded(
+                child: _buildKPICard('Total Deliveries', '247', '+12%',
+                    Colors.blue, Icons.local_shipping)),
             SizedBox(width: 12),
-            Expanded(child: _buildKPICard('Food Rescued', '1.2K kg', '+8%', Colors.green, Icons.eco)),
+            Expanded(
+                child: _buildKPICard(
+                    'Food Rescued', '1.2K kg', '+8%', Colors.green, Icons.eco)),
             SizedBox(width: 12),
-            Expanded(child: _buildKPICard('Avg Delivery Time', '32 min', '-5%', Colors.orange, Icons.timer)),
+            Expanded(
+                child: _buildKPICard('Avg Delivery Time', '32 min', '-5%',
+                    Colors.orange, Icons.timer)),
             SizedBox(width: 12),
-            Expanded(child: _buildKPICard('Efficiency Rate', '94.2%', '+3%', Colors.purple, Icons.trending_up)),
+            Expanded(
+                child: _buildKPICard('Efficiency Rate', '94.2%', '+3%',
+                    Colors.purple, Icons.trending_up)),
           ],
         ),
         SizedBox(height: 12),
         Row(
           children: [
-            Expanded(child: _buildKPICard('Active Volunteers', '28', '+2', Colors.teal, Icons.people)),
+            Expanded(
+                child: _buildKPICard('Active Volunteers', '28', '+2',
+                    Colors.teal, Icons.people)),
             SizedBox(width: 12),
-            Expanded(child: _buildKPICard('Route Optimization', '87%', '+11%', Colors.indigo, Icons.route)),
+            Expanded(
+                child: _buildKPICard('Route Optimization', '87%', '+11%',
+                    Colors.indigo, Icons.route)),
             SizedBox(width: 12),
-            Expanded(child: _buildKPICard('Cost per Delivery', '\$4.20', '-8%', Colors.red, Icons.attach_money)),
+            Expanded(
+                child: _buildKPICard('Cost per Delivery', '\$4.20', '-8%',
+                    Colors.red, Icons.attach_money)),
             SizedBox(width: 12),
-            Expanded(child: _buildKPICard('Customer Satisfaction', '4.7/5', '+0.2', Colors.amber, Icons.star)),
+            Expanded(
+                child: _buildKPICard('Customer Satisfaction', '4.7/5', '+0.2',
+                    Colors.amber, Icons.star)),
           ],
         ),
       ],
     );
   }
-  
-  Widget _buildKPICard(String title, String value, String change, Color color, IconData icon) {
+
+  Widget _buildKPICard(
+      String title, String value, String change, Color color, IconData icon) {
     final isPositive = !change.startsWith('-');
     return Container(
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: Offset(0, 2))],
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: Offset(0, 2))
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -119,7 +144,8 @@ class _LogisticsManagementDashboardState extends State<LogisticsManagementDashbo
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: (isPositive ? Colors.green : Colors.red).withOpacity(0.1),
+                  color:
+                      (isPositive ? Colors.green : Colors.red).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -134,20 +160,22 @@ class _LogisticsManagementDashboardState extends State<LogisticsManagementDashbo
             ],
           ),
           SizedBox(height: 12),
-          Text(value, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: color)),
+          Text(value,
+              style: TextStyle(
+                  fontSize: 24, fontWeight: FontWeight.bold, color: color)),
           SizedBox(height: 4),
           Text(title, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
         ],
       ),
     );
   }
-  
+
   Widget _buildChartsSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Analytics Dashboard', 
-             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        Text('Analytics Dashboard',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
         SizedBox(height: 12),
         Row(
           children: [
@@ -167,7 +195,7 @@ class _LogisticsManagementDashboardState extends State<LogisticsManagementDashbo
       ],
     );
   }
-  
+
   Widget _buildDeliveryTrendsChart() {
     return Container(
       height: 300,
@@ -175,12 +203,15 @@ class _LogisticsManagementDashboardState extends State<LogisticsManagementDashbo
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Delivery Trends', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          Text('Delivery Trends',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           SizedBox(height: 16),
           Expanded(
             child: LineChart(
@@ -191,8 +222,14 @@ class _LogisticsManagementDashboardState extends State<LogisticsManagementDashbo
                 lineBarsData: [
                   LineChartBarData(
                     spots: [
-                      FlSpot(0, 3), FlSpot(1, 4), FlSpot(2, 6), FlSpot(3, 5),
-                      FlSpot(4, 7), FlSpot(5, 8), FlSpot(6, 6), FlSpot(7, 9),
+                      FlSpot(0, 3),
+                      FlSpot(1, 4),
+                      FlSpot(2, 6),
+                      FlSpot(3, 5),
+                      FlSpot(4, 7),
+                      FlSpot(5, 8),
+                      FlSpot(6, 6),
+                      FlSpot(7, 9),
                     ],
                     isCurved: true,
                     color: Colors.blue,
@@ -211,7 +248,7 @@ class _LogisticsManagementDashboardState extends State<LogisticsManagementDashbo
       ),
     );
   }
-  
+
   Widget _buildVolunteerDistributionChart() {
     return Container(
       height: 300,
@@ -219,21 +256,28 @@ class _LogisticsManagementDashboardState extends State<LogisticsManagementDashbo
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Volunteer Status', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          Text('Volunteer Status',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           SizedBox(height: 16),
           Expanded(
             child: PieChart(
               PieChartData(
                 sections: [
-                  PieChartSectionData(value: 65, color: Colors.green, title: 'Active\n65%'),
-                  PieChartSectionData(value: 20, color: Colors.orange, title: 'Busy\n20%'),
-                  PieChartSectionData(value: 10, color: Colors.red, title: 'Offline\n10%'),
-                  PieChartSectionData(value: 5, color: Colors.grey, title: 'Break\n5%'),
+                  PieChartSectionData(
+                      value: 65, color: Colors.green, title: 'Active\n65%'),
+                  PieChartSectionData(
+                      value: 20, color: Colors.orange, title: 'Busy\n20%'),
+                  PieChartSectionData(
+                      value: 10, color: Colors.red, title: 'Offline\n10%'),
+                  PieChartSectionData(
+                      value: 5, color: Colors.grey, title: 'Break\n5%'),
                 ],
                 sectionsSpace: 2,
                 centerSpaceRadius: 40,
@@ -244,7 +288,7 @@ class _LogisticsManagementDashboardState extends State<LogisticsManagementDashbo
       ),
     );
   }
-  
+
   Widget _buildRouteEfficiencyChart() {
     return Container(
       height: 250,
@@ -252,12 +296,15 @@ class _LogisticsManagementDashboardState extends State<LogisticsManagementDashbo
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Route Efficiency', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          Text('Route Efficiency',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           SizedBox(height: 16),
           Expanded(
             child: BarChart(
@@ -266,23 +313,37 @@ class _LogisticsManagementDashboardState extends State<LogisticsManagementDashbo
                 maxY: 100,
                 gridData: FlGridData(show: false),
                 titlesData: FlTitlesData(
-                  leftTitles: AxisTitles(sideTitles: const SideTitles(showTitles: false)),
+                  leftTitles: AxisTitles(
+                      sideTitles: const SideTitles(showTitles: false)),
                   bottomTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
-                      getTitlesWidget: (value, meta) => Text(['Mon', 'Tue', 'Wed', 'Thu', 'Fri'][value.toInt()]),
+                      getTitlesWidget: (value, meta) => Text(
+                          ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'][value.toInt()]),
                     ),
                   ),
-                  topTitles: AxisTitles(sideTitles: const SideTitles(showTitles: false)),
-                  rightTitles: AxisTitles(sideTitles: const SideTitles(showTitles: false)),
+                  topTitles: AxisTitles(
+                      sideTitles: const SideTitles(showTitles: false)),
+                  rightTitles: AxisTitles(
+                      sideTitles: const SideTitles(showTitles: false)),
                 ),
                 borderData: FlBorderData(show: false),
                 barGroups: [
-                  BarChartGroupData(x: 0, barRods: [BarChartRodData(toY: 85, color: Colors.blue, width: 20)]),
-                  BarChartGroupData(x: 1, barRods: [BarChartRodData(toY: 92, color: Colors.green, width: 20)]),
-                  BarChartGroupData(x: 2, barRods: [BarChartRodData(toY: 78, color: Colors.orange, width: 20)]),
-                  BarChartGroupData(x: 3, barRods: [BarChartRodData(toY: 94, color: Colors.purple, width: 20)]),
-                  BarChartGroupData(x: 4, barRods: [BarChartRodData(toY: 88, color: Colors.teal, width: 20)]),
+                  BarChartGroupData(x: 0, barRods: [
+                    BarChartRodData(toY: 85, color: Colors.blue, width: 20)
+                  ]),
+                  BarChartGroupData(x: 1, barRods: [
+                    BarChartRodData(toY: 92, color: Colors.green, width: 20)
+                  ]),
+                  BarChartGroupData(x: 2, barRods: [
+                    BarChartRodData(toY: 78, color: Colors.orange, width: 20)
+                  ]),
+                  BarChartGroupData(x: 3, barRods: [
+                    BarChartRodData(toY: 94, color: Colors.purple, width: 20)
+                  ]),
+                  BarChartGroupData(x: 4, barRods: [
+                    BarChartRodData(toY: 88, color: Colors.teal, width: 20)
+                  ]),
                 ],
               ),
             ),
@@ -291,7 +352,7 @@ class _LogisticsManagementDashboardState extends State<LogisticsManagementDashbo
       ),
     );
   }
-  
+
   Widget _buildFoodTypeDistributionChart() {
     return Container(
       height: 250,
@@ -299,12 +360,15 @@ class _LogisticsManagementDashboardState extends State<LogisticsManagementDashbo
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Food Type Distribution', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          Text('Food Type Distribution',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           SizedBox(height: 16),
           Expanded(
             child: Row(
@@ -313,10 +377,14 @@ class _LogisticsManagementDashboardState extends State<LogisticsManagementDashbo
                   child: PieChart(
                     PieChartData(
                       sections: [
-                        PieChartSectionData(value: 35, color: Colors.red, title: '35%'),
-                        PieChartSectionData(value: 25, color: Colors.blue, title: '25%'),
-                        PieChartSectionData(value: 20, color: Colors.green, title: '20%'),
-                        PieChartSectionData(value: 20, color: Colors.orange, title: '20%'),
+                        PieChartSectionData(
+                            value: 35, color: Colors.red, title: '35%'),
+                        PieChartSectionData(
+                            value: 25, color: Colors.blue, title: '25%'),
+                        PieChartSectionData(
+                            value: 20, color: Colors.green, title: '20%'),
+                        PieChartSectionData(
+                            value: 20, color: Colors.orange, title: '20%'),
                       ],
                       sectionsSpace: 1,
                       centerSpaceRadius: 30,
@@ -341,7 +409,7 @@ class _LogisticsManagementDashboardState extends State<LogisticsManagementDashbo
       ),
     );
   }
-  
+
   Widget _buildLegendItem(String label, Color color) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 2),
@@ -359,54 +427,67 @@ class _LogisticsManagementDashboardState extends State<LogisticsManagementDashbo
       ),
     );
   }
-  
+
   Widget _buildOperationalMetrics() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Operational Metrics', 
-             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        Text('Operational Metrics',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
         SizedBox(height: 12),
         Container(
           padding: EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(12),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+            boxShadow: [
+              BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)
+            ],
           ),
           child: Column(
             children: [
-              _buildMetricRow('Average Pickup Time', '8 minutes', 'Target: 10 min', Colors.green),
+              _buildMetricRow('Average Pickup Time', '8 minutes',
+                  'Target: 10 min', Colors.green),
               Divider(),
-              _buildMetricRow('Average Delivery Time', '24 minutes', 'Target: 30 min', Colors.green),
+              _buildMetricRow('Average Delivery Time', '24 minutes',
+                  'Target: 30 min', Colors.green),
               Divider(),
-              _buildMetricRow('Route Deviation', '12%', 'Target: <15%', Colors.orange),
+              _buildMetricRow(
+                  'Route Deviation', '12%', 'Target: <15%', Colors.orange),
               Divider(),
-              _buildMetricRow('Food Waste Reduction', '89%', 'Target: 85%', Colors.green),
+              _buildMetricRow(
+                  'Food Waste Reduction', '89%', 'Target: 85%', Colors.green),
               Divider(),
-              _buildMetricRow('Volunteer Utilization', '76%', 'Target: 80%', Colors.orange),
+              _buildMetricRow(
+                  'Volunteer Utilization', '76%', 'Target: 80%', Colors.orange),
               Divider(),
-              _buildMetricRow('Customer Response Time', '3.2 min', 'Target: 5 min', Colors.green),
+              _buildMetricRow('Customer Response Time', '3.2 min',
+                  'Target: 5 min', Colors.green),
             ],
           ),
         ),
       ],
     );
   }
-  
-  Widget _buildMetricRow(String metric, String value, String target, Color statusColor) {
+
+  Widget _buildMetricRow(
+      String metric, String value, String target, Color statusColor) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
-          Expanded(child: Text(metric, style: TextStyle(fontWeight: FontWeight.w500))),
+          Expanded(
+              child:
+                  Text(metric, style: TextStyle(fontWeight: FontWeight.w500))),
           Container(
             padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
               color: statusColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Text(value, style: TextStyle(color: statusColor, fontWeight: FontWeight.bold)),
+            child: Text(value,
+                style:
+                    TextStyle(color: statusColor, fontWeight: FontWeight.bold)),
           ),
           SizedBox(width: 12),
           Text(target, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
@@ -414,87 +495,111 @@ class _LogisticsManagementDashboardState extends State<LogisticsManagementDashbo
       ),
     );
   }
-  
+
   Widget _buildResourceManagement() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Resource Management', 
-             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        Text('Resource Management',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
         SizedBox(height: 12),
         Row(
           children: [
-            Expanded(child: _buildResourceCard('Active Vehicles', '18/25', 'Fleet utilization 72%', Colors.blue)),
+            Expanded(
+                child: _buildResourceCard('Active Vehicles', '18/25',
+                    'Fleet utilization 72%', Colors.blue)),
             SizedBox(width: 12),
-            Expanded(child: _buildResourceCard('Available Volunteers', '28/40', 'Capacity utilization 70%', Colors.green)),
+            Expanded(
+                child: _buildResourceCard('Available Volunteers', '28/40',
+                    'Capacity utilization 70%', Colors.green)),
           ],
         ),
         SizedBox(height: 12),
         Row(
           children: [
-            Expanded(child: _buildResourceCard('Storage Capacity', '85%', '2.1 tons remaining', Colors.orange)),
+            Expanded(
+                child: _buildResourceCard('Storage Capacity', '85%',
+                    '2.1 tons remaining', Colors.orange)),
             SizedBox(width: 12),
-            Expanded(child: _buildResourceCard('Operational Budget', '67%', '\$8,400 remaining', Colors.purple)),
+            Expanded(
+                child: _buildResourceCard('Operational Budget', '67%',
+                    '\$8,400 remaining', Colors.purple)),
           ],
         ),
       ],
     );
   }
-  
-  Widget _buildResourceCard(String title, String value, String subtitle, Color color) {
+
+  Widget _buildResourceCard(
+      String title, String value, String subtitle, Color color) {
     return Container(
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey[700])),
+          Text(title,
+              style: TextStyle(
+                  fontWeight: FontWeight.bold, color: Colors.grey[700])),
           SizedBox(height: 8),
-          Text(value, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: color)),
+          Text(value,
+              style: TextStyle(
+                  fontSize: 24, fontWeight: FontWeight.bold, color: color)),
           SizedBox(height: 4),
-          Text(subtitle, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+          Text(subtitle,
+              style: TextStyle(color: Colors.grey[600], fontSize: 12)),
         ],
       ),
     );
   }
-  
+
   Widget _buildPerformanceAnalysis() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Performance Analysis', 
-             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        Text('Performance Analysis',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
         SizedBox(height: 12),
         Container(
           padding: EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(12),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+            boxShadow: [
+              BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)
+            ],
           ),
           child: Column(
             children: [
-              _buildPerformanceItem('Most Efficient Route', 'Downtown Circuit', '94% efficiency', Icons.route, Colors.green),
+              _buildPerformanceItem('Most Efficient Route', 'Downtown Circuit',
+                  '94% efficiency', Icons.route, Colors.green),
               Divider(),
-              _buildPerformanceItem('Top Performing Volunteer', 'Maria Garcia', '4.9★ rating', Icons.person, Colors.blue),
+              _buildPerformanceItem('Top Performing Volunteer', 'Maria Garcia',
+                  '4.9★ rating', Icons.person, Colors.blue),
               Divider(),
-              _buildPerformanceItem('Peak Demand Time', '6:00 PM - 8:00 PM', '40% of daily volume', Icons.schedule, Colors.orange),
+              _buildPerformanceItem('Peak Demand Time', '6:00 PM - 8:00 PM',
+                  '40% of daily volume', Icons.schedule, Colors.orange),
               Divider(),
-              _buildPerformanceItem('Cost Optimization', 'Route Consolidation', '\$340 saved this week', Icons.savings, Colors.purple),
+              _buildPerformanceItem('Cost Optimization', 'Route Consolidation',
+                  '\$340 saved this week', Icons.savings, Colors.purple),
               Divider(),
-              _buildPerformanceItem('Quality Score', 'Delivery Accuracy', '97.2% success rate', Icons.check_circle, Colors.green),
+              _buildPerformanceItem('Quality Score', 'Delivery Accuracy',
+                  '97.2% success rate', Icons.check_circle, Colors.green),
             ],
           ),
         ),
       ],
     );
   }
-  
-  Widget _buildPerformanceItem(String title, String value, String metric, IconData icon, Color color) {
+
+  Widget _buildPerformanceItem(
+      String title, String value, String metric, IconData icon, Color color) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 12),
       child: Row(
@@ -513,7 +618,9 @@ class _LogisticsManagementDashboardState extends State<LogisticsManagementDashbo
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(title, style: TextStyle(fontWeight: FontWeight.w500)),
-                Text(value, style: TextStyle(color: color, fontWeight: FontWeight.bold)),
+                Text(value,
+                    style:
+                        TextStyle(color: color, fontWeight: FontWeight.bold)),
               ],
             ),
           ),
@@ -522,13 +629,14 @@ class _LogisticsManagementDashboardState extends State<LogisticsManagementDashbo
       ),
     );
   }
-  
+
   void _refreshData() {
     setState(() => _isLoading = true);
     // Simulate data refresh
-    Future.delayed(Duration(seconds: 2), () => setState(() => _isLoading = false));
+    Future.delayed(
+        Duration(seconds: 2), () => setState(() => _isLoading = false));
   }
-  
+
   void _exportData() {
     // Implement data export functionality
     showDialog(
@@ -537,8 +645,10 @@ class _LogisticsManagementDashboardState extends State<LogisticsManagementDashbo
         title: Text('Export Data'),
         content: Text('Export logistics data for the selected time range?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: Text('Cancel')),
-          ElevatedButton(onPressed: () => Navigator.pop(context), child: Text('Export')),
+          TextButton(
+              onPressed: () => Navigator.pop(context), child: Text('Cancel')),
+          ElevatedButton(
+              onPressed: () => Navigator.pop(context), child: Text('Export')),
         ],
       ),
     );

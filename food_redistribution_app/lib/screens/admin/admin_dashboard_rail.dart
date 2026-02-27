@@ -36,7 +36,8 @@ class AdminDashboardRail extends StatelessWidget {
         labelType: NavigationRailLabelType.all,
         backgroundColor: Colors.transparent,
         selectedIconTheme: const IconThemeData(color: AppTheme.accentTeal),
-        unselectedIconTheme: IconThemeData(color: Colors.white.withOpacity(0.6)),
+        unselectedIconTheme:
+            IconThemeData(color: Colors.white.withOpacity(0.6)),
         selectedLabelTextStyle: const TextStyle(
           color: AppTheme.accentTeal,
           fontWeight: FontWeight.bold,
@@ -48,42 +49,42 @@ class AdminDashboardRail extends StatelessWidget {
         ),
         indicatorColor: AppTheme.accentTeal.withOpacity(0.2),
         destinations: const [
-        NavigationRailDestination(
-          icon: Icon(Icons.dashboard_outlined),
-          selectedIcon: Icon(Icons.dashboard),
-          label: Text('Overview'),
-        ),
-        NavigationRailDestination(
-          icon: Icon(Icons.verified_user_outlined),
-          selectedIcon: Icon(Icons.verified_user),
-          label: Text('Verifications'),
-        ),
-        NavigationRailDestination(
-          icon: Icon(Icons.people_outline),
-          selectedIcon: Icon(Icons.people),
-          label: Text('Governance'),
-        ),
-        NavigationRailDestination(
-          icon: Icon(Icons.swap_calls_outlined),
-          selectedIcon: Icon(Icons.swap_calls),
-          label: Text('Overrides'),
-        ),
-        NavigationRailDestination(
-          icon: Icon(Icons.analytics_outlined),
-          selectedIcon: Icon(Icons.analytics),
-          label: Text('Analytics'),
-        ),
-        NavigationRailDestination(
-          icon: Icon(Icons.hub_outlined),
-          selectedIcon: Icon(Icons.hub),
-          label: Text('Matching'),
-        ),
-        NavigationRailDestination(
-          icon: Icon(Icons.history_edu_outlined),
-          selectedIcon: Icon(Icons.history_edu),
-          label: Text('Logs'),
-        ),
-      ],
+          NavigationRailDestination(
+            icon: Icon(Icons.dashboard_outlined),
+            selectedIcon: Icon(Icons.dashboard),
+            label: Text('Overview'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.verified_user_outlined),
+            selectedIcon: Icon(Icons.verified_user),
+            label: Text('Verifications'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.people_outline),
+            selectedIcon: Icon(Icons.people),
+            label: Text('Governance'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.swap_calls_outlined),
+            selectedIcon: Icon(Icons.swap_calls),
+            label: Text('Overrides'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.analytics_outlined),
+            selectedIcon: Icon(Icons.analytics),
+            label: Text('Analytics'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.hub_outlined),
+            selectedIcon: Icon(Icons.hub),
+            label: Text('Matching'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.history_edu_outlined),
+            selectedIcon: Icon(Icons.history_edu),
+            label: Text('Logs'),
+          ),
+        ],
       ),
     );
   }

@@ -11,22 +11,23 @@ class UserService {
   // RBAC Middleware - Check if user has required role
   Future<bool> hasRole(String userId, UserRole requiredRole) async {
     try {
-      final userDoc = await _firestore.collection(Collections.users).doc(userId).get();
+      final userDoc =
+          await _firestore.collection(Collections.users).doc(userId).get();
       if (!userDoc.exists) return false;
-      
+
       final userData = userDoc.data() as Map<String, dynamic>;
       final userRoleStr = userData['role'] as String?;
-      
+
       if (userRoleStr == null) return false;
-      
+
       final userRole = UserRole.values.firstWhere(
         (role) => role.name == userRoleStr,
         orElse: () => UserRole.donor,
       );
-      
+
       // Admin can access everything
       if (userRole == UserRole.admin) return true;
-      
+
       // Check specific role
       return userRole == requiredRole;
     } catch (e) {
@@ -38,22 +39,23 @@ class UserService {
   // RBAC Middleware - Check if user has any of the required roles
   Future<bool> hasAnyRole(String userId, List<UserRole> requiredRoles) async {
     try {
-      final userDoc = await _firestore.collection(Collections.users).doc(userId).get();
+      final userDoc =
+          await _firestore.collection(Collections.users).doc(userId).get();
       if (!userDoc.exists) return false;
-      
+
       final userData = userDoc.data() as Map<String, dynamic>;
       final userRoleStr = userData['role'] as String?;
-      
+
       if (userRoleStr == null) return false;
-      
+
       final userRole = UserRole.values.firstWhere(
         (role) => role.name == userRoleStr,
         orElse: () => UserRole.donor,
       );
-      
+
       // Admin can access everything
       if (userRole == UserRole.admin) return true;
-      
+
       // Check if user has any of the required roles
       return requiredRoles.contains(userRole);
     } catch (e) {
@@ -65,14 +67,15 @@ class UserService {
   // Check if user is currently suspended
   Future<bool> isUserSuspended(String userId) async {
     try {
-      final userDoc = await _firestore.collection(Collections.users).doc(userId).get();
+      final userDoc =
+          await _firestore.collection(Collections.users).doc(userId).get();
       if (!userDoc.exists) return false;
-      
+
       final userData = userDoc.data() as Map<String, dynamic>;
       final status = userData['status'] as String?;
-      
+
       if (status != UserStatus.suspended.name) return false;
-      
+
       // Check if suspension has expired
       final suspendedUntil = userData['suspendedUntil'] as Timestamp?;
       if (suspendedUntil != null) {
@@ -87,11 +90,11 @@ class UserService {
             'suspensionReason': FieldValue.delete(),
             'updatedAt': Timestamp.now(),
           });
-          
+
           return false;
         }
       }
-      
+
       return true;
     } catch (e) {
       print('Error checking user suspension: $e');
@@ -115,7 +118,6 @@ class UserService {
     }
   }
 
-
   // Submit verification documents
   Future<void> submitVerificationDocuments({
     required String userId,
@@ -130,16 +132,23 @@ class UserService {
         'onboardingState': OnboardingState.documentSubmitted.name,
         'updatedAt': Timestamp.now(),
       });
-      
+
       // Update specific profile with certificate URL
       String collection;
       switch (role) {
-        case UserRole.donor: collection = Collections.users; break;
-        case UserRole.ngo: collection = Collections.organizations; break;
-        case UserRole.volunteer: collection = Collections.users; break;
-        default: collection = Collections.users;
+        case UserRole.donor:
+          collection = Collections.users;
+          break;
+        case UserRole.ngo:
+          collection = Collections.organizations;
+          break;
+        case UserRole.volunteer:
+          collection = Collections.users;
+          break;
+        default:
+          collection = Collections.users;
       }
-      
+
       batch.update(_firestore.collection(collection).doc(userId), {
         'verificationCertificateUrl': certificateUrl,
         'updatedAt': Timestamp.now(),
@@ -177,8 +186,8 @@ class UserService {
       final userRef = _firestore.collection(Collections.users).doc(userId);
       batch.update(userRef, {
         'status': approved ? UserStatus.verified.name : UserStatus.pending.name,
-        'onboardingState': approved 
-            ? OnboardingState.verified.name 
+        'onboardingState': approved
+            ? OnboardingState.verified.name
             : OnboardingState.registered.name,
         'updatedAt': Timestamp.now(),
       });
@@ -188,9 +197,10 @@ class UserService {
       if (userDoc.exists) {
         final userData = userDoc.data() as Map<String, dynamic>;
         final role = userData['role'];
-        
+
         if (role == UserRole.donor.name) {
-          final profileRef = _firestore.collection(Collections.users).doc(userId);
+          final profileRef =
+              _firestore.collection(Collections.users).doc(userId);
           batch.update(profileRef, {
             'isVerified': approved,
             'updatedAt': Timestamp.now(),
@@ -201,7 +211,7 @@ class UserService {
               .where('ownerId', isEqualTo: userId)
               .limit(1)
               .get();
-              
+
           if (orgQuery.docs.isNotEmpty) {
             batch.update(orgQuery.docs.first.reference, {
               'isVerified': approved,
@@ -209,7 +219,8 @@ class UserService {
             });
           }
         } else if (role == UserRole.volunteer.name) {
-          final profileRef = _firestore.collection(Collections.users).doc(userId);
+          final profileRef =
+              _firestore.collection(Collections.users).doc(userId);
           batch.update(profileRef, {
             'isVerified': approved,
             'updatedAt': Timestamp.now(),
@@ -318,7 +329,8 @@ class UserService {
     required String permission,
   }) async {
     try {
-      final userDoc = await _firestore.collection(Collections.users).doc(userId).get();
+      final userDoc =
+          await _firestore.collection(Collections.users).doc(userId).get();
       if (!userDoc.exists) return false;
 
       final userData = userDoc.data() as Map<String, dynamic>;
@@ -335,7 +347,7 @@ class UserService {
       if (status == UserStatus.restricted) {
         final restrictions = userData['restrictions'] as Map<String, dynamic>?;
         final restrictionEndDate = userData['restrictionEndDate'] as Timestamp?;
-        
+
         if (restrictions != null && restrictionEndDate != null) {
           if (DateTime.now().isBefore(restrictionEndDate.toDate())) {
             return !restrictions.containsKey(permission);
@@ -354,7 +366,8 @@ class UserService {
   // Get user profile based on role
   Future<dynamic> getUserProfile(String userId) async {
     try {
-      final userDoc = await _firestore.collection(Collections.users).doc(userId).get();
+      final userDoc =
+          await _firestore.collection(Collections.users).doc(userId).get();
       if (!userDoc.exists) return null;
 
       final userData = userDoc.data() as Map<String, dynamic>;
@@ -362,36 +375,38 @@ class UserService {
 
       switch (role) {
         case 'donor':
-          final profileDoc = await _firestore
-              .collection(Collections.users)
-              .doc(userId)
-              .get();
-          return profileDoc.exists ? DonorProfile.fromFirestore(profileDoc) : null;
-        
+          final profileDoc =
+              await _firestore.collection(Collections.users).doc(userId).get();
+          return profileDoc.exists
+              ? DonorProfile.fromFirestore(profileDoc)
+              : null;
+
         case 'ngo':
           final query = await _firestore
               .collection(Collections.organizations)
               .where('ownerId', isEqualTo: userId)
               .limit(1)
               .get();
-          
+
           if (query.docs.isNotEmpty) {
             return NGOProfile.fromFirestore(query.docs.first);
           }
-          
+
           final profileDoc = await _firestore
               .collection(Collections.organizations)
               .doc(userId)
               .get();
-          return profileDoc.exists ? NGOProfile.fromFirestore(profileDoc) : null;
-        
+          return profileDoc.exists
+              ? NGOProfile.fromFirestore(profileDoc)
+              : null;
+
         case 'volunteer':
-          final profileDoc = await _firestore
-              .collection(Collections.users)
-              .doc(userId)
-              .get();
-          return profileDoc.exists ? VolunteerProfile.fromFirestore(profileDoc) : null;
-        
+          final profileDoc =
+              await _firestore.collection(Collections.users).doc(userId).get();
+          return profileDoc.exists
+              ? VolunteerProfile.fromFirestore(profileDoc)
+              : null;
+
         default:
           return null;
       }
@@ -407,7 +422,8 @@ class UserService {
     required Map<String, dynamic> profileData,
   }) async {
     try {
-      final userDoc = await _firestore.collection(Collections.users).doc(userId).get();
+      final userDoc =
+          await _firestore.collection(Collections.users).doc(userId).get();
       if (!userDoc.exists) throw Exception('User not found');
 
       final userData = userDoc.data() as Map<String, dynamic>;
@@ -456,17 +472,18 @@ class UserService {
           .get();
 
       List<Map<String, dynamic>> pendingUsers = [];
-      
+
       for (var doc in query.docs) {
         final data = doc.data();
         final userId = data['userId'];
-        
+
         // Get user details
-        final userDoc = await _firestore.collection(Collections.users).doc(userId).get();
+        final userDoc =
+            await _firestore.collection(Collections.users).doc(userId).get();
         if (userDoc.exists) {
           final userData = userDoc.data() as Map<String, dynamic>;
           final profile = await getUserProfile(userId);
-          
+
           pendingUsers.add({
             'reviewId': doc.id,
             'user': userData,
@@ -507,26 +524,28 @@ class UserService {
         final status = data['status'] as String?;
         final createdAt = data['createdAt'];
 
-        if (role == 'donor') donors++;
-        else if (role == 'ngo') ngos++;
+        if (role == 'donor')
+          donors++;
+        else if (role == 'ngo')
+          ngos++;
         else if (role == 'volunteer') volunteers++;
 
         if (status == UserStatus.verified.name) verified++;
         if (status == UserStatus.suspended.name) suspended++;
 
         if (createdAt != null) {
-           DateTime createdDate;
-           if (createdAt is Timestamp) {
-             createdDate = createdAt.toDate();
-           } else if (createdAt is String) {
-             createdDate = DateTime.parse(createdAt);
-           } else {
-             createdDate = DateTime.now(); // Fallback
-           }
-           
-           if (createdDate.isAfter(startOfMonth)) {
-             newUsers++;
-           }
+          DateTime createdDate;
+          if (createdAt is Timestamp) {
+            createdDate = createdAt.toDate();
+          } else if (createdAt is String) {
+            createdDate = DateTime.parse(createdAt);
+          } else {
+            createdDate = DateTime.now(); // Fallback
+          }
+
+          if (createdDate.isAfter(startOfMonth)) {
+            newUsers++;
+          }
         }
       }
 
@@ -598,16 +617,16 @@ class UserService {
     switch (role) {
       case 'donor':
         return profileData.containsKey('businessName') &&
-               profileData.containsKey('address') &&
-               profileData.containsKey('foodTypes');
+            profileData.containsKey('address') &&
+            profileData.containsKey('foodTypes');
       case 'ngo':
         return profileData.containsKey('organizationName') &&
-               profileData.containsKey('registrationNumber') &&
-               profileData.containsKey('address');
+            profileData.containsKey('registrationNumber') &&
+            profileData.containsKey('address');
       case 'volunteer':
         return profileData.containsKey('firstName') &&
-               profileData.containsKey('lastName') &&
-               profileData.containsKey('phone');
+            profileData.containsKey('lastName') &&
+            profileData.containsKey('phone');
       default:
         return false;
     }

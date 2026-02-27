@@ -36,7 +36,8 @@ class TrackingService {
       final batch = _firestore.batch();
 
       // Update donation status
-      final donationRef = _firestore.collection(Collections.donations).doc(donationId);
+      final donationRef =
+          _firestore.collection(Collections.donations).doc(donationId);
       batch.update(donationRef, {
         'status': status.name,
         'updatedAt': Timestamp.now(),
@@ -64,7 +65,8 @@ class TrackingService {
   }
 
   // Get donation tracking history
-  Future<List<Map<String, dynamic>>> getDonationTrackingHistory(String donationId) async {
+  Future<List<Map<String, dynamic>>> getDonationTrackingHistory(
+      String donationId) async {
     try {
       final query = await _firestore
           .collection(Collections.tracking)
@@ -72,9 +74,7 @@ class TrackingService {
           .orderBy('timestamp')
           .get();
 
-      return query.docs
-          .map((doc) => {'id': doc.id, ...doc.data()})
-          .toList();
+      return query.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList();
     } catch (e) {
       print('Error getting tracking history: $e');
       return [];
@@ -115,25 +115,22 @@ class TrackingService {
         .collection(Collections.donations)
         .where('status', whereIn: ['matched', 'pickedUp', 'inTransit'])
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => {'id': doc.id, ...doc.data()})
-            .toList());
+        .map((snapshot) =>
+            snapshot.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList());
   }
 
   // Detect delayed or failed deliveries
   Future<List<Map<String, dynamic>>> getDelayedDeliveries() async {
     try {
       final cutoffTime = DateTime.now().subtract(const Duration(hours: 2));
-      
+
       final query = await _firestore
           .collection(Collections.donations)
           .where('status', whereIn: ['matched', 'pickedUp', 'inTransit'])
           .where('updatedAt', isLessThan: Timestamp.fromDate(cutoffTime))
           .get();
 
-      return query.docs
-          .map((doc) => {'id': doc.id, ...doc.data()})
-          .toList();
+      return query.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList();
     } catch (e) {
       print('Error getting delayed deliveries: $e');
       return [];
@@ -147,9 +144,12 @@ class TrackingService {
   }) async {
     try {
       List<Map<String, dynamic>> donations = [];
-      
+
       for (String donationId in donationIds) {
-        final doc = await _firestore.collection(Collections.donations).doc(donationId).get();
+        final doc = await _firestore
+            .collection(Collections.donations)
+            .doc(donationId)
+            .get();
         if (doc.exists) {
           donations.add({'id': doc.id, ...doc.data() as Map<String, dynamic>});
         }
@@ -158,7 +158,8 @@ class TrackingService {
       // Simple route optimization (in production, would use Google Maps API)
       return {
         'donations': donations,
-        'estimatedTime': donations.length * 30, // 30 minutes per pickup/delivery
+        'estimatedTime':
+            donations.length * 30, // 30 minutes per pickup/delivery
         'totalDistance': donations.length * 5.0, // 5km average per stop
         'optimizedOrder': donationIds, // Would be reordered by actual algorithm
       };
@@ -169,13 +170,17 @@ class TrackingService {
   }
 
   // Send real-time updates to stakeholders
-  Future<void> _notifyStakeholders(String donationId, DonationStatus status) async {
+  Future<void> _notifyStakeholders(
+      String donationId, DonationStatus status) async {
     try {
-      final donationDoc = await _firestore.collection(Collections.donations).doc(donationId).get();
+      final donationDoc = await _firestore
+          .collection(Collections.donations)
+          .doc(donationId)
+          .get();
       if (!donationDoc.exists) return;
 
       final donation = donationDoc.data() as Map<String, dynamic>;
-      
+
       // Create real-time notification document
       await _firestore.collection(Collections.tracking).add({
         'donationId': donationId,

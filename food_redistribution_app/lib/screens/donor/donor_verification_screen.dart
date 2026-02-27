@@ -14,21 +14,22 @@ class DonorVerificationScreen extends StatefulWidget {
   const DonorVerificationScreen({Key? key}) : super(key: key);
 
   @override
-  State<DonorVerificationScreen> createState() => _DonorVerificationScreenState();
+  State<DonorVerificationScreen> createState() =>
+      _DonorVerificationScreenState();
 }
 
 class _DonorVerificationScreenState extends State<DonorVerificationScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final VerificationService _verificationService = VerificationService();
-  
+
   bool _isSubmitting = false;
-  
+
   // Document data
   final Map<String, TextEditingController> _documentControllers = {};
   final Map<String, PlatformFile?> _selectedFiles = {};
   final Map<String, String?> _uploadedUrls = {};
   final Map<String, bool> _uploading = {};
-  
+
   // Donor document requirements
   final List<Map<String, String>> _documentRequirements = [
     {
@@ -91,7 +92,7 @@ class _DonorVerificationScreenState extends State<DonorVerificationScreen> {
         setState(() {
           _selectedFiles[documentType] = result.files.first;
         });
-        
+
         // Auto-upload the file
         await _uploadFile(documentType);
       }
@@ -111,11 +112,14 @@ class _DonorVerificationScreenState extends State<DonorVerificationScreen> {
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final userId = authProvider.firebaseUser?.uid;
-      
+
       if (userId == null) throw Exception('User not authenticated');
 
-      final fileName = '${userId}_${documentType.replaceAll(' ', '_')}_${DateTime.now().millisecondsSinceEpoch}.${file.extension}';
-      final ref = FirebaseStorage.instance.ref().child('verification_documents/donors/$userId/$fileName');
+      final fileName =
+          '${userId}_${documentType.replaceAll(' ', '_')}_${DateTime.now().millisecondsSinceEpoch}.${file.extension}';
+      final ref = FirebaseStorage.instance
+          .ref()
+          .child('verification_documents/donors/$userId/$fileName');
 
       UploadTask uploadTask;
       if (file.path != null) {
@@ -128,7 +132,7 @@ class _DonorVerificationScreenState extends State<DonorVerificationScreen> {
 
       final snapshot = await uploadTask;
       final downloadUrl = await snapshot.ref.getDownloadURL();
-      
+
       setState(() {
         _uploadedUrls[documentType] = downloadUrl;
         _uploading[documentType] = false;
@@ -168,7 +172,7 @@ class _DonorVerificationScreenState extends State<DonorVerificationScreen> {
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final userId = authProvider.firebaseUser?.uid;
-      
+
       if (userId == null) throw Exception('User not authenticated');
 
       // Prepare submission data
@@ -181,7 +185,8 @@ class _DonorVerificationScreenState extends State<DonorVerificationScreen> {
         };
       }
 
-      await _verificationService.submitDonorVerification(userId, submissionData);
+      await _verificationService.submitDonorVerification(
+          userId, submissionData);
 
       if (mounted) {
         _showSuccessSnackBar('Documents submitted successfully!');
@@ -277,9 +282,9 @@ class _DonorVerificationScreenState extends State<DonorVerificationScreen> {
           Text(
             'Account Verification',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: AppTheme.textPrimary,
-            ),
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textPrimary,
+                ),
           ),
           const SizedBox(height: 8),
           Text(
@@ -385,8 +390,11 @@ class _DonorVerificationScreenState extends State<DonorVerificationScreen> {
           ),
         ),
         const SizedBox(height: 20),
-        ..._documentRequirements.asMap().entries.map(
-            (entry) => _buildDocumentCard(entry.value, entry.key + 1)).toList(),
+        ..._documentRequirements
+            .asMap()
+            .entries
+            .map((entry) => _buildDocumentCard(entry.value, entry.key + 1))
+            .toList(),
       ],
     );
   }
@@ -396,7 +404,8 @@ class _DonorVerificationScreenState extends State<DonorVerificationScreen> {
     final isRequired = doc['required'] == 'true';
     final isUploading = _uploading[type] ?? false;
     final hasFile = _selectedFiles[type] != null;
-    final isUploaded = _uploadedUrls[type] != null && _uploadedUrls[type]!.isNotEmpty;
+    final isUploaded =
+        _uploadedUrls[type] != null && _uploadedUrls[type]!.isNotEmpty;
 
     Color statusColor = AppTheme.textTertiary;
     if (isUploaded) {
@@ -453,7 +462,8 @@ class _DonorVerificationScreenState extends State<DonorVerificationScreen> {
                 ),
                 if (isRequired)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
                       color: AppTheme.errorRed.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(8),
@@ -469,7 +479,8 @@ class _DonorVerificationScreenState extends State<DonorVerificationScreen> {
                   )
                 else
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
                       color: AppTheme.textTertiary.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(8),
@@ -497,7 +508,7 @@ class _DonorVerificationScreenState extends State<DonorVerificationScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            
+
             // File upload section
             Container(
               width: double.infinity,
@@ -561,19 +572,26 @@ class _DonorVerificationScreenState extends State<DonorVerificationScreen> {
                     Column(
                       children: [
                         Icon(
-                          hasFile ? Icons.upload_file_rounded : Icons.cloud_upload_outlined,
+                          hasFile
+                              ? Icons.upload_file_rounded
+                              : Icons.cloud_upload_outlined,
                           size: 32,
-                          color: hasFile ? AppTheme.warningAmber : AppTheme.textTertiary,
+                          color: hasFile
+                              ? AppTheme.warningAmber
+                              : AppTheme.textTertiary,
                         ),
                         const SizedBox(height: 10),
                         Text(
-                          hasFile 
-                              ? 'Tap to upload ${_selectedFiles[type]?.name}' 
+                          hasFile
+                              ? 'Tap to upload ${_selectedFiles[type]?.name}'
                               : doc['hint']!,
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: hasFile ? AppTheme.warningAmber : AppTheme.textSecondary,
-                            fontWeight: hasFile ? FontWeight.w600 : FontWeight.normal,
+                            color: hasFile
+                                ? AppTheme.warningAmber
+                                : AppTheme.textSecondary,
+                            fontWeight:
+                                hasFile ? FontWeight.w600 : FontWeight.normal,
                             fontSize: 13,
                           ),
                         ),
@@ -583,14 +601,16 @@ class _DonorVerificationScreenState extends State<DonorVerificationScreen> {
               ),
             ),
             const SizedBox(height: 12),
-            
+
             // Action buttons
             Row(
               children: [
                 Expanded(
                   child: GradientButton(
                     text: hasFile ? 'Change File' : 'Choose File',
-                    icon: hasFile ? Icons.refresh_rounded : Icons.attach_file_rounded,
+                    icon: hasFile
+                        ? Icons.refresh_rounded
+                        : Icons.attach_file_rounded,
                     outlined: !isUploaded,
                     onPressed: isUploading ? null : () => _pickFile(type),
                   ),
@@ -607,9 +627,9 @@ class _DonorVerificationScreenState extends State<DonorVerificationScreen> {
                 ],
               ],
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Additional info text field
             TextFormField(
               controller: _documentControllers[type],
@@ -618,7 +638,8 @@ class _DonorVerificationScreenState extends State<DonorVerificationScreen> {
                 labelText: 'Additional Information',
                 labelStyle: TextStyle(color: AppTheme.textSecondary),
                 hintText: 'Document number, expiry date, or other details...',
-                hintStyle: TextStyle(color: AppTheme.textTertiary, fontSize: 13),
+                hintStyle:
+                    TextStyle(color: AppTheme.textTertiary, fontSize: 13),
                 filled: true,
                 fillColor: AppTheme.surfaceGlass,
                 border: OutlineInputBorder(
@@ -631,7 +652,8 @@ class _DonorVerificationScreenState extends State<DonorVerificationScreen> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: AppTheme.accentTeal, width: 1.5),
+                  borderSide:
+                      BorderSide(color: AppTheme.accentTeal, width: 1.5),
                 ),
                 contentPadding: const EdgeInsets.all(14),
               ),

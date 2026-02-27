@@ -14,10 +14,12 @@ import '../../models/matching.dart';
 
 class DeliveryCoordinationScreen extends StatefulWidget {
   @override
-  _DeliveryCoordinationScreenState createState() => _DeliveryCoordinationScreenState();
+  _DeliveryCoordinationScreenState createState() =>
+      _DeliveryCoordinationScreenState();
 }
 
-class _DeliveryCoordinationScreenState extends State<DeliveryCoordinationScreen> {
+class _DeliveryCoordinationScreenState
+    extends State<DeliveryCoordinationScreen> {
   // ignore: unused_field
   late final VolunteerDispatchService _dispatchService;
   // ignore: unused_field
@@ -25,31 +27,31 @@ class _DeliveryCoordinationScreenState extends State<DeliveryCoordinationScreen>
   // ignore: unused_field
   late final RouteOptimizationService _routeService;
   // late FoodDonationMatchingService _matchingService;
-  
+
   List<DeliveryTask> _activeTasks = [];
   // ignore: unused_field
   List<MatchingResult> _availableMatches = [];
   DeliveryTask? _selectedTask;
   bool _isLoading = false;
   String _searchQuery = '';
-  
+
   // TextControllers for create task dialog
   final _donationIdController = TextEditingController();
   final _pickupAddressController = TextEditingController();
   final _deliveryAddressController = TextEditingController();
-  
+
   @override
   void initState() {
     super.initState();
     _initializeServices();
     _loadActiveTasks();
   }
-  
+
   void _initializeServices() {
     // Initialize services with providers
     // These would be injected via dependency injection in a real app
   }
-  
+
   Future<void> _loadActiveTasks() async {
     setState(() => _isLoading = true);
     try {
@@ -60,13 +62,14 @@ class _DeliveryCoordinationScreenState extends State<DeliveryCoordinationScreen>
       setState(() => _isLoading = false);
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: Text('Delivery Coordination', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text('Delivery Coordination',
+            style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black87,
         elevation: 0,
@@ -107,7 +110,7 @@ class _DeliveryCoordinationScreenState extends State<DeliveryCoordinationScreen>
       ),
     );
   }
-  
+
   Widget _buildSearchAndFilters() {
     return Container(
       padding: EdgeInsets.all(16),
@@ -120,7 +123,8 @@ class _DeliveryCoordinationScreenState extends State<DeliveryCoordinationScreen>
               decoration: InputDecoration(
                 hintText: 'Search tasks, volunteers, or locations...',
                 prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                 filled: true,
                 fillColor: Colors.grey[50],
               ),
@@ -139,7 +143,7 @@ class _DeliveryCoordinationScreenState extends State<DeliveryCoordinationScreen>
       ),
     );
   }
-  
+
   Widget _buildFilterChip(String label, bool selected) {
     return FilterChip(
       label: Text(label),
@@ -151,14 +155,15 @@ class _DeliveryCoordinationScreenState extends State<DeliveryCoordinationScreen>
       selectedColor: Theme.of(context).primaryColor.withOpacity(0.2),
     );
   }
-  
+
   Widget _buildTaskSummary() {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       color: Colors.white,
       child: Row(
         children: [
-          _buildSummaryCard('Active Tasks', '${_activeTasks.length}', Colors.blue),
+          _buildSummaryCard(
+              'Active Tasks', '${_activeTasks.length}', Colors.blue),
           SizedBox(width: 12),
           _buildSummaryCard('In Transit', '3', Colors.orange),
           SizedBox(width: 12),
@@ -169,7 +174,7 @@ class _DeliveryCoordinationScreenState extends State<DeliveryCoordinationScreen>
       ),
     );
   }
-  
+
   Widget _buildSummaryCard(String title, String value, Color color) {
     return Expanded(
       child: Container(
@@ -182,15 +187,18 @@ class _DeliveryCoordinationScreenState extends State<DeliveryCoordinationScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+            Text(title,
+                style: TextStyle(color: Colors.grey[600], fontSize: 12)),
             SizedBox(height: 4),
-            Text(value, style: TextStyle(color: color, fontSize: 24, fontWeight: FontWeight.bold)),
+            Text(value,
+                style: TextStyle(
+                    color: color, fontSize: 24, fontWeight: FontWeight.bold)),
           ],
         ),
       ),
     );
   }
-  
+
   Widget _buildTasksList() {
     return Container(
       color: Colors.white,
@@ -199,7 +207,8 @@ class _DeliveryCoordinationScreenState extends State<DeliveryCoordinationScreen>
         children: [
           Padding(
             padding: EdgeInsets.all(16),
-            child: Text('Active Tasks', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            child: Text('Active Tasks',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           ),
           Expanded(
             child: ListView.builder(
@@ -211,7 +220,7 @@ class _DeliveryCoordinationScreenState extends State<DeliveryCoordinationScreen>
       ),
     );
   }
-  
+
   Widget _buildTaskCard(int index) {
     // Demo task data
     final demoTasks = [
@@ -227,7 +236,7 @@ class _DeliveryCoordinationScreenState extends State<DeliveryCoordinationScreen>
         'color': Colors.orange,
       },
       {
-        'id': 'TASK-002', 
+        'id': 'TASK-002',
         'donor': 'Green Cafe',
         'ngo': 'Food Bank Network',
         'volunteer': 'Maria Garcia',
@@ -249,18 +258,21 @@ class _DeliveryCoordinationScreenState extends State<DeliveryCoordinationScreen>
         'color': Colors.red,
       },
     ];
-    
+
     if (index >= demoTasks.length) return Container();
-    
+
     final task = demoTasks[index];
     final isSelected = _selectedTask?.id == task['id'];
-    
+
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color: isSelected ? Theme.of(context).primaryColor.withOpacity(0.1) : null,
+        color:
+            isSelected ? Theme.of(context).primaryColor.withOpacity(0.1) : null,
         borderRadius: BorderRadius.circular(8),
-        border: isSelected ? Border.all(color: Theme.of(context).primaryColor) : null,
+        border: isSelected
+            ? Border.all(color: Theme.of(context).primaryColor)
+            : null,
       ),
       child: ListTile(
         onTap: () => setState(() {
@@ -274,7 +286,8 @@ class _DeliveryCoordinationScreenState extends State<DeliveryCoordinationScreen>
             borderRadius: BorderRadius.circular(4),
           ),
         ),
-        title: Text(task['id'] as String, style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(task['id'] as String,
+            style: TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -284,9 +297,11 @@ class _DeliveryCoordinationScreenState extends State<DeliveryCoordinationScreen>
               children: [
                 Icon(Icons.person, size: 14, color: Colors.grey[600]),
                 SizedBox(width: 4),
-                Text(task['volunteer'] as String, style: TextStyle(fontSize: 12)),
+                Text(task['volunteer'] as String,
+                    style: TextStyle(fontSize: 12)),
                 Spacer(),
-                Text(task['distance'] as String, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                Text(task['distance'] as String,
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600])),
               ],
             ),
           ],
@@ -302,17 +317,21 @@ class _DeliveryCoordinationScreenState extends State<DeliveryCoordinationScreen>
               ),
               child: Text(
                 task['status'] as String,
-                style: TextStyle(fontSize: 10, color: task['color'] as Color, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    fontSize: 10,
+                    color: task['color'] as Color,
+                    fontWeight: FontWeight.bold),
               ),
             ),
             SizedBox(height: 2),
-            Text('ETA: ${task['eta']}', style: TextStyle(fontSize: 10, color: Colors.grey[600])),
+            Text('ETA: ${task['eta']}',
+                style: TextStyle(fontSize: 10, color: Colors.grey[600])),
           ],
         ),
       ),
     );
   }
-  
+
   Widget _buildTaskDetails() {
     if (_selectedTask == null) {
       return Container(
@@ -323,13 +342,14 @@ class _DeliveryCoordinationScreenState extends State<DeliveryCoordinationScreen>
             children: [
               Icon(Icons.assignment, size: 64, color: Colors.grey[400]),
               SizedBox(height: 16),
-              Text('Select a task to view details', style: TextStyle(color: Colors.grey[600])),
+              Text('Select a task to view details',
+                  style: TextStyle(color: Colors.grey[600])),
             ],
           ),
         ),
       );
     }
-    
+
     return Container(
       color: Colors.white,
       padding: EdgeInsets.all(16),
@@ -349,14 +369,15 @@ class _DeliveryCoordinationScreenState extends State<DeliveryCoordinationScreen>
       ),
     );
   }
-  
+
   Widget _buildTaskHeader() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Text('TASK-001', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            Text('TASK-001',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
             Spacer(),
             Container(
               padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -364,12 +385,15 @@ class _DeliveryCoordinationScreenState extends State<DeliveryCoordinationScreen>
                 color: Colors.orange.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Text('In Transit', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
+              child: Text('In Transit',
+                  style: TextStyle(
+                      color: Colors.orange, fontWeight: FontWeight.bold)),
             ),
           ],
         ),
         SizedBox(height: 8),
-        Text('Food delivery from Central Kitchen to Hope Foundation', style: TextStyle(color: Colors.grey[600])),
+        Text('Food delivery from Central Kitchen to Hope Foundation',
+            style: TextStyle(color: Colors.grey[600])),
         SizedBox(height: 12),
         Row(
           children: [
@@ -383,7 +407,7 @@ class _DeliveryCoordinationScreenState extends State<DeliveryCoordinationScreen>
       ],
     );
   }
-  
+
   Widget _buildInfoChip(IconData icon, String text, Color color) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -401,12 +425,13 @@ class _DeliveryCoordinationScreenState extends State<DeliveryCoordinationScreen>
       ),
     );
   }
-  
+
   Widget _buildLocationDetails() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Route Details', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        Text('Route Details',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         SizedBox(height: 12),
         _buildLocationCard(
           icon: Icons.restaurant,
@@ -428,7 +453,7 @@ class _DeliveryCoordinationScreenState extends State<DeliveryCoordinationScreen>
       ],
     );
   }
-  
+
   Widget _buildLocationCard({
     required IconData icon,
     required String title,
@@ -460,7 +485,8 @@ class _DeliveryCoordinationScreenState extends State<DeliveryCoordinationScreen>
               children: [
                 Text(title, style: TextStyle(fontWeight: FontWeight.bold)),
                 Text(subtitle, style: TextStyle(color: Colors.grey[600])),
-                Text(address, style: TextStyle(fontSize: 12, color: Colors.grey[500])),
+                Text(address,
+                    style: TextStyle(fontSize: 12, color: Colors.grey[500])),
               ],
             ),
           ),
@@ -470,18 +496,23 @@ class _DeliveryCoordinationScreenState extends State<DeliveryCoordinationScreen>
               color: statusColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Text(status, style: TextStyle(fontSize: 10, color: statusColor, fontWeight: FontWeight.bold)),
+            child: Text(status,
+                style: TextStyle(
+                    fontSize: 10,
+                    color: statusColor,
+                    fontWeight: FontWeight.bold)),
           ),
         ],
       ),
     );
   }
-  
+
   Widget _buildVolunteerInfo() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Volunteer Information', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        Text('Volunteer Information',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         SizedBox(height: 12),
         Container(
           padding: EdgeInsets.all(12),
@@ -500,9 +531,11 @@ class _DeliveryCoordinationScreenState extends State<DeliveryCoordinationScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('John Smith', style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text('John Smith',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
                     Text('4.8 ⭐ • 127 deliveries completed'),
-                    Text('Phone: +1 (555) 123-4567', style: TextStyle(color: Colors.grey[600])),
+                    Text('Phone: +1 (555) 123-4567',
+                        style: TextStyle(color: Colors.grey[600])),
                   ],
                 ),
               ),
@@ -524,12 +557,13 @@ class _DeliveryCoordinationScreenState extends State<DeliveryCoordinationScreen>
       ],
     );
   }
-  
+
   Widget _buildTrackingMap() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Live Tracking', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        Text('Live Tracking',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         SizedBox(height: 12),
         Container(
           height: 200,
@@ -544,9 +578,11 @@ class _DeliveryCoordinationScreenState extends State<DeliveryCoordinationScreen>
               children: [
                 Icon(Icons.map, size: 48, color: Colors.grey[400]),
                 SizedBox(height: 8),
-                Text('Live Map View', style: TextStyle(color: Colors.grey[600])),
+                Text('Live Map View',
+                    style: TextStyle(color: Colors.grey[600])),
                 SizedBox(height: 4),
-                Text('Last updated: 2 minutes ago', style: TextStyle(fontSize: 12, color: Colors.grey[500])),
+                Text('Last updated: 2 minutes ago',
+                    style: TextStyle(fontSize: 12, color: Colors.grey[500])),
               ],
             ),
           ),
@@ -554,7 +590,7 @@ class _DeliveryCoordinationScreenState extends State<DeliveryCoordinationScreen>
       ],
     );
   }
-  
+
   Widget _buildActionButtons() {
     return Row(
       children: [
@@ -599,14 +635,14 @@ class _DeliveryCoordinationScreenState extends State<DeliveryCoordinationScreen>
       ],
     );
   }
-  
+
   void _createNewDeliveryTask() {
     showDialog(
       context: context,
       builder: (context) => _buildCreateTaskDialog(),
     );
   }
-  
+
   Widget _buildCreateTaskDialog() {
     return AlertDialog(
       title: Text('Create New Delivery Task'),
@@ -639,7 +675,8 @@ class _DeliveryCoordinationScreenState extends State<DeliveryCoordinationScreen>
                 border: OutlineInputBorder(),
               ),
               items: ['Low', 'Medium', 'High', 'Urgent']
-                  .map((priority) => DropdownMenuItem(value: priority, child: Text(priority)))
+                  .map((priority) =>
+                      DropdownMenuItem(value: priority, child: Text(priority)))
                   .toList(),
               onChanged: (value) {},
             ),
@@ -661,7 +698,7 @@ class _DeliveryCoordinationScreenState extends State<DeliveryCoordinationScreen>
       ],
     );
   }
-  
+
   void _showSettingsDialog() {
     showDialog(
       context: context,
@@ -696,27 +733,27 @@ class _DeliveryCoordinationScreenState extends State<DeliveryCoordinationScreen>
       ),
     );
   }
-  
+
   void _callVolunteer() {
     // Implement phone call functionality
   }
-  
+
   void _messageVolunteer() {
     // Implement messaging functionality
   }
-  
+
   void _optimizeRoute() {
     // Implement route optimization
   }
-  
+
   void _reassignVolunteer() {
     // Implement volunteer reassignment
   }
-  
+
   void _markComplete() {
     // Implement task completion
   }
-  
+
   void _createTask() {
     // Implement task creation
   }

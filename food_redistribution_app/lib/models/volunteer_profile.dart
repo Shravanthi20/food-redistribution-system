@@ -65,7 +65,8 @@ class VolunteerProfile {
   });
 
   factory VolunteerProfile.fromFirestore(DocumentSnapshot doc) {
-    return VolunteerProfile.fromMap(doc.data() as Map<String, dynamic>, id: doc.id);
+    return VolunteerProfile.fromMap(doc.data() as Map<String, dynamic>,
+        id: doc.id);
   }
 
   factory VolunteerProfile.fromMap(Map<String, dynamic> data, {String? id}) {
@@ -82,8 +83,8 @@ class VolunteerProfile {
       hasVehicle: data['hasVehicle'] ?? false,
       drivingLicense: data['drivingLicense'],
       licenseExpiryDate: data['licenseExpiryDate'] != null
-          ? (data['licenseExpiryDate'] is Timestamp 
-              ? (data['licenseExpiryDate'] as Timestamp).toDate() 
+          ? (data['licenseExpiryDate'] is Timestamp
+              ? (data['licenseExpiryDate'] as Timestamp).toDate()
               : DateTime.parse(data['licenseExpiryDate'].toString()))
           : null,
       availabilityHours: List<String>.from(data['availabilityHours'] ?? []),
@@ -109,14 +110,14 @@ class VolunteerProfile {
       baseLocation: (data['location'] as Map<dynamic, dynamic>?)
               ?.map((k, v) => MapEntry(k.toString(), (v as num).toDouble())) ??
           const {},
-      createdAt: data['createdAt'] != null 
-          ? (data['createdAt'] is Timestamp 
-              ? (data['createdAt'] as Timestamp).toDate() 
+      createdAt: data['createdAt'] != null
+          ? (data['createdAt'] is Timestamp
+              ? (data['createdAt'] as Timestamp).toDate()
               : DateTime.parse(data['createdAt'].toString()))
           : DateTime.now(),
       updatedAt: data['updatedAt'] != null
-          ? (data['updatedAt'] is Timestamp 
-              ? (data['updatedAt'] as Timestamp).toDate() 
+          ? (data['updatedAt'] is Timestamp
+              ? (data['updatedAt'] as Timestamp).toDate()
               : DateTime.parse(data['updatedAt'].toString()))
           : null,
     );

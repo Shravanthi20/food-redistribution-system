@@ -54,7 +54,7 @@ class AppUser {
   factory AppUser.fromMap(Map<String, dynamic> data, {String? id}) {
     // Handle embedded profile or legacy flat structure
     final profileData = data[Fields.profile] as Map<String, dynamic>? ?? {};
-    
+
     // Merge legacy flat fields into profile if not in profile object
     final mergedProfile = {
       ...profileData,
@@ -64,12 +64,13 @@ class AppUser {
         'lastName': data['lastName'],
       if (data['phone'] != null && profileData['phone'] == null)
         'phone': data['phone'],
-      if (data['profileImageUrl'] != null && profileData['profileImageUrl'] == null)
+      if (data['profileImageUrl'] != null &&
+          profileData['profileImageUrl'] == null)
         'profileImageUrl': data['profileImageUrl'],
       if (data['address'] != null && profileData['location'] == null)
         'location': data['address'],
     };
-    
+
     return AppUser(
       uid: id ?? data['uid'] ?? '',
       email: data[Fields.email] ?? '',
@@ -101,12 +102,14 @@ class AppUser {
       Fields.status: status.name,
       Fields.onboardingState: onboardingState.name,
       Fields.createdAt: Timestamp.fromDate(createdAt),
-      Fields.updatedAt: updatedAt != null ? Timestamp.fromDate(updatedAt!) : null,
+      Fields.updatedAt:
+          updatedAt != null ? Timestamp.fromDate(updatedAt!) : null,
       'restrictions': restrictions,
       'restrictionEndDate': restrictionEndDate != null
           ? Timestamp.fromDate(restrictionEndDate!)
           : null,
-      'lastLoginAt': lastLoginAt != null ? Timestamp.fromDate(lastLoginAt!) : null,
+      'lastLoginAt':
+          lastLoginAt != null ? Timestamp.fromDate(lastLoginAt!) : null,
       Fields.profile: profile.toMap(),
     };
   }
@@ -137,15 +140,17 @@ class AppUser {
     );
   }
 
-  bool get isVerified => status == UserStatus.verified || status == UserStatus.active;
+  bool get isVerified =>
+      status == UserStatus.verified || status == UserStatus.active;
   bool get isActive => status == UserStatus.active;
   bool get isPending => status == UserStatus.pending;
-  bool get isRestricted => 
-      status == UserStatus.restricted || 
-      (restrictions != null && restrictionEndDate?.isAfter(DateTime.now()) == true);
-  
+  bool get isRestricted =>
+      status == UserStatus.restricted ||
+      (restrictions != null &&
+          restrictionEndDate?.isAfter(DateTime.now()) == true);
+
   String get fullName => profile.fullName;
-  
+
   static DateTime? _parseTimestamp(dynamic value) {
     if (value == null) return null;
     if (value is Timestamp) return value.toDate();
@@ -166,12 +171,12 @@ class UserProfile {
   final String? state;
   final String? zipCode;
   final Location? location;
-  
+
   // Donor-specific fields
   final String? businessName;
   final String? businessType;
   final String? organizationType;
-  
+
   // Volunteer-specific fields
   final bool? hasVehicle;
   final VehicleType? vehicleType;
@@ -185,10 +190,10 @@ class UserProfile {
   final bool? isAvailable;
   final double? rating;
   final int? completedTasks;
-  
+
   // NGO-specific fields (links to organization)
   final String? organizationId;
-  
+
   UserProfile({
     this.firstName,
     this.lastName,
@@ -216,7 +221,7 @@ class UserProfile {
     this.completedTasks,
     this.organizationId,
   });
-  
+
   factory UserProfile.fromMap(Map<String, dynamic> data) {
     return UserProfile(
       firstName: data['firstName'],
@@ -227,7 +232,8 @@ class UserProfile {
       city: data['city'],
       state: data['state'],
       zipCode: data['zipCode'],
-      location: data['location'] != null ? Location.fromJson(data['location']) : null,
+      location:
+          data['location'] != null ? Location.fromJson(data['location']) : null,
       businessName: data['businessName'],
       businessType: data['businessType'],
       organizationType: data['organizationType'],
@@ -239,7 +245,7 @@ class UserProfile {
             )
           : null,
       maxRadius: data['maxRadius'],
-      availabilityHours: data['availabilityHours'] != null 
+      availabilityHours: data['availabilityHours'] != null
           ? List<String>.from(data['availabilityHours'])
           : null,
       workingDays: data['workingDays'] != null
@@ -257,7 +263,7 @@ class UserProfile {
       organizationId: data['organizationId'],
     );
   }
-  
+
   Map<String, dynamic> toMap() {
     return {
       if (firstName != null) 'firstName': firstName,
@@ -287,9 +293,9 @@ class UserProfile {
       if (organizationId != null) 'organizationId': organizationId,
     };
   }
-  
+
   String get fullName => '${firstName ?? ""} ${lastName ?? ""}'.trim();
-  
+
   UserProfile copyWith({
     String? firstName,
     String? lastName,

@@ -22,7 +22,7 @@ class _QueriesScreenState extends State<QueriesScreen> {
     return Consumer<NGOProvider>(
       builder: (context, ngoProvider, child) {
         final filteredQueries = _filterQueries(ngoProvider.myQueries);
-        
+
         return Column(
           children: [
             // Filter bar
@@ -39,12 +39,14 @@ class _QueriesScreenState extends State<QueriesScreen> {
                           style: const TextStyle(color: AppTheme.textPrimary),
                           decoration: const InputDecoration(
                             labelText: 'Status',
-                            labelStyle: TextStyle(color: AppTheme.textSecondary),
+                            labelStyle:
+                                TextStyle(color: AppTheme.textSecondary),
                             enabledBorder: OutlineInputBorder(
                               borderSide: BorderSide(color: Colors.white24),
                             ),
                             focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: AppTheme.accentTeal),
+                              borderSide:
+                                  BorderSide(color: AppTheme.accentTeal),
                             ),
                           ),
                           items: [
@@ -52,17 +54,18 @@ class _QueriesScreenState extends State<QueriesScreen> {
                               value: null,
                               child: Text('All Statuses'),
                             ),
-                            ...QueryStatus.values.map((status) => DropdownMenuItem(
-                              value: status,
-                              child: Text(_getStatusDisplayName(status)),
-                            )),
+                            ...QueryStatus.values
+                                .map((status) => DropdownMenuItem(
+                                      value: status,
+                                      child:
+                                          Text(_getStatusDisplayName(status)),
+                                    )),
                           ],
-                          onChanged: (value) => setState(() => _selectedStatus = value),
+                          onChanged: (value) =>
+                              setState(() => _selectedStatus = value),
                         ),
                       ),
-                      
                       const SizedBox(width: 12),
-                      
                       Expanded(
                         child: DropdownButtonFormField<QueryType>(
                           value: _selectedType,
@@ -70,12 +73,14 @@ class _QueriesScreenState extends State<QueriesScreen> {
                           style: const TextStyle(color: AppTheme.textPrimary),
                           decoration: const InputDecoration(
                             labelText: 'Type',
-                            labelStyle: TextStyle(color: AppTheme.textSecondary),
+                            labelStyle:
+                                TextStyle(color: AppTheme.textSecondary),
                             enabledBorder: OutlineInputBorder(
                               borderSide: BorderSide(color: Colors.white24),
                             ),
                             focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: AppTheme.accentTeal),
+                              borderSide:
+                                  BorderSide(color: AppTheme.accentTeal),
                             ),
                           ),
                           items: [
@@ -84,11 +89,12 @@ class _QueriesScreenState extends State<QueriesScreen> {
                               child: Text('All Types'),
                             ),
                             ...QueryType.values.map((type) => DropdownMenuItem(
-                              value: type,
-                              child: Text(_getTypeDisplayName(type)),
-                            )),
+                                  value: type,
+                                  child: Text(_getTypeDisplayName(type)),
+                                )),
                           ],
-                          onChanged: (value) => setState(() => _selectedType = value),
+                          onChanged: (value) =>
+                              setState(() => _selectedType = value),
                         ),
                       ),
                     ],
@@ -96,7 +102,7 @@ class _QueriesScreenState extends State<QueriesScreen> {
                 ],
               ),
             ),
-            
+
             // Queries list
             Expanded(
               child: filteredQueries.isEmpty
@@ -104,23 +110,28 @@ class _QueriesScreenState extends State<QueriesScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.help_outline, size: 64, color: AppTheme.textMuted),
+                          Icon(Icons.help_outline,
+                              size: 64, color: AppTheme.textMuted),
                           SizedBox(height: 16),
-                          Text('No queries found', style: TextStyle(color: AppTheme.textPrimary)),
+                          Text('No queries found',
+                              style: TextStyle(color: AppTheme.textPrimary)),
                           SizedBox(height: 8),
-                          Text('Try adjusting your filters', style: TextStyle(color: AppTheme.textSecondary)),
+                          Text('Try adjusting your filters',
+                              style: TextStyle(color: AppTheme.textSecondary)),
                         ],
                       ),
                     )
                   : RefreshIndicator(
                       onRefresh: () => ngoProvider.refreshData(
-                        Provider.of<AuthProvider>(context, listen: false).firebaseUser!.uid
-                      ),
+                          Provider.of<AuthProvider>(context, listen: false)
+                              .firebaseUser!
+                              .uid),
                       child: ListView.builder(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
                         itemCount: filteredQueries.length,
                         itemBuilder: (context, index) {
-                          return _buildQueryCard(filteredQueries[index], ngoProvider);
+                          return _buildQueryCard(
+                              filteredQueries[index], ngoProvider);
                         },
                       ),
                     ),
@@ -155,7 +166,8 @@ class _QueriesScreenState extends State<QueriesScreen> {
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: _getTypeColor(query.type).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
@@ -169,11 +181,10 @@ class _QueriesScreenState extends State<QueriesScreen> {
                     ),
                   ),
                 ),
-                
                 const SizedBox(width: 8),
-                
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: _getPriorityColor(query.priority).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
@@ -187,11 +198,10 @@ class _QueriesScreenState extends State<QueriesScreen> {
                     ),
                   ),
                 ),
-                
                 const Spacer(),
-                
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: _getStatusColor(query.status).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
@@ -207,9 +217,9 @@ class _QueriesScreenState extends State<QueriesScreen> {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 12),
-            
+
             // Subject
             Text(
               query.subject,
@@ -219,9 +229,9 @@ class _QueriesScreenState extends State<QueriesScreen> {
                 color: AppTheme.textPrimary,
               ),
             ),
-            
+
             const SizedBox(height: 8),
-            
+
             // Description
             Text(
               query.description,
@@ -229,9 +239,9 @@ class _QueriesScreenState extends State<QueriesScreen> {
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
             ),
-            
+
             const SizedBox(height: 12),
-            
+
             // Metadata
             Row(
               children: [
@@ -241,9 +251,7 @@ class _QueriesScreenState extends State<QueriesScreen> {
                   'Created ${_formatDate(query.createdAt)}',
                   style: TextStyle(color: AppTheme.textMuted, fontSize: 12),
                 ),
-                
                 const SizedBox(width: 16),
-                
                 if (query.updates.isNotEmpty) ...[
                   Icon(Icons.update, size: 16, color: AppTheme.textMuted),
                   const SizedBox(width: 4),
@@ -254,9 +262,9 @@ class _QueriesScreenState extends State<QueriesScreen> {
                 ],
               ],
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Action buttons
             Row(
               children: [
@@ -267,10 +275,9 @@ class _QueriesScreenState extends State<QueriesScreen> {
                     label: const Text('View Details'),
                   ),
                 ),
-                
                 const SizedBox(width: 12),
-                
-                if (query.status == QueryStatus.open || query.status == QueryStatus.inReview)
+                if (query.status == QueryStatus.open ||
+                    query.status == QueryStatus.inReview)
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: () => _updateQuery(query, ngoProvider),
@@ -313,9 +320,9 @@ class _QueriesScreenState extends State<QueriesScreen> {
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Header
                 Row(
                   children: [
@@ -326,7 +333,8 @@ class _QueriesScreenState extends State<QueriesScreen> {
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
                         color: _getStatusColor(query.status).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
@@ -341,28 +349,33 @@ class _QueriesScreenState extends State<QueriesScreen> {
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Query info
                 _buildDetailSection('Query Information', [
                   _buildDetailRow('Type', _getTypeDisplayName(query.type)),
-                  _buildDetailRow('Priority', _getPriorityDisplayName(query.priority)),
-                  _buildDetailRow('Created', query.createdAt.toString().substring(0, 16)),
-                  if (query.donationId != null) _buildDetailRow('Related Donation', query.donationId!),
-                  if (query.requestId != null) _buildDetailRow('Related Request', query.requestId!),
-                  if (query.assignmentId != null) _buildDetailRow('Related Assignment', query.assignmentId!),
+                  _buildDetailRow(
+                      'Priority', _getPriorityDisplayName(query.priority)),
+                  _buildDetailRow(
+                      'Created', query.createdAt.toString().substring(0, 16)),
+                  if (query.donationId != null)
+                    _buildDetailRow('Related Donation', query.donationId!),
+                  if (query.requestId != null)
+                    _buildDetailRow('Related Request', query.requestId!),
+                  if (query.assignmentId != null)
+                    _buildDetailRow('Related Assignment', query.assignmentId!),
                 ]),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Description
                 _buildDetailSection('Description', [
                   Text(query.description),
                 ]),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Updates
                 if (query.updates.isNotEmpty) ...[
                   Text(
@@ -371,45 +384,48 @@ class _QueriesScreenState extends State<QueriesScreen> {
                   ),
                   const SizedBox(height: 8),
                   ...query.updates.map((update) => Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                update.updatedBy,
-                                style: const TextStyle(fontWeight: FontWeight.bold),
+                              Row(
+                                children: [
+                                  Text(
+                                    update.updatedBy,
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  const Spacer(),
+                                  Text(
+                                    _formatDate(update.timestamp),
+                                    style: TextStyle(
+                                      color: Colors.grey[600],
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const Spacer(),
-                              Text(
-                                _formatDate(update.timestamp),
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontSize: 12,
-                                ),
-                              ),
+                              const SizedBox(height: 8),
+                              Text(update.content),
                             ],
                           ),
-                          const SizedBox(height: 8),
-                          Text(update.content),
-                        ],
-                      ),
-                    ),
-                  )),
+                        ),
+                      )),
                 ],
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Action button
-                if (query.status == QueryStatus.open || query.status == QueryStatus.inReview)
+                if (query.status == QueryStatus.open ||
+                    query.status == QueryStatus.inReview)
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       onPressed: () {
                         Navigator.pop(context);
-                        _updateQuery(query, Provider.of<NGOProvider>(context, listen: false));
+                        _updateQuery(query,
+                            Provider.of<NGOProvider>(context, listen: false));
                       },
                       icon: const Icon(Icons.edit),
                       label: const Text('Add Update'),
@@ -461,7 +477,7 @@ class _QueriesScreenState extends State<QueriesScreen> {
 
   void _updateQuery(Query query, NGOProvider ngoProvider) {
     final messageController = TextEditingController();
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -489,11 +505,13 @@ class _QueriesScreenState extends State<QueriesScreen> {
           ElevatedButton(
             onPressed: () {
               if (messageController.text.trim().isNotEmpty) {
-                ngoProvider.addQueryUpdate(query.id, messageController.text.trim());
+                ngoProvider.addQueryUpdate(
+                    query.id, messageController.text.trim());
                 Navigator.pop(context);
-                
+
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Query update added successfully')),
+                  const SnackBar(
+                      content: Text('Query update added successfully')),
                 );
               }
             },
@@ -507,7 +525,7 @@ class _QueriesScreenState extends State<QueriesScreen> {
   String _formatDate(DateTime date) {
     final now = DateTime.now();
     final difference = now.difference(date);
-    
+
     if (difference.inDays > 0) {
       return '${difference.inDays}d ago';
     } else if (difference.inHours > 0) {

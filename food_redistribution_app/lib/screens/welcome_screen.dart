@@ -128,7 +128,7 @@ class WelcomeScreen extends StatelessWidget {
                     alignment: WrapAlignment.center,
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
-                       Text(
+                      Text(
                         'Already have an account? ',
                         style: TextStyle(color: AppTheme.textSecondary),
                       ),
@@ -226,7 +226,7 @@ class WelcomeScreen extends StatelessWidget {
 
   void _navigateToRole(BuildContext context, String role) {
     Widget destination;
-    
+
     switch (role) {
       case 'donor':
         destination = const DonorRegistrationScreen();
@@ -246,7 +246,7 @@ class WelcomeScreen extends StatelessWidget {
         );
         return;
     }
-    
+
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => destination),
@@ -338,15 +338,15 @@ class RoleDashboard extends StatelessWidget {
                   Text(
                     'Welcome back!',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: _getRoleColor(role),
-                    ),
+                          fontWeight: FontWeight.bold,
+                          color: _getRoleColor(role),
+                        ),
                   ),
                   Text(
                     _getRoleWelcomeMessage(role),
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey.shade600,
-                    ),
+                          color: Colors.grey.shade600,
+                        ),
                   ),
                 ],
               ),
@@ -366,23 +366,25 @@ class RoleDashboard extends StatelessWidget {
             margin: const EdgeInsets.symmetric(horizontal: 4),
             child: Card(
               elevation: 4,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   children: [
                     Text(
                       stat['value']!,
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: _getRoleColor(role),
-                      ),
+                      style:
+                          Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: _getRoleColor(role),
+                              ),
                     ),
                     Text(
                       stat['label']!,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey.shade600,
-                      ),
+                            color: Colors.grey.shade600,
+                          ),
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -402,9 +404,9 @@ class RoleDashboard extends StatelessWidget {
         Text(
           'Quick Actions',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: Colors.grey.shade800,
-          ),
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade800,
+              ),
         ),
         const SizedBox(height: 12),
         GridView.count(
@@ -417,7 +419,8 @@ class RoleDashboard extends StatelessWidget {
           children: _getRoleActions(role).map((action) {
             return Card(
               elevation: 4,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
               child: InkWell(
                 onTap: () => _handleAction(context, action['action']),
                 borderRadius: BorderRadius.circular(12),
@@ -435,9 +438,9 @@ class RoleDashboard extends StatelessWidget {
                       Text(
                         action['label'],
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey.shade800,
-                        ),
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey.shade800,
+                            ),
                         textAlign: TextAlign.center,
                       ),
                     ],
@@ -459,15 +462,16 @@ class RoleDashboard extends StatelessWidget {
           Text(
             'Recent Activity',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Colors.grey.shade800,
-            ),
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey.shade800,
+                ),
           ),
           const SizedBox(height: 12),
           Expanded(
             child: Card(
               elevation: 4,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Center(
@@ -482,15 +486,16 @@ class RoleDashboard extends StatelessWidget {
                       const SizedBox(height: 16),
                       Text(
                         'No recent activity',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: Colors.grey.shade600,
-                        ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: Colors.grey.shade600,
+                                ),
                       ),
                       Text(
                         'Activity will appear here once you start using the platform',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.grey.shade500,
-                        ),
+                              color: Colors.grey.shade500,
+                            ),
                         textAlign: TextAlign.center,
                       ),
                     ],
@@ -506,37 +511,53 @@ class RoleDashboard extends StatelessWidget {
 
   String _getRoleTitle(String role) {
     switch (role) {
-      case 'donor': return 'Food Donor';
-      case 'ngo': return 'NGO Partner';
-      case 'volunteer': return 'Volunteer';
-      default: return 'User';
+      case 'donor':
+        return 'Food Donor';
+      case 'ngo':
+        return 'NGO Partner';
+      case 'volunteer':
+        return 'Volunteer';
+      default:
+        return 'User';
     }
   }
 
   Color _getRoleColor(String role) {
     switch (role) {
-      case 'donor': return Colors.blue;
-      case 'ngo': return Colors.orange;
-      case 'volunteer': return Colors.green;
-      default: return Colors.grey;
+      case 'donor':
+        return Colors.blue;
+      case 'ngo':
+        return Colors.orange;
+      case 'volunteer':
+        return Colors.green;
+      default:
+        return Colors.grey;
     }
   }
 
   IconData _getRoleIcon(String role) {
     switch (role) {
-      case 'donor': return Icons.volunteer_activism;
-      case 'ngo': return Icons.business_center;
-      case 'volunteer': return Icons.delivery_dining;
-      default: return Icons.person;
+      case 'donor':
+        return Icons.volunteer_activism;
+      case 'ngo':
+        return Icons.business_center;
+      case 'volunteer':
+        return Icons.delivery_dining;
+      default:
+        return Icons.person;
     }
   }
 
   String _getRoleWelcomeMessage(String role) {
     switch (role) {
-      case 'donor': return 'Ready to share surplus food and make a difference?';
-      case 'ngo': return 'Connect with donors and serve your community better.';
-      case 'volunteer': return 'Help deliver food to those who need it most.';
-      default: return 'Welcome to the platform!';
+      case 'donor':
+        return 'Ready to share surplus food and make a difference?';
+      case 'ngo':
+        return 'Connect with donors and serve your community better.';
+      case 'volunteer':
+        return 'Help deliver food to those who need it most.';
+      default:
+        return 'Welcome to the platform!';
     }
   }
 
@@ -573,24 +594,72 @@ class RoleDashboard extends StatelessWidget {
     switch (role) {
       case 'donor':
         return [
-          {'label': 'Post Donation', 'icon': Icons.add_circle, 'action': 'post_donation'},
-          {'label': 'View History', 'icon': Icons.history, 'action': 'view_history'},
-          {'label': 'Track Status', 'icon': Icons.track_changes, 'action': 'track_status'},
-          {'label': 'Impact Report', 'icon': Icons.assessment, 'action': 'impact_report'},
+          {
+            'label': 'Post Donation',
+            'icon': Icons.add_circle,
+            'action': 'post_donation'
+          },
+          {
+            'label': 'View History',
+            'icon': Icons.history,
+            'action': 'view_history'
+          },
+          {
+            'label': 'Track Status',
+            'icon': Icons.track_changes,
+            'action': 'track_status'
+          },
+          {
+            'label': 'Impact Report',
+            'icon': Icons.assessment,
+            'action': 'impact_report'
+          },
         ];
       case 'ngo':
         return [
-          {'label': 'Browse Donations', 'icon': Icons.search, 'action': 'browse_donations'},
-          {'label': 'Request Food', 'icon': Icons.request_page, 'action': 'request_food'},
-          {'label': 'Manage Inventory', 'icon': Icons.inventory, 'action': 'manage_inventory'},
-          {'label': 'Beneficiary List', 'icon': Icons.people, 'action': 'beneficiary_list'},
+          {
+            'label': 'Browse Donations',
+            'icon': Icons.search,
+            'action': 'browse_donations'
+          },
+          {
+            'label': 'Request Food',
+            'icon': Icons.request_page,
+            'action': 'request_food'
+          },
+          {
+            'label': 'Manage Inventory',
+            'icon': Icons.inventory,
+            'action': 'manage_inventory'
+          },
+          {
+            'label': 'Beneficiary List',
+            'icon': Icons.people,
+            'action': 'beneficiary_list'
+          },
         ];
       case 'volunteer':
         return [
-          {'label': 'Available Tasks', 'icon': Icons.assignment, 'action': 'available_tasks'},
-          {'label': 'Start Delivery', 'icon': Icons.local_shipping, 'action': 'start_delivery'},
-          {'label': 'Update Status', 'icon': Icons.update, 'action': 'update_status'},
-          {'label': 'My Schedule', 'icon': Icons.schedule, 'action': 'my_schedule'},
+          {
+            'label': 'Available Tasks',
+            'icon': Icons.assignment,
+            'action': 'available_tasks'
+          },
+          {
+            'label': 'Start Delivery',
+            'icon': Icons.local_shipping,
+            'action': 'start_delivery'
+          },
+          {
+            'label': 'Update Status',
+            'icon': Icons.update,
+            'action': 'update_status'
+          },
+          {
+            'label': 'My Schedule',
+            'icon': Icons.schedule,
+            'action': 'my_schedule'
+          },
         ];
       default:
         return [];

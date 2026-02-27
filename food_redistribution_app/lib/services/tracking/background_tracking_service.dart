@@ -10,7 +10,7 @@ import '../../models/enums.dart';
 class BackgroundTrackingService {
   static const String backgroundLocationTaskId = 'background_location_tracking';
   static const String geofenceTaskId = 'geofence_monitoring';
-  
+
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   bool _isInitialized = false;
 
@@ -26,7 +26,7 @@ class BackgroundTrackingService {
 
       // Configure background_geolocation
       await _configureBackgroundGeolocation();
-      
+
       _isInitialized = true;
       debugPrint('BackgroundTrackingService initialized');
     } catch (e) {
@@ -65,7 +65,7 @@ class BackgroundTrackingService {
 
       // Enable background geolocation
       await BackgroundGeolocation.start();
-      
+
       debugPrint('Background tracking started for volunteer: $volunteerId');
       return true;
     } catch (e) {
@@ -106,31 +106,31 @@ class BackgroundTrackingService {
           distanceFilter: 10, // Update every 10 meters
           locationUpdateInterval: 30000, // 30 seconds
           fastestLocationUpdateInterval: 15000, // 15 seconds
-          
+
           // iOS-specific
           showsBackgroundLocationIndicator: true,
           pausesLocationUpdatesAutomatically: false,
-          
+
           // Android-specific
           foregroundService: true,
           enableHeadless: true,
           startOnBoot: false,
-          
+
           // Stopping options
           stopOnStationary: false,
           stopAfterElapsedMinutes: 0,
-          
+
           // Geofencing
           geofenceInitialTriggerEntry: true,
           geofenceProximityRadius: 100,
-          
+
           // Notifications
           notificationTitle: '📍 Food Redistribution Tracking',
           notificationText: 'We\'re tracking your delivery location',
           notificationSmallIcon: 'ic_launcher',
           notificationChannelName: 'BackgroundLocation',
           notificationPriority: Config.NOTIFICATION_PRIORITY_DEFAULT,
-          
+
           // HTTP logging
           debug: kDebugMode,
           logLevel: Config.LOG_LEVEL_VERBOSE,
@@ -139,7 +139,8 @@ class BackgroundTrackingService {
 
       // Handle location updates
       BackgroundGeolocation.onLocation((Location location) async {
-        debugPrint('Background location update: ${location.coords.latitude}, ${location.coords.longitude}');
+        debugPrint(
+            'Background location update: ${location.coords.latitude}, ${location.coords.longitude}');
         await _storeLocationUpdate(location);
       });
 
@@ -156,7 +157,8 @@ class BackgroundTrackingService {
 
       // Handle state changes
       BackgroundGeolocation.onProviderChange((ProviderChangeEvent event) {
-        debugPrint('Provider change: GPS=${event.gps}, Network=${event.network}');
+        debugPrint(
+            'Provider change: GPS=${event.gps}, Network=${event.network}');
       });
     } catch (e) {
       debugPrint('Error configuring background geolocation: $e');
@@ -200,7 +202,8 @@ class BackgroundTrackingService {
   /// Handle geofence entry/exit events
   Future<void> _handleGeofenceEvent(GeofenceEvent event) async {
     try {
-      debugPrint('Processing geofence: ${event.identifier}, action: ${event.action}');
+      debugPrint(
+          'Processing geofence: ${event.identifier}, action: ${event.action}');
 
       // Store geofence event to Firestore
       await _firestore.collection('geofence_events').add({
@@ -280,10 +283,8 @@ class BackgroundTrackingService {
   /// Notify on geofence entry
   Future<void> _notifyGeofenceEntry(String geofenceId) async {
     try {
-      final geofence = await _firestore
-          .collection('geofences')
-          .doc(geofenceId)
-          .get();
+      final geofence =
+          await _firestore.collection('geofences').doc(geofenceId).get();
 
       if (!geofence.exists) return;
 
@@ -305,10 +306,8 @@ class BackgroundTrackingService {
   /// Notify on geofence exit
   Future<void> _notifyGeofenceExit(String geofenceId) async {
     try {
-      final geofence = await _firestore
-          .collection('geofences')
-          .doc(geofenceId)
-          .get();
+      final geofence =
+          await _firestore.collection('geofences').doc(geofenceId).get();
 
       if (!geofence.exists) return;
 

@@ -8,43 +8,43 @@ class AppTheme {
   // ═══════════════════════════════════════════════════════════════════════════
   // DEEP OCEAN COLOR PALETTE
   // ═══════════════════════════════════════════════════════════════════════════
-  
+
   // Primary Deep Navy - The foundation
   static const Color primaryNavy = Color(0xFF0A1628);
   static const Color primaryNavyLight = Color(0xFF132238);
   static const Color primaryNavyMedium = Color(0xFF1A2B4A);
-  
-  // Secondary Teal - Action & highlights  
+
+  // Secondary Teal - Action & highlights
   static const Color accentTeal = Color(0xFF00BFA6);
   static const Color accentTealLight = Color(0xFF26D9C2);
   static const Color accentTealDark = Color(0xFF009688);
-  
+
   // Tertiary Cyan - Accents & gradients
   static const Color accentCyan = Color(0xFF00E5FF);
   static const Color accentCyanSoft = Color(0xFF4DD0E1);
-  
+
   // Surface colors for glassmorphism
   static const Color surfaceGlass = Color(0x1AFFFFFF);
   static const Color surfaceGlassBorder = Color(0x33FFFFFF);
   static const Color surfaceGlassDark = Color(0x0DFFFFFF);
-  
+
   // Background gradients
   static const Color gradientStart = Color(0xFF0A1628);
   static const Color gradientMiddle = Color(0xFF0D2137);
   static const Color gradientEnd = Color(0xFF0F2847);
-  
+
   // Semantic colors
   static const Color successTeal = Color(0xFF00E676);
   static const Color warningAmber = Color(0xFFFFB74D);
   static const Color errorCoral = Color(0xFFFF5252);
   static const Color infoCyan = Color(0xFF29B6F6);
-  
+
   // Text colors
   static const Color textPrimary = Color(0xFFFFFFFF);
   static const Color textSecondary = Color(0xB3FFFFFF); // 70% white
   static const Color textTertiary = Color(0x80FFFFFF); // 50% white
   static const Color textMuted = Color(0x4DFFFFFF); // 30% white
-  
+
   // Legacy aliases for backwards compatibility
   static const Color primaryGreen = accentTeal;
   static const Color secondaryOrange = accentCyan;
@@ -58,26 +58,26 @@ class AppTheme {
   // ═══════════════════════════════════════════════════════════════════════════
   // GRADIENT DEFINITIONS
   // ═══════════════════════════════════════════════════════════════════════════
-  
+
   static const LinearGradient backgroundGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [gradientStart, gradientMiddle, gradientEnd],
     stops: [0.0, 0.5, 1.0],
   );
-  
+
   static const LinearGradient accentGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [accentTeal, accentCyan],
   );
-  
+
   static const LinearGradient buttonGradient = LinearGradient(
     begin: Alignment.centerLeft,
     end: Alignment.centerRight,
     colors: [accentTeal, accentTealLight],
   );
-  
+
   static const LinearGradient cardGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
@@ -90,54 +90,54 @@ class AppTheme {
   // ═══════════════════════════════════════════════════════════════════════════
   // GLASSMORPHISM DECORATIONS
   // ═══════════════════════════════════════════════════════════════════════════
-  
+
   static BoxDecoration get glassDecoration => BoxDecoration(
-    gradient: cardGradient,
-    borderRadius: BorderRadius.circular(20),
-    border: Border.all(
-      color: surfaceGlassBorder,
-      width: 1.5,
-    ),
-    boxShadow: [
-      BoxShadow(
-        color: Colors.black.withOpacity(0.2),
-        blurRadius: 20,
-        offset: const Offset(0, 8),
-      ),
-    ],
-  );
-  
+        gradient: cardGradient,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: surfaceGlassBorder,
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      );
+
   static BoxDecoration get glassDecorationSubtle => BoxDecoration(
-    color: surfaceGlassDark,
-    borderRadius: BorderRadius.circular(16),
-    border: Border.all(
-      color: surfaceGlassBorder.withOpacity(0.5),
-      width: 1,
-    ),
-  );
-  
+        color: surfaceGlassDark,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: surfaceGlassBorder.withOpacity(0.5),
+          width: 1,
+        ),
+      );
+
   static BoxDecoration get accentGlassDecoration => BoxDecoration(
-    gradient: LinearGradient(
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-      colors: [
-        accentTeal.withOpacity(0.2),
-        accentCyan.withOpacity(0.1),
-      ],
-    ),
-    borderRadius: BorderRadius.circular(20),
-    border: Border.all(
-      color: accentTeal.withOpacity(0.3),
-      width: 1.5,
-    ),
-  );
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            accentTeal.withOpacity(0.2),
+            accentCyan.withOpacity(0.1),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: accentTeal.withOpacity(0.3),
+          width: 1.5,
+        ),
+      );
 
   // ═══════════════════════════════════════════════════════════════════════════
   // THEME DATA
   // ═══════════════════════════════════════════════════════════════════════════
 
   static ThemeData get lightTheme => darkTheme; // Deep Ocean is dark-first
-  
+
   static ThemeData get darkTheme {
     return ThemeData(
       useMaterial3: true,
@@ -159,7 +159,8 @@ class AppTheme {
         surfaceVariant: primaryNavyMedium,
         outline: surfaceGlassBorder,
       ),
-      textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme).copyWith(
+      textTheme:
+          GoogleFonts.interTextTheme(ThemeData.dark().textTheme).copyWith(
         displayLarge: GoogleFonts.inter(
           fontSize: 36,
           fontWeight: FontWeight.w700,
@@ -288,7 +289,8 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: surfaceGlassDark,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide(color: surfaceGlassBorder),

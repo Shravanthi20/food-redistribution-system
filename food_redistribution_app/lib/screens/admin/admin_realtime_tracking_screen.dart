@@ -8,10 +8,12 @@ class AdminRealTimeTrackingScreen extends StatefulWidget {
   const AdminRealTimeTrackingScreen({Key? key}) : super(key: key);
 
   @override
-  State<AdminRealTimeTrackingScreen> createState() => _AdminRealTimeTrackingScreenState();
+  State<AdminRealTimeTrackingScreen> createState() =>
+      _AdminRealTimeTrackingScreenState();
 }
 
-class _AdminRealTimeTrackingScreenState extends State<AdminRealTimeTrackingScreen> {
+class _AdminRealTimeTrackingScreenState
+    extends State<AdminRealTimeTrackingScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   String _filterStatus = 'all'; // all, active, delayed, completed
   String _searchQuery = '';
@@ -119,11 +121,14 @@ class _AdminRealTimeTrackingScreenState extends State<AdminRealTimeTrackingScree
   }
 
   Query<Object?> _buildQuery() {
-    var query = _firestore.collection('delivery_tasks').orderBy('updatedAt', descending: true);
+    var query = _firestore
+        .collection('delivery_tasks')
+        .orderBy('updatedAt', descending: true);
 
     // Apply status filter
     if (_filterStatus == 'active') {
-      query = query.where('status', whereIn: ['assigned', 'picked_up', 'in_transit']);
+      query = query
+          .where('status', whereIn: ['assigned', 'picked_up', 'in_transit']);
     } else if (_filterStatus == 'delayed') {
       query = query.where('isDelayed', isEqualTo: true);
     } else if (_filterStatus == 'completed') {
@@ -155,18 +160,21 @@ class _AdminRealTimeTrackingScreenState extends State<AdminRealTimeTrackingScree
                     children: [
                       Text(
                         'Task: $taskId',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16),
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
                         'Volunteer: $volunteerId',
-                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                        style:
+                            const TextStyle(fontSize: 12, color: Colors.grey),
                       ),
                     ],
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: _getStatusColor(status).withOpacity(0.2),
                     borderRadius: BorderRadius.circular(4),
@@ -334,7 +342,8 @@ class _AdminRealTimeTrackingScreenState extends State<AdminRealTimeTrackingScree
                   children: [
                     const Text(
                       'Task Details',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     IconButton(
                       icon: const Icon(Icons.close),
@@ -346,16 +355,21 @@ class _AdminRealTimeTrackingScreenState extends State<AdminRealTimeTrackingScree
                 const SizedBox(height: 12),
                 _buildDetailRow('Task ID', taskId),
                 _buildDetailRow('Volunteer', data['volunteerId'] ?? 'N/A'),
-                _buildDetailRow('Status', (data['status'] as String? ?? 'unknown').toUpperCase()),
+                _buildDetailRow('Status',
+                    (data['status'] as String? ?? 'unknown').toUpperCase()),
                 _buildDetailRow('NGO', data['ngoId'] ?? 'N/A'),
                 _buildDetailRow('Food Type', data['foodType'] ?? 'N/A'),
-                _buildDetailRow('Quantity', data['quantity']?.toString() ?? 'N/A'),
+                _buildDetailRow(
+                    'Quantity', data['quantity']?.toString() ?? 'N/A'),
                 if (data['assignedAt'] != null)
-                  _buildDetailRow('Assigned', _formatDateTime(data['assignedAt'])),
+                  _buildDetailRow(
+                      'Assigned', _formatDateTime(data['assignedAt'])),
                 if (data['pickedUpAt'] != null)
-                  _buildDetailRow('Picked Up', _formatDateTime(data['pickedUpAt'])),
+                  _buildDetailRow(
+                      'Picked Up', _formatDateTime(data['pickedUpAt'])),
                 if (data['deliveredAt'] != null)
-                  _buildDetailRow('Delivered', _formatDateTime(data['deliveredAt'])),
+                  _buildDetailRow(
+                      'Delivered', _formatDateTime(data['deliveredAt'])),
               ],
             ),
           ),

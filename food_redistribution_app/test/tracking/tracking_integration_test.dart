@@ -15,12 +15,15 @@ import 'package:firebase_core_platform_interface/firebase_core_platform_interfac
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MockFirebaseAppPlatform extends FirebaseAppPlatform {
-  MockFirebaseAppPlatform() : super('test_app', const FirebaseOptions(
-    apiKey: 'test_key',
-    appId: 'test_id',
-    messagingSenderId: 'test_sender_id',
-    projectId: 'test_project_id',
-  ));
+  MockFirebaseAppPlatform()
+      : super(
+            'test_app',
+            const FirebaseOptions(
+              apiKey: 'test_key',
+              appId: 'test_id',
+              messagingSenderId: 'test_sender_id',
+              projectId: 'test_project_id',
+            ));
 }
 
 class MockFirebasePlatform extends FirebasePlatform {
@@ -32,10 +35,11 @@ class MockFirebasePlatform extends FirebasePlatform {
   }
 
   @override
-  Future<FirebaseAppPlatform> initializeApp({String? name, FirebaseOptions? options}) async {
+  Future<FirebaseAppPlatform> initializeApp(
+      {String? name, FirebaseOptions? options}) async {
     return MockFirebaseAppPlatform();
   }
-  
+
   @override
   List<FirebaseAppPlatform> get apps => [app()];
 }
@@ -76,7 +80,8 @@ void main() {
       const volunteerId = 'volunteer_integration_001';
       const taskId = 'task_integration_001';
 
-      await trackingProvider.startTracking(volunteerId: volunteerId, taskId: taskId);
+      await trackingProvider.startTracking(
+          volunteerId: volunteerId, taskId: taskId);
       trackingProvider.setOnlineStatus(false);
 
       for (int i = 0; i < 3; i++) {
@@ -131,7 +136,8 @@ void main() {
       const task1 = 'task_1';
       const task2 = 'task_2';
 
-      await trackingProvider.startTracking(volunteerId: volunteer1, taskId: task1);
+      await trackingProvider.startTracking(
+          volunteerId: volunteer1, taskId: task1);
 
       final update1 = LocationUpdate(
         id: 'loc_task1',
@@ -195,7 +201,8 @@ void main() {
       const volunteerId = 'volunteer_accuracy_test';
       const taskId = 'task_accuracy_01';
 
-      await trackingProvider.startTracking(volunteerId: volunteerId, taskId: taskId);
+      await trackingProvider.startTracking(
+          volunteerId: volunteerId, taskId: taskId);
 
       final highAccuracy = LocationUpdate(
         id: 'loc_high_acc',
@@ -261,7 +268,8 @@ void main() {
       const volunteerId = 'volunteer_metrics_test';
       const taskId = 'task_metrics_01';
 
-      await trackingProvider.startTracking(volunteerId: volunteerId, taskId: taskId);
+      await trackingProvider.startTracking(
+          volunteerId: volunteerId, taskId: taskId);
 
       final locations = [
         LocationUpdate(

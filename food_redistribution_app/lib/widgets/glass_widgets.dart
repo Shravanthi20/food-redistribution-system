@@ -125,7 +125,8 @@ class GradientButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = gradientColors ?? [AppTheme.accentTeal, AppTheme.accentTealLight];
+    final colors =
+        gradientColors ?? [AppTheme.accentTeal, AppTheme.accentTealLight];
 
     if (outlined) {
       return Container(
@@ -299,7 +300,8 @@ class GlassTextField extends StatelessWidget {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
-                  borderSide: const BorderSide(color: AppTheme.accentTeal, width: 2),
+                  borderSide:
+                      const BorderSide(color: AppTheme.accentTeal, width: 2),
                 ),
                 errorBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
@@ -358,7 +360,8 @@ class GlassIconButton extends StatelessWidget {
               ),
               child: Icon(
                 icon,
-                color: iconColor ?? (isAccent ? AppTheme.accentTeal : AppTheme.textSecondary),
+                color: iconColor ??
+                    (isAccent ? AppTheme.accentTeal : AppTheme.textSecondary),
                 size: size * 0.5,
               ),
             ),
@@ -396,7 +399,8 @@ class GlassChip extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? color.withOpacity(0.2) : AppTheme.surfaceGlassDark,
+          color:
+              isSelected ? color.withOpacity(0.2) : AppTheme.surfaceGlassDark,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected ? color : AppTheme.surfaceGlassBorder,
@@ -562,7 +566,9 @@ class GlassNavigationBar extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppTheme.accentTeal.withOpacity(0.15) : Colors.transparent,
+          color: isSelected
+              ? AppTheme.accentTeal.withOpacity(0.15)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(

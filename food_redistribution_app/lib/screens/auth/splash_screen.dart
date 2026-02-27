@@ -60,25 +60,26 @@ class _SplashScreenState extends State<SplashScreen> {
       Navigator.pushReplacementNamed(context, AppRouter.adminDashboard);
       return;
     }
-    
+
     if (user.role == UserRole.ngo) {
-       switch(user.onboardingState) {
-         case OnboardingState.registered:
-           Navigator.pushReplacementNamed(context, AppRouter.documentSubmission);
-           return;
-         case OnboardingState.documentSubmitted:
-           Navigator.pushReplacementNamed(context, AppRouter.verificationPending);
-           return;
-         // If we had a rejected state in enum, handle it. Assuming it might be handled via status or re-purposed state.
-         // For now, if active/verified:
-         case OnboardingState.verified:
-         case OnboardingState.active:
-           _navigateToRoleDashboard(user.role);
-           return;
-         default:
-           // If profile not complete etc
-           break;
-       }
+      switch (user.onboardingState) {
+        case OnboardingState.registered:
+          Navigator.pushReplacementNamed(context, AppRouter.documentSubmission);
+          return;
+        case OnboardingState.documentSubmitted:
+          Navigator.pushReplacementNamed(
+              context, AppRouter.verificationPending);
+          return;
+        // If we had a rejected state in enum, handle it. Assuming it might be handled via status or re-purposed state.
+        // For now, if active/verified:
+        case OnboardingState.verified:
+        case OnboardingState.active:
+          _navigateToRoleDashboard(user.role);
+          return;
+        default:
+          // If profile not complete etc
+          break;
+      }
     }
 
     // Default existing logic for others
@@ -200,7 +201,8 @@ class _SplashScreenState extends State<SplashScreen> {
               height: 32,
               child: CircularProgressIndicator(
                 strokeWidth: 3,
-                valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.accentTeal),
+                valueColor:
+                    const AlwaysStoppedAnimation<Color>(AppTheme.accentTeal),
                 backgroundColor: AppTheme.surfaceGlassDark,
               ),
             ),

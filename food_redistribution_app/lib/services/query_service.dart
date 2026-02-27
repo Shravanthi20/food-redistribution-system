@@ -39,14 +39,16 @@ class QueryService {
         createdAt: DateTime.now(),
       );
 
-      final docRef = await _firestore.collection(Collections.adminTasks).add(query.toMap());
+      final docRef = await _firestore
+          .collection(Collections.adminTasks)
+          .add(query.toMap());
 
       // Log action
       await _auditService.logEvent(
         eventType: AuditEventType.dataModification,
         userId: raiserUserId,
-        riskLevel: priority == query_model.QueryPriority.urgent 
-            ? AuditRiskLevel.high 
+        riskLevel: priority == query_model.QueryPriority.urgent
+            ? AuditRiskLevel.high
             : priority == query_model.QueryPriority.high
                 ? AuditRiskLevel.medium
                 : AuditRiskLevel.low,
@@ -54,7 +56,8 @@ class QueryService {
         resourceType: 'query',
         additionalData: {
           'action': 'query_created',
-          'description': '$raiserUserType $raiserUserId created ${type.name} query: $subject',
+          'description':
+              '$raiserUserType $raiserUserId created ${type.name} query: $subject',
           'queryId': docRef.id,
           'raiserUserId': raiserUserId,
           'type': type.name,
@@ -75,7 +78,8 @@ class QueryService {
         riskLevel: AuditRiskLevel.high,
         additionalData: {
           'action': 'query_creation_failed',
-          'description': 'Failed to create query for $raiserUserType $raiserUserId: $e',
+          'description':
+              'Failed to create query for $raiserUserType $raiserUserId: $e',
           'raiserUserId': raiserUserId,
           'error': e.toString(),
         },
@@ -100,17 +104,19 @@ class QueryService {
       if (status != null) {
         query = query.where('status', isEqualTo: status.name);
       }
-      
+
       if (priority != null) {
         query = query.where('priority', isEqualTo: priority.name);
       }
-      
+
       if (assignedAdminId != null) {
         query = query.where('assignedAdminId', isEqualTo: assignedAdminId);
       }
 
       final snapshot = await query.limit(limit).get();
-      return snapshot.docs.map((doc) => query_model.Query.fromFirestore(doc)).toList();
+      return snapshot.docs
+          .map((doc) => query_model.Query.fromFirestore(doc))
+          .toList();
     } catch (e) {
       await _auditService.logEvent(
         eventType: AuditEventType.dataAccess,
@@ -135,7 +141,9 @@ class QueryService {
           .orderBy('createdAt', descending: true)
           .get();
 
-      return snapshot.docs.map((doc) => query_model.Query.fromFirestore(doc)).toList();
+      return snapshot.docs
+          .map((doc) => query_model.Query.fromFirestore(doc))
+          .toList();
     } catch (e) {
       await _auditService.logEvent(
         eventType: AuditEventType.dataAccess,
@@ -165,7 +173,10 @@ class QueryService {
             'updateType': 'assignment',
             'content': 'Query assigned for review',
             'timestamp': Timestamp.now(),
-            'changes': {'assignedAdminId': adminId, 'status': query_model.QueryStatus.inReview.name},
+            'changes': {
+              'assignedAdminId': adminId,
+              'status': query_model.QueryStatus.inReview.name
+            },
           }
         ]),
       });
@@ -204,7 +215,8 @@ class QueryService {
         resourceType: 'query',
         additionalData: {
           'action': 'query_assignment_failed',
-          'description': 'Failed to assign query $queryId to admin $adminId: $e',
+          'description':
+              'Failed to assign query $queryId to admin $adminId: $e',
           'queryId': queryId,
           'adminId': adminId,
           'error': e.toString(),
@@ -297,10 +309,13 @@ class QueryService {
       });
 
       // Get query details to notify raiser
-      final queryDoc = await _firestore.collection(Collections.adminTasks).doc(queryId).get();
+      final queryDoc = await _firestore
+          .collection(Collections.adminTasks)
+          .doc(queryId)
+          .get();
       if (queryDoc.exists) {
         final query = query_model.Query.fromFirestore(queryDoc);
-        
+
         // Notify the person who raised the query
         await _notificationService.sendNotification(
           userId: query.raiserUserId,
@@ -357,53 +372,61 @@ class QueryService {
   ) async {
     try {
       // Get query details
-      final queryDoc = await _firestore.collection(Collections.adminTasks).doc(queryId).get();
+      final queryDoc = await _firestore
+          .collection(Collections.adminTasks)
+          .doc(queryId)
+          .get();
       if (!queryDoc.exists) throw Exception('Query not found');
-      
+
       final query = query_model.Query.fromFirestore(queryDoc);
-      
+
       final batch = _firestore.batch();
-      
+
       // If reassigning donation
       if (query.donationId != null && newDonationId != null) {
         // Update old donation
-        batch.update(_firestore.collection(Collections.donations).doc(query.donationId!), {
-          'status': 'available',
-          'matchedRequestId': null,
-          'assignedVolunteerId': null,
-          'updatedAt': Timestamp.now(),
-          'metadata.reassignedFrom': queryId,
-        });
-        
+        batch.update(
+            _firestore.collection(Collections.donations).doc(query.donationId!),
+            {
+              'status': 'available',
+              'matchedRequestId': null,
+              'assignedVolunteerId': null,
+              'updatedAt': Timestamp.now(),
+              'metadata.reassignedFrom': queryId,
+            });
+
         // Update new donation
-        batch.update(_firestore.collection(Collections.donations).doc(newDonationId), {
+        batch.update(
+            _firestore.collection(Collections.donations).doc(newDonationId), {
           'status': 'matched',
           'matchedRequestId': query.requestId,
           'updatedAt': Timestamp.now(),
           'metadata.reassignedTo': queryId,
         });
       }
-      
+
       // If reassigning request
       if (query.requestId != null && newRequestId != null) {
         // Update old request
-        batch.update(_firestore.collection(Collections.requests).doc(query.requestId!), {
+        batch.update(
+            _firestore.collection(Collections.requests).doc(query.requestId!), {
           'status': 'pending',
           'matchedDonationId': null,
           'assignedVolunteerId': null,
           'updatedAt': Timestamp.now(),
           'metadata.reassignedFrom': queryId,
         });
-        
+
         // Update new request
-        batch.update(_firestore.collection(Collections.requests).doc(newRequestId), {
+        batch.update(
+            _firestore.collection(Collections.requests).doc(newRequestId), {
           'status': 'matched',
           'matchedDonationId': query.donationId,
           'updatedAt': Timestamp.now(),
           'metadata.reassignedTo': queryId,
         });
       }
-      
+
       // Update query with reassignment info
       batch.update(_firestore.collection(Collections.adminTasks).doc(queryId), {
         'status': query_model.QueryStatus.resolved.name,
@@ -431,9 +454,9 @@ class QueryService {
           }
         ]),
       });
-      
+
       await batch.commit();
-      
+
       // Log the reassignment
       await _auditService.logEvent(
         eventType: AuditEventType.adminAction,
@@ -443,7 +466,8 @@ class QueryService {
         resourceType: 'query',
         additionalData: {
           'action': 'admin_reassignment',
-          'description': 'Admin $adminId reassigned due to query $queryId: $reassignmentReason',
+          'description':
+              'Admin $adminId reassigned due to query $queryId: $reassignmentReason',
           'queryId': queryId,
           'adminId': adminId,
           'reassignmentReason': reassignmentReason,
@@ -452,10 +476,9 @@ class QueryService {
           'newVolunteerId': newVolunteerId,
         },
       );
-      
+
       // Notify affected parties
       await _notifyReassignment(query, adminId, reassignmentReason);
-      
     } catch (e) {
       await _auditService.logEvent(
         eventType: AuditEventType.securityAlert,
@@ -484,13 +507,14 @@ class QueryService {
           .where('role', isEqualTo: 'admin')
           .where('isActive', isEqualTo: true)
           .get();
-      
+
       // Send notification to all admins
       for (final adminDoc in adminSnapshot.docs) {
         await _notificationService.sendNotification(
           userId: adminDoc.id,
           title: 'New ${query.type.name.toUpperCase()} Query',
-          message: 'Priority: ${query.priority.name.toUpperCase()} - ${query.subject}',
+          message:
+              'Priority: ${query.priority.name.toUpperCase()} - ${query.subject}',
           type: 'new_query',
           data: {
             'queryId': queryId,
@@ -533,16 +557,20 @@ class QueryService {
           'queryId': query.id,
         },
       );
-      
+
       // If there was a donation involved, notify the donor
       if (query.donationId != null) {
-        final donationDoc = await _firestore.collection(Collections.donations).doc(query.donationId!).get();
+        final donationDoc = await _firestore
+            .collection(Collections.donations)
+            .doc(query.donationId!)
+            .get();
         if (donationDoc.exists) {
           final donorId = donationDoc.data()!['donorId'];
           await _notificationService.sendNotification(
             userId: donorId,
             title: 'Donation Reassignment',
-            message: 'Your donation has been reassigned due to an administrative review.',
+            message:
+                'Your donation has been reassigned due to an administrative review.',
             type: 'donation_reassignment',
             data: {
               'donationId': query.donationId!,
@@ -551,16 +579,20 @@ class QueryService {
           );
         }
       }
-      
+
       // If there was a request involved, notify the NGO
       if (query.requestId != null) {
-        final requestDoc = await _firestore.collection(Collections.requests).doc(query.requestId!).get();
+        final requestDoc = await _firestore
+            .collection(Collections.requests)
+            .doc(query.requestId!)
+            .get();
         if (requestDoc.exists) {
           final ngoId = requestDoc.data()!['ngoId'];
           await _notificationService.sendNotification(
             userId: ngoId,
             title: 'Request Reassignment',
-            message: 'Your food request has been reassigned due to an administrative review.',
+            message:
+                'Your food request has been reassigned due to an administrative review.',
             type: 'request_reassignment',
             data: {
               'requestId': query.requestId!,
@@ -589,16 +621,29 @@ class QueryService {
   /// Get query statistics for admin dashboard
   Future<Map<String, dynamic>> getQueryStatistics() async {
     try {
-      final snapshot = await _firestore.collection(Collections.adminTasks).get();
-      final queries = snapshot.docs.map((doc) => query_model.Query.fromFirestore(doc)).toList();
-      
+      final snapshot =
+          await _firestore.collection(Collections.adminTasks).get();
+      final queries = snapshot.docs
+          .map((doc) => query_model.Query.fromFirestore(doc))
+          .toList();
+
       return {
         'totalQueries': queries.length,
-        'openQueries': queries.where((q) => q.status == query_model.QueryStatus.open).length,
-        'inReviewQueries': queries.where((q) => q.status == query_model.QueryStatus.inReview).length,
-        'resolvedQueries': queries.where((q) => q.status == query_model.QueryStatus.resolved).length,
-        'urgentQueries': queries.where((q) => q.priority == query_model.QueryPriority.urgent).length,
-        'highPriorityQueries': queries.where((q) => q.priority == query_model.QueryPriority.high).length,
+        'openQueries': queries
+            .where((q) => q.status == query_model.QueryStatus.open)
+            .length,
+        'inReviewQueries': queries
+            .where((q) => q.status == query_model.QueryStatus.inReview)
+            .length,
+        'resolvedQueries': queries
+            .where((q) => q.status == query_model.QueryStatus.resolved)
+            .length,
+        'urgentQueries': queries
+            .where((q) => q.priority == query_model.QueryPriority.urgent)
+            .length,
+        'highPriorityQueries': queries
+            .where((q) => q.priority == query_model.QueryPriority.high)
+            .length,
         'averageResolutionTime': _calculateAverageResolutionTime(queries),
         'queriesByType': _getQueriesByType(queries),
       };
@@ -620,11 +665,11 @@ class QueryService {
   double _calculateAverageResolutionTime(List<query_model.Query> queries) {
     final resolvedQueries = queries.where((q) => q.resolvedAt != null).toList();
     if (resolvedQueries.isEmpty) return 0.0;
-    
+
     final totalHours = resolvedQueries.fold<double>(0.0, (sum, query) {
       return sum + query.resolvedAt!.difference(query.createdAt).inHours;
     });
-    
+
     return totalHours / resolvedQueries.length;
   }
 

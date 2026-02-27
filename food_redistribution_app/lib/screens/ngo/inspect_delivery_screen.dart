@@ -7,7 +7,8 @@ import '../../models/food_donation.dart';
 class InspectDeliveryScreen extends StatefulWidget {
   final FoodDonation donation;
 
-  const InspectDeliveryScreen({Key? key, required this.donation}) : super(key: key);
+  const InspectDeliveryScreen({Key? key, required this.donation})
+      : super(key: key);
 
   @override
   State<InspectDeliveryScreen> createState() => _InspectDeliveryScreenState();
@@ -18,7 +19,7 @@ class _InspectDeliveryScreenState extends State<InspectDeliveryScreen> {
   final TextEditingController _notesController = TextEditingController();
   final FoodDonationService _donationService = FoodDonationService();
   bool _isSubmitting = false;
-  
+
   // Hygiene Checklist
   final Map<String, bool> _hygieneChecklist = {
     'Temperature appropriate': false,
@@ -30,9 +31,10 @@ class _InspectDeliveryScreenState extends State<InspectDeliveryScreen> {
     'Within expiry date': false,
     'Quantity matches description': false,
   };
-  
+
   bool? _overallApproval;
-  final TextEditingController _rejectionReasonController = TextEditingController();
+  final TextEditingController _rejectionReasonController =
+      TextEditingController();
 
   @override
   void initState() {
@@ -84,27 +86,39 @@ class _InspectDeliveryScreenState extends State<InspectDeliveryScreen> {
                           Expanded(
                             child: Text(
                               'Delivery Inspection',
-                              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                color: Colors.blue.shade700,
-                                fontWeight: FontWeight.bold,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .headlineSmall
+                                  ?.copyWith(
+                                    color: Colors.blue.shade700,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 16),
                       _buildInfoRow('Food Item', widget.donation.title),
-                      _buildInfoRow('Expected Quantity', '${widget.donation.quantity} ${widget.donation.unit}'),
-                      _buildInfoRow('Food Type', widget.donation.foodTypes.map((e) => e.name.toUpperCase()).join(', ')),
-                      _buildInfoRow('Expiry Date', widget.donation.expiryDateTime.toString().split(' ')[0]),
+                      _buildInfoRow('Expected Quantity',
+                          '${widget.donation.quantity} ${widget.donation.unit}'),
+                      _buildInfoRow(
+                          'Food Type',
+                          widget.donation.foodTypes
+                              .map((e) => e.name.toUpperCase())
+                              .join(', ')),
+                      _buildInfoRow(
+                          'Expiry Date',
+                          widget.donation.expiryDateTime
+                              .toString()
+                              .split(' ')[0]),
                       _buildInfoRow('Description', widget.donation.description),
                     ],
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Hygiene Safety Checklist
               Card(
                 elevation: 2,
@@ -123,10 +137,13 @@ class _InspectDeliveryScreenState extends State<InspectDeliveryScreen> {
                           const SizedBox(width: 8),
                           Text(
                             'Food Safety Checklist',
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.green.shade700,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.green.shade700,
+                                ),
                           ),
                         ],
                       ),
@@ -139,20 +156,20 @@ class _InspectDeliveryScreenState extends State<InspectDeliveryScreen> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      
                       Column(
                         children: _hygieneChecklist.entries.map((entry) {
                           return CheckboxListTile(
                             title: Text(entry.key),
-                            subtitle: entry.key == 'Within expiry date' && !entry.value
-                              ? Text(
-                                  'Warning: Food appears to be expired',
-                                  style: TextStyle(
-                                    color: Colors.red.shade600,
-                                    fontSize: 12,
-                                  ),
-                                )
-                              : null,
+                            subtitle: entry.key == 'Within expiry date' &&
+                                    !entry.value
+                                ? Text(
+                                    'Warning: Food appears to be expired',
+                                    style: TextStyle(
+                                      color: Colors.red.shade600,
+                                      fontSize: 12,
+                                    ),
+                                  )
+                                : null,
                             value: entry.value,
                             onChanged: (bool? value) {
                               setState(() {
@@ -169,17 +186,17 @@ class _InspectDeliveryScreenState extends State<InspectDeliveryScreen> {
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Overall Decision
               Card(
                 elevation: 2,
-                color: _overallApproval == true 
-                  ? Colors.green.shade50 
-                  : _overallApproval == false 
-                    ? Colors.red.shade50 
-                    : null,
+                color: _overallApproval == true
+                    ? Colors.green.shade50
+                    : _overallApproval == false
+                        ? Colors.red.shade50
+                        : null,
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
@@ -188,11 +205,10 @@ class _InspectDeliveryScreenState extends State<InspectDeliveryScreen> {
                       Text(
                         'Inspection Decision',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
                       const SizedBox(height: 16),
-                      
                       RadioListTile<bool>(
                         title: const Text('Accept Delivery'),
                         subtitle: Text(
@@ -211,7 +227,6 @@ class _InspectDeliveryScreenState extends State<InspectDeliveryScreen> {
                         },
                         activeColor: Colors.green.shade700,
                       ),
-                      
                       RadioListTile<bool>(
                         title: const Text('Reject Delivery'),
                         subtitle: Text(
@@ -234,7 +249,7 @@ class _InspectDeliveryScreenState extends State<InspectDeliveryScreen> {
                   ),
                 ),
               ),
-              
+
               // Rejection Reason (if rejecting)
               if (_overallApproval == false) ...[
                 const SizedBox(height: 16),
@@ -248,21 +263,23 @@ class _InspectDeliveryScreenState extends State<InspectDeliveryScreen> {
                       children: [
                         Text(
                           'Reason for Rejection',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.red.shade700,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.red.shade700,
+                                  ),
                         ),
                         const SizedBox(height: 8),
                         TextFormField(
                           controller: _rejectionReasonController,
                           maxLines: 3,
                           decoration: const InputDecoration(
-                            hintText: 'Please specify why the delivery is being rejected...',
+                            hintText:
+                                'Please specify why the delivery is being rejected...',
                             border: OutlineInputBorder(),
                           ),
                           validator: (value) {
-                            if (_overallApproval == false && 
+                            if (_overallApproval == false &&
                                 (value == null || value.trim().isEmpty)) {
                               return 'Please provide a reason for rejection';
                             }
@@ -274,9 +291,9 @@ class _InspectDeliveryScreenState extends State<InspectDeliveryScreen> {
                   ),
                 ),
               ],
-              
+
               const SizedBox(height: 16),
-              
+
               // Inspector Notes
               Card(
                 elevation: 2,
@@ -287,16 +304,18 @@ class _InspectDeliveryScreenState extends State<InspectDeliveryScreen> {
                     children: [
                       Text(
                         'Inspector Notes (Optional)',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                       ),
                       const SizedBox(height: 8),
                       TextFormField(
                         controller: _notesController,
                         maxLines: 3,
                         decoration: const InputDecoration(
-                          hintText: 'Any additional observations or comments...',
+                          hintText:
+                              'Any additional observations or comments...',
                           border: OutlineInputBorder(),
                         ),
                       ),
@@ -304,18 +323,20 @@ class _InspectDeliveryScreenState extends State<InspectDeliveryScreen> {
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 32),
-              
+
               // Submit Button
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _isSubmitting || _overallApproval == null ? null : _submitInspection,
+                  onPressed: _isSubmitting || _overallApproval == null
+                      ? null
+                      : _submitInspection,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _overallApproval == true 
-                      ? Colors.green.shade700 
-                      : Colors.red.shade700,
+                    backgroundColor: _overallApproval == true
+                        ? Colors.green.shade700
+                        : Colors.red.shade700,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
@@ -339,19 +360,23 @@ class _InspectDeliveryScreenState extends State<InspectDeliveryScreen> {
                           ],
                         )
                       : Text(
-                          _overallApproval == true ? 'Accept Delivery' : 'Reject Delivery',
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          _overallApproval == true
+                              ? 'Accept Delivery'
+                              : 'Reject Delivery',
+                          style: const TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                 ),
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Cancel Button
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton(
-                    onPressed: _isSubmitting ? null : () => Navigator.pop(context),
+                  onPressed:
+                      _isSubmitting ? null : () => Navigator.pop(context),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.grey[700],
                     padding: const EdgeInsets.symmetric(vertical: 16),
@@ -407,11 +432,13 @@ class _InspectDeliveryScreenState extends State<InspectDeliveryScreen> {
       'No visible contamination',
       'Within expiry date'
     ];
-    
-      final criticalPassed = criticalChecks.every((check) => _hygieneChecklist[check] == true);
-final totalChecked = _hygieneChecklist.values.where((v) => v == true).length;
-    
-      if (!criticalPassed || totalChecked < 6) {
+
+    final criticalPassed =
+        criticalChecks.every((check) => _hygieneChecklist[check] == true);
+    final totalChecked =
+        _hygieneChecklist.values.where((v) => v == true).length;
+
+    if (!criticalPassed || totalChecked < 6) {
       // Don't auto-reject, but suggest caution
       // Let the user decide
     }
@@ -420,16 +447,16 @@ final totalChecked = _hygieneChecklist.values.where((v) => v == true).length;
   Future<void> _submitInspection() async {
     if (!_formKey.currentState!.validate()) return;
 
-setState(() => _isSubmitting = true);
+    setState(() => _isSubmitting = true);
 
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      
+
       String? reason;
       if (_overallApproval == false) {
         reason = _rejectionReasonController.text.trim();
       }
-      
+
       await _donationService.reviewDonation(
         donationId: widget.donation.id,
         ngoId: authProvider.firebaseUser!.uid,
@@ -445,11 +472,9 @@ setState(() => _isSubmitting = true);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              _overallApproval! 
-                ? 'Delivery accepted successfully!' 
-                : 'Delivery rejected and feedback sent.'
-            ),
+            content: Text(_overallApproval!
+                ? 'Delivery accepted successfully!'
+                : 'Delivery rejected and feedback sent.'),
             backgroundColor: _overallApproval! ? Colors.green : Colors.orange,
           ),
         );
@@ -466,7 +491,7 @@ setState(() => _isSubmitting = true);
       }
     } finally {
       if (mounted) {
-          setState(() => _isSubmitting = false);
+        setState(() => _isSubmitting = false);
       }
     }
   }

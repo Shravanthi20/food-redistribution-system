@@ -14,11 +14,11 @@ class VolunteerProfileScreen extends StatefulWidget {
 class _VolunteerProfileScreenState extends State<VolunteerProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   final _userService = UserService();
-  
+
   late TextEditingController _firstNameController;
   late TextEditingController _lastNameController;
   late TextEditingController _phoneController;
-  
+
   bool _isLoading = false;
   bool _isLoadingProfile = true; // [NEW]
 
@@ -35,12 +35,12 @@ class _VolunteerProfileScreenState extends State<VolunteerProfileScreen> {
   void initState() {
     super.initState();
     final user = Provider.of<AuthProvider>(context, listen: false).appUser;
-    
+
     // Initialize with AppUser data first (fast)
     _firstNameController = TextEditingController(text: user?.firstName ?? '');
     _lastNameController = TextEditingController(text: user?.lastName ?? '');
     _phoneController = TextEditingController(text: user?.phone ?? '');
-    
+
     // Fetch full volunteer profile for availability
     if (user != null) {
       _loadVolunteerProfile(user.uid);
@@ -96,7 +96,7 @@ class _VolunteerProfileScreenState extends State<VolunteerProfileScreen> {
       // Force refresh of user data
       // (This works if AuthProvider listens to user changes or we trigger a reload)
       // For now, simpler to show success. AuthProvider real-time listener should catch it.
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Profile updated successfully')),
@@ -157,7 +157,7 @@ class _VolunteerProfileScreenState extends State<VolunteerProfileScreen> {
                 validator: (v) => v?.isEmpty == true ? "Required" : null,
               ),
               const SizedBox(height: 24),
-              
+
               // [NEW] Availability Section
               const Align(
                 alignment: Alignment.centerLeft,
@@ -167,7 +167,7 @@ class _VolunteerProfileScreenState extends State<VolunteerProfileScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              _isLoadingProfile 
+              _isLoadingProfile
                   ? const CircularProgressIndicator()
                   : Wrap(
                       spacing: 8.0,
@@ -189,12 +189,13 @@ class _VolunteerProfileScreenState extends State<VolunteerProfileScreen> {
                           selectedColor: Colors.green.withOpacity(0.2),
                           checkmarkColor: Colors.green,
                           labelStyle: TextStyle(
-                            color: isSelected ? Colors.green[800] : Colors.black87,
+                            color:
+                                isSelected ? Colors.green[800] : Colors.black87,
                           ),
                         );
                       }).toList(),
                     ),
-              
+
               const SizedBox(height: 32),
               SizedBox(
                 width: double.infinity,
@@ -205,7 +206,7 @@ class _VolunteerProfileScreenState extends State<VolunteerProfileScreen> {
                     backgroundColor: Colors.green,
                     foregroundColor: Colors.white,
                   ),
-                  child: _isLoading 
+                  child: _isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
                       : const Text("Save Changes"),
                 ),
