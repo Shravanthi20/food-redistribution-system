@@ -10,11 +10,16 @@ import '../services/tracking/analytics_aggregation_service.dart';
 class TrackingProvider extends ChangeNotifier {
   late final DelayDetectionService _delayDetectionService;
   final AnalyticsAggregationService _analyticsService = AnalyticsAggregationService();
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  late final FirebaseFirestore _firestore;
 
-  TrackingProvider() {
+  TrackingProvider({
+    FirebaseFirestore? firestore,
+    NotificationHandler? notificationHandler,
+  }) {
+    _firestore = firestore ?? FirebaseFirestore.instance;
     _delayDetectionService = DelayDetectionService(
-      notificationHandler: NotificationHandler(),
+      notificationHandler: notificationHandler ?? NotificationHandler(),
+      firestore: _firestore,
     );
   }
 
@@ -89,7 +94,7 @@ class TrackingProvider extends ChangeNotifier {
           .collection('donations')
           .doc(donationId)
           .update({
-            'status': newStatus,
+            'status': newStatus.name,
             'updatedAt': FieldValue.serverTimestamp(),
             'updatedBy': userId,
             if (notes != null) 'notes': notes,
@@ -114,6 +119,7 @@ class TrackingProvider extends ChangeNotifier {
     required String taskId,
     required double latitude,
     required double longitude,
+    double? accuracy,
   }) async {
     try {
       final newLocation = LocationUpdate(
@@ -122,6 +128,7 @@ class TrackingProvider extends ChangeNotifier {
         taskId: taskId,
         latitude: latitude,
         longitude: longitude,
+        accuracy: accuracy ?? 0.0,
         timestamp: DateTime.now(),
         status: _trackingState.currentStatus ?? TrackingStatus.enRoute,
       );

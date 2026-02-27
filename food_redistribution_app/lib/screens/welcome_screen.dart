@@ -14,132 +14,140 @@ class WelcomeScreen extends StatelessWidget {
     return GradientScaffold(
       showAnimatedBackground: true,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 40),
-              // Glowing Logo
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      AppTheme.accentTeal.withOpacity(0.2),
-                      AppTheme.accentCyan.withOpacity(0.1),
+        child: CustomScrollView(
+          slivers: [
+            SliverPadding(
+              padding: const EdgeInsets.all(24.0),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate([
+                  const SizedBox(height: 40),
+                  // Glowing Logo
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          AppTheme.accentTeal.withOpacity(0.2),
+                          AppTheme.accentCyan.withOpacity(0.1),
+                        ],
+                      ),
+                      border: Border.all(
+                        color: AppTheme.accentTeal.withOpacity(0.3),
+                        width: 2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppTheme.accentTeal.withOpacity(0.3),
+                          blurRadius: 30,
+                          spreadRadius: 5,
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.restaurant_menu_rounded,
+                      size: 52,
+                      color: AppTheme.accentTeal,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  // Title with gradient
+                  ShaderMask(
+                    shaderCallback: (bounds) => const LinearGradient(
+                      colors: [AppTheme.textPrimary, AppTheme.accentCyanSoft],
+                    ).createShader(bounds),
+                    child: const Text(
+                      'Food Redistribution',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        letterSpacing: -0.5,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Reducing waste, feeding communities',
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: AppTheme.textSecondary,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 48),
+                  Text(
+                    'Choose your role',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: AppTheme.textTertiary,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  _buildRoleCard(
+                    context,
+                    title: 'Food Donor',
+                    description: 'Share surplus food with those in need',
+                    icon: Icons.volunteer_activism_rounded,
+                    color: AppTheme.accentCyan,
+                    onTap: () => _navigateToRole(context, 'donor'),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildRoleCard(
+                    context,
+                    title: 'NGO Partner',
+                    description: 'Connect with donors to help communities',
+                    icon: Icons.business_center_rounded,
+                    color: AppTheme.warningAmber,
+                    onTap: () => _navigateToRole(context, 'ngo'),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildRoleCard(
+                    context,
+                    title: 'Volunteer',
+                    description: 'Help with food collection and delivery',
+                    icon: Icons.delivery_dining_rounded,
+                    color: AppTheme.successTeal,
+                    onTap: () => _navigateToRole(context, 'volunteer'),
+                  ),
+                ]),
+              ),
+            ),
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 24.0),
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                       Text(
+                        'Already have an account? ',
+                        style: TextStyle(color: AppTheme.textSecondary),
+                      ),
+                      TextButton(
+                        onPressed: () => _navigateToLogin(context),
+                        child: Text(
+                          'Sign In',
+                          style: TextStyle(
+                            color: AppTheme.accentTeal,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
-                  border: Border.all(
-                    color: AppTheme.accentTeal.withOpacity(0.3),
-                    width: 2,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppTheme.accentTeal.withOpacity(0.3),
-                      blurRadius: 30,
-                      spreadRadius: 5,
-                    ),
-                  ],
-                ),
-                child: const Icon(
-                  Icons.restaurant_menu_rounded,
-                  size: 52,
-                  color: AppTheme.accentTeal,
                 ),
               ),
-              const SizedBox(height: 32),
-              // Title with gradient
-              ShaderMask(
-                shaderCallback: (bounds) => const LinearGradient(
-                  colors: [AppTheme.textPrimary, AppTheme.accentCyanSoft],
-                ).createShader(bounds),
-                child: const Text(
-                  'Food Redistribution',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    letterSpacing: -0.5,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Reducing waste, feeding communities',
-                style: TextStyle(
-                  fontSize: 15,
-                  color: AppTheme.textSecondary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 48),
-              Text(
-                'Choose your role',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: AppTheme.textTertiary,
-                ),
-              ),
-              const SizedBox(height: 24),
-              Expanded(
-                child: ListView(
-                  children: [
-                    _buildRoleCard(
-                      context,
-                      title: 'Food Donor',
-                      description: 'Share surplus food with those in need',
-                      icon: Icons.volunteer_activism_rounded,
-                      color: AppTheme.accentCyan,
-                      onTap: () => _navigateToRole(context, 'donor'),
-                    ),
-                    const SizedBox(height: 16),
-                    _buildRoleCard(
-                      context,
-                      title: 'NGO Partner',
-                      description: 'Connect with donors to help communities',
-                      icon: Icons.business_center_rounded,
-                      color: AppTheme.warningAmber,
-                      onTap: () => _navigateToRole(context, 'ngo'),
-                    ),
-                    const SizedBox(height: 16),
-                    _buildRoleCard(
-                      context,
-                      title: 'Volunteer',
-                      description: 'Help with food collection and delivery',
-                      icon: Icons.delivery_dining_rounded,
-                      color: AppTheme.successTeal,
-                      onTap: () => _navigateToRole(context, 'volunteer'),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Already have an account? ',
-                    style: TextStyle(color: AppTheme.textSecondary),
-                  ),
-                  TextButton(
-                    onPressed: () => _navigateToLogin(context),
-                    child: Text(
-                      'Sign In',
-                      style: TextStyle(
-                        color: AppTheme.accentTeal,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

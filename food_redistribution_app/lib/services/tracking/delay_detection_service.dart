@@ -7,7 +7,7 @@ import 'notification_handler.dart';
 // Check if deliveries are taking too long
 class DelayDetectionService {
   final NotificationHandler _notificationHandler;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  late final FirebaseFirestore _firestore;
 
   // SLA configurations (in minutes)
   static const int defaultPickupSLA = 60;
@@ -18,7 +18,10 @@ class DelayDetectionService {
 
   DelayDetectionService({
     required NotificationHandler notificationHandler,
-  }) : _notificationHandler = notificationHandler;
+    FirebaseFirestore? firestore,
+  }) : _notificationHandler = notificationHandler {
+    _firestore = firestore ?? FirebaseFirestore.instance;
+  }
 
   // Start monitoring for delays on a task
   Future<void> startMonitoring({
