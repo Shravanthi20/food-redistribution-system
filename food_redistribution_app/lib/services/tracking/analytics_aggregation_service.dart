@@ -29,7 +29,7 @@ class AnalyticsAggregationService {
     
     double mean = values.reduce((a, b) => a + b) / values.length;
     double sumSquares = values.fold(0.0, (sum, val) => sum + ((val - mean) * (val - mean)));
-    return (sumSquares / (values.length - 1)).toStringAsFixed(2) as double;
+    return sumSquares / (values.length - 1);
   }
 
   // ENHANCED: Seasonality detection (day of week, time patterns)
@@ -338,7 +338,7 @@ class AnalyticsAggregationService {
   // ENHANCED: Predict surplus with seasonality and trends
   Future<Map<String, dynamic>> predictSurplusRisk({
     required int daysAhead,
-    required int historicalDays = 60,
+    int historicalDays = 60,
   }) async {
     try {
       final startDate = DateTime.now().subtract(Duration(days: historicalDays)).toUtc();
@@ -360,7 +360,7 @@ class AnalyticsAggregationService {
       Map<int, int> dailyDonations = {};
       List<double> donationTrend = [];
 
-      for (var doc in snapshot.docs.docs) {
+      for (var doc in snapshot.docs) {
         final data = doc.data();
         final timestamp = data['createdAt'] as Timestamp?;
         if (timestamp != null) {
@@ -388,7 +388,7 @@ class AnalyticsAggregationService {
       final predictedTotal = (predictedDaily * daysAhead).toInt();
 
       // Seasonality-based risk
-      final seasonality = _analyzeSeasonality(snapshot.docs.docs.map((d) => d.data()).toList());
+      final seasonality = _analyzeSeasonality(snapshot.docs.map((d) => d.data()).toList());
       final peakDay = seasonality['peakDayOfWeek'];
       
       // Check if prediction falls on peak day
@@ -415,7 +415,7 @@ class AnalyticsAggregationService {
   // ENHANCED: Advanced volunteer demand prediction with multiple factors
   Future<Map<String, dynamic>> predictVolunteerDemandAdvanced({
     required int daysAhead,
-    required int historicalDays = 30,
+    int historicalDays = 30,
   }) async {
     try {
       final startDate = DateTime.now().subtract(Duration(days: historicalDays)).toUtc();
@@ -518,7 +518,13 @@ class AnalyticsAggregationService {
       int totalDonations = donationsSnapshot.size;
 
       for (var doc in donationsSnapshot.docs) {
-        final weight = (doc.data()['weight'] as num?)?.toDouble() ?? 0;
+        final data = doc.data();
+        double weight = 0;
+        if (data['weight'] is String) {
+          weight = double.tryParse(data['weight'] as String) ?? 0;
+        } else if (data['weight'] is num) {
+          weight = (data['weight'] as num).toDouble();
+        }
         totalSupplyWeight += weight;
       }
 
@@ -526,7 +532,13 @@ class AnalyticsAggregationService {
       int totalNGOs = ngosSnapshot.size;
 
       for (var doc in ngosSnapshot.docs) {
-        final capacity = (doc.data()['capacity'] as num?)?.toDouble() ?? 0;
+        final data = doc.data();
+        double capacity = 0;
+        if (data['capacity'] is String) {
+          capacity = double.tryParse(data['capacity'] as String) ?? 0;
+        } else if (data['capacity'] is num) {
+          capacity = (data['capacity'] as num).toDouble();
+        }
         totalCapacity += capacity;
       }
 
@@ -610,3 +622,164 @@ class AnalyticsAggregationService {
       return {};
     }
   }
+
+  // NEW: Analyze historical NGO demand patterns over time
+  Future<Map<String, dynamic>> getNGODemandTrends({required int days}) async {
+    try {
+      final startDate = DateTime.now().subtract(Duration(days: days)).toUtc();
+      final snapshot = await _firestore
+          .collection('requests')
+          .where('createdAt', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
+          .get();
+
+      if (snapshot.docs.isEmpty) {
+        return {
+          'period': '$days days',
+          'trends': [],
+          'totalRequests': 0,
+        };
+      }
+
+      Map<String, int> requestedFoodTypes = {};
+      Map<String, int> demandByRegion = {};
+      
+      for (var doc in snapshot.docs) {
+        final data = doc.data();
+        
+        // Analyze food types
+        final types = data['foodTypes'] as List<dynamic>? ?? [];
+        for (var type in types) {
+           final typeStr = type.toString();
+           requestedFoodTypes[typeStr] = (requestedFoodTypes[typeStr] ?? 0) + 1;
+        }
+
+        // We assume NGOs might have regions attached or we can look it up, 
+        // for simplicity we extract from the request if available or group by ngoId
+        final region = data['region'] as String? ?? 'general';
+        demandByRegion[region] = (demandByRegion[region] ?? 0) + 1;
+      }
+
+      return {
+        'period': '$days days',
+        'topRequestedTypes': requestedFoodTypes,
+        'demandByRegion': demandByRegion,
+        'totalRequests': snapshot.docs.length,
+      };
+    } catch (e) {
+      print('Error getting NGO demand trends: $e');
+      return {};
+    }
+  }
+
+  // NEW: Forecast NGO demand by region and time
+  Future<Map<String, dynamic>> predictNGODemandAdvanced({
+    required int daysAhead,
+    required String region,
+    int historicalDays = 60,
+  }) async {
+    try {
+      final startDate = DateTime.now().subtract(Duration(days: historicalDays)).toUtc();
+      
+      var query = _firestore
+          .collection('requests')
+          .where('createdAt', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate));
+          
+      if (region != 'all') {
+         query = query.where('region', isEqualTo: region);
+      }
+
+      final snapshot = await query.get();
+
+      if (snapshot.docs.isEmpty) {
+        return {
+          'period': '$daysAhead days ahead',
+          'region': region,
+          'predictedDailyRequests': 0,
+          'predictedTotalRequests': 0,
+          'trend': 'neutral',
+        };
+      }
+
+      // Analyze by day for trend
+      Map<int, int> dailyRequests = {};
+      List<double> demandTrend = [];
+
+      for (var doc in snapshot.docs) {
+        final data = doc.data();
+        final timestamp = data['createdAt'] as Timestamp?;
+        if (timestamp != null) {
+          final date = timestamp.toDate();
+          final dayIndex = DateTime.now().difference(date).inDays;
+          dailyRequests[dayIndex] = (dailyRequests[dayIndex] ?? 0) + 1;
+        }
+      }
+
+      // Convert to trend list (0 is today, `historicalDays` is oldest)
+      for (int i = 0; i <= historicalDays; i++) {
+        demandTrend.add((dailyRequests[i] ?? 0).toDouble());
+      }
+
+      // Calculate EMA for smoothed trend
+      final ema = _calculateEMA(values: demandTrend, period: 7);
+      
+      // Calculate velocity (trend direction)
+      final recentAvg = demandTrend.sublist(0, 7).reduce((a, b) => a + b) / 7;
+      final olderAvg = demandTrend.sublist(30, 37).reduce((a, b) => a + b) / 7;
+      final trend = recentAvg > olderAvg ? 'increasing' : recentAvg < olderAvg ? 'decreasing' : 'neutral';
+
+      // Advanced projection
+      final predictedDaily = (ema * (trend == 'increasing' ? 1.15 : trend == 'decreasing' ? 0.85 : 1.0)).toInt();
+      final predictedTotal = (predictedDaily * daysAhead).toInt();
+
+      return {
+        'period': '$daysAhead days ahead',
+        'region': region,
+        'predictedDailyRequests': predictedDaily,
+        'predictedTotalRequests': predictedTotal,
+        'trend': trend,
+        'confidence': 0.78, // Slightly lower confidence for demand forecasting generally
+        'emaValue': (ema * 100).toStringAsFixed(2),
+        'volatility': (_calculateStdDev(demandTrend) * 100).toStringAsFixed(2),
+      };
+    } catch (e) {
+      print('Error predicting NGO demand: $e');
+      return {};
+    }
+  }
+
+  // NEW: Generate Summary Reports for Admin Review
+  Future<Map<String, dynamic>> generateSummaryReport() async {
+    try {
+       // Combine high-level metrics across all systems into a single summary report
+       final recentDays = 30; // standard monthly report
+       
+       final surplusTrends = await getSurplusTrends(days: recentDays);
+       final volunteerDemand = await predictVolunteerDemandAdvanced(daysAhead: 7);
+       final ngoTrends = await getNGODemandTrends(days: recentDays);
+       
+       // Gather all regional risks
+       final regions = await _firestore.collection('delivery_tasks').get()
+          .then((s) => s.docs.map((d) => d.data()['region'] as String?).where((r) => r != null).toSet());
+       
+       List<Map<String, dynamic>> highRiskRegions = [];
+       for (var r in regions) {
+         final risk = await getRegionalRiskIndicators(r!);
+         if (risk['riskLevel'] == 'high') {
+            highRiskRegions.add(risk);
+         }
+       }
+       
+       return {
+         'generatedAt': Timestamp.now(),
+         'reportPeriod': 'Last $recentDays days',
+         'surplusSummary': surplusTrends,
+         'volunteerSummary': volunteerDemand,
+         'ngoDemandSummary': ngoTrends,
+         'highRiskRegions': highRiskRegions,
+       };
+    } catch (e) {
+      print('Error generating summary report: $e');
+      return {};
+    }
+  }
+}

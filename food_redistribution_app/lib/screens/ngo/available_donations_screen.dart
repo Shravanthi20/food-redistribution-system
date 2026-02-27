@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../../providers/ngo_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../models/food_donation.dart';
+import '../../widgets/glass_widgets.dart';
+import '../../utils/app_theme.dart';
 
 class AvailableDonationsScreen extends StatefulWidget {
   const AvailableDonationsScreen({Key? key}) : super(key: key);
@@ -31,19 +33,26 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
                 children: [
                   TextField(
                     controller: _searchController,
+                    style: const TextStyle(color: AppTheme.textPrimary),
                     decoration: InputDecoration(
                       labelText: 'Search donations...',
-                      prefixIcon: const Icon(Icons.search),
+                      labelStyle: const TextStyle(color: AppTheme.textSecondary),
+                      prefixIcon: const Icon(Icons.search, color: AppTheme.textSecondary),
                       suffixIcon: _searchQuery.isNotEmpty
                           ? IconButton(
-                              icon: const Icon(Icons.clear),
+                              icon: const Icon(Icons.clear, color: AppTheme.textSecondary),
                               onPressed: () {
                                 _searchController.clear();
                                 setState(() => _searchQuery = '');
                               },
                             )
                           : null,
-                      border: const OutlineInputBorder(),
+                      enabledBorder: const OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white24),
+                      ),
+                      focusedBorder: const OutlineInputBorder(
+                        borderSide: BorderSide(color: AppTheme.accentTeal),
+                      ),
                     ),
                     onChanged: (value) => setState(() => _searchQuery = value),
                   ),
@@ -61,6 +70,12 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
                           onSelected: (selected) {
                             setState(() => _selectedFoodType = null);
                           },
+                          backgroundColor: AppTheme.surfaceGlassDark.withOpacity(0.5),
+                          selectedColor: AppTheme.accentTeal.withOpacity(0.3),
+                          checkmarkColor: AppTheme.textPrimary,
+                          labelStyle: TextStyle(
+                            color: _selectedFoodType == null ? AppTheme.accentTeal : AppTheme.textSecondary,
+                          ),
                         ),
                         const SizedBox(width: 8),
                         ...FoodType.values.map((type) => Padding(
@@ -71,6 +86,12 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
                             onSelected: (selected) {
                               setState(() => _selectedFoodType = selected ? type : null);
                             },
+                            backgroundColor: AppTheme.surfaceGlassDark.withOpacity(0.5),
+                            selectedColor: AppTheme.accentTeal.withOpacity(0.3),
+                            checkmarkColor: AppTheme.textPrimary,
+                            labelStyle: TextStyle(
+                              color: _selectedFoodType == type ? AppTheme.accentTeal : AppTheme.textSecondary,
+                            ),
                           ),
                         )),
                       ],
@@ -87,11 +108,11 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.local_shipping, size: 64, color: Colors.grey),
+                          Icon(Icons.local_shipping, size: 64, color: AppTheme.textMuted),
                           SizedBox(height: 16),
-                          Text('No available donations found'),
+                          Text('No available donations found', style: TextStyle(color: AppTheme.textPrimary)),
                           SizedBox(height: 8),
-                          Text('Try adjusting your filters'),
+                          Text('Try adjusting your filters', style: TextStyle(color: AppTheme.textSecondary)),
                         ],
                       ),
                     )
@@ -141,9 +162,9 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
     final timeUntilExpiry = donation.expiresAt.difference(DateTime.now());
     final isUrgent = timeUntilExpiry.inHours <= 12;
     
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: GlassContainer(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -157,6 +178,7 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
+                      color: AppTheme.textPrimary,
                     ),
                   ),
                 ),
@@ -184,7 +206,7 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
             // Description
             Text(
               donation.description,
-              style: TextStyle(color: Colors.grey[600]),
+              style: TextStyle(color: AppTheme.textSecondary),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
