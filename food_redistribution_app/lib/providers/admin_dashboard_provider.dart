@@ -7,8 +7,8 @@ import '../services/issue_service.dart';
 import '../services/audit_service.dart';
 import '../services/security_service.dart';
 import '../services/food_donation_service.dart';
-import '../models/user.dart';
 import '../models/food_donation.dart';
+import 'package:flutter/foundation.dart';
 
 class AdminDashboardProvider extends ChangeNotifier {
   final AnalyticsService _analyticsService = AnalyticsService();
@@ -82,7 +82,7 @@ class AdminDashboardProvider extends ChangeNotifier {
       ]);
     } catch (e) {
       _errorMessage = 'Failed to load dashboard data: $e';
-      print(_errorMessage);
+      debugPrint(_errorMessage);
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -98,7 +98,8 @@ class AdminDashboardProvider extends ChangeNotifier {
   }
 
   Future<void> _fetchPendingVerifications() async {
-    _pendingVerifications = await _verificationService.getPendingVerifications();
+    _pendingVerifications =
+        await _verificationService.getPendingVerifications();
   }
 
   Future<void> _fetchOpenIssues() async {
@@ -115,7 +116,8 @@ class AdminDashboardProvider extends ChangeNotifier {
 
   Future<void> _fetchUnmatchedDonations() async {
     final foodDonationService = FoodDonationService();
-    _unmatchedDonations = await foodDonationService.getDonationsByStatus(DonationStatus.listed);
+    _unmatchedDonations =
+        await foodDonationService.getDonationsByStatus(DonationStatus.listed);
   }
 
   Future<void> _fetchRegionalStats() async {
@@ -132,11 +134,13 @@ class AdminDashboardProvider extends ChangeNotifier {
         .orderBy('timestamp', descending: true)
         .limit(10)
         .get();
-    
-    _matchingSessions = snapshot.docs.map((doc) => {
-      'id': doc.id,
-      ...doc.data(),
-    }).toList();
+
+    _matchingSessions = snapshot.docs
+        .map((doc) => {
+              'id': doc.id,
+              ...doc.data(),
+            })
+        .toList();
   }
 
   Future<void> searchUsers(String query) async {
@@ -158,7 +162,8 @@ class AdminDashboardProvider extends ChangeNotifier {
   }
 
   // Action: Review Verification
-  Future<bool> reviewVerification(String submissionId, String adminId, VerificationStatus decision, String? notes) async {
+  Future<bool> reviewVerification(String submissionId, String adminId,
+      VerificationStatus decision, String? notes) async {
     try {
       await _verificationService.reviewSubmission(
         submissionId: submissionId,
@@ -166,7 +171,7 @@ class AdminDashboardProvider extends ChangeNotifier {
         decision: decision,
         notes: notes,
       );
-      
+
       // Refresh list
       await _fetchPendingVerifications();
       await _fetchVerificationStats();
@@ -180,7 +185,8 @@ class AdminDashboardProvider extends ChangeNotifier {
   }
 
   // Action: Suspend User
-  Future<bool> suspendUser(String userId, String adminId, String reason, DateTime endDate) async {
+  Future<bool> suspendUser(
+      String userId, String adminId, String reason, DateTime endDate) async {
     try {
       await _userService.restrictUser(
         userId: userId,
@@ -198,7 +204,8 @@ class AdminDashboardProvider extends ChangeNotifier {
   }
 
   // Action: Force Assign NGO
-  Future<bool> forceAssignNGO(String donationId, String adminId, String ngoId, String reason) async {
+  Future<bool> forceAssignNGO(
+      String donationId, String adminId, String ngoId, String reason) async {
     try {
       final foodDonationService = FoodDonationService();
       await foodDonationService.forceAssignNGO(
@@ -218,7 +225,8 @@ class AdminDashboardProvider extends ChangeNotifier {
   }
 
   // Action: Force Assign Volunteer
-  Future<bool> forceAssignVolunteer(String donationId, String adminId, String volunteerId, String reason) async {
+  Future<bool> forceAssignVolunteer(String donationId, String adminId,
+      String volunteerId, String reason) async {
     try {
       final foodDonationService = FoodDonationService();
       await foodDonationService.forceAssignVolunteer(

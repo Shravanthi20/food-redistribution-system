@@ -11,7 +11,7 @@ import '../../utils/app_router.dart';
 class OnboardingScreen extends StatefulWidget {
   final dynamic userRole;
 
-  const OnboardingScreen({Key? key, this.userRole}) : super(key: key);
+  const OnboardingScreen({super.key, this.userRole});
 
   @override
   State<OnboardingScreen> createState() => _OnboardingScreenState();
@@ -20,7 +20,7 @@ class OnboardingScreen extends StatefulWidget {
 class _OnboardingScreenState extends State<OnboardingScreen> {
   final UserService _userService = UserService();
   final AuthService _authService = AuthService();
-  
+
   bool _isLoading = false;
   PlatformFile? _selectedFile;
   String? _uploadError;
@@ -29,7 +29,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
     final user = authProvider.appUser;
-    
+
     // If user data is not loaded yet
     if (user == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -40,8 +40,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       // Donors need verification - check if documents submitted
       if (user.onboardingState == OnboardingState.documentSubmitted) {
         return _buildUnderReviewScreen(context);
-      } else if (user.onboardingState == OnboardingState.verified || 
-                 user.onboardingState == OnboardingState.active) {
+      } else if (user.onboardingState == OnboardingState.verified ||
+          user.onboardingState == OnboardingState.active) {
         // Verified donor - navigate to dashboard
         WidgetsBinding.instance.addPostFrameCallback((_) {
           _navigateToDashboard(context, user.role);
@@ -55,25 +55,25 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         return const Scaffold(body: Center(child: CircularProgressIndicator()));
       }
     }
-    
+
     // Volunteers do not need verification - redirect immediately
     if (user.role == UserRole.volunteer) {
-       WidgetsBinding.instance.addPostFrameCallback((_) {
-          _navigateToDashboard(context, user.role);
-       });
-       return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _navigateToDashboard(context, user.role);
+      });
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     // Check Onboarding State
     if (user.onboardingState == OnboardingState.documentSubmitted) {
       return _buildUnderReviewScreen(context);
-    } else if (user.onboardingState == OnboardingState.verified || 
-               user.onboardingState == OnboardingState.active) {
-       // Should have been redirected by Splash/AuthWrapper, but handle here just in case
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          _navigateToDashboard(context, user.role);
-        });
-        return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    } else if (user.onboardingState == OnboardingState.verified ||
+        user.onboardingState == OnboardingState.active) {
+      // Should have been redirected by Splash/AuthWrapper, but handle here just in case
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _navigateToDashboard(context, user.role);
+      });
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     // Default: registered state, needs document upload
@@ -97,7 +97,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               const SizedBox(height: 20),
               _buildHeader(context, user.role),
               const SizedBox(height: 40),
-              
+
               // Upload Section
               Container(
                 padding: const EdgeInsets.all(20),
@@ -108,15 +108,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 ),
                 child: Column(
                   children: [
-                    Icon(
-                      Icons.cloud_upload_outlined, 
-                      size: 48, 
-                      color: Theme.of(context).primaryColor
-                    ),
+                    Icon(Icons.cloud_upload_outlined,
+                        size: 48, color: Theme.of(context).primaryColor),
                     const SizedBox(height: 16),
                     const Text(
                       'Upload Registration Certificate',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 8),
                     const Text(
@@ -124,12 +122,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       style: TextStyle(color: Colors.grey, fontSize: 12),
                     ),
                     const SizedBox(height: 20),
-                    
                     if (_selectedFile != null)
                       ListTile(
-                        leading: const Icon(Icons.check_circle, color: Colors.green),
+                        leading:
+                            const Icon(Icons.check_circle, color: Colors.green),
                         title: Text(_selectedFile!.name),
-                        subtitle: Text('${(_selectedFile!.size / 1024).toStringAsFixed(1)} KB'),
+                        subtitle: Text(
+                            '${(_selectedFile!.size / 1024).toStringAsFixed(1)} KB'),
                         trailing: IconButton(
                           icon: const Icon(Icons.close, color: Colors.red),
                           onPressed: () => setState(() => _selectedFile = null),
@@ -144,7 +143,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ],
                 ),
               ),
-              
+
               if (_uploadError != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 16),
@@ -154,11 +153,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     textAlign: TextAlign.center,
                   ),
                 ),
-                
+
               const Spacer(),
-              
+
               ElevatedButton(
-                onPressed: _selectedFile != null ? () => _submitDocument(context, user) : null,
+                onPressed: _selectedFile != null
+                    ? () => _submitDocument(context, user)
+                    : null,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   textStyle: const TextStyle(fontSize: 16),
@@ -179,11 +180,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         title: const Text('Verification Pending'),
         leading: const SizedBox(), // Hide back button
         actions: [
-            IconButton(
-              icon: const Icon(Icons.logout),
-              onPressed: () => _signOut(context),
-            )
-          ],
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () => _signOut(context),
+          )
+        ],
       ),
       body: Center(
         child: Padding(
@@ -191,7 +192,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.access_time_filled, size: 80, color: Colors.orange.shade300),
+              Icon(Icons.access_time_filled,
+                  size: 80, color: Colors.orange.shade300),
               const SizedBox(height: 32),
               const Text(
                 'Under Review',
@@ -223,7 +225,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     switch (role) {
       case UserRole.ngo:
         title = 'NGO Verification';
-        description = 'Please upload your NGO Registration Certificate (Trust/Society/Section 8) to verify your organization.';
+        description =
+            'Please upload your NGO Registration Certificate (Trust/Society/Section 8) to verify your organization.';
         break;
       default:
         title = 'Verification';
@@ -243,7 +246,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Future<void> _pickFile() async {
     try {
       // Check permissions if needed (usually handled by file_picker)
-      
+
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
@@ -270,8 +273,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
     try {
       // 1. Upload File
-      final url = await _authService.uploadVerificationCertificate(user.uid, _selectedFile!);
-      
+      final url = await _authService.uploadVerificationCertificate(
+          user.uid, _selectedFile!);
+
       if (url == null) {
         throw Exception('File upload failed');
       }
@@ -284,9 +288,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       );
 
       // 3. Refresh Provider State (Optional, logic usually listens to stream)
+      if (!context.mounted) return;
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      await authProvider.updateOnboardingState(OnboardingState.documentSubmitted);
-
+      await authProvider
+          .updateOnboardingState(OnboardingState.documentSubmitted);
     } catch (e) {
       setState(() {
         _uploadError = 'Submission failed: $e';
@@ -298,6 +303,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Future<void> _signOut(BuildContext context) async {
     await Provider.of<AuthProvider>(context, listen: false).signOut();
+    if (!context.mounted) return;
     Navigator.pushReplacementNamed(context, AppRouter.login);
   }
 

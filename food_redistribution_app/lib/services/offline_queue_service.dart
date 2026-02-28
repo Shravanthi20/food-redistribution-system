@@ -18,12 +18,12 @@ class OfflineQueueService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final Connectivity _connectivity = Connectivity();
   late SharedPreferences _prefs;
-  
-  final StreamController<QueueStatus> _statusController = 
+
+  final StreamController<QueueStatus> _statusController =
       StreamController<QueueStatus>.broadcast();
-  
+
   Stream<QueueStatus> get statusStream => _statusController.stream;
-  
+
   bool _isInitialized = false;
   bool _isSyncing = false;
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
@@ -31,19 +31,20 @@ class OfflineQueueService {
   /// Initialize the service
   Future<void> initialize() async {
     if (_isInitialized) return;
-    
+
     _prefs = await SharedPreferences.getInstance();
-    
+
     // Listen for connectivity changes
-    _connectivitySubscription = _connectivity.onConnectivityChanged.listen((results) {
+    _connectivitySubscription =
+        _connectivity.onConnectivityChanged.listen((results) {
       final isOnline = results.any((r) => r != ConnectivityResult.none);
       if (isOnline) {
         _attemptSync();
       }
     });
-    
+
     _isInitialized = true;
-    
+
     // Attempt sync on startup
     _attemptSync();
   }
@@ -64,14 +65,14 @@ class OfflineQueueService {
       final queue = await _getQueue();
       queue.add(operation.toJson());
       await _saveQueue(queue);
-      
+
       _emitStatus();
-      
+
       // Try to sync immediately if online
       if (await isOnline()) {
         _attemptSync();
       }
-      
+
       return true;
     } catch (e) {
       debugPrint('Error queuing operation: $e');
@@ -172,7 +173,7 @@ class OfflineQueueService {
         failed: 0,
       );
     }
-    
+
     if (!await isOnline()) {
       return SyncResult(
         success: false,
@@ -181,47 +182,49 @@ class OfflineQueueService {
         failed: 0,
       );
     }
-    
+
     _isSyncing = true;
     _emitStatus(isSyncing: true);
-    
+
     int processed = 0;
     int failed = 0;
     final failedOperations = <Map<String, dynamic>>[];
-    
+
     try {
       final queue = await _getQueue();
-      
+
       for (final opJson in queue) {
         final operation = OfflineOperation.fromJson(opJson);
-        
+
         bool success = await _executeOperation(operation);
-        
+
         if (success) {
           processed++;
         } else {
           failed++;
           // Increment retry count
           opJson['retryCount'] = (opJson['retryCount'] ?? 0) + 1;
-          
+
           if ((opJson['retryCount'] as int) < _maxRetries) {
             failedOperations.add(opJson);
           } else {
             // Max retries exceeded, log and discard
-            debugPrint('Operation ${operation.id} exceeded max retries, discarding');
+            debugPrint(
+                'Operation ${operation.id} exceeded max retries, discarding');
           }
         }
       }
-      
+
       // Save only failed operations back to queue
       await _saveQueue(failedOperations);
-      
+
       _isSyncing = false;
       _emitStatus();
-      
+
       return SyncResult(
         success: failed == 0,
-        message: failed == 0 ? 'All operations synced' : '$failed operations failed',
+        message:
+            failed == 0 ? 'All operations synced' : '$failed operations failed',
         processed: processed,
         failed: failed,
       );
@@ -254,7 +257,7 @@ class OfflineQueueService {
             'offlineCreatedAt': operation.createdAt.toIso8601String(),
           });
           return true;
-          
+
         case OperationType.createDemand:
           await _firestore.collection('demand_requests').add({
             ...operation.data,
@@ -262,32 +265,32 @@ class OfflineQueueService {
             'offlineCreatedAt': operation.createdAt.toIso8601String(),
           });
           return true;
-          
+
         case OperationType.updateStatus:
           final collection = operation.data['collection'] as String;
           final docId = operation.data['documentId'] as String;
           final status = operation.data['status'] as String;
-          
+
           await _firestore.collection(collection).doc(docId).update({
             'status': status,
             'lastUpdated': FieldValue.serverTimestamp(),
             'updatedFromOffline': true,
           });
           return true;
-          
+
         case OperationType.updateLocation:
           await _firestore.collection('location_updates').add({
             ...operation.data,
             'syncedFromOffline': true,
           });
           return true;
-          
+
         case OperationType.genericWrite:
           final collection = operation.data['collection'] as String;
           final docId = operation.data['documentId'] as String?;
           final data = operation.data['data'] as Map<String, dynamic>;
           final merge = operation.data['merge'] as bool? ?? false;
-          
+
           if (docId != null) {
             await _firestore.collection(collection).doc(docId).set(
               {...data, 'syncedFromOffline': true},
@@ -315,7 +318,7 @@ class OfflineQueueService {
     try {
       final jsonStr = _prefs.getString(_queueKey);
       if (jsonStr == null) return [];
-      
+
       final list = jsonDecode(jsonStr) as List<dynamic>;
       return list.map((e) => e as Map<String, dynamic>).toList();
     } catch (e) {
@@ -398,12 +401,12 @@ class OfflineOperation {
   });
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'type': type.name,
-    'data': data,
-    'createdAt': createdAt.toIso8601String(),
-    'retryCount': retryCount,
-  };
+        'id': id,
+        'type': type.name,
+        'data': data,
+        'createdAt': createdAt.toIso8601String(),
+        'retryCount': retryCount,
+      };
 
   factory OfflineOperation.fromJson(Map<String, dynamic> json) {
     return OfflineOperation(

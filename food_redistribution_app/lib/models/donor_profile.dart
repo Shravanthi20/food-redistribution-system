@@ -46,7 +46,7 @@ class DonorProfile {
 
   factory DonorProfile.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
-    
+
     return DonorProfile(
       userId: doc.id,
       donorType: DonorType.values.firstWhere(

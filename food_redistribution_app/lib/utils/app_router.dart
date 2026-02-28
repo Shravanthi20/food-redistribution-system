@@ -54,10 +54,12 @@ class AppRouter {
   static const String onboarding = '/onboarding';
 
   static const String forgotPassword = '/forgot-password'; // [NEW] Route
-  static const String otpVerification = '/otp-verification'; // Phone OTP verification
+  static const String otpVerification =
+      '/otp-verification'; // Phone OTP verification
 
   static const String donorDashboard = '/donor-dashboard';
-  static const String donorVerification = '/donor-verification'; // [NEW] Donor verification route
+  static const String donorVerification =
+      '/donor-verification'; // [NEW] Donor verification route
   static const String ngoDashboard = '/ngo-dashboard';
   static const String ngoCreateRequest = '/ngo/create-request'; // [NEW]
   static const String volunteerDashboard = '/volunteer-dashboard';
@@ -83,7 +85,7 @@ class AppRouter {
   static const String documentSubmission = '/document-submission';
   static const String verificationPending = '/verification-pending';
   static const String verificationRejected = '/verification-rejected';
-  
+
   static const String issueReporting = '/issue-reporting'; // [NEW]
   static const String verifyUser = '/admin/verify-user';
   static const String volunteerProfile = '/volunteer-profile';
@@ -143,14 +145,16 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const DonorDashboard());
 
       case donorVerification:
-        return MaterialPageRoute(builder: (_) => const DonorVerificationScreen());
+        return MaterialPageRoute(
+            builder: (_) => const DonorVerificationScreen());
 
       case ngoDashboard:
         return MaterialPageRoute(builder: (_) => const NGODashboard());
-      
+
       case ngoCreateRequest:
-        return MaterialPageRoute(builder: (_) => const CreateFoodRequestScreen());
-      
+        return MaterialPageRoute(
+            builder: (_) => const CreateFoodRequestScreen());
+
       case documentSubmission:
         return MaterialPageRoute(
           builder: (_) => const DocumentSubmissionScreen(),
@@ -160,8 +164,8 @@ class AppRouter {
         return MaterialPageRoute(
           builder: (_) => const VerificationPendingScreen(),
         );
-      
-       case verificationRejected:
+
+      case verificationRejected:
         return MaterialPageRoute(
           builder: (_) => const VerificationRejectedScreen(),
         );
@@ -190,7 +194,8 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const VolunteerDashboard());
 
       case volunteerProfile:
-        return MaterialPageRoute(builder: (_) => const VolunteerProfileScreen());
+        return MaterialPageRoute(
+            builder: (_) => const VolunteerProfileScreen());
 
       case acceptTask:
         return MaterialPageRoute(builder: (_) => const AcceptTaskScreen());
@@ -201,9 +206,10 @@ class AppRouter {
       case taskExecution:
         final args = settings.arguments as Map<String, dynamic>?;
         if (args != null && args.containsKey('donationId')) {
-           return MaterialPageRoute(
-              builder: (_) => TaskExecutionScreen(donationId: args['donationId']!),
-           );
+          return MaterialPageRoute(
+            builder: (_) =>
+                TaskExecutionScreen(donationId: args['donationId']!),
+          );
         }
         return _errorRoute();
 
@@ -211,7 +217,7 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const AdminDashboardScreen());
 
       case adminIssues:
-         return MaterialPageRoute(builder: (_) => const AdminIssuesScreen());
+        return MaterialPageRoute(builder: (_) => const AdminIssuesScreen());
 
       case verifyUser:
         final args = settings.arguments as Map<String, dynamic>;
@@ -236,8 +242,9 @@ class AppRouter {
       case issueReporting:
         final args = settings.arguments as Map<String, dynamic>;
         return MaterialPageRoute(
-            builder: (_) => IssueReportingScreen(donationId: args['donationId']));
-      
+            builder: (_) =>
+                IssueReportingScreen(donationId: args['donationId']));
+
       default:
         return _errorRoute();
     }

@@ -9,12 +9,12 @@ class LiveTrackingMap extends StatefulWidget {
   final DonationStatus status;
 
   const LiveTrackingMap({
-    Key? key,
+    super.key,
     required this.pickupLocation,
     required this.dropoffLocation,
     this.volunteerLocation,
     required this.status,
-  }) : super(key: key);
+  });
 
   @override
   State<LiveTrackingMap> createState() => _LiveTrackingMapState();
@@ -55,23 +55,24 @@ class _LiveTrackingMapState extends State<LiveTrackingMap> {
           markerId: const MarkerId('dropoff'),
           position: widget.dropoffLocation,
           infoWindow: const InfoWindow(title: 'Dropoff Location (NGO)'),
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
+          icon:
+              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
         ),
       };
 
       // Volunteer Marker (only if assigned/active)
       if (widget.volunteerLocation != null &&
-          (widget.status == DonationStatus.pickedUp || 
-           widget.status == DonationStatus.inTransit ||
-           widget.status == DonationStatus.matched)) {
-        
+          (widget.status == DonationStatus.pickedUp ||
+              widget.status == DonationStatus.inTransit ||
+              widget.status == DonationStatus.matched)) {
         _markers.add(
           Marker(
             markerId: const MarkerId('volunteer'),
             position: widget.volunteerLocation!,
             infoWindow: const InfoWindow(title: 'Volunteer'),
-            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
-            zIndex: 2, // Show on top
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+                BitmapDescriptor.hueGreen),
+            zIndexInt: 2, // Show on top
           ),
         );
       }
@@ -80,23 +81,39 @@ class _LiveTrackingMapState extends State<LiveTrackingMap> {
 
   void _fitBounds() {
     if (!mounted) return;
-    
+
     // Calculate bounds to include all relevant points
     double minLat = widget.pickupLocation.latitude;
     double maxLat = widget.pickupLocation.latitude;
     double minLng = widget.pickupLocation.longitude;
     double maxLng = widget.pickupLocation.longitude;
 
-    if (widget.dropoffLocation.latitude < minLat) minLat = widget.dropoffLocation.latitude;
-    if (widget.dropoffLocation.latitude > maxLat) maxLat = widget.dropoffLocation.latitude;
-    if (widget.dropoffLocation.longitude < minLng) minLng = widget.dropoffLocation.longitude;
-    if (widget.dropoffLocation.longitude > maxLng) maxLng = widget.dropoffLocation.longitude;
+    if (widget.dropoffLocation.latitude < minLat) {
+      minLat = widget.dropoffLocation.latitude;
+    }
+    if (widget.dropoffLocation.latitude > maxLat) {
+      maxLat = widget.dropoffLocation.latitude;
+    }
+    if (widget.dropoffLocation.longitude < minLng) {
+      minLng = widget.dropoffLocation.longitude;
+    }
+    if (widget.dropoffLocation.longitude > maxLng) {
+      maxLng = widget.dropoffLocation.longitude;
+    }
 
     if (widget.volunteerLocation != null) {
-      if (widget.volunteerLocation!.latitude < minLat) minLat = widget.volunteerLocation!.latitude;
-      if (widget.volunteerLocation!.latitude > maxLat) maxLat = widget.volunteerLocation!.latitude;
-      if (widget.volunteerLocation!.longitude < minLng) minLng = widget.volunteerLocation!.longitude;
-      if (widget.volunteerLocation!.longitude > maxLng) maxLng = widget.volunteerLocation!.longitude;
+      if (widget.volunteerLocation!.latitude < minLat) {
+        minLat = widget.volunteerLocation!.latitude;
+      }
+      if (widget.volunteerLocation!.latitude > maxLat) {
+        maxLat = widget.volunteerLocation!.latitude;
+      }
+      if (widget.volunteerLocation!.longitude < minLng) {
+        minLng = widget.volunteerLocation!.longitude;
+      }
+      if (widget.volunteerLocation!.longitude > maxLng) {
+        maxLng = widget.volunteerLocation!.longitude;
+      }
     }
 
     _controller.animateCamera(

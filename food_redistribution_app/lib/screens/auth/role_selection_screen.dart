@@ -5,7 +5,7 @@ import '../../widgets/glass_widgets.dart';
 import '../../widgets/gradient_scaffold.dart';
 
 class RoleSelectionScreen extends StatelessWidget {
-  const RoleSelectionScreen({Key? key}) : super(key: key);
+  const RoleSelectionScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -28,10 +28,10 @@ class RoleSelectionScreen extends StatelessWidget {
           child: Column(
             children: [
               const SizedBox(height: 20),
-              
+
               // Header
               ShaderMask(
-                shaderCallback: (bounds) => LinearGradient(
+                shaderCallback: (bounds) => const LinearGradient(
                   colors: [AppTheme.accentTeal, AppTheme.accentCyan],
                 ).createShader(bounds),
                 child: const Text(
@@ -48,7 +48,7 @@ class RoleSelectionScreen extends StatelessWidget {
                 'Select your role to get started',
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.white.withOpacity(0.7),
+                  color: Colors.white.withValues(alpha: 0.7),
                 ),
               ),
               const SizedBox(height: 40),
@@ -66,7 +66,8 @@ class RoleSelectionScreen extends StatelessWidget {
                         description: 'Post surplus food for redistribution',
                         iconColor: AppTheme.warningAmber,
                         onTap: () {
-                          Navigator.pushNamed(context, AppRouter.donorRegistration);
+                          Navigator.pushNamed(
+                              context, AppRouter.donorRegistration);
                         },
                       ),
                       const SizedBox(height: 16),
@@ -76,10 +77,12 @@ class RoleSelectionScreen extends StatelessWidget {
                         icon: Icons.volunteer_activism,
                         title: 'NGO/Organization',
                         subtitle: 'Orphanages, shelters, food banks',
-                        description: 'Receive and distribute food to those in need',
+                        description:
+                            'Receive and distribute food to those in need',
                         iconColor: AppTheme.accentTeal,
                         onTap: () {
-                          Navigator.pushNamed(context, AppRouter.ngoRegistration);
+                          Navigator.pushNamed(
+                              context, AppRouter.ngoRegistration);
                         },
                       ),
                       const SizedBox(height: 16),
@@ -92,14 +95,15 @@ class RoleSelectionScreen extends StatelessWidget {
                         description: 'Help pickup and deliver food donations',
                         iconColor: AppTheme.accentCyan,
                         onTap: () {
-                          Navigator.pushNamed(context, AppRouter.volunteerRegistration);
+                          Navigator.pushNamed(
+                              context, AppRouter.volunteerRegistration);
                         },
                       ),
                     ],
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 24),
 
               // Back to Login
@@ -109,7 +113,7 @@ class RoleSelectionScreen extends StatelessWidget {
                   Text(
                     'Already have an account? ',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.7),
+                      color: Colors.white.withValues(alpha: 0.7),
                       fontSize: 14,
                     ),
                   ),
@@ -118,7 +122,7 @@ class RoleSelectionScreen extends StatelessWidget {
                       Navigator.pushReplacementNamed(context, AppRouter.login);
                     },
                     child: ShaderMask(
-                      shaderCallback: (bounds) => LinearGradient(
+                      shaderCallback: (bounds) => const LinearGradient(
                         colors: [AppTheme.accentTeal, AppTheme.accentCyan],
                       ).createShader(bounds),
                       child: const Text(
@@ -172,10 +176,10 @@ class _RoleCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: iconColor.withOpacity(0.15),
+                color: iconColor.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                  color: iconColor.withOpacity(0.3),
+                  color: iconColor.withValues(alpha: 0.3),
                   width: 1,
                 ),
               ),
@@ -186,7 +190,7 @@ class _RoleCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 16),
-            
+
             // Text content
             Expanded(
               child: Column(
@@ -204,7 +208,7 @@ class _RoleCard extends StatelessWidget {
                   Text(
                     subtitle,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.6),
+                      color: Colors.white.withValues(alpha: 0.6),
                       fontSize: 13,
                     ),
                   ),
@@ -212,24 +216,24 @@ class _RoleCard extends StatelessWidget {
                   Text(
                     description,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.8),
+                      color: Colors.white.withValues(alpha: 0.8),
                       fontSize: 14,
                     ),
                   ),
                 ],
               ),
             ),
-            
+
             // Arrow
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
                 Icons.arrow_forward_ios,
-                color: Colors.white.withOpacity(0.5),
+                color: Colors.white.withValues(alpha: 0.5),
                 size: 16,
               ),
             ),

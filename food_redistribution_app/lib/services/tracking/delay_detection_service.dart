@@ -7,7 +7,7 @@ import 'notification_handler.dart';
 // Check if deliveries are taking too long
 class DelayDetectionService {
   final NotificationHandler _notificationHandler;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  late final FirebaseFirestore _firestore;
 
   // SLA configurations (in minutes)
   static const int defaultPickupSLA = 60;
@@ -18,7 +18,10 @@ class DelayDetectionService {
 
   DelayDetectionService({
     required NotificationHandler notificationHandler,
-  }) : _notificationHandler = notificationHandler;
+    FirebaseFirestore? firestore,
+  }) : _notificationHandler = notificationHandler {
+    _firestore = firestore ?? FirebaseFirestore.instance;
+  }
 
   // Start monitoring for delays on a task
   Future<void> startMonitoring({
@@ -29,10 +32,8 @@ class DelayDetectionService {
   }) async {
     try {
       // Get task document
-      final taskDoc = await _firestore
-          .collection('delivery_tasks')
-          .doc(taskId)
-          .get();
+      final taskDoc =
+          await _firestore.collection('delivery_tasks').doc(taskId).get();
 
       if (!taskDoc.exists) return;
 
@@ -103,9 +104,9 @@ class DelayDetectionService {
       }
 
       // Check delivery delay
-      if ((status == 'pickedUp' || status == 'inTransit') && pickedUpAt != null) {
-        final deliveryDeadline =
-            pickedUpAt.add(Duration(minutes: deliverySLA));
+      if ((status == 'pickedUp' || status == 'inTransit') &&
+          pickedUpAt != null) {
+        final deliveryDeadline = pickedUpAt.add(Duration(minutes: deliverySLA));
         if (DateTime.now().isAfter(deliveryDeadline)) {
           _handleDeliveryDelay(
             taskId: taskId,
@@ -228,10 +229,10 @@ class DelayDetectionService {
         estimatedDelay: alert.estimatedDelay,
       );
 
-      await _firestore
-          .collection('delay_alerts')
-          .doc(alertId)
-          .update({'resolvedAt': FieldValue.serverTimestamp(), 'resolutionAction': resolution});
+      await _firestore.collection('delay_alerts').doc(alertId).update({
+        'resolvedAt': FieldValue.serverTimestamp(),
+        'resolutionAction': resolution
+      });
 
       _activeAlerts[alertId] = resolvedAlert;
     } catch (e) {

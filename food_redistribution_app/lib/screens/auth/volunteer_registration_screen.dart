@@ -8,13 +8,15 @@ import '../../widgets/loading_overlay.dart';
 import '../../utils/app_router.dart';
 
 class VolunteerRegistrationScreen extends StatefulWidget {
-  const VolunteerRegistrationScreen({Key? key}) : super(key: key);
+  const VolunteerRegistrationScreen({super.key});
 
   @override
-  State<VolunteerRegistrationScreen> createState() => _VolunteerRegistrationScreenState();
+  State<VolunteerRegistrationScreen> createState() =>
+      _VolunteerRegistrationScreenState();
 }
 
-class _VolunteerRegistrationScreenState extends State<VolunteerRegistrationScreen> {
+class _VolunteerRegistrationScreenState
+    extends State<VolunteerRegistrationScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -35,9 +37,9 @@ class _VolunteerRegistrationScreenState extends State<VolunteerRegistrationScree
   bool _hasVehicle = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
-  List<String> _selectedAvailabilityHours = [];
-  List<String> _selectedWorkingDays = [];
-  List<String> _selectedPreferredTasks = [];
+  final List<String> _selectedAvailabilityHours = [];
+  final List<String> _selectedWorkingDays = [];
+  final List<String> _selectedPreferredTasks = [];
 
   final List<String> _availabilityHoursOptions = [
     'Morning (6AM-12PM)',
@@ -131,13 +133,14 @@ class _VolunteerRegistrationScreenState extends State<VolunteerRegistrationScree
       zipCode: _zipCodeController.text.trim(),
       location: {}, // Will be set later with geocoding
       hasVehicle: _hasVehicle,
-      vehicleType: _hasVehicle 
+      vehicleType: _hasVehicle
           ? VehicleType.values.firstWhere(
               (e) => e.name == _vehicleTypeController.text.trim().toLowerCase(),
               orElse: () => VehicleType.car,
             )
           : VehicleType.none,
-      drivingLicense: _hasVehicle ? _drivingLicenseController.text.trim() : null,
+      drivingLicense:
+          _hasVehicle ? _drivingLicenseController.text.trim() : null,
       availabilityHours: _selectedAvailabilityHours,
       workingDays: _selectedWorkingDays,
       maxRadius: int.tryParse(_maxRadiusController.text.trim()) ?? 10,
@@ -212,7 +215,8 @@ class _VolunteerRegistrationScreenState extends State<VolunteerRegistrationScree
                         if (value == null || value.isEmpty) {
                           return 'Please enter your email';
                         }
-                        if (!RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(value)) {
+                        if (!RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$')
+                            .hasMatch(value)) {
                           return 'Please enter a valid email address';
                         }
                         return null;
@@ -226,7 +230,9 @@ class _VolunteerRegistrationScreenState extends State<VolunteerRegistrationScree
                       obscureText: _obscurePassword,
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                          _obscurePassword
+                              ? Icons.visibility
+                              : Icons.visibility_off,
                         ),
                         onPressed: () {
                           setState(() {
@@ -252,7 +258,9 @@ class _VolunteerRegistrationScreenState extends State<VolunteerRegistrationScree
                       obscureText: _obscureConfirmPassword,
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _obscureConfirmPassword ? Icons.visibility : Icons.visibility_off,
+                          _obscureConfirmPassword
+                              ? Icons.visibility
+                              : Icons.visibility_off,
                         ),
                         onPressed: () {
                           setState(() {
@@ -480,7 +488,7 @@ class _VolunteerRegistrationScreenState extends State<VolunteerRegistrationScree
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                     const SizedBox(height: 16),
-                    
+
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
@@ -509,12 +517,13 @@ class _VolunteerRegistrationScreenState extends State<VolunteerRegistrationScree
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                     const SizedBox(height: 16),
-                    
+
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
                       children: _availabilityHoursOptions.map((hours) {
-                        final isSelected = _selectedAvailabilityHours.contains(hours);
+                        final isSelected =
+                            _selectedAvailabilityHours.contains(hours);
                         return FilterChip(
                           label: Text(hours),
                           selected: isSelected,
@@ -538,12 +547,13 @@ class _VolunteerRegistrationScreenState extends State<VolunteerRegistrationScree
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                     const SizedBox(height: 16),
-                    
+
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
                       children: _preferredTasksOptions.map((task) {
-                        final isSelected = _selectedPreferredTasks.contains(task);
+                        final isSelected =
+                            _selectedPreferredTasks.contains(task);
                         return FilterChip(
                           label: Text(task),
                           selected: isSelected,
@@ -578,7 +588,8 @@ class _VolunteerRegistrationScreenState extends State<VolunteerRegistrationScree
                         ),
                         TextButton(
                           onPressed: () {
-                            Navigator.pushReplacementNamed(context, AppRouter.login);
+                            Navigator.pushReplacementNamed(
+                                context, AppRouter.login);
                           },
                           child: const Text('Sign In'),
                         ),

@@ -32,7 +32,7 @@ class Organization {
   final bool isVerified;
   final DateTime createdAt;
   final DateTime? updatedAt;
-  
+
   // Analytics fields
   final int totalMealsReceived;
   final int totalDeliveries;
@@ -85,7 +85,7 @@ class Organization {
         orElse: () => NGOType.other,
       ),
       description: data[Fields.description] ?? '',
-      location: data[Fields.location] != null 
+      location: data[Fields.location] != null
           ? Location.fromJson(data[Fields.location])
           : Location(latitude: 0, longitude: 0, address: ''),
       address: data[Fields.address] ?? '',
@@ -139,7 +139,8 @@ class Organization {
       'taxExemptionCertificate': taxExemptionCertificate,
       Fields.isVerified: isVerified,
       Fields.createdAt: Timestamp.fromDate(createdAt),
-      Fields.updatedAt: updatedAt != null ? Timestamp.fromDate(updatedAt!) : null,
+      Fields.updatedAt:
+          updatedAt != null ? Timestamp.fromDate(updatedAt!) : null,
       'totalMealsReceived': totalMealsReceived,
       'totalDeliveries': totalDeliveries,
       'rating': rating,
@@ -192,13 +193,15 @@ class Organization {
       operatingHours: operatingHours ?? this.operatingHours,
       preferredFoodTypes: preferredFoodTypes ?? this.preferredFoodTypes,
       storageCapacity: storageCapacity ?? this.storageCapacity,
-      refrigerationAvailable: refrigerationAvailable ?? this.refrigerationAvailable,
+      refrigerationAvailable:
+          refrigerationAvailable ?? this.refrigerationAvailable,
       contactPerson: contactPerson ?? this.contactPerson,
       contactPhone: contactPhone ?? this.contactPhone,
       contactEmail: contactEmail ?? this.contactEmail,
       website: website ?? this.website,
       verificationUrl: verificationUrl ?? this.verificationUrl,
-      taxExemptionCertificate: taxExemptionCertificate ?? this.taxExemptionCertificate,
+      taxExemptionCertificate:
+          taxExemptionCertificate ?? this.taxExemptionCertificate,
       isVerified: isVerified ?? this.isVerified,
       createdAt: createdAt,
       updatedAt: updatedAt ?? DateTime.now(),

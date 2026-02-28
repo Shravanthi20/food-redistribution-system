@@ -35,11 +35,7 @@ enum DonationStatus {
   expired
 }
 
-enum FoodSafetyLevel {
-  high,
-  medium,
-  low
-}
+enum FoodSafetyLevel { high, medium, low }
 
 enum DeliveryStatus {
   pending,
@@ -51,13 +47,7 @@ enum DeliveryStatus {
   cancelled
 }
 
-enum Priority {
-  low,
-  normal,
-  high,
-  urgent,
-  critical
-}
+enum Priority { low, normal, high, urgent, critical }
 
 enum TrackingStatus {
   idle,
@@ -70,11 +60,7 @@ enum TrackingStatus {
   completed
 }
 
-enum GeofenceType {
-  pickup,
-  delivery,
-  checkpoint
-}
+enum GeofenceType { pickup, delivery, checkpoint }
 
 enum OptimizationStrategy {
   shortestDistance,
@@ -84,21 +70,9 @@ enum OptimizationStrategy {
   multiStop
 }
 
-enum NotificationPriority {
-  low,
-  normal,
-  high,
-  urgent,
-  critical
-}
+enum NotificationPriority { low, normal, high, urgent, critical }
 
-enum NotificationChannel {
-  inApp,
-  push,
-  email,
-  sms,
-  whatsapp
-}
+enum NotificationChannel { inApp, push, email, sms, whatsapp }
 
 enum NotificationCategory {
   donationMatching,
@@ -146,10 +120,10 @@ enum NGOType {
 }
 
 enum DispatchPriority {
-  immediate,   // < 30 minutes
-  urgent,      // < 2 hours
-  scheduled,   // > 2 hours
-  flexible,    // No specific time
+  immediate, // < 30 minutes
+  urgent, // < 2 hours
+  scheduled, // > 2 hours
+  flexible, // No specific time
 }
 
 enum VolunteerStatus {
@@ -159,13 +133,7 @@ enum VolunteerStatus {
   onBreak,
 }
 
-enum MatchingCriteria {
-  distance,
-  capacity,
-  urgency,
-  foodType,
-  availability
-}
+enum MatchingCriteria { distance, capacity, urgency, foodType, availability }
 
 enum VehicleType {
   bicycle,

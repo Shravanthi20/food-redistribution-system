@@ -7,139 +7,147 @@ import 'auth/ngo_registration_screen.dart';
 import 'auth/volunteer_registration_screen.dart';
 
 class WelcomeScreen extends StatelessWidget {
-  const WelcomeScreen({Key? key}) : super(key: key);
+  const WelcomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return GradientScaffold(
       showAnimatedBackground: true,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 40),
-              // Glowing Logo
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      AppTheme.accentTeal.withOpacity(0.2),
-                      AppTheme.accentCyan.withOpacity(0.1),
+        child: CustomScrollView(
+          slivers: [
+            SliverPadding(
+              padding: const EdgeInsets.all(24.0),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate([
+                  const SizedBox(height: 40),
+                  // Glowing Logo
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          AppTheme.accentTeal.withValues(alpha: 0.2),
+                          AppTheme.accentCyan.withValues(alpha: 0.1),
+                        ],
+                      ),
+                      border: Border.all(
+                        color: AppTheme.accentTeal.withValues(alpha: 0.3),
+                        width: 2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppTheme.accentTeal.withValues(alpha: 0.3),
+                          blurRadius: 30,
+                          spreadRadius: 5,
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.restaurant_menu_rounded,
+                      size: 52,
+                      color: AppTheme.accentTeal,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  // Title with gradient
+                  ShaderMask(
+                    shaderCallback: (bounds) => const LinearGradient(
+                      colors: [AppTheme.textPrimary, AppTheme.accentCyanSoft],
+                    ).createShader(bounds),
+                    child: const Text(
+                      'Food Redistribution',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        letterSpacing: -0.5,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Reducing waste, feeding communities',
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: AppTheme.textSecondary,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 48),
+                  const Text(
+                    'Choose your role',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: AppTheme.textTertiary,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  _buildRoleCard(
+                    context,
+                    title: 'Food Donor',
+                    description: 'Share surplus food with those in need',
+                    icon: Icons.volunteer_activism_rounded,
+                    color: AppTheme.accentCyan,
+                    onTap: () => _navigateToRole(context, 'donor'),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildRoleCard(
+                    context,
+                    title: 'NGO Partner',
+                    description: 'Connect with donors to help communities',
+                    icon: Icons.business_center_rounded,
+                    color: AppTheme.warningAmber,
+                    onTap: () => _navigateToRole(context, 'ngo'),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildRoleCard(
+                    context,
+                    title: 'Volunteer',
+                    description: 'Help with food collection and delivery',
+                    icon: Icons.delivery_dining_rounded,
+                    color: AppTheme.successTeal,
+                    onTap: () => _navigateToRole(context, 'volunteer'),
+                  ),
+                ]),
+              ),
+            ),
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 24.0),
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      const Text(
+                        'Already have an account? ',
+                        style: TextStyle(color: AppTheme.textSecondary),
+                      ),
+                      TextButton(
+                        onPressed: () => _navigateToLogin(context),
+                        child: const Text(
+                          'Sign In',
+                          style: TextStyle(
+                            color: AppTheme.accentTeal,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
-                  border: Border.all(
-                    color: AppTheme.accentTeal.withOpacity(0.3),
-                    width: 2,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppTheme.accentTeal.withOpacity(0.3),
-                      blurRadius: 30,
-                      spreadRadius: 5,
-                    ),
-                  ],
-                ),
-                child: const Icon(
-                  Icons.restaurant_menu_rounded,
-                  size: 52,
-                  color: AppTheme.accentTeal,
                 ),
               ),
-              const SizedBox(height: 32),
-              // Title with gradient
-              ShaderMask(
-                shaderCallback: (bounds) => const LinearGradient(
-                  colors: [AppTheme.textPrimary, AppTheme.accentCyanSoft],
-                ).createShader(bounds),
-                child: const Text(
-                  'Food Redistribution',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    letterSpacing: -0.5,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Reducing waste, feeding communities',
-                style: TextStyle(
-                  fontSize: 15,
-                  color: AppTheme.textSecondary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 48),
-              Text(
-                'Choose your role',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: AppTheme.textTertiary,
-                ),
-              ),
-              const SizedBox(height: 24),
-              Expanded(
-                child: ListView(
-                  children: [
-                    _buildRoleCard(
-                      context,
-                      title: 'Food Donor',
-                      description: 'Share surplus food with those in need',
-                      icon: Icons.volunteer_activism_rounded,
-                      color: AppTheme.accentCyan,
-                      onTap: () => _navigateToRole(context, 'donor'),
-                    ),
-                    const SizedBox(height: 16),
-                    _buildRoleCard(
-                      context,
-                      title: 'NGO Partner',
-                      description: 'Connect with donors to help communities',
-                      icon: Icons.business_center_rounded,
-                      color: AppTheme.warningAmber,
-                      onTap: () => _navigateToRole(context, 'ngo'),
-                    ),
-                    const SizedBox(height: 16),
-                    _buildRoleCard(
-                      context,
-                      title: 'Volunteer',
-                      description: 'Help with food collection and delivery',
-                      icon: Icons.delivery_dining_rounded,
-                      color: AppTheme.successTeal,
-                      onTap: () => _navigateToRole(context, 'volunteer'),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Already have an account? ',
-                    style: TextStyle(color: AppTheme.textSecondary),
-                  ),
-                  TextButton(
-                    onPressed: () => _navigateToLogin(context),
-                    child: Text(
-                      'Sign In',
-                      style: TextStyle(
-                        color: AppTheme.accentTeal,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -162,10 +170,10 @@ class WelcomeScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.15),
+              color: color.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
-                color: color.withOpacity(0.3),
+                color: color.withValues(alpha: 0.3),
                 width: 1,
               ),
             ),
@@ -182,7 +190,7 @@ class WelcomeScreen extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w600,
                     color: AppTheme.textPrimary,
@@ -191,7 +199,7 @@ class WelcomeScreen extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   description,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 13,
                     color: AppTheme.textSecondary,
                   ),
@@ -202,7 +210,7 @@ class WelcomeScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(
@@ -218,7 +226,7 @@ class WelcomeScreen extends StatelessWidget {
 
   void _navigateToRole(BuildContext context, String role) {
     Widget destination;
-    
+
     switch (role) {
       case 'donor':
         destination = const DonorRegistrationScreen();
@@ -231,14 +239,14 @@ class WelcomeScreen extends StatelessWidget {
         break;
       default:
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text('Registration for this role is coming soon!'),
             backgroundColor: Colors.orange,
           ),
         );
         return;
     }
-    
+
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => destination),
@@ -253,7 +261,7 @@ class WelcomeScreen extends StatelessWidget {
 class RoleDashboard extends StatelessWidget {
   final String role;
 
-  const RoleDashboard({Key? key, required this.role}) : super(key: key);
+  const RoleDashboard({super.key, required this.role});
 
   @override
   Widget build(BuildContext context) {
@@ -271,7 +279,7 @@ class RoleDashboard extends StatelessWidget {
             end: Alignment.bottomCenter,
             colors: [
               _getRoleColor(role),
-              _getRoleColor(role).withOpacity(0.1),
+              _getRoleColor(role).withValues(alpha: 0.1),
             ],
           ),
         ),
@@ -313,7 +321,7 @@ class RoleDashboard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: _getRoleColor(role).withOpacity(0.1),
+                color: _getRoleColor(role).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
@@ -330,15 +338,15 @@ class RoleDashboard extends StatelessWidget {
                   Text(
                     'Welcome back!',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: _getRoleColor(role),
-                    ),
+                          fontWeight: FontWeight.bold,
+                          color: _getRoleColor(role),
+                        ),
                   ),
                   Text(
                     _getRoleWelcomeMessage(role),
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey.shade600,
-                    ),
+                          color: Colors.grey.shade600,
+                        ),
                   ),
                 ],
               ),
@@ -358,23 +366,25 @@ class RoleDashboard extends StatelessWidget {
             margin: const EdgeInsets.symmetric(horizontal: 4),
             child: Card(
               elevation: 4,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   children: [
                     Text(
                       stat['value']!,
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: _getRoleColor(role),
-                      ),
+                      style:
+                          Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: _getRoleColor(role),
+                              ),
                     ),
                     Text(
                       stat['label']!,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey.shade600,
-                      ),
+                            color: Colors.grey.shade600,
+                          ),
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -394,9 +404,9 @@ class RoleDashboard extends StatelessWidget {
         Text(
           'Quick Actions',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: Colors.grey.shade800,
-          ),
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade800,
+              ),
         ),
         const SizedBox(height: 12),
         GridView.count(
@@ -409,7 +419,8 @@ class RoleDashboard extends StatelessWidget {
           children: _getRoleActions(role).map((action) {
             return Card(
               elevation: 4,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
               child: InkWell(
                 onTap: () => _handleAction(context, action['action']),
                 borderRadius: BorderRadius.circular(12),
@@ -427,9 +438,9 @@ class RoleDashboard extends StatelessWidget {
                       Text(
                         action['label'],
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey.shade800,
-                        ),
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey.shade800,
+                            ),
                         textAlign: TextAlign.center,
                       ),
                     ],
@@ -451,15 +462,16 @@ class RoleDashboard extends StatelessWidget {
           Text(
             'Recent Activity',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Colors.grey.shade800,
-            ),
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey.shade800,
+                ),
           ),
           const SizedBox(height: 12),
           Expanded(
             child: Card(
               elevation: 4,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Center(
@@ -474,15 +486,16 @@ class RoleDashboard extends StatelessWidget {
                       const SizedBox(height: 16),
                       Text(
                         'No recent activity',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: Colors.grey.shade600,
-                        ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: Colors.grey.shade600,
+                                ),
                       ),
                       Text(
                         'Activity will appear here once you start using the platform',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.grey.shade500,
-                        ),
+                              color: Colors.grey.shade500,
+                            ),
                         textAlign: TextAlign.center,
                       ),
                     ],
@@ -498,37 +511,53 @@ class RoleDashboard extends StatelessWidget {
 
   String _getRoleTitle(String role) {
     switch (role) {
-      case 'donor': return 'Food Donor';
-      case 'ngo': return 'NGO Partner';
-      case 'volunteer': return 'Volunteer';
-      default: return 'User';
+      case 'donor':
+        return 'Food Donor';
+      case 'ngo':
+        return 'NGO Partner';
+      case 'volunteer':
+        return 'Volunteer';
+      default:
+        return 'User';
     }
   }
 
   Color _getRoleColor(String role) {
     switch (role) {
-      case 'donor': return Colors.blue;
-      case 'ngo': return Colors.orange;
-      case 'volunteer': return Colors.green;
-      default: return Colors.grey;
+      case 'donor':
+        return Colors.blue;
+      case 'ngo':
+        return Colors.orange;
+      case 'volunteer':
+        return Colors.green;
+      default:
+        return Colors.grey;
     }
   }
 
   IconData _getRoleIcon(String role) {
     switch (role) {
-      case 'donor': return Icons.volunteer_activism;
-      case 'ngo': return Icons.business_center;
-      case 'volunteer': return Icons.delivery_dining;
-      default: return Icons.person;
+      case 'donor':
+        return Icons.volunteer_activism;
+      case 'ngo':
+        return Icons.business_center;
+      case 'volunteer':
+        return Icons.delivery_dining;
+      default:
+        return Icons.person;
     }
   }
 
   String _getRoleWelcomeMessage(String role) {
     switch (role) {
-      case 'donor': return 'Ready to share surplus food and make a difference?';
-      case 'ngo': return 'Connect with donors and serve your community better.';
-      case 'volunteer': return 'Help deliver food to those who need it most.';
-      default: return 'Welcome to the platform!';
+      case 'donor':
+        return 'Ready to share surplus food and make a difference?';
+      case 'ngo':
+        return 'Connect with donors and serve your community better.';
+      case 'volunteer':
+        return 'Help deliver food to those who need it most.';
+      default:
+        return 'Welcome to the platform!';
     }
   }
 
@@ -565,24 +594,72 @@ class RoleDashboard extends StatelessWidget {
     switch (role) {
       case 'donor':
         return [
-          {'label': 'Post Donation', 'icon': Icons.add_circle, 'action': 'post_donation'},
-          {'label': 'View History', 'icon': Icons.history, 'action': 'view_history'},
-          {'label': 'Track Status', 'icon': Icons.track_changes, 'action': 'track_status'},
-          {'label': 'Impact Report', 'icon': Icons.assessment, 'action': 'impact_report'},
+          {
+            'label': 'Post Donation',
+            'icon': Icons.add_circle,
+            'action': 'post_donation'
+          },
+          {
+            'label': 'View History',
+            'icon': Icons.history,
+            'action': 'view_history'
+          },
+          {
+            'label': 'Track Status',
+            'icon': Icons.track_changes,
+            'action': 'track_status'
+          },
+          {
+            'label': 'Impact Report',
+            'icon': Icons.assessment,
+            'action': 'impact_report'
+          },
         ];
       case 'ngo':
         return [
-          {'label': 'Browse Donations', 'icon': Icons.search, 'action': 'browse_donations'},
-          {'label': 'Request Food', 'icon': Icons.request_page, 'action': 'request_food'},
-          {'label': 'Manage Inventory', 'icon': Icons.inventory, 'action': 'manage_inventory'},
-          {'label': 'Beneficiary List', 'icon': Icons.people, 'action': 'beneficiary_list'},
+          {
+            'label': 'Browse Donations',
+            'icon': Icons.search,
+            'action': 'browse_donations'
+          },
+          {
+            'label': 'Request Food',
+            'icon': Icons.request_page,
+            'action': 'request_food'
+          },
+          {
+            'label': 'Manage Inventory',
+            'icon': Icons.inventory,
+            'action': 'manage_inventory'
+          },
+          {
+            'label': 'Beneficiary List',
+            'icon': Icons.people,
+            'action': 'beneficiary_list'
+          },
         ];
       case 'volunteer':
         return [
-          {'label': 'Available Tasks', 'icon': Icons.assignment, 'action': 'available_tasks'},
-          {'label': 'Start Delivery', 'icon': Icons.local_shipping, 'action': 'start_delivery'},
-          {'label': 'Update Status', 'icon': Icons.update, 'action': 'update_status'},
-          {'label': 'My Schedule', 'icon': Icons.schedule, 'action': 'my_schedule'},
+          {
+            'label': 'Available Tasks',
+            'icon': Icons.assignment,
+            'action': 'available_tasks'
+          },
+          {
+            'label': 'Start Delivery',
+            'icon': Icons.local_shipping,
+            'action': 'start_delivery'
+          },
+          {
+            'label': 'Update Status',
+            'icon': Icons.update,
+            'action': 'update_status'
+          },
+          {
+            'label': 'My Schedule',
+            'icon': Icons.schedule,
+            'action': 'my_schedule'
+          },
         ];
       default:
         return [];

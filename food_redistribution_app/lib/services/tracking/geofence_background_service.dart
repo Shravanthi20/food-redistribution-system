@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import '../../models/tracking/location_tracking_model.dart';
+import '../../models/enums.dart';
 import 'background_tracking_service.dart';
 
 // Manages geofence entry/exit detection in background
@@ -10,7 +11,7 @@ class GeofenceBackgroundService {
 
   // Cache of active geofences to reduce Firestore queries
   final Map<String, Geofence> _geofenceCache = {};
-  
+
   // Track last notification sent for each geofence to avoid spam
   final Map<String, DateTime> _lastNotificationTime = {};
 
@@ -22,7 +23,8 @@ class GeofenceBackgroundService {
   Future<void> initialize() async {
     try {
       await loadActiveGeofences();
-      debugPrint('GeofenceBackgroundService initialized with ${_geofenceCache.length} geofences');
+      debugPrint(
+          'GeofenceBackgroundService initialized with ${_geofenceCache.length} geofences');
     } catch (e) {
       debugPrint('Error initializing GeofenceBackgroundService: $e');
     }
@@ -37,11 +39,11 @@ class GeofenceBackgroundService {
           .get();
 
       _geofenceCache.clear();
-      
+
       for (var doc in snapshot.docs) {
         final geofence = Geofence.fromMap(doc.data(), id: doc.id);
         _geofenceCache[doc.id] = geofence;
-        
+
         // Register with background tracking service
         await _backgroundTrackingService.addGeofence(
           geofenceId: doc.id,
@@ -51,7 +53,7 @@ class GeofenceBackgroundService {
           taskId: geofence.taskId,
         );
       }
-      
+
       debugPrint('Loaded ${_geofenceCache.length} active geofences');
     } catch (e) {
       debugPrint('Error loading geofences: $e');
@@ -308,13 +310,19 @@ class GeofenceBackgroundService {
 
       // Update status based on geofence type
       if (geofence.type == GeofenceType.pickup && currentStatus == 'assigned') {
-        await _firestore.collection('delivery_tasks').doc(geofence.taskId).update({
+        await _firestore
+            .collection('delivery_tasks')
+            .doc(geofence.taskId)
+            .update({
           'status': 'arrived_at_pickup',
           'arrivedAtPickupTime': FieldValue.serverTimestamp(),
         });
       } else if (geofence.type == GeofenceType.checkpoint &&
           (currentStatus == 'picked_up' || currentStatus == 'in_transit')) {
-        await _firestore.collection('delivery_tasks').doc(geofence.taskId).update({
+        await _firestore
+            .collection('delivery_tasks')
+            .doc(geofence.taskId)
+            .update({
           'status': 'arrived_at_delivery',
           'arrivedAtDeliveryTime': FieldValue.serverTimestamp(),
         });
@@ -343,7 +351,8 @@ class GeofenceBackgroundService {
         _lastNotificationTime.remove(geofenceId);
       }
 
-      debugPrint('Removed ${geofencesToRemove.length} geofences for task $taskId');
+      debugPrint(
+          'Removed ${geofencesToRemove.length} geofences for task $taskId');
     } catch (e) {
       debugPrint('Error removing geofences for task: $e');
     }
@@ -351,9 +360,7 @@ class GeofenceBackgroundService {
 
   /// Get all active geofences for a task
   List<Geofence> getGeofencesForTask(String taskId) {
-    return _geofenceCache.values
-        .where((g) => g.taskId == taskId)
-        .toList();
+    return _geofenceCache.values.where((g) => g.taskId == taskId).toList();
   }
 
   /// Clear all geofences (cleanup)

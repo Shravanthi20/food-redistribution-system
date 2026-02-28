@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../utils/app_router.dart';
 
 class AcceptTaskScreen extends StatelessWidget {
-  const AcceptTaskScreen({Key? key}) : super(key: key);
+  const AcceptTaskScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -25,11 +25,11 @@ class AcceptTaskScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.green.withOpacity(0.12),
+                color: Colors.green.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Row(
-                children: const [
+              child: const Row(
+                children: [
                   Icon(Icons.check_circle, color: Colors.green, size: 32),
                   SizedBox(width: 12),
                   Expanded(

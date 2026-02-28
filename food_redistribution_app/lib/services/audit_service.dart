@@ -4,13 +4,14 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'dart:io';
 import '../models/enums.dart';
 import '../config/firebase_schema.dart';
+import 'package:flutter/foundation.dart';
 
 export '../models/enums.dart' show AuditEventType, AuditRiskLevel;
 
 class AuditService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  
+
   static final AuditService _instance = AuditService._internal();
   factory AuditService() => _instance;
   AuditService._internal();
@@ -29,7 +30,7 @@ class AuditService {
     try {
       final deviceInfo = await _getDeviceInfo();
       final currentUser = _auth.currentUser;
-      
+
       final auditLog = {
         'eventType': eventType.name,
         'riskLevel': riskLevel.name,
@@ -44,15 +45,16 @@ class AuditService {
         'deviceInfo': deviceInfo,
         'additionalData': additionalData ?? {},
       };
-      
+
       await _firestore.collection(Collections.audit).add(auditLog);
-      
+
       // If high or critical risk, create alert
-      if (riskLevel == AuditRiskLevel.high || riskLevel == AuditRiskLevel.critical) {
+      if (riskLevel == AuditRiskLevel.high ||
+          riskLevel == AuditRiskLevel.critical) {
         await _createSecurityAlert(auditLog);
       }
     } catch (e) {
-      print('Error logging audit event: $e');
+      debugPrint('Error logging audit event: $e');
       // Don't throw - audit logging should not break app functionality
     }
   }
@@ -67,9 +69,11 @@ class AuditService {
     String? ipAddress,
   }) async {
     final riskLevel = success ? AuditRiskLevel.low : AuditRiskLevel.medium;
-    
+
     await logEvent(
-      eventType: eventType == 'login' ? AuditEventType.userLogin : AuditEventType.userLogout,
+      eventType: eventType == 'login'
+          ? AuditEventType.userLogin
+          : AuditEventType.userLogout,
       userId: userId,
       riskLevel: riskLevel,
       additionalData: {
@@ -125,7 +129,7 @@ class AuditService {
       default:
         auditEventType = AuditEventType.adminAction;
     }
-    
+
     await logEvent(
       eventType: auditEventType,
       userId: adminUserId ?? userId,
@@ -151,7 +155,9 @@ class AuditService {
     await logEvent(
       eventType: AuditEventType.dataAccess,
       userId: userId,
-      riskLevel: sensitiveFields?.isNotEmpty == true ? AuditRiskLevel.medium : AuditRiskLevel.low,
+      riskLevel: sensitiveFields?.isNotEmpty == true
+          ? AuditRiskLevel.medium
+          : AuditRiskLevel.low,
       resourceId: resourceId,
       resourceType: resourceType,
       additionalData: {
@@ -195,47 +201,48 @@ class AuditService {
   }) async {
     try {
       Query query = _firestore.collection(Collections.audit);
-      
+
       if (userId != null) {
         query = query.where('userId', isEqualTo: userId);
       }
-      
+
       if (eventType != null) {
         query = query.where('eventType', isEqualTo: eventType.name);
       }
-      
+
       if (startDate != null) {
-        query = query.where('timestamp', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate));
+        query = query.where('timestamp',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(startDate));
       }
-      
+
       if (endDate != null) {
-        query = query.where('timestamp', isLessThanOrEqualTo: Timestamp.fromDate(endDate));
+        query = query.where('timestamp',
+            isLessThanOrEqualTo: Timestamp.fromDate(endDate));
       }
-      
-      final querySnapshot = await query
-          .orderBy('timestamp', descending: true)
-          .limit(limit)
-          .get();
-      
+
+      final querySnapshot =
+          await query.orderBy('timestamp', descending: true).limit(limit).get();
+
       List<Map<String, dynamic>> logs = querySnapshot.docs
           .map((doc) => {'id': doc.id, ...doc.data() as Map<String, dynamic>})
           .toList();
-      
+
       // Filter by risk level if specified (Firestore doesn't support enum ordering)
       if (minRiskLevel != null) {
-        final riskLevels = AuditRiskLevel.values;
+        const riskLevels = AuditRiskLevel.values;
         final minIndex = riskLevels.indexOf(minRiskLevel);
-        
+
         logs = logs.where((log) {
-          final logRiskLevel = AuditRiskLevel.values
-              .firstWhere((level) => level.name == log['riskLevel'], orElse: () => AuditRiskLevel.low);
+          final logRiskLevel = AuditRiskLevel.values.firstWhere(
+              (level) => level.name == log['riskLevel'],
+              orElse: () => AuditRiskLevel.low);
           return riskLevels.indexOf(logRiskLevel) >= minIndex;
         }).toList();
       }
-      
+
       return logs;
     } catch (e) {
-      print('Error getting audit logs: $e');
+      debugPrint('Error getting audit logs: $e');
       return [];
     }
   }
@@ -246,33 +253,35 @@ class AuditService {
     DateTime? endDate,
   }) async {
     try {
-      final start = startDate ?? DateTime.now().subtract(const Duration(days: 30));
+      final start =
+          startDate ?? DateTime.now().subtract(const Duration(days: 30));
       final end = endDate ?? DateTime.now();
-      
+
       final query = await _firestore
           .collection(Collections.audit)
           .where('timestamp', isGreaterThanOrEqualTo: Timestamp.fromDate(start))
           .where('timestamp', isLessThanOrEqualTo: Timestamp.fromDate(end))
           .get();
-      
+
       final logs = query.docs.map((doc) => doc.data()).toList();
-      
+
       // Calculate statistics
       final eventTypeCounts = <String, int>{};
       final riskLevelCounts = <String, int>{};
       final dailyCounts = <String, int>{};
-      
+
       for (final log in logs) {
         final eventType = log['eventType'] as String;
         final riskLevel = log['riskLevel'] as String;
         final timestamp = (log['timestamp'] as Timestamp).toDate();
-        final dateKey = '${timestamp.year}-${timestamp.month.toString().padLeft(2, '0')}-${timestamp.day.toString().padLeft(2, '0')}';
-        
+        final dateKey =
+            '${timestamp.year}-${timestamp.month.toString().padLeft(2, '0')}-${timestamp.day.toString().padLeft(2, '0')}';
+
         eventTypeCounts[eventType] = (eventTypeCounts[eventType] ?? 0) + 1;
         riskLevelCounts[riskLevel] = (riskLevelCounts[riskLevel] ?? 0) + 1;
         dailyCounts[dateKey] = (dailyCounts[dateKey] ?? 0) + 1;
       }
-      
+
       return {
         'totalEvents': logs.length,
         'eventTypeCounts': eventTypeCounts,
@@ -283,7 +292,7 @@ class AuditService {
         'generatedAt': DateTime.now().toIso8601String(),
       };
     } catch (e) {
-      print('Error getting audit statistics: $e');
+      debugPrint('Error getting audit statistics: $e');
       return {};
     }
   }
@@ -304,7 +313,7 @@ class AuditService {
         'createdAt': Timestamp.now(),
       });
     } catch (e) {
-      print('Error creating security alert: $e');
+      debugPrint('Error creating security alert: $e');
     }
   }
 
@@ -312,7 +321,7 @@ class AuditService {
   Future<Map<String, dynamic>> _getDeviceInfo() async {
     try {
       final deviceInfo = DeviceInfoPlugin();
-      
+
       if (Platform.isAndroid) {
         final androidInfo = await deviceInfo.androidInfo;
         return {
@@ -320,7 +329,8 @@ class AuditService {
           'model': androidInfo.model,
           'version': androidInfo.version.release,
           'brand': androidInfo.brand,
-          'userAgent': 'Android/${androidInfo.version.release} ${androidInfo.brand}/${androidInfo.model}',
+          'userAgent':
+              'Android/${androidInfo.version.release} ${androidInfo.brand}/${androidInfo.model}',
         };
       } else if (Platform.isIOS) {
         final iosInfo = await deviceInfo.iosInfo;
@@ -337,7 +347,8 @@ class AuditService {
           'platform': 'Windows',
           'computerName': windowsInfo.computerName,
           'version': '${windowsInfo.majorVersion}.${windowsInfo.minorVersion}',
-          'userAgent': 'Windows/${windowsInfo.majorVersion}.${windowsInfo.minorVersion}',
+          'userAgent':
+              'Windows/${windowsInfo.majorVersion}.${windowsInfo.minorVersion}',
         };
       } else {
         return {
@@ -357,24 +368,24 @@ class AuditService {
   Future<void> cleanupOldLogs({int retentionDays = 90}) async {
     try {
       final cutoffDate = DateTime.now().subtract(Duration(days: retentionDays));
-      
+
       final oldLogsQuery = await _firestore
           .collection(Collections.audit)
           .where('timestamp', isLessThan: Timestamp.fromDate(cutoffDate))
           .limit(500) // Process in batches
           .get();
-      
+
       if (oldLogsQuery.docs.isNotEmpty) {
         final batch = _firestore.batch();
         for (final doc in oldLogsQuery.docs) {
           batch.delete(doc.reference);
         }
         await batch.commit();
-        
-        print('Cleaned up ${oldLogsQuery.docs.length} old audit logs');
+
+        debugPrint('Cleaned up ${oldLogsQuery.docs.length} old audit logs');
       }
     } catch (e) {
-      print('Error cleaning up old audit logs: $e');
+      debugPrint('Error cleaning up old audit logs: $e');
     }
   }
 }

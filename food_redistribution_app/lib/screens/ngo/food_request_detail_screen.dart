@@ -7,10 +7,11 @@ import '../../services/matching_service.dart';
 class FoodRequestDetailScreen extends StatefulWidget {
   final String requestId;
 
-  const FoodRequestDetailScreen({Key? key, required this.requestId}) : super(key: key);
+  const FoodRequestDetailScreen({super.key, required this.requestId});
 
   @override
-  State<FoodRequestDetailScreen> createState() => _FoodRequestDetailScreenState();
+  State<FoodRequestDetailScreen> createState() =>
+      _FoodRequestDetailScreenState();
 }
 
 class _FoodRequestDetailScreenState extends State<FoodRequestDetailScreen> {
@@ -28,7 +29,7 @@ class _FoodRequestDetailScreenState extends State<FoodRequestDetailScreen> {
     return Consumer<NGOProvider>(
       builder: (context, ngoProvider, child) {
         final request = ngoProvider.getRequestById(widget.requestId);
-        
+
         if (request == null) {
           return Scaffold(
             appBar: AppBar(title: const Text('Request Not Found')),
@@ -42,11 +43,15 @@ class _FoodRequestDetailScreenState extends State<FoodRequestDetailScreen> {
             actions: [
               if (request.status == RequestStatus.pending)
                 PopupMenuButton<String>(
-                  onSelected: (value) => _handleAction(value, request, ngoProvider),
+                  onSelected: (value) =>
+                      _handleAction(value, request, ngoProvider),
                   itemBuilder: (context) => [
-                    const PopupMenuItem(value: 'edit', child: Text('Edit Request')),
-                    const PopupMenuItem(value: 'cancel', child: Text('Cancel Request')),
-                    const PopupMenuItem(value: 'find_matches', child: Text('Find Matches')),
+                    const PopupMenuItem(
+                        value: 'edit', child: Text('Edit Request')),
+                    const PopupMenuItem(
+                        value: 'cancel', child: Text('Cancel Request')),
+                    const PopupMenuItem(
+                        value: 'find_matches', child: Text('Find Matches')),
                   ],
                 ),
             ],
@@ -61,20 +66,24 @@ class _FoodRequestDetailScreenState extends State<FoodRequestDetailScreen> {
                   children: [
                     Chip(
                       label: Text(request.status.name.toUpperCase()),
-                      backgroundColor: _getStatusColor(request.status).withOpacity(0.1),
-                      labelStyle: TextStyle(color: _getStatusColor(request.status)),
+                      backgroundColor: _getStatusColor(request.status)
+                          .withValues(alpha: 0.1),
+                      labelStyle:
+                          TextStyle(color: _getStatusColor(request.status)),
                     ),
                     const SizedBox(width: 8),
                     Chip(
                       label: Text(request.urgency.name.toUpperCase()),
-                      backgroundColor: _getUrgencyColor(request.urgency).withOpacity(0.1),
-                      labelStyle: TextStyle(color: _getUrgencyColor(request.urgency)),
+                      backgroundColor: _getUrgencyColor(request.urgency)
+                          .withValues(alpha: 0.1),
+                      labelStyle:
+                          TextStyle(color: _getUrgencyColor(request.urgency)),
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Basic information card
                 Card(
                   child: Padding(
@@ -88,17 +97,21 @@ class _FoodRequestDetailScreenState extends State<FoodRequestDetailScreen> {
                         ),
                         const SizedBox(height: 12),
                         _buildInfoRow('Description', request.description),
-                        _buildInfoRow('Quantity', '${request.requiredQuantity} ${request.unit}'),
-                        _buildInfoRow('Expected Beneficiaries', request.expectedBeneficiaries.toString()),
-                        _buildInfoRow('Needed By', request.neededBy.toString().substring(0, 16)),
-                        _buildInfoRow('Created', request.createdAt.toString().substring(0, 16)),
+                        _buildInfoRow('Quantity',
+                            '${request.requiredQuantity} ${request.unit}'),
+                        _buildInfoRow('Expected Beneficiaries',
+                            request.expectedBeneficiaries.toString()),
+                        _buildInfoRow('Needed By',
+                            request.neededBy.toString().substring(0, 16)),
+                        _buildInfoRow('Created',
+                            request.createdAt.toString().substring(0, 16)),
                       ],
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Food requirements card
                 Card(
                   child: Padding(
@@ -111,46 +124,48 @@ class _FoodRequestDetailScreenState extends State<FoodRequestDetailScreen> {
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
                         const SizedBox(height: 12),
-                        
-                        const Text('Required Food Types:', style: TextStyle(fontWeight: FontWeight.w500)),
+                        const Text('Required Food Types:',
+                            style: TextStyle(fontWeight: FontWeight.w500)),
                         const SizedBox(height: 8),
                         Wrap(
                           spacing: 8,
                           runSpacing: 4,
-                          children: request.requiredFoodTypes.map((type) => 
-                            Chip(label: Text(type.name))).toList(),
+                          children: request.requiredFoodTypes
+                              .map((type) => Chip(label: Text(type.name)))
+                              .toList(),
                         ),
-                        
                         if (request.dietaryRestrictions.isNotEmpty) ...[
                           const SizedBox(height: 16),
-                          const Text('Dietary Restrictions:', style: TextStyle(fontWeight: FontWeight.w500)),
+                          const Text('Dietary Restrictions:',
+                              style: TextStyle(fontWeight: FontWeight.w500)),
                           const SizedBox(height: 8),
                           Wrap(
                             spacing: 8,
                             runSpacing: 4,
-                            children: request.dietaryRestrictions.map((restriction) => 
-                              Chip(
-                                label: Text(restriction),
-                                backgroundColor: Colors.orange.withOpacity(0.1),
-                              )).toList(),
+                            children: request.dietaryRestrictions
+                                .map((restriction) => Chip(
+                                      label: Text(restriction),
+                                      backgroundColor:
+                                          Colors.orange.withValues(alpha: 0.1),
+                                    ))
+                                .toList(),
                           ),
                         ],
-                        
                         const SizedBox(height: 16),
                         Row(
                           children: [
                             Icon(
-                              request.requiresRefrigeration 
-                                  ? Icons.ac_unit 
+                              request.requiresRefrigeration
+                                  ? Icons.ac_unit
                                   : Icons.room_outlined,
-                              color: request.requiresRefrigeration 
-                                  ? Colors.blue 
+                              color: request.requiresRefrigeration
+                                  ? Colors.blue
                                   : Colors.grey,
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              request.requiresRefrigeration 
-                                  ? 'Requires Refrigeration' 
+                              request.requiresRefrigeration
+                                  ? 'Requires Refrigeration'
                                   : 'No Refrigeration Required',
                             ),
                           ],
@@ -159,9 +174,9 @@ class _FoodRequestDetailScreenState extends State<FoodRequestDetailScreen> {
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Serving population card
                 Card(
                   child: Padding(
@@ -177,25 +192,28 @@ class _FoodRequestDetailScreenState extends State<FoodRequestDetailScreen> {
                         Wrap(
                           spacing: 8,
                           runSpacing: 4,
-                          children: request.servingPopulation.map((population) => 
-                            Chip(
-                              label: Text(population),
-                              backgroundColor: Colors.green.withOpacity(0.1),
-                            )).toList(),
+                          children: request.servingPopulation
+                              .map((population) => Chip(
+                                    label: Text(population),
+                                    backgroundColor:
+                                        Colors.green.withValues(alpha: 0.1),
+                                  ))
+                              .toList(),
                         ),
                       ],
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Matched donation (if matched)
-                if (request.matchedDonationId != null) 
+                if (request.matchedDonationId != null)
                   _buildMatchedDonationCard(request, ngoProvider),
-                
+
                 // Potential matches (if pending)
-                if (request.status == RequestStatus.pending && ngoProvider.potentialMatches.isNotEmpty)
+                if (request.status == RequestStatus.pending &&
+                    ngoProvider.potentialMatches.isNotEmpty)
                   _buildPotentialMatchesCard(ngoProvider, request),
               ],
             ),
@@ -224,11 +242,12 @@ class _FoodRequestDetailScreenState extends State<FoodRequestDetailScreen> {
     );
   }
 
-  Widget _buildMatchedDonationCard(FoodRequest request, NGOProvider ngoProvider) {
+  Widget _buildMatchedDonationCard(
+      FoodRequest request, NGOProvider ngoProvider) {
     final donation = ngoProvider.getDonationById(request.matchedDonationId!);
-    
+
     return Card(
-      color: Colors.green.withOpacity(0.1),
+      color: Colors.green.withValues(alpha: 0.1),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -236,20 +255,23 @@ class _FoodRequestDetailScreenState extends State<FoodRequestDetailScreen> {
           children: [
             Row(
               children: [
-                Icon(Icons.check_circle, color: Colors.green),
+                const Icon(Icons.check_circle, color: Colors.green),
                 const SizedBox(width: 8),
                 Text(
                   'Matched Donation',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.green),
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleLarge
+                      ?.copyWith(color: Colors.green),
                 ),
               ],
             ),
-            
             if (donation != null) ...[
               const SizedBox(height: 12),
               Text('Donation: ${donation.title}'),
               Text('Quantity: ${donation.quantity} ${donation.unit}'),
-                Text('Expires: ${donation.expiresAt.toString().substring(0, 16)}'),
+              Text(
+                  'Expires: ${donation.expiresAt.toString().substring(0, 16)}'),
               const SizedBox(height: 8),
               ElevatedButton(
                 onPressed: () {
@@ -268,7 +290,8 @@ class _FoodRequestDetailScreenState extends State<FoodRequestDetailScreen> {
     );
   }
 
-  Widget _buildPotentialMatchesCard(NGOProvider ngoProvider, FoodRequest request) {
+  Widget _buildPotentialMatchesCard(
+      NGOProvider ngoProvider, FoodRequest request) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -283,28 +306,29 @@ class _FoodRequestDetailScreenState extends State<FoodRequestDetailScreen> {
                 ),
                 const Spacer(),
                 TextButton(
-                  onPressed: () => ngoProvider.findPotentialMatches(widget.requestId),
+                  onPressed: () =>
+                      ngoProvider.findPotentialMatches(widget.requestId),
                   child: const Text('Refresh'),
                 ),
               ],
             ),
-            
             const SizedBox(height: 12),
-            
-            ...ngoProvider.potentialMatches.take(5).map((match) => 
-              _buildMatchCard(match, request, ngoProvider)),
+            ...ngoProvider.potentialMatches
+                .take(5)
+                .map((match) => _buildMatchCard(match, request, ngoProvider)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildMatchCard(RequestDonationMatchingResult match, FoodRequest request, NGOProvider ngoProvider) {
+  Widget _buildMatchCard(RequestDonationMatchingResult match,
+      FoodRequest request, NGOProvider ngoProvider) {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: _getScoreColor(match.score).withOpacity(0.1),
+          backgroundColor: _getScoreColor(match.score).withValues(alpha: 0.1),
           child: Text(
             '${(match.score * 100).round()}%',
             style: TextStyle(
@@ -318,7 +342,8 @@ class _FoodRequestDetailScreenState extends State<FoodRequestDetailScreen> {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('${match.donation.quantity} ${match.donation.unit} • ${match.distance.toStringAsFixed(1)}km away'),
+            Text(
+                '${match.donation.quantity} ${match.donation.unit} • ${match.distance.toStringAsFixed(1)}km away'),
             Text(
               match.reasoning,
               style: TextStyle(color: Colors.grey[600], fontSize: 12),
@@ -367,7 +392,8 @@ class _FoodRequestDetailScreenState extends State<FoodRequestDetailScreen> {
     return Colors.red;
   }
 
-  void _handleAction(String action, FoodRequest request, NGOProvider ngoProvider) {
+  void _handleAction(
+      String action, FoodRequest request, NGOProvider ngoProvider) {
     switch (action) {
       case 'edit':
         // Navigate to edit screen
@@ -389,7 +415,8 @@ class _FoodRequestDetailScreenState extends State<FoodRequestDetailScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Cancel Request'),
-        content: const Text('Are you sure you want to cancel this food request?'),
+        content:
+            const Text('Are you sure you want to cancel this food request?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -398,26 +425,27 @@ class _FoodRequestDetailScreenState extends State<FoodRequestDetailScreen> {
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(context);
-              
+
               final success = await ngoProvider.cancelFoodRequest(
                 request.id,
                 request.ngoId,
                 'Cancelled by NGO',
               );
-              
+
               if (success) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Request cancelled successfully')),
-                  );
-                  Navigator.pop(context);
-                }
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                      content: Text('Request cancelled successfully')),
+                );
+                Navigator.pop(context);
               } else {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(ngoProvider.errorMessage ?? 'Failed to cancel request')),
-                  );
-                }
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                      content: Text(ngoProvider.errorMessage ??
+                          'Failed to cancel request')),
+                );
               }
             },
             child: const Text('Yes, Cancel'),
@@ -427,12 +455,14 @@ class _FoodRequestDetailScreenState extends State<FoodRequestDetailScreen> {
     );
   }
 
-  void _acceptMatch(RequestDonationMatchingResult match, FoodRequest request, NGOProvider ngoProvider) {
+  void _acceptMatch(RequestDonationMatchingResult match, FoodRequest request,
+      NGOProvider ngoProvider) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Accept Match'),
-        content: Text('Accept this donation match?\n\nDonation: ${match.donation.title}\nCompatibility: ${(match.score * 100).round()}%'),
+        content: Text(
+            'Accept this donation match?\n\nDonation: ${match.donation.title}\nCompatibility: ${(match.score * 100).round()}%'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -441,25 +471,25 @@ class _FoodRequestDetailScreenState extends State<FoodRequestDetailScreen> {
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(context);
-              
+
               final success = await ngoProvider.acceptDonationMatch(
                 request.id,
                 match.donationId,
                 request.ngoId,
               );
-              
+
               if (success) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Match accepted successfully!')),
-                  );
-                }
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Match accepted successfully!')),
+                );
               } else {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(ngoProvider.errorMessage ?? 'Failed to accept match')),
-                  );
-                }
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                      content: Text(ngoProvider.errorMessage ??
+                          'Failed to accept match')),
+                );
               }
             },
             child: const Text('Accept'),

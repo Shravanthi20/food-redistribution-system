@@ -1,19 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-enum RequestStatus {
-  pending,
-  matched,
-  fulfilled,
-  cancelled,
-  expired
-}
+enum RequestStatus { pending, matched, fulfilled, cancelled, expired }
 
-enum RequestUrgency {
-  low,
-  medium,
-  high,
-  critical
-}
+enum RequestUrgency { low, medium, high, critical }
 
 enum FoodCategory {
   vegetables,
@@ -74,18 +63,19 @@ class FoodRequest {
 
   factory FoodRequest.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
-    
+
     return FoodRequest(
       id: doc.id,
       ngoId: data['ngoId'] ?? '',
       title: data['title'] ?? '',
       description: data['description'] ?? '',
       requiredFoodTypes: (data['requiredFoodTypes'] as List<dynamic>?)
-          ?.map((e) => FoodCategory.values.firstWhere(
-                (category) => category.name == e,
-                orElse: () => FoodCategory.other,
-              ))
-          .toList() ?? [],
+              ?.map((e) => FoodCategory.values.firstWhere(
+                    (category) => category.name == e,
+                    orElse: () => FoodCategory.other,
+                  ))
+              .toList() ??
+          [],
       requiredQuantity: data['requiredQuantity'] ?? 0,
       unit: data['unit'] ?? 'servings',
       urgency: RequestUrgency.values.firstWhere(
@@ -105,8 +95,8 @@ class FoodRequest {
       matchedDonationId: data['matchedDonationId'],
       assignedVolunteerId: data['assignedVolunteerId'],
       createdAt: (data['createdAt'] as Timestamp).toDate(),
-      updatedAt: data['updatedAt'] != null 
-          ? (data['updatedAt'] as Timestamp).toDate() 
+      updatedAt: data['updatedAt'] != null
+          ? (data['updatedAt'] as Timestamp).toDate()
           : null,
       metadata: data['metadata'] ?? {},
     );
@@ -119,18 +109,19 @@ class FoodRequest {
       title: data['title'] ?? '',
       description: data['description'] ?? '',
       requiredFoodTypes: (data['requiredFoodTypes'] as List<dynamic>?)
-          ?.map((e) => FoodCategory.values.firstWhere(
-                (category) => category.name == e,
-                orElse: () => FoodCategory.other,
-              ))
-          .toList() ?? [],
+              ?.map((e) => FoodCategory.values.firstWhere(
+                    (category) => category.name == e,
+                    orElse: () => FoodCategory.other,
+                  ))
+              .toList() ??
+          [],
       requiredQuantity: data['requiredQuantity'] ?? 0,
       unit: data['unit'] ?? 'servings',
       urgency: RequestUrgency.values.firstWhere(
         (e) => e.name == data['urgency'],
         orElse: () => RequestUrgency.medium,
       ),
-      neededBy: data['neededBy'] is Timestamp 
+      neededBy: data['neededBy'] is Timestamp
           ? (data['neededBy'] as Timestamp).toDate()
           : DateTime.parse(data['neededBy']),
       deliveryLocation: data['deliveryLocation'] ?? {},
@@ -144,11 +135,11 @@ class FoodRequest {
       dietaryRestrictions: List<String>.from(data['dietaryRestrictions'] ?? []),
       matchedDonationId: data['matchedDonationId'],
       assignedVolunteerId: data['assignedVolunteerId'],
-      createdAt: data['createdAt'] is Timestamp 
+      createdAt: data['createdAt'] is Timestamp
           ? (data['createdAt'] as Timestamp).toDate()
           : DateTime.parse(data['createdAt']),
-      updatedAt: data['updatedAt'] != null 
-          ? (data['updatedAt'] is Timestamp 
+      updatedAt: data['updatedAt'] != null
+          ? (data['updatedAt'] is Timestamp
               ? (data['updatedAt'] as Timestamp).toDate()
               : DateTime.parse(data['updatedAt']))
           : null,
@@ -216,8 +207,10 @@ class FoodRequest {
       deliveryLocation: deliveryLocation ?? this.deliveryLocation,
       status: status ?? this.status,
       servingPopulation: servingPopulation ?? this.servingPopulation,
-      expectedBeneficiaries: expectedBeneficiaries ?? this.expectedBeneficiaries,
-      requiresRefrigeration: requiresRefrigeration ?? this.requiresRefrigeration,
+      expectedBeneficiaries:
+          expectedBeneficiaries ?? this.expectedBeneficiaries,
+      requiresRefrigeration:
+          requiresRefrigeration ?? this.requiresRefrigeration,
       dietaryRestrictions: dietaryRestrictions ?? this.dietaryRestrictions,
       matchedDonationId: matchedDonationId ?? this.matchedDonationId,
       assignedVolunteerId: assignedVolunteerId ?? this.assignedVolunteerId,

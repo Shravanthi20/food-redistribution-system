@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart'; // [NEW]
-import 'package:google_maps_flutter/google_maps_flutter.dart'; // [NEW] For LatLng
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../models/user.dart';
 import '../../services/user_service.dart';
 
 class UserSelectionScreen extends StatefulWidget {
   final UserRole role;
   final String title;
-  final LatLng? origin; // [NEW]
+  final LatLng? origin;
 
   const UserSelectionScreen({
-    Key? key,
+    super.key,
     required this.role,
     required this.title,
     this.origin,
-  }) : super(key: key);
+  });
 
   @override
   State<UserSelectionScreen> createState() => _UserSelectionScreenState();
@@ -33,7 +33,7 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
     _loadUsers();
     _searchController.addListener(_filterUsers);
   }
-  
+
   @override
   void dispose() {
     _searchController.dispose();
@@ -43,32 +43,28 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
   Future<void> _loadUsers() async {
     try {
       final users = await _userService.getUsersByRole(widget.role);
-      
+
       // [NEW] Proximity Sorting
       if (widget.origin != null) {
         for (var user in users) {
-           // Assume user has 'location' field or we might need to fetch it
-           // For this implementation, I'll check if 'location' exists in user map
-           // user['location'] might be a GeoPoint from Firestore or Map
-           double distance = double.infinity;
-           
-           if (user['location'] != null) {
-              // Handle Firestore GeoPoint or Map
-              double uLat = 0, uLng = 0;
-              if (user['location'] is Map) {
-                uLat = (user['location']['latitude'] as num).toDouble();
-                uLng = (user['location']['longitude'] as num).toDouble();
-              } 
-              // Add other checks if needed
-              
-              distance = Geolocator.distanceBetween(
-                widget.origin!.latitude, 
-                widget.origin!.longitude, 
-                uLat, 
-                uLng
-              );
-           }
-           user['distanceMetrics'] = distance;
+          // Assume user has 'location' field or we might need to fetch it
+          // For this implementation, I'll check if 'location' exists in user map
+          // user['location'] might be a GeoPoint from Firestore or Map
+          double distance = double.infinity;
+
+          if (user['location'] != null) {
+            // Handle Firestore GeoPoint or Map
+            double uLat = 0, uLng = 0;
+            if (user['location'] is Map) {
+              uLat = (user['location']['latitude'] as num).toDouble();
+              uLng = (user['location']['longitude'] as num).toDouble();
+            }
+            // Add other checks if needed
+
+            distance = Geolocator.distanceBetween(
+                widget.origin!.latitude, widget.origin!.longitude, uLat, uLng);
+          }
+          user['distanceMetrics'] = distance;
         }
 
         // Sort
@@ -85,7 +81,7 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
         _isLoading = false;
       });
     } catch (e) {
-      print('Error loading users: $e');
+      debugPrint('Error loading users: $e');
       setState(() => _isLoading = false);
     }
   }
@@ -95,7 +91,8 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
     setState(() {
       _filteredUsers = _users.where((user) {
         final email = (user['email'] ?? '').toString().toLowerCase();
-        final name = (user['name'] ?? user['email'] ?? '').toString().toLowerCase();
+        final name =
+            (user['name'] ?? user['email'] ?? '').toString().toLowerCase();
         return email.contains(query) || name.contains(query);
       }).toList();
     });
@@ -127,16 +124,18 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
             ),
           ),
           if (widget.origin != null)
-             Padding(
-               padding: const EdgeInsets.symmetric(horizontal: 16),
-               child: Row(
-                 children: const [
-                   Icon(Icons.sort, size: 16, color: Colors.blue),
-                   SizedBox(width: 4),
-                   Text('Sorted by proximity', style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold)),
-                 ],
-               ),
-             ),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  Icon(Icons.sort, size: 16, color: Colors.blue),
+                  SizedBox(width: 4),
+                  Text('Sorted by proximity',
+                      style: TextStyle(
+                          color: Colors.blue, fontWeight: FontWeight.bold)),
+                ],
+              ),
+            ),
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
@@ -147,10 +146,13 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
                         itemBuilder: (context, index) {
                           final user = _filteredUsers[index];
                           final id = user['id'];
-                          final displayName = user['name'] ?? user['email'] ?? 'Unknown User'; 
+                          final displayName =
+                              user['name'] ?? user['email'] ?? 'Unknown User';
                           final subtitle = user['email'] ?? '';
-                          
-                          final distanceVal = user['distanceMetrics'] as double? ?? double.infinity;
+
+                          final distanceVal =
+                              user['distanceMetrics'] as double? ??
+                                  double.infinity;
                           final distanceStr = _formatDistance(distanceVal);
 
                           return ListTile(

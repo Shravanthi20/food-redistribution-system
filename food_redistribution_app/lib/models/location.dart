@@ -48,7 +48,9 @@ class Location {
   }
 
   String get fullAddress {
-    final parts = [address, city, state, zipCode].where((part) => part != null && part.isNotEmpty).toList();
+    final parts = [address, city, state, zipCode]
+        .where((part) => part != null && part.isNotEmpty)
+        .toList();
     return parts.join(', ');
   }
 
@@ -63,19 +65,21 @@ class Location {
   /// Returns distance in kilometers
   double distanceTo(Location other) {
     const double earthRadius = 6371.0; // km
-    
+
     // Convert to radians
     final lat1Rad = latitude * math.pi / 180;
     final lat2Rad = other.latitude * math.pi / 180;
     final deltaLat = (other.latitude - latitude) * math.pi / 180;
     final deltaLon = (other.longitude - longitude) * math.pi / 180;
-    
+
     // Haversine formula
     final a = math.sin(deltaLat / 2) * math.sin(deltaLat / 2) +
-              math.cos(lat1Rad) * math.cos(lat2Rad) *
-              math.sin(deltaLon / 2) * math.sin(deltaLon / 2);
+        math.cos(lat1Rad) *
+            math.cos(lat2Rad) *
+            math.sin(deltaLon / 2) *
+            math.sin(deltaLon / 2);
     final c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
-    
+
     return earthRadius * c;
   }
 }
