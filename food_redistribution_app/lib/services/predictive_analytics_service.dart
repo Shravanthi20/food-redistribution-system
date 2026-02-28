@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'dart:math' as math;
 
 /// Predictive Analytics Service
@@ -22,51 +23,52 @@ class PredictiveAnalyticsService {
     try {
       // Get historical donation data for the past 30 days
       final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));
-      
+
       Query query = _firestore
           .collection('food_donations')
           .where('createdAt', isGreaterThan: Timestamp.fromDate(thirtyDaysAgo));
-      
+
       final snapshot = await query.get();
-      
+
       // Analyze patterns
       final dailyCounts = <int, int>{};
       final hourlyDistribution = <int, int>{};
-      
+
       for (final doc in snapshot.docs) {
-        final data = doc.data()! as Map<String, dynamic>;
+        final data = doc.data() as Map<String, dynamic>;
         final createdAt = (data['createdAt'] as Timestamp).toDate();
-        
+
         // Count by day of week (0 = Monday, 6 = Sunday)
         final dayOfWeek = createdAt.weekday - 1;
         dailyCounts[dayOfWeek] = (dailyCounts[dayOfWeek] ?? 0) + 1;
-        
+
         // Count by hour
         final hour = createdAt.hour;
         hourlyDistribution[hour] = (hourlyDistribution[hour] ?? 0) + 1;
       }
-      
+
       // Calculate average donations per day
       final avgDonationsPerDay = snapshot.docs.length / 30;
-      
+
       // Predict demand for next N days
       final predictions = <DailyPrediction>[];
       final now = DateTime.now();
-      
+
       for (int i = 0; i < forecastDays; i++) {
         final targetDate = now.add(Duration(days: i + 1));
         final dayOfWeek = targetDate.weekday - 1;
-        
+
         // Use historical pattern with some randomness for realism
         final baseVolume = dailyCounts[dayOfWeek] ?? avgDonationsPerDay.toInt();
-        final adjustedVolume = (baseVolume * (0.8 + math.Random().nextDouble() * 0.4)).round();
-        
+        final adjustedVolume =
+            (baseVolume * (0.8 + math.Random().nextDouble() * 0.4)).round();
+
         // Estimate volunteers needed (1 volunteer per 2-3 donations)
         final volunteersNeeded = (adjustedVolume / 2.5).ceil();
-        
+
         // Peak hours based on historical data
         final peakHours = _calculatePeakHours(hourlyDistribution);
-        
+
         predictions.add(DailyPrediction(
           date: targetDate,
           predictedDonations: adjustedVolume,
@@ -75,7 +77,7 @@ class PredictiveAnalyticsService {
           confidenceScore: _calculateConfidence(snapshot.docs.length),
         ));
       }
-      
+
       return VolunteerDemandForecast(
         generatedAt: DateTime.now(),
         forecastDays: forecastDays,
@@ -85,7 +87,7 @@ class PredictiveAnalyticsService {
         trend: _calculateTrend(snapshot.docs),
       );
     } catch (e) {
-      print('Error predicting volunteer demand: $e');
+      debugPrint('Error predicting volunteer demand: $e');
       rethrow;
     }
   }
@@ -101,12 +103,12 @@ class PredictiveAnalyticsService {
   }) async {
     try {
       final startDate = DateTime.now().subtract(Duration(days: historicalDays));
-      
+
       final snapshot = await _firestore
           .collection('food_donations')
           .where('createdAt', isGreaterThan: Timestamp.fromDate(startDate))
           .get();
-      
+
       // Analyze by food type
       final foodTypeDistribution = <String, int>{};
       final weeklyTrends = <int, int>{};
@@ -114,30 +116,30 @@ class PredictiveAnalyticsService {
       int totalQuantity = 0;
       int expiredCount = 0;
       int deliveredCount = 0;
-      
+
       for (final doc in snapshot.docs) {
-        final data = doc.data()! as Map<String, dynamic>;
+        final data = doc.data();
         final foodTypes = data['foodTypes'] as List<dynamic>? ?? [];
         final quantity = data['quantity'] as int? ?? 0;
         final status = data['status'] as String?;
         final createdAt = (data['createdAt'] as Timestamp).toDate();
-        
+
         totalQuantity += quantity;
-        
+
         // Count by food type
         for (final type in foodTypes) {
-          foodTypeDistribution[type.toString()] = 
+          foodTypeDistribution[type.toString()] =
               (foodTypeDistribution[type.toString()] ?? 0) + quantity;
         }
-        
+
         // Week number in year
         final weekNum = _weekNumber(createdAt);
         weeklyTrends[weekNum] = (weeklyTrends[weekNum] ?? 0) + quantity;
-        
+
         // Month
-        monthlyVolumes[createdAt.month] = 
+        monthlyVolumes[createdAt.month] =
             (monthlyVolumes[createdAt.month] ?? 0) + quantity;
-        
+
         // Status tracking
         if (status == 'expired' || status == 'cancelled') {
           expiredCount++;
@@ -145,16 +147,16 @@ class PredictiveAnalyticsService {
           deliveredCount++;
         }
       }
-      
+
       // Calculate waste rate
-      final wasteRate = snapshot.docs.isNotEmpty 
+      final wasteRate = snapshot.docs.isNotEmpty
           ? (expiredCount / snapshot.docs.length * 100)
           : 0.0;
-      
+
       // Find top food types
       final sortedTypes = foodTypeDistribution.entries.toList()
         ..sort((a, b) => b.value.compareTo(a.value));
-      
+
       return SurplusTrendAnalysis(
         generatedAt: DateTime.now(),
         periodDays: historicalDays,
@@ -164,16 +166,20 @@ class PredictiveAnalyticsService {
         deliveredCount: deliveredCount,
         expiredCount: expiredCount,
         wasteRate: wasteRate,
-        topFoodTypes: sortedTypes.take(5).map((e) => 
-            FoodTypeTrend(type: e.key, quantity: e.value)).toList(),
-        weeklyTrend: weeklyTrends.entries.map((e) => 
-            WeeklyData(weekNumber: e.key, quantity: e.value)).toList(),
-        monthlyTrend: monthlyVolumes.entries.map((e) => 
-            MonthlyData(month: e.key, quantity: e.value)).toList(),
+        topFoodTypes: sortedTypes
+            .take(5)
+            .map((e) => FoodTypeTrend(type: e.key, quantity: e.value))
+            .toList(),
+        weeklyTrend: weeklyTrends.entries
+            .map((e) => WeeklyData(weekNumber: e.key, quantity: e.value))
+            .toList(),
+        monthlyTrend: monthlyVolumes.entries
+            .map((e) => MonthlyData(month: e.key, quantity: e.value))
+            .toList(),
         growthRate: _calculateGrowthRate(weeklyTrends),
       );
     } catch (e) {
-      print('Error analyzing surplus trends: $e');
+      debugPrint('Error analyzing surplus trends: $e');
       rethrow;
     }
   }
@@ -191,95 +197,96 @@ class PredictiveAnalyticsService {
     try {
       // Get recent deliveries by region
       final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));
-      
+
       final donationsSnapshot = await _firestore
           .collection('food_donations')
           .where('createdAt', isGreaterThan: Timestamp.fromDate(thirtyDaysAgo))
           .get();
-      
+
       final volunteersSnapshot = await _firestore
           .collection('volunteer_profiles')
           .where('isAvailable', isEqualTo: true)
           .get();
-      
+
       // Group by region (using city as approximation)
       final regionData = <String, RegionStats>{};
-      
+
       for (final doc in donationsSnapshot.docs) {
-        final data = doc.data()! as Map<String, dynamic>;
+        final data = doc.data();
         final address = data['pickupAddress'] as String? ?? '';
         final status = data['status'] as String?;
-        
+
         // Extract region from address (simplified)
         final region = _extractRegion(address);
-        
+
         regionData.putIfAbsent(region, () => RegionStats());
         regionData[region]!.totalDeliveries++;
-        
+
         if (status == 'delivered') {
           regionData[region]!.successfulDeliveries++;
         } else if (status == 'expired' || status == 'cancelled') {
           regionData[region]!.failedDeliveries++;
         }
       }
-      
+
       // Count volunteers by region
       for (final doc in volunteersSnapshot.docs) {
-        final data = doc.data()! as Map<String, dynamic>;
+        final data = doc.data();
         final city = data['city'] as String? ?? 'Unknown';
-        
+
         regionData.putIfAbsent(city, () => RegionStats());
         regionData[city]!.availableVolunteers++;
       }
-      
+
       // Calculate risk scores
       final indicators = <RegionalRiskIndicator>[];
-      
+
       for (final entry in regionData.entries) {
         final stats = entry.value;
-        
+
         // Calculate risk score (0-100, higher = more risk)
         double riskScore = 0;
-        
+
         // Factor 1: Failure rate (0-40 points)
         if (stats.totalDeliveries > 0) {
           final failureRate = stats.failedDeliveries / stats.totalDeliveries;
           riskScore += failureRate * 40;
         }
-        
+
         // Factor 2: Volunteer shortage (0-30 points)
         final expectedVolunteers = stats.totalDeliveries / 30; // ~1 per day
         if (stats.availableVolunteers < expectedVolunteers) {
-          final shortage = (expectedVolunteers - stats.availableVolunteers) / expectedVolunteers;
+          final shortage = (expectedVolunteers - stats.availableVolunteers) /
+              expectedVolunteers;
           riskScore += shortage.clamp(0, 1) * 30;
         }
-        
+
         // Factor 3: Low volume (0-30 points) - areas with few deliveries may lack coverage
         if (stats.totalDeliveries < 10) {
           riskScore += (10 - stats.totalDeliveries) * 3;
         }
-        
+
         final riskLevel = _getRiskLevel(riskScore);
-        
+
         indicators.add(RegionalRiskIndicator(
           region: entry.key,
           riskScore: riskScore.clamp(0, 100),
           riskLevel: riskLevel,
           totalDeliveries: stats.totalDeliveries,
-          successRate: stats.totalDeliveries > 0 
-              ? (stats.successfulDeliveries / stats.totalDeliveries * 100) 
+          successRate: stats.totalDeliveries > 0
+              ? (stats.successfulDeliveries / stats.totalDeliveries * 100)
               : 0,
           availableVolunteers: stats.availableVolunteers,
           recommendations: _getRecommendations(riskLevel, stats),
         ));
       }
-      
+
       // Sort by risk score (highest first)
       indicators.sort((a, b) => b.riskScore.compareTo(a.riskScore));
-      
+
       return indicators;
     } catch (e) {
-      print('Error getting regional risk indicators: $e');
+      debugPrint('Error getting regional risk indicators: $e');
       rethrow;
     }
   }
@@ -295,31 +302,31 @@ class PredictiveAnalyticsService {
     try {
       // Analyze historical performance
       final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));
-      
+
       final snapshot = await _firestore
           .collection('food_donations')
           .where('status', isEqualTo: 'delivered')
           .where('createdAt', isGreaterThan: Timestamp.fromDate(thirtyDaysAgo))
           .get();
-      
+
       // Calculate average metrics
       double totalDurationMinutes = 0;
       int count = 0;
-      
+
       for (final doc in snapshot.docs) {
-        final data = doc.data()! as Map<String, dynamic>;
+        final data = doc.data();
         final createdAt = (data['createdAt'] as Timestamp?)?.toDate();
         final deliveredAt = (data['deliveredAt'] as Timestamp?)?.toDate();
-        
+
         if (createdAt != null && deliveredAt != null) {
           totalDurationMinutes += deliveredAt.difference(createdAt).inMinutes;
           count++;
         }
       }
-      
+
       final avgDeliveryTime = count > 0 ? totalDurationMinutes / count : 120.0;
       final successRate = snapshot.docs.length / 30; // Per day
-      
+
       return DeliveryPerformanceForecast(
         generatedAt: DateTime.now(),
         forecastDays: forecastDays,
@@ -334,7 +341,7 @@ class PredictiveAnalyticsService {
         ],
       );
     } catch (e) {
-      print('Error forecasting delivery performance: $e');
+      debugPrint('Error forecasting delivery performance: $e');
       rethrow;
     }
   }
@@ -359,14 +366,14 @@ class PredictiveAnalyticsService {
 
   String _calculateTrend(List<QueryDocumentSnapshot> docs) {
     if (docs.length < 10) return 'insufficient_data';
-    
+
     // Compare first half to second half
     final midpoint = docs.length ~/ 2;
     final firstHalf = docs.take(midpoint).length;
     final secondHalf = docs.skip(midpoint).length;
-    
+
     final growth = (secondHalf - firstHalf) / firstHalf;
-    
+
     if (growth > 0.1) return 'increasing';
     if (growth < -0.1) return 'decreasing';
     return 'stable';
@@ -380,11 +387,11 @@ class PredictiveAnalyticsService {
 
   double _calculateGrowthRate(Map<int, int> weeklyTrends) {
     if (weeklyTrends.length < 2) return 0;
-    
+
     final weeks = weeklyTrends.keys.toList()..sort();
     final firstWeek = weeklyTrends[weeks.first] ?? 1;
     final lastWeek = weeklyTrends[weeks.last] ?? 1;
-    
+
     return ((lastWeek - firstWeek) / firstWeek * 100);
   }
 
@@ -411,27 +418,27 @@ class PredictiveAnalyticsService {
 
   List<String> _getRecommendations(String riskLevel, RegionStats stats) {
     final recommendations = <String>[];
-    
+
     if (stats.availableVolunteers < 3) {
       recommendations.add('Recruit more volunteers in this area');
     }
-    
+
     if (stats.failedDeliveries > stats.successfulDeliveries * 0.2) {
       recommendations.add('Investigate delivery failure causes');
     }
-    
+
     if (stats.totalDeliveries < 5) {
       recommendations.add('Increase awareness and outreach in this region');
     }
-    
+
     if (riskLevel == 'critical') {
       recommendations.add('Immediate attention required for this region');
     }
-    
+
     if (recommendations.isEmpty) {
       recommendations.add('Continue monitoring - region performing well');
     }
-    
+
     return recommendations;
   }
 }
@@ -458,13 +465,13 @@ class VolunteerDemandForecast {
   });
 
   Map<String, dynamic> toJson() => {
-    'generatedAt': generatedAt.toIso8601String(),
-    'forecastDays': forecastDays,
-    'region': region,
-    'predictions': predictions.map((p) => p.toJson()).toList(),
-    'historicalAverage': historicalAverage,
-    'trend': trend,
-  };
+        'generatedAt': generatedAt.toIso8601String(),
+        'forecastDays': forecastDays,
+        'region': region,
+        'predictions': predictions.map((p) => p.toJson()).toList(),
+        'historicalAverage': historicalAverage,
+        'trend': trend,
+      };
 }
 
 class DailyPrediction {
@@ -483,12 +490,12 @@ class DailyPrediction {
   });
 
   Map<String, dynamic> toJson() => {
-    'date': date.toIso8601String(),
-    'predictedDonations': predictedDonations,
-    'volunteersNeeded': volunteersNeeded,
-    'peakHours': peakHours,
-    'confidenceScore': confidenceScore,
-  };
+        'date': date.toIso8601String(),
+        'predictedDonations': predictedDonations,
+        'volunteersNeeded': volunteersNeeded,
+        'peakHours': peakHours,
+        'confidenceScore': confidenceScore,
+      };
 }
 
 class SurplusTrendAnalysis {
@@ -521,19 +528,19 @@ class SurplusTrendAnalysis {
   });
 
   Map<String, dynamic> toJson() => {
-    'generatedAt': generatedAt.toIso8601String(),
-    'periodDays': periodDays,
-    'region': region,
-    'totalDonations': totalDonations,
-    'totalQuantity': totalQuantity,
-    'deliveredCount': deliveredCount,
-    'expiredCount': expiredCount,
-    'wasteRate': wasteRate,
-    'topFoodTypes': topFoodTypes.map((t) => t.toJson()).toList(),
-    'weeklyTrend': weeklyTrend.map((w) => w.toJson()).toList(),
-    'monthlyTrend': monthlyTrend.map((m) => m.toJson()).toList(),
-    'growthRate': growthRate,
-  };
+        'generatedAt': generatedAt.toIso8601String(),
+        'periodDays': periodDays,
+        'region': region,
+        'totalDonations': totalDonations,
+        'totalQuantity': totalQuantity,
+        'deliveredCount': deliveredCount,
+        'expiredCount': expiredCount,
+        'wasteRate': wasteRate,
+        'topFoodTypes': topFoodTypes.map((t) => t.toJson()).toList(),
+        'weeklyTrend': weeklyTrend.map((w) => w.toJson()).toList(),
+        'monthlyTrend': monthlyTrend.map((m) => m.toJson()).toList(),
+        'growthRate': growthRate,
+      };
 }
 
 class FoodTypeTrend {
@@ -551,7 +558,8 @@ class WeeklyData {
 
   WeeklyData({required this.weekNumber, required this.quantity});
 
-  Map<String, dynamic> toJson() => {'weekNumber': weekNumber, 'quantity': quantity};
+  Map<String, dynamic> toJson() =>
+      {'weekNumber': weekNumber, 'quantity': quantity};
 }
 
 class MonthlyData {
@@ -583,14 +591,14 @@ class RegionalRiskIndicator {
   });
 
   Map<String, dynamic> toJson() => {
-    'region': region,
-    'riskScore': riskScore,
-    'riskLevel': riskLevel,
-    'totalDeliveries': totalDeliveries,
-    'successRate': successRate,
-    'availableVolunteers': availableVolunteers,
-    'recommendations': recommendations,
-  };
+        'region': region,
+        'riskScore': riskScore,
+        'riskLevel': riskLevel,
+        'totalDeliveries': totalDeliveries,
+        'successRate': successRate,
+        'availableVolunteers': availableVolunteers,
+        'recommendations': recommendations,
+      };
 }
 
 class DeliveryPerformanceForecast {
@@ -613,14 +621,14 @@ class DeliveryPerformanceForecast {
   });
 
   Map<String, dynamic> toJson() => {
-    'generatedAt': generatedAt.toIso8601String(),
-    'forecastDays': forecastDays,
-    'predictedDeliveryCount': predictedDeliveryCount,
-    'averageDeliveryTimeMinutes': averageDeliveryTimeMinutes,
-    'predictedSuccessRate': predictedSuccessRate,
-    'bottleneckHours': bottleneckHours,
-    'recommendations': recommendations,
-  };
+        'generatedAt': generatedAt.toIso8601String(),
+        'forecastDays': forecastDays,
+        'predictedDeliveryCount': predictedDeliveryCount,
+        'averageDeliveryTimeMinutes': averageDeliveryTimeMinutes,
+        'predictedSuccessRate': predictedSuccessRate,
+        'bottleneckHours': bottleneckHours,
+        'recommendations': recommendations,
+      };
 }
 
 class RegionStats {

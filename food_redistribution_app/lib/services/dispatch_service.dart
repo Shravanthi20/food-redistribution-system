@@ -8,22 +8,24 @@ import '../services/notification_service.dart';
 import '../services/audit_service.dart';
 
 export '../models/dispatch.dart';
-export '../models/enums.dart' show DispatchPriority, VolunteerStatus, VehicleType;
+export '../models/enums.dart'
+    show DispatchPriority, VolunteerStatus, VehicleType;
+
 class VolunteerDispatchService {
   final FirestoreService _firestoreService;
   final LocationService _locationService;
   final NotificationService _notificationService;
   final AuditService _auditService;
-  
+
   VolunteerDispatchService({
     required FirestoreService firestoreService,
     required LocationService locationService,
     required NotificationService notificationService,
     required AuditService auditService,
-  }) : _firestoreService = firestoreService,
-       _locationService = locationService,
-       _notificationService = notificationService,
-       _auditService = auditService;
+  })  : _firestoreService = firestoreService,
+        _locationService = locationService,
+        _notificationService = notificationService,
+        _auditService = auditService;
 
   /// Find optimal volunteers for a delivery task
   Future<List<DispatchResult>> findAvailableVolunteers({
@@ -37,7 +39,7 @@ class VolunteerDispatchService {
         location: task.pickupLocation,
         criteria: criteria,
       );
-      
+
       if (volunteers.isEmpty) {
         await _auditService.logEvent(
           eventType: AuditEventType.securityAlert,
@@ -52,29 +54,29 @@ class VolunteerDispatchService {
         );
         return [];
       }
-      
+
       // Calculate dispatch scores for each volunteer
       final results = <DispatchResult>[];
-      
+
       for (final volunteer in volunteers) {
         final result = await _calculateDispatchScore(
           volunteer: volunteer,
           task: task,
           criteria: criteria,
         );
-        
+
         if (result != null) {
           results.add(result);
         }
       }
-      
+
       // Sort by score (highest first) and limit results
       results.sort((a, b) => b.score.compareTo(a.score));
       final topResults = results.take(maxVolunteers).toList();
-      
+
       // Store dispatch analysis for optimization
       await _storeDispatchAnalysis(task.id, criteria, topResults);
-      
+
       await _auditService.logEvent(
         eventType: AuditEventType.adminAction,
         userId: 'system',
@@ -86,7 +88,7 @@ class VolunteerDispatchService {
           'topScore': topResults.isNotEmpty ? topResults.first.score : 0,
         },
       );
-      
+
       return topResults;
     } catch (e) {
       await _auditService.logEvent(
@@ -95,14 +97,14 @@ class VolunteerDispatchService {
         riskLevel: AuditRiskLevel.high,
         additionalData: {
           'action': 'dispatch_error',
-          'taskId': task.id, 
+          'taskId': task.id,
           'error': e.toString()
         },
       );
       rethrow;
     }
   }
-  
+
   /// Create delivery task from food donation
   Future<DeliveryTask> createDeliveryTask({
     required String donationId,
@@ -118,14 +120,14 @@ class VolunteerDispatchService {
     // Get donation details for task planning
     final donation = await _getDonation(donationId);
     if (donation == null) throw Exception('Donation not found');
-    
+
     // Determine priority based on expiry time
     final calculatedPriority = priority ?? _calculatePriority(donation);
-    
+
     // Estimate weight and volume
     final estimatedWeight = _estimateWeight(donation);
     final estimatedVolume = _estimateVolume(donation);
-    
+
     final task = DeliveryTask(
       id: _generateTaskId(),
       donationId: donationId,
@@ -133,17 +135,18 @@ class VolunteerDispatchService {
       deliveryAddress: deliveryAddress,
       pickupLocation: pickupLocation,
       deliveryLocation: deliveryLocation,
-      scheduledTime: scheduledTime ?? DateTime.now().add(Duration(hours: 1)),
+      scheduledTime:
+          scheduledTime ?? DateTime.now().add(const Duration(hours: 1)),
       priority: calculatedPriority,
       specialInstructions: specialInstructions,
       requiredSkills: requiredSkills,
       estimatedWeight: estimatedWeight,
       estimatedVolume: estimatedVolume,
     );
-    
+
     // Store task in database
-    await _firestoreService.create('delivery_tasks', task.toMap());
-    
+    await _firestoreService.create('delivery_tasks', task.id, task.toMap());
+
     await _auditService.logEvent(
       eventType: AuditEventType.dataModification,
       userId: 'system',
@@ -156,10 +159,10 @@ class VolunteerDispatchService {
         'estimatedWeight': estimatedWeight,
       },
     );
-    
+
     return task;
   }
-  
+
   /// Assign task to volunteer
   Future<bool> assignTask({
     required String taskId,
@@ -174,24 +177,25 @@ class VolunteerDispatchService {
         'assignedAt': DateTime.now(),
         'assignmentMetadata': assignmentMetadata,
       });
-      
+
       // Update volunteer status
       await _firestoreService.update('volunteer_profiles', volunteerId, {
         'currentTaskId': taskId,
         'status': 'busy',
         'lastAssignedAt': DateTime.now(),
       });
-      
+
       // Get volunteer and task details for notification
       final volunteer = await _getVolunteer(volunteerId);
       final task = await _getTask(taskId);
-      
+
       if (volunteer != null && task != null) {
         // Send notification to volunteer
         await _notificationService.sendNotification(
           userId: volunteerId,
           title: 'New Delivery Assignment',
-          message: 'You have been assigned a delivery task from ${task['pickupAddress']} to ${task['deliveryAddress']}',
+          message:
+              'You have been assigned a delivery task from ${task['pickupAddress']} to ${task['deliveryAddress']}',
           type: 'task_assignment',
           data: {
             'taskId': taskId,
@@ -199,7 +203,7 @@ class VolunteerDispatchService {
             'estimatedDuration': task['estimatedDuration']?.toString() ?? '60',
           },
         );
-        
+
         // Send confirmation to donation owner
         await _notificationService.sendToDonor(
           donationId: task['donationId'],
@@ -212,7 +216,7 @@ class VolunteerDispatchService {
           },
         );
       }
-      
+
       await _auditService.logEvent(
         eventType: AuditEventType.dataModification,
         userId: 'system',
@@ -224,7 +228,7 @@ class VolunteerDispatchService {
           'assignmentMetadata': assignmentMetadata,
         },
       );
-      
+
       return true;
     } catch (e) {
       await _auditService.logEvent(
@@ -241,7 +245,7 @@ class VolunteerDispatchService {
       return false;
     }
   }
-  
+
   /// Calculate dispatch score for volunteer
   Future<DispatchResult?> _calculateDispatchScore({
     required VolunteerProfile volunteer,
@@ -250,8 +254,10 @@ class VolunteerDispatchService {
   }) async {
     try {
       // Calculate distance to pickup location
-      final startLat = volunteer.currentLocation?['latitude'] ?? volunteer.baseLocation['latitude']!;
-      final startLon = volunteer.currentLocation?['longitude'] ?? volunteer.baseLocation['longitude']!;
+      final startLat = volunteer.currentLocation?['latitude'] ??
+          volunteer.baseLocation['latitude']!;
+      final startLon = volunteer.currentLocation?['longitude'] ??
+          volunteer.baseLocation['longitude']!;
       final endLat = task.pickupLocation['latitude']!;
       final endLon = task.pickupLocation['longitude']!;
 
@@ -261,31 +267,35 @@ class VolunteerDispatchService {
         endLat,
         endLon,
       );
-      
+
       if (distance > criteria.maxDistance) return null;
-      
+
       // Calculate various scoring factors
-      final distanceScore = _calculateDistanceScore(distance, criteria.maxDistance);
-      final ratingScore = _calculateRatingScore(volunteer.rating ?? 0, criteria.minRating);
+      final distanceScore =
+          _calculateDistanceScore(distance, criteria.maxDistance);
+      final ratingScore =
+          _calculateRatingScore(volunteer.rating ?? 0, criteria.minRating);
       final availabilityScore = _calculateAvailabilityScore(volunteer);
-      final experienceScore = _calculateExperienceScore(volunteer, criteria.requiresExperience);
-      final transportScore = _calculateTransportScore(volunteer, criteria.allowedTransport);
+      final experienceScore =
+          _calculateExperienceScore(volunteer, criteria.requiresExperience);
+      final transportScore =
+          _calculateTransportScore(volunteer, criteria.allowedTransport);
       final priorityScore = _calculatePriorityScore(task.priority, volunteer);
-      
+
       // Calculate weighted total score
-      final totalScore = (
-        distanceScore * 0.25 +
-        ratingScore * 0.20 +
-        availabilityScore * 0.20 +
-        experienceScore * 0.15 +
-        transportScore * 0.10 +
-        priorityScore * 0.10
-      );
-      
+      final totalScore = (distanceScore * 0.25 +
+          ratingScore * 0.20 +
+          availabilityScore * 0.20 +
+          experienceScore * 0.15 +
+          transportScore * 0.10 +
+          priorityScore * 0.10);
+
       // Estimate duration and arrival time
-      final estimatedDuration = _estimateTaskDuration(distance, task, volunteer);
-      final estimatedArrival = DateTime.now().add(Duration(minutes: (distance * 2).round()));
-      
+      final estimatedDuration =
+          _estimateTaskDuration(distance, task, volunteer);
+      final estimatedArrival =
+          DateTime.now().add(Duration(minutes: (distance * 2).round()));
+
       // Generate reasoning
       final reasoning = _generateDispatchReasoning({
         'distance': distanceScore,
@@ -295,7 +305,7 @@ class VolunteerDispatchService {
         'transport': transportScore,
         'priority': priorityScore,
       }, distance);
-      
+
       return DispatchResult(
         volunteerId: volunteer.id,
         taskId: task.id,
@@ -329,7 +339,7 @@ class VolunteerDispatchService {
       return null;
     }
   }
-  
+
   /// Get available volunteers within criteria
   Future<List<VolunteerProfile>> _getAvailableVolunteers({
     required Map<String, double> location,
@@ -338,33 +348,34 @@ class VolunteerDispatchService {
     // Get all verified and available volunteers
     final volunteerDocs = await _firestoreService.query(
       'volunteer_profiles',
-      where: [
-        {'field': 'verificationStatus', 'operator': '==', 'value': 'verified'},
-        {'field': 'isActive', 'operator': '==', 'value': true},
-        {'field': 'status', 'operator': '==', 'value': 'available'},
-      ],
+      where: {
+        'verificationStatus': 'verified',
+        'isActive': true,
+        'status': 'available',
+      },
     );
-    
+
     final volunteers = <VolunteerProfile>[];
-    
-    for (final doc in volunteerDocs) {
-      final volunteer = VolunteerProfile.fromMap(doc.data() as Map<String, dynamic>);
-      
+
+    for (final doc in volunteerDocs.docs) {
+      final volunteer =
+          VolunteerProfile.fromMap(doc.data() as Map<String, dynamic>);
+
       // Check basic criteria
       if ((volunteer.rating ?? 0) >= criteria.minRating &&
           criteria.allowedTransport.contains(volunteer.vehicleType)) {
         volunteers.add(volunteer);
       }
     }
-    
+
     return volunteers;
   }
-  
+
   /// Helper scoring functions
   double _calculateDistanceScore(double distance, double maxDistance) {
     return 1.0 - (distance / maxDistance);
   }
-  
+
   double _calculateRatingScore(double rating, int minRating) {
     if (rating >= 4.5) return 1.0;
     if (rating >= 4.0) return 0.8;
@@ -372,50 +383,59 @@ class VolunteerDispatchService {
     if (rating >= minRating) return 0.4;
     return 0.0;
   }
-  
+
   double _calculateAvailabilityScore(VolunteerProfile volunteer) {
     // Check if volunteer is currently available
     final now = DateTime.now();
     final isAvailable = volunteer.availability?.any((slot) =>
-      slot['dayOfWeek'] == now.weekday &&
-      TimeOfDay.fromDateTime(now).hour >= slot['startHour'] &&
-      TimeOfDay.fromDateTime(now).hour <= slot['endHour']
-    ) ?? true;
-    
+            slot['dayOfWeek'] == now.weekday &&
+            TimeOfDay.fromDateTime(now).hour >= slot['startHour'] &&
+            TimeOfDay.fromDateTime(now).hour <= slot['endHour']) ??
+        true;
+
     return isAvailable ? 1.0 : 0.2;
   }
-  
-  double _calculateExperienceScore(VolunteerProfile volunteer, bool requiresExperience) {
+
+  double _calculateExperienceScore(
+      VolunteerProfile volunteer, bool requiresExperience) {
     final completedTasks = volunteer.completedTasks ?? 0;
-    
+
     if (!requiresExperience) return 0.5; // Neutral if not required
-    
+
     if (completedTasks >= 50) return 1.0;
     if (completedTasks >= 20) return 0.8;
     if (completedTasks >= 5) return 0.6;
     if (completedTasks > 0) return 0.4;
     return 0.2;
   }
-  
-  double _calculateTransportScore(VolunteerProfile volunteer, List<VehicleType> allowed) {
+
+  double _calculateTransportScore(
+      VolunteerProfile volunteer, List<VehicleType> allowed) {
     if (allowed.contains(volunteer.vehicleType)) {
       // Bonus for better transport methods
       switch (volunteer.vehicleType) {
-        case VehicleType.car: return 1.0;
-        case VehicleType.bicycle: return 0.8;
-        case VehicleType.scooter: return 0.6;
-        case VehicleType.public: return 0.4;
-        case VehicleType.walking: return 0.2;
-        default: return 0.5;
+        case VehicleType.car:
+          return 1.0;
+        case VehicleType.bicycle:
+          return 0.8;
+        case VehicleType.scooter:
+          return 0.6;
+        case VehicleType.public:
+          return 0.4;
+        case VehicleType.walking:
+          return 0.2;
+        default:
+          return 0.5;
       }
     }
     return 0.0;
   }
-  
-  double _calculatePriorityScore(DispatchPriority priority, VolunteerProfile volunteer) {
+
+  double _calculatePriorityScore(
+      DispatchPriority priority, VolunteerProfile volunteer) {
     // Experienced volunteers get higher priority for urgent tasks
     final completedTasks = volunteer.completedTasks ?? 0;
-    
+
     switch (priority) {
       case DispatchPriority.immediate:
         return completedTasks >= 10 ? 1.0 : 0.3;
@@ -426,29 +446,43 @@ class VolunteerDispatchService {
         return 0.8;
     }
   }
-  
-  double _estimateTaskDuration(double distance, DeliveryTask task, VolunteerProfile volunteer) {
+
+  double _estimateTaskDuration(
+      double distance, DeliveryTask task, VolunteerProfile volunteer) {
     // Base time on transport method and distance
     double baseSpeed; // km/hour
     switch (volunteer.vehicleType) {
-      case VehicleType.car: baseSpeed = 30; break;
-      case VehicleType.bicycle: baseSpeed = 15; break;
-      case VehicleType.scooter: baseSpeed = 25; break;
-      case VehicleType.public: baseSpeed = 12; break;
-      case VehicleType.walking: baseSpeed = 5; break;
-      default: baseSpeed = 20; break;
+      case VehicleType.car:
+        baseSpeed = 30;
+        break;
+      case VehicleType.bicycle:
+        baseSpeed = 15;
+        break;
+      case VehicleType.scooter:
+        baseSpeed = 25;
+        break;
+      case VehicleType.public:
+        baseSpeed = 12;
+        break;
+      case VehicleType.walking:
+        baseSpeed = 5;
+        break;
+      default:
+        baseSpeed = 20;
+        break;
     }
-    
+
     final totalDistance = distance * 2; // Round trip
     final travelTime = (totalDistance / baseSpeed) * 60; // minutes
-    final loadingTime = 15; // minutes for pickup/delivery
-    
+    const loadingTime = 15; // minutes for pickup/delivery
+
     return travelTime + loadingTime;
   }
-  
-  String _generateDispatchReasoning(Map<String, double> scores, double distance) {
+
+  String _generateDispatchReasoning(
+      Map<String, double> scores, double distance) {
     final reasons = <String>[];
-    
+
     if (scores['distance']! > 0.8) {
       reasons.add('Very close (${distance.toStringAsFixed(1)}km)');
     }
@@ -464,58 +498,61 @@ class VolunteerDispatchService {
     if (scores['transport']! > 0.8) {
       reasons.add('Optimal transport method');
     }
-    
+
     return reasons.isEmpty ? 'Meets basic criteria' : reasons.join(', ');
   }
-  
+
   /// Helper functions for data retrieval
   Future<FoodDonation?> _getDonation(String donationId) async {
     final doc = await _firestoreService.get('food_donations', donationId);
-    if (doc == null) return null;
+    if (!doc.exists) return null;
     return FoodDonation.fromMap(doc.data()! as Map<String, dynamic>);
   }
-  
+
   Future<VolunteerProfile?> _getVolunteer(String volunteerId) async {
     final doc = await _firestoreService.get('volunteer_profiles', volunteerId);
-    if (doc == null) return null;
+    if (!doc.exists) return null;
     return VolunteerProfile.fromMap(doc.data()! as Map<String, dynamic>);
   }
-  
+
   Future<Map<String, dynamic>?> _getTask(String taskId) async {
     final doc = await _firestoreService.get('delivery_tasks', taskId);
-    return doc?.data() as Map<String, dynamic>?;
+    return doc.data() as Map<String, dynamic>?;
   }
-  
+
   DispatchPriority _calculatePriority(FoodDonation donation) {
-    final hoursUntilExpiry = donation.expiryDateTime.difference(DateTime.now()).inHours;
-    
+    final hoursUntilExpiry =
+        donation.expiryDateTime.difference(DateTime.now()).inHours;
+
     if (hoursUntilExpiry <= 1) return DispatchPriority.immediate;
     if (hoursUntilExpiry <= 4) return DispatchPriority.urgent;
     if (hoursUntilExpiry <= 12) return DispatchPriority.scheduled;
     return DispatchPriority.flexible;
   }
-  
+
   double _estimateWeight(FoodDonation donation) {
     // Estimate based on food types and quantity
     final baseWeight = donation.quantity * 0.5; // 0.5kg per serving average
     return baseWeight;
   }
-  
+
   int _estimateVolume(FoodDonation donation) {
     // Estimate volume in liters
     return (donation.quantity * 0.8).round();
   }
-  
+
   String _generateTaskId() {
     return 'task_${DateTime.now().millisecondsSinceEpoch}';
   }
-  
-  Future<void> _storeDispatchAnalysis(String taskId, DispatchCriteria criteria, List<DispatchResult> results) async {
+
+  Future<void> _storeDispatchAnalysis(String taskId, DispatchCriteria criteria,
+      List<DispatchResult> results) async {
     final analysis = {
       'taskId': taskId,
       'criteria': {
         'maxDistance': criteria.maxDistance,
-        'allowedTransport': criteria.allowedTransport.map((t) => t.toString()).toList(),
+        'allowedTransport':
+            criteria.allowedTransport.map((t) => t.toString()).toList(),
         'minRating': criteria.minRating,
         'requiresExperience': criteria.requiresExperience,
         'priority': criteria.priority.toString(),
@@ -523,7 +560,8 @@ class VolunteerDispatchService {
       'results': results.map((r) => r.toMap()).toList(),
       'timestamp': DateTime.now(),
     };
-    
-    await _firestoreService.create('dispatch_analytics', analysis);
+
+    await _firestoreService.create(
+        'dispatch_analytics', 'analysis_$taskId', analysis);
   }
 }

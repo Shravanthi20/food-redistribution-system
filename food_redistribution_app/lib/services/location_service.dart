@@ -3,6 +3,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dart_geohash/dart_geohash.dart';
+import 'package:flutter/foundation.dart';
 
 class LocationService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -30,7 +31,7 @@ class LocationService {
 
       return await Geolocator.getCurrentPosition();
     } catch (e) {
-      print('Error getting current location: $e');
+      debugPrint('Error getting current location: $e');
       return null;
     }
   }
@@ -42,9 +43,10 @@ class LocationService {
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
       }
-      return permission == LocationPermission.always || permission == LocationPermission.whileInUse;
+      return permission == LocationPermission.always ||
+          permission == LocationPermission.whileInUse;
     } catch (e) {
-      print('Error requesting location permission: $e');
+      debugPrint('Error requesting location permission: $e');
       return false;
     }
   }
@@ -55,7 +57,8 @@ class LocationService {
       List<Location> locations = await locationFromAddress(address);
       if (locations.isNotEmpty) {
         final location = locations.first;
-        final geohash = _geoHasher.encode(location.latitude, location.longitude);
+        final geohash =
+            _geoHasher.encode(location.latitude, location.longitude);
         return {
           'latitude': location.latitude,
           'longitude': location.longitude,
@@ -65,7 +68,7 @@ class LocationService {
       }
       return null;
     } catch (e) {
-      print('Error geocoding address: $e');
+      debugPrint('Error geocoding address: $e');
       return null;
     }
   }
@@ -73,14 +76,15 @@ class LocationService {
   // Convert coordinates to address
   Future<String?> reverseGeocode(double latitude, double longitude) async {
     try {
-      List<Placemark> placemarks = await placemarkFromCoordinates(latitude, longitude);
+      List<Placemark> placemarks =
+          await placemarkFromCoordinates(latitude, longitude);
       if (placemarks.isNotEmpty) {
         final place = placemarks.first;
         return '${place.street}, ${place.locality}, ${place.administrativeArea} ${place.postalCode}';
       }
       return null;
     } catch (e) {
-      print('Error reverse geocoding: $e');
+      debugPrint('Error reverse geocoding: $e');
       return null;
     }
   }
@@ -93,11 +97,12 @@ class LocationService {
     double endLongitude,
   ) {
     return Geolocator.distanceBetween(
-      startLatitude,
-      startLongitude,
-      endLatitude,
-      endLongitude,
-    ) / 1000; // Convert to kilometers
+          startLatitude,
+          startLongitude,
+          endLatitude,
+          endLongitude,
+        ) /
+        1000; // Convert to kilometers
   }
 
   // Find nearby donations for NGO
@@ -114,19 +119,21 @@ class LocationService {
           .get();
 
       List<Map<String, dynamic>> nearbyDonations = [];
-      
+
       for (var doc in donations.docs) {
         final data = doc.data();
         final location = data['pickupLocation'] as Map<String, dynamic>?;
-        
-        if (location != null && location.containsKey('latitude') && location.containsKey('longitude')) {
+
+        if (location != null &&
+            location.containsKey('latitude') &&
+            location.containsKey('longitude')) {
           final distance = calculateDistance(
             latitude,
             longitude,
             location['latitude'],
             location['longitude'],
           );
-          
+
           if (distance <= radiusKm) {
             nearbyDonations.add({
               'id': doc.id,
@@ -136,14 +143,14 @@ class LocationService {
           }
         }
       }
-      
+
       // Sort by distance
-      nearbyDonations.sort((a, b) => 
-        (a['distance'] as double).compareTo(b['distance'] as double));
-      
+      nearbyDonations.sort((a, b) =>
+          (a['distance'] as double).compareTo(b['distance'] as double));
+
       return nearbyDonations;
     } catch (e) {
-      print('Error finding nearby donations: $e');
+      debugPrint('Error finding nearby donations: $e');
       return [];
     }
   }
@@ -152,7 +159,7 @@ class LocationService {
   Future<void> updateUserLocation(String userId, Position position) async {
     try {
       final geohash = _geoHasher.encode(position.latitude, position.longitude);
-      
+
       await _firestore.collection('user_locations').doc(userId).set({
         'latitude': position.latitude,
         'longitude': position.longitude,
@@ -161,9 +168,8 @@ class LocationService {
         'accuracy': position.accuracy,
         'timestamp': Timestamp.now(),
       });
-      
     } catch (e) {
-      print('Error updating user location: $e');
+      debugPrint('Error updating user location: $e');
     }
   }
   // LIVE TRACKING
@@ -185,18 +191,18 @@ class LocationService {
         distanceFilter: 10, // Update every 10 meters
       );
 
-      final stream = Geolocator.getPositionStream(locationSettings: locationSettings);
-      
+      final stream =
+          Geolocator.getPositionStream(locationSettings: locationSettings);
+
       _trackingSubscriptions[userId]?.cancel(); // Cancel existing if any
 
       _trackingSubscriptions[userId] = stream.listen((Position position) {
         updateUserLocation(userId, position);
       });
-      
-      print('Started location tracking for $userId');
 
+      debugPrint('Started location tracking for $userId');
     } catch (e) {
-      print('Error starting location tracking: $e');
+      debugPrint('Error starting location tracking: $e');
     }
   }
 
@@ -204,7 +210,7 @@ class LocationService {
   Future<void> stopLocationTracking(String userId) async {
     await _trackingSubscriptions[userId]?.cancel();
     _trackingSubscriptions.remove(userId);
-    print('Stopped location tracking for $userId');
+    debugPrint('Stopped location tracking for $userId');
   }
 
   // Stream of specific user's location
@@ -214,8 +220,8 @@ class LocationService {
         .doc(userId)
         .snapshots()
         .map((doc) {
-          if (!doc.exists) return {};
-          return doc.data() as Map<String, dynamic>;
-        });
+      if (!doc.exists) return {};
+      return doc.data() as Map<String, dynamic>;
+    });
   }
 }

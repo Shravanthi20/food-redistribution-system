@@ -2,11 +2,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../config/firebase_schema.dart';
+import 'package:flutter/foundation.dart';
 
 class NotificationService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseMessaging _messaging = FirebaseMessaging.instance;
-  final FlutterLocalNotificationsPlugin _localNotifications = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _localNotifications =
+      FlutterLocalNotificationsPlugin();
 
   // Initialize notifications
   Future<void> initialize() async {
@@ -18,13 +20,14 @@ class NotificationService {
     );
 
     // Initialize local notifications
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
     const iosSettings = DarwinInitializationSettings();
     const initSettings = InitializationSettings(
       android: androidSettings,
       iOS: iosSettings,
     );
-    
+
     await _localNotifications.initialize(initSettings);
 
     // Handle background messages
@@ -32,7 +35,7 @@ class NotificationService {
   }
 
   // Send notification to user
-  Future<void> sendNotification({
+  Future<bool> sendNotification({
     required String userId,
     required String title,
     required String message,
@@ -49,22 +52,29 @@ class NotificationService {
         'read': false,
         'createdAt': Timestamp.now(),
       });
+      return true;
     } catch (e) {
-      print('Error sending notification: $e');
+      debugPrint('Error sending notification: $e');
+      return false;
     }
   }
 
   // Alias methods for compatibility with DispatchService
-  Future<void> sendToUser({
+  Future<bool> sendToUser({
     required String userId,
     required String title,
     required String body,
     Map<String, dynamic>? data,
   }) async {
-    await sendNotification(userId: userId, title: title, message: body, type: 'dispatch_update', data: data);
+    return await sendNotification(
+        userId: userId,
+        title: title,
+        message: body,
+        type: 'dispatch_update',
+        data: data);
   }
 
-  Future<void> sendToDonor({
+  Future<bool> sendToDonor({
     required String donationId,
     required String title,
     required String body,
@@ -72,11 +82,16 @@ class NotificationService {
   }) async {
     // Note: In a real app, we'd look up the donorId from the donationId
     // For now, we'll assume the donorId is passed as donationId OR we'd need to fetch it
-    await sendNotification(userId: donationId, title: title, message: body, type: 'donation_update', data: data);
+    return await sendNotification(
+        userId: donationId,
+        title: title,
+        message: body,
+        type: 'donation_update',
+        data: data);
   }
 
   // Send notification to multiple stakeholders (Donor, NGO, potentially Admin)
-  Future<void> sendToStakeholders({
+  Future<bool> sendToStakeholders({
     required String taskId,
     required String title,
     required String body,
@@ -84,26 +99,34 @@ class NotificationService {
   }) async {
     try {
       // Fetch task to get donor and NGO IDs
-      final taskDoc = await _firestore.collection(Collections.deliveries).doc(taskId).get();
-      if (!taskDoc.exists) return;
+      final taskDoc =
+          await _firestore.collection(Collections.deliveries).doc(taskId).get();
+      if (!taskDoc.exists) return false;
 
       final taskData = taskDoc.data()!;
       final donorId = taskData['donorId'] as String?;
       final ngoId = taskData['ngoId'] as String?;
       final volunteerId = taskData['volunteerId'] as String?;
 
+      bool success = true;
+
       if (donorId != null) {
-        await sendToUser(userId: donorId, title: title, body: body, data: data);
+        success &= await sendToUser(
+            userId: donorId, title: title, body: body, data: data);
       }
       if (ngoId != null) {
-        await sendToUser(userId: ngoId, title: title, body: body, data: data);
+        success &= await sendToUser(
+            userId: ngoId, title: title, body: body, data: data);
       }
       // Usually doesn't notify the volunteer about their own actions but could be useful
       if (volunteerId != null && (data?['notifyVolunteer'] == true)) {
-        await sendToUser(userId: volunteerId, title: title, body: body, data: data);
+        success &= await sendToUser(
+            userId: volunteerId, title: title, body: body, data: data);
       }
+      return success;
     } catch (e) {
-      print('Error sending notifications to stakeholders: $e');
+      debugPrint('Error sending notifications to stakeholders: $e');
+      return false;
     }
   }
 
@@ -125,25 +148,24 @@ class NotificationService {
         .where('userId', isEqualTo: userId)
         .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => {'id': doc.id, ...doc.data()})
-            .toList());
+        .map((snapshot) =>
+            snapshot.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList());
   }
 
   // Save FCM Token to User Profile
   Future<void> saveTokenToUser(String userId) async {
     try {
-      String?token = await _messaging.getToken();
+      String? token = await _messaging.getToken();
       if (token != null) {
         await _saveToken(userId, token);
       }
-      
+
       // Listen for token refreshes
       _messaging.onTokenRefresh.listen((newToken) {
         _saveToken(userId, newToken);
       });
     } catch (e) {
-      print('Error saving FCM token: $e');
+      debugPrint('Error saving FCM token: $e');
     }
   }
 
@@ -154,10 +176,10 @@ class NotificationService {
         .collection(Subcollections.tokens)
         .doc(token)
         .set({
-          'token': token,
-          'createdAt': FieldValue.serverTimestamp(),
-          'platform': 'flutter',
-        });
+      'token': token,
+      'createdAt': FieldValue.serverTimestamp(),
+      'platform': 'flutter',
+    });
   }
 
   // Mark notification as read
@@ -168,12 +190,12 @@ class NotificationService {
           .doc(notificationId)
           .update({'read': true});
     } catch (e) {
-      print('Error marking notification as read: $e');
+      debugPrint('Error marking notification as read: $e');
     }
   }
 }
 
 // Background message handler
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  print('Background message: ${message.messageId}');
+  debugPrint('Background message: ${message.messageId}');
 }

@@ -3,10 +3,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// Admin System Status Monitoring Screen
 class AdminSystemStatusScreen extends StatefulWidget {
-  const AdminSystemStatusScreen({Key? key}) : super(key: key);
+  const AdminSystemStatusScreen({super.key});
 
   @override
-  State<AdminSystemStatusScreen> createState() => _AdminSystemStatusScreenState();
+  State<AdminSystemStatusScreen> createState() =>
+      _AdminSystemStatusScreenState();
 }
 
 class _AdminSystemStatusScreenState extends State<AdminSystemStatusScreen> {
@@ -106,14 +107,14 @@ class _AdminSystemStatusScreenState extends State<AdminSystemStatusScreen> {
                 }
 
                 if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return Card(
+                  return const Card(
                     child: Padding(
-                      padding: const EdgeInsets.all(16),
+                      padding: EdgeInsets.all(16),
                       child: Row(
                         children: [
-                          const Icon(Icons.check_circle, color: Colors.green),
-                          const SizedBox(width: 12),
-                          const Text('No recent errors detected'),
+                          Icon(Icons.check_circle, color: Colors.green),
+                          SizedBox(width: 12),
+                          Text('No recent errors detected'),
                         ],
                       ),
                     ),
@@ -150,27 +151,33 @@ class _AdminSystemStatusScreenState extends State<AdminSystemStatusScreen> {
                                 ),
                                 Chip(
                                   label: Text(
-                                    (data['riskLevel'] ?? 'medium').toString().toUpperCase(),
+                                    (data['riskLevel'] ?? 'medium')
+                                        .toString()
+                                        .toUpperCase(),
                                     style: const TextStyle(
                                       fontSize: 10,
                                       color: Colors.white,
                                     ),
                                   ),
-                                  backgroundColor: _getRiskColor(data['riskLevel']),
+                                  backgroundColor:
+                                      _getRiskColor(data['riskLevel']),
                                 ),
                               ],
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              data['additionalData']?['error'] ?? 'Unknown error',
-                              style: const TextStyle(fontSize: 12, color: Colors.grey),
+                              data['additionalData']?['error'] ??
+                                  'Unknown error',
+                              style: const TextStyle(
+                                  fontSize: 12, color: Colors.grey),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
                             const SizedBox(height: 4),
                             Text(
                               _formatTimestamp(data['timestamp']),
-                              style: const TextStyle(fontSize: 10, color: Colors.grey),
+                              style: const TextStyle(
+                                  fontSize: 10, color: Colors.grey),
                             ),
                           ],
                         ),
@@ -232,7 +239,7 @@ class _AdminSystemStatusScreenState extends State<AdminSystemStatusScreen> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.2),
+                color: color.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(icon, color: color),
@@ -242,7 +249,8 @@ class _AdminSystemStatusScreenState extends State<AdminSystemStatusScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Text(title,
+                      style: const TextStyle(fontWeight: FontWeight.bold)),
                   Text(
                     status,
                     style: TextStyle(fontSize: 12, color: color),
@@ -277,9 +285,12 @@ class _AdminSystemStatusScreenState extends State<AdminSystemStatusScreen> {
             child: Column(
               children: [
                 _buildStatRow('Active Users', stats['activeUsers'].toString()),
-                _buildStatRow('Active Volunteers Tracking', stats['trackingVolunteers'].toString()),
-                _buildStatRow('Pending Assignments', stats['pendingAssignments'].toString()),
-                _buildStatRow('In-Transit Deliveries', stats['inTransitDeliveries'].toString()),
+                _buildStatRow('Active Volunteers Tracking',
+                    stats['trackingVolunteers'].toString()),
+                _buildStatRow('Pending Assignments',
+                    stats['pendingAssignments'].toString()),
+                _buildStatRow('In-Transit Deliveries',
+                    stats['inTransitDeliveries'].toString()),
               ],
             ),
           ),
@@ -421,7 +432,8 @@ class _AdminSystemStatusScreenState extends State<AdminSystemStatusScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Restart Services'),
-        content: const Text('This will restart all running services. Continue?'),
+        content:
+            const Text('This will restart all running services. Continue?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -431,7 +443,8 @@ class _AdminSystemStatusScreenState extends State<AdminSystemStatusScreen> {
             onPressed: () {
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Services restarted successfully')),
+                const SnackBar(
+                    content: Text('Services restarted successfully')),
               );
             },
             child: const Text('Restart'),
@@ -456,7 +469,9 @@ class _AdminSystemStatusScreenState extends State<AdminSystemStatusScreen> {
             onPressed: () {
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Backup initiated - This may take a few minutes')),
+                const SnackBar(
+                    content:
+                        Text('Backup initiated - This may take a few minutes')),
               );
             },
             child: const Text('Backup'),

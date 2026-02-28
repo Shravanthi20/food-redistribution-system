@@ -6,7 +6,7 @@ import '../services/verification_service.dart';
 import '../services/auth_service.dart';
 
 class DocumentVerificationScreen extends StatefulWidget {
-  const DocumentVerificationScreen({Key? key}) : super(key: key);
+  const DocumentVerificationScreen({super.key});
 
   @override
   State<DocumentVerificationScreen> createState() =>

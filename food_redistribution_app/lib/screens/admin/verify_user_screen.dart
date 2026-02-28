@@ -8,7 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 class VerifyUserScreen extends StatefulWidget {
   final Map<String, dynamic> verificationData;
 
-  const VerifyUserScreen({Key? key, required this.verificationData}) : super(key: key);
+  const VerifyUserScreen({super.key, required this.verificationData});
 
   @override
   State<VerifyUserScreen> createState() => _VerifyUserScreenState();
@@ -18,24 +18,23 @@ class _VerifyUserScreenState extends State<VerifyUserScreen> {
   bool _isProcessing = false;
   final TextEditingController _notesController = TextEditingController();
 
-  Map<String, dynamic> get submission => widget.verificationData['submission'] ?? {};
+  Map<String, dynamic> get submission =>
+      widget.verificationData['submission'] ?? {};
   Map<String, dynamic> get user => widget.verificationData['user'] ?? {};
   String get submissionId => widget.verificationData['id'];
 
   Future<void> _processVerification(VerificationStatus status) async {
     setState(() => _isProcessing = true);
-    
+
     try {
-      final adminId = Provider.of<AuthProvider>(context, listen: false).firebaseUser?.uid ?? 'admin';
-      
+      final adminId =
+          Provider.of<AuthProvider>(context, listen: false).firebaseUser?.uid ??
+              'admin';
+
       await Provider.of<AdminDashboardProvider>(context, listen: false)
-          .reviewVerification(
-            submissionId, 
-            adminId, 
-            status, 
-            _notesController.text.isNotEmpty ? _notesController.text : null
-          );
-      
+          .reviewVerification(submissionId, adminId, status,
+              _notesController.text.isNotEmpty ? _notesController.text : null);
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Verification ${status.name}')),
@@ -67,7 +66,8 @@ class _VerifyUserScreenState extends State<VerifyUserScreen> {
           maxLines: 3,
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () {
@@ -92,7 +92,7 @@ class _VerifyUserScreenState extends State<VerifyUserScreen> {
     final documents = (submission['documentInfo'] as List<dynamic>?) ?? [];
     // Just finding the first doc URL for simple display if available
     // In current implementation, 'information' might be the URL or text
-    
+
     return Scaffold(
       appBar: AppBar(title: const Text('Verify User')),
       body: SingleChildScrollView(
@@ -111,11 +111,12 @@ class _VerifyUserScreenState extends State<VerifyUserScreen> {
                       children: [
                         CircleAvatar(
                           radius: 30,
-                          backgroundImage: user['profileImageUrl'] != null 
-                              ? NetworkImage(user['profileImageUrl']) 
+                          backgroundImage: user['profileImageUrl'] != null
+                              ? NetworkImage(user['profileImageUrl'])
                               : null,
-                          child: user['profileImageUrl'] == null 
-                              ? Text((user['email'] ?? 'U')[0].toUpperCase(), style: const TextStyle(fontSize: 24))
+                          child: user['profileImageUrl'] == null
+                              ? Text((user['email'] ?? 'U')[0].toUpperCase(),
+                                  style: const TextStyle(fontSize: 24))
                               : null,
                         ),
                         const SizedBox(width: 16),
@@ -123,28 +124,38 @@ class _VerifyUserScreenState extends State<VerifyUserScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(user['email'] ?? 'Unknown Email', style: Theme.of(context).textTheme.titleLarge),
-                              Text('Role: ${submission['userRole']}', style: Theme.of(context).textTheme.bodyMedium),
-                              Text('Submitted: ${submission['submittedAt']?.toDate().toString() ?? 'Unknown'}', style: Theme.of(context).textTheme.bodySmall),
+                              Text(user['email'] ?? 'Unknown Email',
+                                  style:
+                                      Theme.of(context).textTheme.titleLarge),
+                              Text('Role: ${submission['userRole']}',
+                                  style:
+                                      Theme.of(context).textTheme.bodyMedium),
+                              Text(
+                                  'Submitted: ${submission['submittedAt']?.toDate().toString() ?? 'Unknown'}',
+                                  style: Theme.of(context).textTheme.bodySmall),
                             ],
                           ),
                         ),
                       ],
                     ),
                     const Divider(),
-                    const Text('Additional Details:', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const Text('Additional Details:',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
-                    Text('Name: ${user['fullName'] ?? '${user['firstName']} ${user['lastName']}'}'),
-                    Text('Phone: ${user['phoneNumber'] ?? user['phone'] ?? 'N/A'}'),
+                    Text(
+                        'Name: ${user['fullName'] ?? '${user['firstName']} ${user['lastName']}'}'),
+                    Text(
+                        'Phone: ${user['phoneNumber'] ?? user['phone'] ?? 'N/A'}'),
                   ],
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 24),
-            Text('Submitted Documents', style: Theme.of(context).textTheme.titleLarge),
+            Text('Submitted Documents',
+                style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 12),
-            
+
             if (documents.isEmpty)
               const Card(
                 child: Padding(
@@ -152,7 +163,7 @@ class _VerifyUserScreenState extends State<VerifyUserScreen> {
                   child: Center(child: Text('No documents found')),
                 ),
               ),
-              
+
             ...documents.map((doc) {
               final isUrl = doc['information'].toString().startsWith('http');
               return Card(
@@ -160,15 +171,16 @@ class _VerifyUserScreenState extends State<VerifyUserScreen> {
                 child: ListTile(
                   leading: const Icon(Icons.description, color: Colors.blue),
                   title: Text(doc['type'] ?? 'Document'),
-                  subtitle: Text(isUrl ? 'Tap to view document' : doc['information']),
+                  subtitle:
+                      Text(isUrl ? 'Tap to view document' : doc['information']),
                   trailing: isUrl ? const Icon(Icons.open_in_new) : null,
                   onTap: isUrl ? () => _launchUrl(doc['information']) : null,
                 ),
               );
-            }).toList(),
-            
+            }),
+
             const SizedBox(height: 32),
-            
+
             // Actions
             if (!_isProcessing)
               Row(
@@ -193,7 +205,8 @@ class _VerifyUserScreenState extends State<VerifyUserScreen> {
                         backgroundColor: Colors.green,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
-                      onPressed: () => _processVerification(VerificationStatus.approved),
+                      onPressed: () =>
+                          _processVerification(VerificationStatus.approved),
                     ),
                   ),
                 ],

@@ -42,7 +42,7 @@ class NotificationTemplate {
   final NotificationPriority priority;
   final Duration? delay;
   final Map<String, String> translations;
-  
+
   NotificationTemplate({
     required this.id,
     required this.name,
@@ -55,17 +55,17 @@ class NotificationTemplate {
     this.delay,
     this.translations = const {},
   });
-  
+
   String renderTitle(Map<String, dynamic> data, {String language = 'en'}) {
     String template = translations['${language}_title'] ?? titleTemplate;
     return _renderTemplate(template, data);
   }
-  
+
   String renderBody(Map<String, dynamic> data, {String language = 'en'}) {
     String template = translations['${language}_body'] ?? bodyTemplate;
     return _renderTemplate(template, data);
   }
-  
+
   String _renderTemplate(String template, Map<String, dynamic> data) {
     String result = template;
     data.forEach((key, value) {
@@ -86,7 +86,7 @@ class NotificationRule {
   final Duration? throttleInterval;
   final int? maxPerDay;
   final bool isActive;
-  
+
   NotificationRule({
     required this.id,
     required this.name,
@@ -111,7 +111,7 @@ class ScheduledNotification {
   final Duration? recurringInterval;
   final NotificationPriority priority;
   final String? groupId;
-  
+
   ScheduledNotification({
     required this.id,
     required this.templateId,
@@ -123,7 +123,7 @@ class ScheduledNotification {
     this.priority = NotificationPriority.normal,
     this.groupId,
   });
-  
+
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -147,7 +147,7 @@ class NotificationBatch {
   final List<ScheduledNotification> notifications;
   final DateTime createdAt;
   final String? description;
-  
+
   NotificationBatch({
     required this.id,
     required this.name,
@@ -161,19 +161,19 @@ class NotificationDispatchService {
   final FirestoreService _firestoreService;
   final NotificationService _notificationService;
   final AuditService _auditService;
-  
+
   final Map<String, NotificationTemplate> _templates = {};
   final Map<String, NotificationRule> _rules = {};
   final Map<String, DateTime> _throttleTracker = {};
   final Map<String, List<DateTime>> _dailyCounter = {};
-  
+
   NotificationDispatchService({
     required FirestoreService firestoreService,
     required NotificationService notificationService,
     required AuditService auditService,
-  }) : _firestoreService = firestoreService,
-       _notificationService = notificationService,
-       _auditService = auditService {
+  })  : _firestoreService = firestoreService,
+        _notificationService = notificationService,
+        _auditService = auditService {
     _initializeTemplates();
     _initializeRules();
   }
@@ -186,89 +186,91 @@ class NotificationDispatchService {
         name: 'Food Donation Matched',
         category: NotificationCategory.donationMatching,
         titleTemplate: 'New Food Donation Match',
-        bodyTemplate: 'A {{foodType}} donation ({{quantity}} servings) is available at {{distance}}km',
+        bodyTemplate:
+            'A {{foodType}} donation ({{quantity}} servings) is available at {{distance}}km',
         channels: [NotificationChannel.push, NotificationChannel.inApp],
         priority: NotificationPriority.high,
         translations: {
           'es_title': 'Nueva Donación Disponible',
-          'es_body': 'Una donación de {{foodType}} ({{quantity}} porciones) está disponible a {{distance}}km',
+          'es_body':
+              'Una donación de {{foodType}} ({{quantity}} porciones) está disponible a {{distance}}km',
         },
       ),
-      
       'volunteer_assigned': NotificationTemplate(
         id: 'volunteer_assigned',
         name: 'Volunteer Assignment',
         category: NotificationCategory.volunteerDispatch,
         titleTemplate: 'New Delivery Assignment',
-        bodyTemplate: 'You have been assigned a {{priority}} priority delivery from {{pickup}} to {{delivery}}',
+        bodyTemplate:
+            'You have been assigned a {{priority}} priority delivery from {{pickup}} to {{delivery}}',
         channels: [NotificationChannel.push, NotificationChannel.sms],
         priority: NotificationPriority.urgent,
       ),
-      
       'route_optimized': NotificationTemplate(
         id: 'route_optimized',
         name: 'Route Optimization Complete',
         category: NotificationCategory.routeOptimization,
         titleTemplate: 'Route Optimized',
-        bodyTemplate: 'Your delivery route has been optimized, saving {{timeSaved}} minutes and {{distanceSaved}}km',
+        bodyTemplate:
+            'Your delivery route has been optimized, saving {{timeSaved}} minutes and {{distanceSaved}}km',
         channels: [NotificationChannel.inApp],
         priority: NotificationPriority.normal,
       ),
-      
       'delivery_delayed': NotificationTemplate(
         id: 'delivery_delayed',
         name: 'Delivery Delay Alert',
         category: NotificationCategory.deliveryTracking,
         titleTemplate: 'Delivery Delay Alert',
-        bodyTemplate: 'Delivery {{taskId}} is running {{delayMinutes}} minutes late. New ETA: {{newEta}}',
+        bodyTemplate:
+            'Delivery {{taskId}} is running {{delayMinutes}} minutes late. New ETA: {{newEta}}',
         channels: [NotificationChannel.push, NotificationChannel.email],
         priority: NotificationPriority.urgent,
       ),
-      
       'system_maintenance': NotificationTemplate(
         id: 'system_maintenance',
         name: 'System Maintenance Notice',
         category: NotificationCategory.systemAlert,
         titleTemplate: 'System Maintenance Scheduled',
-        bodyTemplate: 'System will be under maintenance from {{startTime}} to {{endTime}}. Please plan accordingly.',
+        bodyTemplate:
+            'System will be under maintenance from {{startTime}} to {{endTime}}. Please plan accordingly.',
         channels: [NotificationChannel.push, NotificationChannel.email],
         priority: NotificationPriority.high,
-        delay: Duration(hours: 24), // Send 24 hours in advance
+        delay: const Duration(hours: 24), // Send 24 hours in advance
       ),
-      
       'performance_report': NotificationTemplate(
         id: 'performance_report',
         name: 'Weekly Performance Report',
         category: NotificationCategory.performanceUpdate,
         titleTemplate: 'Your Weekly Impact Report',
-        bodyTemplate: 'This week you completed {{deliveries}} deliveries, saved {{foodKg}}kg of food, and helped {{beneficiaries}} people',
+        bodyTemplate:
+            'This week you completed {{deliveries}} deliveries, saved {{foodKg}}kg of food, and helped {{beneficiaries}} people',
         channels: [NotificationChannel.email],
         priority: NotificationPriority.low,
       ),
-      
       'resource_low': NotificationTemplate(
         id: 'resource_low',
         name: 'Low Resource Alert',
         category: NotificationCategory.resourceAlert,
         titleTemplate: 'Resource Alert: {{resourceType}}',
-        bodyTemplate: '{{resourceType}} is running low ({{currentLevel}}% remaining). Please review and replenish.',
+        bodyTemplate:
+            '{{resourceType}} is running low ({{currentLevel}}% remaining). Please review and replenish.',
         channels: [NotificationChannel.push, NotificationChannel.email],
         priority: NotificationPriority.high,
       ),
-      
       'schedule_reminder': NotificationTemplate(
         id: 'schedule_reminder',
         name: 'Schedule Reminder',
         category: NotificationCategory.scheduleUpdate,
         titleTemplate: 'Upcoming Schedule Reminder',
-        bodyTemplate: 'You have a {{taskType}} scheduled for {{scheduledTime}}. Location: {{location}}',
+        bodyTemplate:
+            'You have a {{taskType}} scheduled for {{scheduledTime}}. Location: {{location}}',
         channels: [NotificationChannel.push],
         priority: NotificationPriority.normal,
-        delay: Duration(minutes: 30), // Send 30 minutes before
+        delay: const Duration(minutes: 30), // Send 30 minutes before
       ),
     });
   }
-  
+
   /// Initialize notification rules
   void _initializeRules() {
     _rules.addAll({
@@ -276,47 +278,56 @@ class NotificationDispatchService {
         id: 'urgent_donations',
         name: 'Urgent Food Donations',
         category: NotificationCategory.donationMatching,
-        conditions: {'urgency': 'urgent', 'expiryHours': {'<': 2}},
+        conditions: {
+          'urgency': 'urgent',
+          'expiryHours': {'<': 2}
+        },
         targetUserTypes: ['ngo', 'volunteer'],
         channels: [NotificationChannel.push, NotificationChannel.sms],
         priority: NotificationPriority.urgent,
         maxPerDay: 10,
       ),
-      
       'volunteer_performance': NotificationRule(
         id: 'volunteer_performance',
         name: 'Volunteer Performance Updates',
         category: NotificationCategory.performanceUpdate,
-        conditions: {'role': 'volunteer', 'completedTasks': {'>': 5}},
+        conditions: {
+          'role': 'volunteer',
+          'completedTasks': {'>': 5}
+        },
         targetUserTypes: ['volunteer'],
         channels: [NotificationChannel.email],
         priority: NotificationPriority.low,
-        throttleInterval: Duration(days: 7),
+        throttleInterval: const Duration(days: 7),
       ),
-      
       'system_alerts': NotificationRule(
         id: 'system_alerts',
         name: 'Critical System Alerts',
         category: NotificationCategory.systemAlert,
         conditions: {'severity': 'critical'},
         targetUserTypes: ['admin'],
-        channels: [NotificationChannel.push, NotificationChannel.email, NotificationChannel.sms],
+        channels: [
+          NotificationChannel.push,
+          NotificationChannel.email,
+          NotificationChannel.sms
+        ],
         priority: NotificationPriority.critical,
       ),
-      
       'delivery_delays': NotificationRule(
         id: 'delivery_delays',
         name: 'Delivery Delay Notifications',
         category: NotificationCategory.deliveryTracking,
-        conditions: {'delayMinutes': {'>': 15}},
+        conditions: {
+          'delayMinutes': {'>': 15}
+        },
         targetUserTypes: ['ngo', 'donor'],
         channels: [NotificationChannel.push],
         priority: NotificationPriority.high,
-        throttleInterval: Duration(minutes: 30),
+        throttleInterval: const Duration(minutes: 30),
       ),
     });
   }
-  
+
   /// Dispatch notification based on event
   Future<bool> dispatchNotification({
     required String templateId,
@@ -331,7 +342,7 @@ class NotificationDispatchService {
       if (template == null) {
         throw ArgumentError('Template $templateId not found');
       }
-      
+
       // Check if notification should be throttled
       if (await _shouldThrottle(templateId, recipientIds)) {
         await _auditService.logEvent(
@@ -346,7 +357,7 @@ class NotificationDispatchService {
         );
         return false;
       }
-      
+
       // Schedule for immediate delivery or future delivery
       final notification = ScheduledNotification(
         id: _generateNotificationId(),
@@ -357,7 +368,7 @@ class NotificationDispatchService {
         priority: template.priority,
         groupId: groupId,
       );
-      
+
       if (scheduledFor == null || scheduledFor.isBefore(DateTime.now())) {
         // Send immediately
         return await _sendNotification(notification, template, language);
@@ -380,7 +391,7 @@ class NotificationDispatchService {
       return false;
     }
   }
-  
+
   /// Send notification immediately
   Future<bool> _sendNotification(
     ScheduledNotification notification,
@@ -390,16 +401,17 @@ class NotificationDispatchService {
     try {
       final title = template.renderTitle(notification.data, language: language);
       final body = template.renderBody(notification.data, language: language);
-      
+
       int successCount = 0;
-      
+
       for (final recipientId in notification.recipientIds) {
         // Check user preferences for channels
-        final userPreferences = await _getUserNotificationPreferences(recipientId);
+        final userPreferences =
+            await _getUserNotificationPreferences(recipientId);
         final enabledChannels = template.channels
             .where((channel) => userPreferences[channel.toString()] != false)
             .toList();
-        
+
         for (final channel in enabledChannels) {
           final success = await _sendOnChannel(
             recipientId,
@@ -409,17 +421,17 @@ class NotificationDispatchService {
             channel,
             template.priority,
           );
-          
+
           if (success) successCount++;
         }
-        
+
         // Update daily counter for throttling
         _updateDailyCounter(template.id, recipientId);
       }
-      
+
       // Store notification record
       await _storeNotificationRecord(notification, template, successCount);
-      
+
       await _auditService.logEvent(
         eventType: AuditEventType.adminAction,
         userId: 'system',
@@ -432,7 +444,7 @@ class NotificationDispatchService {
           'channels': template.channels.map((c) => c.name).toList(),
         },
       );
-      
+
       return successCount > 0;
     } catch (e) {
       await _auditService.logEvent(
@@ -449,7 +461,7 @@ class NotificationDispatchService {
       return false;
     }
   }
-  
+
   /// Send notification on specific channel
   Future<bool> _sendOnChannel(
     String recipientId,
@@ -468,29 +480,29 @@ class NotificationDispatchService {
           type: 'push',
           data: data,
         );
-        
+
       case NotificationChannel.inApp:
         return await _sendInAppNotification(recipientId, title, body, data);
-        
+
       case NotificationChannel.email:
         return await _sendEmailNotification(recipientId, title, body, data);
-        
+
       case NotificationChannel.sms:
         return await _sendSMSNotification(recipientId, body, priority);
-        
+
       case NotificationChannel.whatsapp:
         return await _sendWhatsAppNotification(recipientId, body, data);
-        
-      default:
-        return false;
     }
   }
-  
+
   /// Schedule notification for future delivery
   Future<bool> _scheduleNotification(ScheduledNotification notification) async {
     try {
-      await _firestoreService.create('scheduled_notifications', 'auto_${DateTime.now().millisecondsSinceEpoch}', notification.toMap());
-      
+      await _firestoreService.create(
+          'scheduled_notifications',
+          'auto_${DateTime.now().millisecondsSinceEpoch}',
+          notification.toMap());
+
       await _auditService.logEvent(
         eventType: AuditEventType.adminAction,
         userId: 'system',
@@ -503,7 +515,7 @@ class NotificationDispatchService {
           'recipientCount': notification.recipientIds.length,
         },
       );
-      
+
       return true;
     } catch (e) {
       await _auditService.logEvent(
@@ -519,7 +531,7 @@ class NotificationDispatchService {
       return false;
     }
   }
-  
+
   /// Process scheduled notifications (called by background service)
   Future<void> processScheduledNotifications() async {
     try {
@@ -532,31 +544,31 @@ class NotificationDispatchService {
         ],
         limit: 100, // Process in batches
       );
-      
+
       for (final doc in docs.docs) {
         final data = doc.data() as Map<String, dynamic>;
         final notification = ScheduledNotification(
           id: data['id'],
           templateId: data['templateId'],
-          recipientIds: List<String>.from(data['recipientIds']),
-          data: data['data'],
+          recipientIds: List<String>.from(data['recipientIds'] ?? []),
+          data: data['data'] as Map<String, dynamic>? ?? {},
           scheduledFor: (data['scheduledFor'] as Timestamp).toDate(),
           priority: NotificationPriority.values.firstWhere(
             (p) => p.toString() == data['priority'],
             orElse: () => NotificationPriority.normal,
           ),
         );
-        
+
         final template = _templates[notification.templateId];
         if (template != null) {
           final success = await _sendNotification(notification, template, 'en');
-          
+
           // Update notification status
           await _firestoreService.update('scheduled_notifications', doc.id, {
             'status': success ? 'sent' : 'failed',
             'processedAt': DateTime.now(),
           });
-          
+
           // Handle recurring notifications
           if (data['isRecurring'] == true && success) {
             await _scheduleRecurringNotification(notification, data);
@@ -575,7 +587,7 @@ class NotificationDispatchService {
       );
     }
   }
-  
+
   /// Create notification batch for bulk operations
   Future<bool> createNotificationBatch({
     required String name,
@@ -590,9 +602,10 @@ class NotificationDispatchService {
         createdAt: DateTime.now(),
         description: description,
       );
-      
+
       // Store batch metadata
-      await _firestoreService.create('notification_batches', 'batch_${DateTime.now().millisecondsSinceEpoch}', {
+      await _firestoreService.create('notification_batches',
+          'batch_${DateTime.now().millisecondsSinceEpoch}', {
         'id': batch.id,
         'name': batch.name,
         'description': batch.description,
@@ -600,12 +613,12 @@ class NotificationDispatchService {
         'createdAt': batch.createdAt,
         'status': 'pending',
       });
-      
+
       // Schedule individual notifications
       for (final notification in batch.notifications) {
         await _scheduleNotification(notification);
       }
-      
+
       await _auditService.logEvent(
         eventType: AuditEventType.adminAction,
         userId: 'system',
@@ -616,7 +629,7 @@ class NotificationDispatchService {
           'notificationCount': notifications.length,
         },
       );
-      
+
       return true;
     } catch (e) {
       await _auditService.logEvent(
@@ -631,11 +644,13 @@ class NotificationDispatchService {
       return false;
     }
   }
-  
+
   /// Helper methods for different notification channels
-  Future<bool> _sendInAppNotification(String recipientId, String title, String body, Map<String, dynamic> data) async {
+  Future<bool> _sendInAppNotification(String recipientId, String title,
+      String body, Map<String, dynamic> data) async {
     try {
-      await _firestoreService.create('in_app_notifications', 'notif_${DateTime.now().millisecondsSinceEpoch}', {
+      await _firestoreService.create('in_app_notifications',
+          'notif_${DateTime.now().millisecondsSinceEpoch}', {
         'recipientId': recipientId,
         'title': title,
         'body': body,
@@ -648,11 +663,13 @@ class NotificationDispatchService {
       return false;
     }
   }
-  
-  Future<bool> _sendEmailNotification(String recipientId, String title, String body, Map<String, dynamic> data) async {
+
+  Future<bool> _sendEmailNotification(String recipientId, String title,
+      String body, Map<String, dynamic> data) async {
     // Integration with email service (SendGrid, AWS SES, etc.)
     // This is a placeholder implementation
-    await _firestoreService.create('email_queue', 'email_${DateTime.now().millisecondsSinceEpoch}', {
+    await _firestoreService.create(
+        'email_queue', 'email_${DateTime.now().millisecondsSinceEpoch}', {
       'recipientId': recipientId,
       'subject': title,
       'body': body,
@@ -662,11 +679,13 @@ class NotificationDispatchService {
     });
     return true;
   }
-  
-  Future<bool> _sendSMSNotification(String recipientId, String message, NotificationPriority priority) async {
+
+  Future<bool> _sendSMSNotification(
+      String recipientId, String message, NotificationPriority priority) async {
     // Integration with SMS service (Twilio, AWS SNS, etc.)
     // This is a placeholder implementation
-    await _firestoreService.create('sms_queue', 'sms_${DateTime.now().millisecondsSinceEpoch}', {
+    await _firestoreService
+        .create('sms_queue', 'sms_${DateTime.now().millisecondsSinceEpoch}', {
       'recipientId': recipientId,
       'message': message,
       'priority': priority.toString(),
@@ -675,11 +694,13 @@ class NotificationDispatchService {
     });
     return true;
   }
-  
-  Future<bool> _sendWhatsAppNotification(String recipientId, String message, Map<String, dynamic> data) async {
+
+  Future<bool> _sendWhatsAppNotification(
+      String recipientId, String message, Map<String, dynamic> data) async {
     // Integration with WhatsApp Business API
     // This is a placeholder implementation
-    await _firestoreService.create('whatsapp_queue', 'whatsapp_${DateTime.now().millisecondsSinceEpoch}', {
+    await _firestoreService.create(
+        'whatsapp_queue', 'whatsapp_${DateTime.now().millisecondsSinceEpoch}', {
       'recipientId': recipientId,
       'message': message,
       'data': data,
@@ -688,69 +709,75 @@ class NotificationDispatchService {
     });
     return true;
   }
-  
+
   /// Throttling and rate limiting
-  Future<bool> _shouldThrottle(String templateId, List<String> recipientIds) async {
-    final rule = _rules.values
-        .firstWhere((r) => r.id == templateId, orElse: () => _rules.values.first);
-    
+  Future<bool> _shouldThrottle(
+      String templateId, List<String> recipientIds) async {
+    final rule = _rules.values.firstWhere((r) => r.id == templateId,
+        orElse: () => _rules.values.first);
+
     // Check throttle interval
     if (rule.throttleInterval != null) {
       final key = '${templateId}_${recipientIds.join('_')}';
       final lastSent = _throttleTracker[key];
-      if (lastSent != null && 
+      if (lastSent != null &&
           DateTime.now().difference(lastSent) < rule.throttleInterval!) {
         return true;
       }
       _throttleTracker[key] = DateTime.now();
     }
-    
+
     // Check daily limits
     if (rule.maxPerDay != null) {
       for (final recipientId in recipientIds) {
         final key = '${templateId}_$recipientId';
         final today = DateTime.now();
-        final dailyCount = _dailyCounter[key]?.where((date) =>
-            date.year == today.year &&
-            date.month == today.month &&
-            date.day == today.day).length ?? 0;
-        
+        final dailyCount = _dailyCounter[key]
+                ?.where((date) =>
+                    date.year == today.year &&
+                    date.month == today.month &&
+                    date.day == today.day)
+                .length ??
+            0;
+
         if (dailyCount >= rule.maxPerDay!) {
           return true;
         }
       }
     }
-    
+
     return false;
   }
-  
+
   void _updateDailyCounter(String templateId, String recipientId) {
     final key = '${templateId}_$recipientId';
     _dailyCounter[key] = (_dailyCounter[key] ?? [])..add(DateTime.now());
-    
+
     // Clean old entries (keep only last 24 hours)
-    final yesterday = DateTime.now().subtract(Duration(hours: 24));
-    _dailyCounter[key] = _dailyCounter[key]!
-        .where((date) => date.isAfter(yesterday))
-        .toList();
+    final yesterday = DateTime.now().subtract(const Duration(hours: 24));
+    _dailyCounter[key] =
+        _dailyCounter[key]!.where((date) => date.isAfter(yesterday)).toList();
   }
-  
-  Future<Map<String, dynamic>> _getUserNotificationPreferences(String userId) async {
+
+  Future<Map<String, dynamic>> _getUserNotificationPreferences(
+      String userId) async {
     final doc = await _firestoreService.get('user_preferences', userId);
-    return doc?.data() as Map<String, dynamic>? ?? {
-      'push': true,
-      'email': true,
-      'sms': false,
-      'whatsapp': false,
-      'inApp': true,
-    };
+    return doc.data() as Map<String, dynamic>? ??
+        {
+          'push': true,
+          'email': true,
+          'sms': false,
+          'whatsapp': false,
+          'inApp': true,
+        };
   }
-  
-  Future<void> _scheduleRecurringNotification(ScheduledNotification notification, Map<String, dynamic> data) async {
+
+  Future<void> _scheduleRecurringNotification(
+      ScheduledNotification notification, Map<String, dynamic> data) async {
     if (data['recurringInterval'] != null) {
       final interval = Duration(milliseconds: data['recurringInterval']);
       final nextSchedule = notification.scheduledFor.add(interval);
-      
+
       final nextNotification = ScheduledNotification(
         id: _generateNotificationId(),
         templateId: notification.templateId,
@@ -761,18 +788,19 @@ class NotificationDispatchService {
         recurringInterval: interval,
         priority: notification.priority,
       );
-      
+
       await _scheduleNotification(nextNotification);
     }
   }
-  
+
   Future<bool> _storeNotificationRecord(
     ScheduledNotification notification,
     NotificationTemplate template,
     int successCount,
   ) async {
     try {
-      await _firestoreService.create('notification_records', 'record_${DateTime.now().millisecondsSinceEpoch}', {
+      await _firestoreService.create('notification_records',
+          'record_${DateTime.now().millisecondsSinceEpoch}', {
         'notificationId': notification.id,
         'templateId': template.id,
         'templateName': template.name,
@@ -789,23 +817,23 @@ class NotificationDispatchService {
       return false;
     }
   }
-  
+
   String _generateNotificationId() {
     return 'notif_${DateTime.now().millisecondsSinceEpoch}_${Random().nextInt(1000)}';
   }
-  
+
   String _generateBatchId() {
     return 'batch_${DateTime.now().millisecondsSinceEpoch}';
   }
-  
+
   /// Get notification analytics
   Future<Map<String, dynamic>> getNotificationAnalytics({
     DateTime? startDate,
     DateTime? endDate,
   }) async {
-    final start = startDate ?? DateTime.now().subtract(Duration(days: 7));
+    final start = startDate ?? DateTime.now().subtract(const Duration(days: 7));
     final end = endDate ?? DateTime.now();
-    
+
     final records = await _firestoreService.query(
       'notification_records',
       where: [
@@ -813,7 +841,7 @@ class NotificationDispatchService {
         {'field': 'sentAt', 'operator': '<=', 'value': end},
       ],
     );
-    
+
     final analytics = {
       'totalSent': 0,
       'successRate': 0.0,
@@ -822,23 +850,27 @@ class NotificationDispatchService {
       'priorityBreakdown': <String, int>{},
       'dailyTrends': <String, int>{},
     };
-    
-    for (final doc in records) {
+
+    for (final doc in records.docs) {
       final data = doc.data() as Map<String, dynamic>;
       analytics['totalSent'] = (analytics['totalSent'] as int) + 1;
-      
-      // Category breakdown
-      final category = data['category'] as String;
-      analytics['categoryBreakdown'][category] = 
-          (analytics['categoryBreakdown'][category] as int? ?? 0) + 1;
-      
+
+      final category = data['category'] as String? ?? 'unknown';
+      final categoryBreakdown =
+          analytics['categoryBreakdown'] as Map<String, int>;
+      categoryBreakdown[category] = (categoryBreakdown[category] ?? 0) + 1;
+
       // Daily trends
-      final date = (data['sentAt'] as Timestamp).toDate();
-      final dateKey = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-      analytics['dailyTrends'][dateKey] = 
-          (analytics['dailyTrends'][dateKey] as int? ?? 0) + 1;
+      final sentAt = data['sentAt'];
+      if (sentAt is Timestamp) {
+        final date = sentAt.toDate();
+        final dateKey =
+            '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+        final dailyTrends = analytics['dailyTrends'] as Map<String, int>;
+        dailyTrends[dateKey] = (dailyTrends[dateKey] ?? 0) + 1;
+      }
     }
-    
+
     return analytics;
   }
 }

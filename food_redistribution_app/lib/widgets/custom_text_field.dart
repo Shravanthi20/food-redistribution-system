@@ -15,7 +15,7 @@ class CustomTextField extends StatelessWidget {
   final bool useGlassStyle;
 
   const CustomTextField({
-    Key? key,
+    super.key,
     required this.controller,
     required this.label,
     this.hintText,
@@ -27,12 +27,13 @@ class CustomTextField extends StatelessWidget {
     this.maxLines = 1,
     this.enabled = true,
     this.useGlassStyle = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark || useGlassStyle;
-    
+    final isDark =
+        Theme.of(context).brightness == Brightness.dark || useGlassStyle;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -41,7 +42,8 @@ class CustomTextField extends StatelessWidget {
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w500,
-            color: isDark ? Colors.white.withOpacity(0.9) : Colors.black87,
+            color:
+                isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black87,
           ),
         ),
         const SizedBox(height: 8),
@@ -58,23 +60,30 @@ class CustomTextField extends StatelessWidget {
           decoration: InputDecoration(
             hintText: hintText ?? label,
             hintStyle: TextStyle(
-              color: isDark ? Colors.white.withOpacity(0.5) : Colors.black45,
+              color:
+                  isDark ? Colors.white.withValues(alpha: 0.5) : Colors.black45,
             ),
             prefixIcon: prefixIcon,
             suffixIcon: suffixIcon,
             errorMaxLines: 2,
             filled: true,
-            fillColor: isDark ? Colors.white.withOpacity(0.1) : Colors.grey.shade100,
+            fillColor: isDark
+                ? Colors.white.withValues(alpha: 0.1)
+                : Colors.grey.shade100,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: isDark ? Colors.white.withOpacity(0.3) : Colors.grey.shade300,
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.3)
+                    : Colors.grey.shade300,
               ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: isDark ? Colors.white.withOpacity(0.3) : Colors.grey.shade300,
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.3)
+                    : Colors.grey.shade300,
               ),
             ),
             focusedBorder: OutlineInputBorder(

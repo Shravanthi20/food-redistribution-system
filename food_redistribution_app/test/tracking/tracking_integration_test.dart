@@ -1,24 +1,74 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_redistribution_app/providers/tracking_provider.dart';
+import 'test_mocks.dart';
 import 'package:food_redistribution_app/services/tracking/offline_tracking_service.dart';
 import 'package:food_redistribution_app/services/tracking/delay_detection_service.dart';
-import 'package:food_redistribution_app/services/tracking/notification_handler.dart';
 import 'package:food_redistribution_app/models/tracking/location_tracking_model.dart';
 import 'package:food_redistribution_app/models/enums.dart';
+import 'package:firebase_core/firebase_core.dart';
+
+import 'package:firebase_core_platform_interface/firebase_core_platform_interface.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+class MockFirebaseAppPlatform extends FirebaseAppPlatform {
+  MockFirebaseAppPlatform()
+      : super(
+            'test_app',
+            const FirebaseOptions(
+              apiKey: 'test_key',
+              appId: 'test_id',
+              messagingSenderId: 'test_sender_id',
+              projectId: 'test_project_id',
+            ));
+}
+
+class MockFirebasePlatform extends FirebasePlatform {
+  MockFirebasePlatform() : super();
+
+  @override
+  FirebaseAppPlatform app([String name = defaultFirebaseAppName]) {
+    return MockFirebaseAppPlatform();
+  }
+
+  @override
+  Future<FirebaseAppPlatform> initializeApp(
+      {String? name, FirebaseOptions? options}) async {
+    return MockFirebaseAppPlatform();
+  }
+
+  @override
+  List<FirebaseAppPlatform> get apps => [app()];
+}
 
 // Integration tests for tracking services working together
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  FirebasePlatform.instance = MockFirebasePlatform();
+
   group('Tracking Services Integration Tests', () {
     late TrackingProvider trackingProvider;
     late OfflineTrackingService offlineService;
     late DelayDetectionService delayDetectionService;
 
-    setUp(() {
-      trackingProvider = TrackingProvider();
+    setUpAll(() async {
+      SharedPreferences.setMockInitialValues({});
+      await Firebase.initializeApp();
+    });
+
+    setUp(() async {
+      final fakeFirestore = FakeFirebaseFirestore();
+      final fakeNotificationHandler = FakeNotificationHandler();
+      trackingProvider = TrackingProvider(
+        firestore: fakeFirestore,
+        notificationHandler: fakeNotificationHandler,
+      );
       offlineService = OfflineTrackingService();
+      // Ensure prefs are initialized
+      await offlineService.prefs;
       delayDetectionService = DelayDetectionService(
-        notificationHandler: NotificationHandler(),
+        notificationHandler: fakeNotificationHandler,
+        firestore: fakeFirestore,
       );
     });
 
@@ -26,7 +76,8 @@ void main() {
       const volunteerId = 'volunteer_integration_001';
       const taskId = 'task_integration_001';
 
-      await trackingProvider.startTracking(volunteerId: volunteerId, taskId: taskId);
+      await trackingProvider.startTracking(
+          volunteerId: volunteerId, taskId: taskId);
       trackingProvider.setOnlineStatus(false);
 
       for (int i = 0; i < 3; i++) {
@@ -45,6 +96,7 @@ void main() {
           taskId: update.taskId,
           latitude: update.latitude,
           longitude: update.longitude,
+          accuracy: update.accuracy,
         );
         await offlineService.saveOfflineLocationUpdate(update);
       }
@@ -80,7 +132,8 @@ void main() {
       const task1 = 'task_1';
       const task2 = 'task_2';
 
-      await trackingProvider.startTracking(volunteerId: volunteer1, taskId: task1);
+      await trackingProvider.startTracking(
+          volunteerId: volunteer1, taskId: task1);
 
       final update1 = LocationUpdate(
         id: 'loc_task1',
@@ -109,12 +162,14 @@ void main() {
         taskId: update1.taskId,
         latitude: update1.latitude,
         longitude: update1.longitude,
+        accuracy: update1.accuracy,
       );
       await trackingProvider.updateVolunteerLocation(
         volunteerId: update2.volunteerId,
         taskId: update2.taskId,
         latitude: update2.latitude,
         longitude: update2.longitude,
+        accuracy: update2.accuracy,
       );
       expect(trackingProvider.locationHistory.length, greaterThanOrEqualTo(2));
     });
@@ -142,7 +197,8 @@ void main() {
       const volunteerId = 'volunteer_accuracy_test';
       const taskId = 'task_accuracy_01';
 
-      await trackingProvider.startTracking(volunteerId: volunteerId, taskId: taskId);
+      await trackingProvider.startTracking(
+          volunteerId: volunteerId, taskId: taskId);
 
       final highAccuracy = LocationUpdate(
         id: 'loc_high_acc',
@@ -160,6 +216,7 @@ void main() {
         taskId: highAccuracy.taskId,
         latitude: highAccuracy.latitude,
         longitude: highAccuracy.longitude,
+        accuracy: highAccuracy.accuracy,
       );
 
       final lowAccuracy = LocationUpdate(
@@ -178,6 +235,7 @@ void main() {
         taskId: lowAccuracy.taskId,
         latitude: lowAccuracy.latitude,
         longitude: lowAccuracy.longitude,
+        accuracy: lowAccuracy.accuracy,
       );
       expect(trackingProvider.locationHistory.length, greaterThanOrEqualTo(2));
       expect(trackingProvider.locationHistory.last.accuracy, 50.0);
@@ -206,7 +264,8 @@ void main() {
       const volunteerId = 'volunteer_metrics_test';
       const taskId = 'task_metrics_01';
 
-      await trackingProvider.startTracking(volunteerId: volunteerId, taskId: taskId);
+      await trackingProvider.startTracking(
+          volunteerId: volunteerId, taskId: taskId);
 
       final locations = [
         LocationUpdate(
@@ -237,6 +296,7 @@ void main() {
           taskId: loc.taskId,
           latitude: loc.latitude,
           longitude: loc.longitude,
+          accuracy: loc.accuracy,
         );
       }
 

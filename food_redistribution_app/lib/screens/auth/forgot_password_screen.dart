@@ -4,7 +4,7 @@ import '../../providers/auth_provider.dart';
 import '../../widgets/custom_text_field.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
-  const ForgotPasswordScreen({Key? key}) : super(key: key);
+  const ForgotPasswordScreen({super.key});
 
   @override
   State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
@@ -29,7 +29,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     try {
       await Provider.of<AuthProvider>(context, listen: false)
           .sendPasswordResetEmail(_emailController.text.trim());
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -42,11 +42,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       }
     } catch (e) {
       if (mounted) {
-        // AuthProvider handles error message formatting in errorMessage usually, 
-        // but sendPasswordResetEmail might rethrow. 
+        // AuthProvider handles error message formatting in errorMessage usually,
+        // but sendPasswordResetEmail might rethrow.
         final authProvider = Provider.of<AuthProvider>(context, listen: false);
-        final errorMsg = authProvider.errorMessage ?? 'Failed to send reset email. Please try again.';
-        
+        final errorMsg = authProvider.errorMessage ??
+            'Failed to send reset email. Please try again.';
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMsg),
@@ -72,10 +73,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         titleTextStyle: const TextStyle(
-          color: Colors.black, 
-          fontSize: 20, 
-          fontWeight: FontWeight.bold
-        ),
+            color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
       ),
       body: SafeArea(
         child: Padding(
@@ -88,57 +86,63 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-              const SizedBox(height: 20),
-              
-              // Icon
-              Center(
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.lock_reset,
-                    size: 64,
-                    color: Theme.of(context).primaryColor,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 32),
+                      const SizedBox(height: 20),
 
-              Text(
-                'Forgot your password?',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Enter the email address associated with your account and we\'ll send you a link to reset your password.',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Colors.grey[600],
-                ),
-              ),
-              const SizedBox(height: 32),
+                      // Icon
+                      Center(
+                        child: Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context)
+                                .primaryColor
+                                .withValues(alpha: 0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.lock_reset,
+                            size: 64,
+                            color: Theme.of(context).primaryColor,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 32),
 
-              Form(
-                key: _formKey,
-                child: CustomTextField(
-                  controller: _emailController,
-                  label: 'Email Address',
-                  hintText: 'hello@example.com',
-                  prefixIcon: const Icon(Icons.email_outlined),
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (v) {
-                    if (v == null || v.isEmpty) return 'Please enter your email';
-                    if (!v.contains('@')) return 'Please enter a valid email';
-                    return null;
-                  },
-                ),
-              ),
-              const SizedBox(height: 24),
+                      Text(
+                        'Forgot your password?',
+                        style:
+                            Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Enter the email address associated with your account and we\'ll send you a link to reset your password.',
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              color: Colors.grey[600],
+                            ),
+                      ),
+                      const SizedBox(height: 32),
 
+                      Form(
+                        key: _formKey,
+                        child: CustomTextField(
+                          controller: _emailController,
+                          label: 'Email Address',
+                          hintText: 'hello@example.com',
+                          prefixIcon: const Icon(Icons.email_outlined),
+                          keyboardType: TextInputType.emailAddress,
+                          validator: (v) {
+                            if (v == null || v.isEmpty) {
+                              return 'Please enter your email';
+                            }
+                            if (!v.contains('@')) {
+                              return 'Please enter a valid email';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 24),
                     ],
                   ),
                 ),
@@ -157,7 +161,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       ? const SizedBox(
                           width: 20,
                           height: 20,
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                          child: CircularProgressIndicator(
+                              color: Colors.white, strokeWidth: 2),
                         )
                       : const Text(
                           'Send Reset Link',

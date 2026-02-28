@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'enums.dart';
-import 'location.dart';
 
 export 'enums.dart';
 
@@ -37,7 +36,7 @@ class FoodDonation {
   final DateTime? updatedAt;
   final Map<String, dynamic>? hygieneCertification;
   final bool isUrgent;
-  
+
   // Additional fields for tracking
   final int estimatedMeals;
   final int estimatedPeopleServed;
@@ -103,24 +102,24 @@ class FoodDonation {
           [],
       quantity: data['quantity'] ?? 0,
       unit: data['unit'] ?? '',
-      preparedAt: data['preparedAt'] != null 
-          ? (data['preparedAt'] is Timestamp 
-              ? (data['preparedAt'] as Timestamp).toDate() 
+      preparedAt: data['preparedAt'] != null
+          ? (data['preparedAt'] is Timestamp
+              ? (data['preparedAt'] as Timestamp).toDate()
               : DateTime.parse(data['preparedAt'].toString()))
           : DateTime.now(),
-      expiresAt: data['expiresAt'] != null 
-          ? (data['expiresAt'] is Timestamp 
-              ? (data['expiresAt'] as Timestamp).toDate() 
+      expiresAt: data['expiresAt'] != null
+          ? (data['expiresAt'] is Timestamp
+              ? (data['expiresAt'] as Timestamp).toDate()
               : DateTime.parse(data['expiresAt'].toString()))
           : DateTime.now(),
-      availableFrom: data['availableFrom'] != null 
-          ? (data['availableFrom'] is Timestamp 
-              ? (data['availableFrom'] as Timestamp).toDate() 
+      availableFrom: data['availableFrom'] != null
+          ? (data['availableFrom'] is Timestamp
+              ? (data['availableFrom'] as Timestamp).toDate()
               : DateTime.parse(data['availableFrom'].toString()))
           : DateTime.now(),
-      availableUntil: data['availableUntil'] != null 
-          ? (data['availableUntil'] is Timestamp 
-              ? (data['availableUntil'] as Timestamp).toDate() 
+      availableUntil: data['availableUntil'] != null
+          ? (data['availableUntil'] is Timestamp
+              ? (data['availableUntil'] as Timestamp).toDate()
               : DateTime.parse(data['availableUntil'].toString()))
           : DateTime.now(),
       safetyLevel: FoodSafetyLevel.values.firstWhere(
@@ -143,14 +142,14 @@ class FoodDonation {
       ),
       assignedVolunteerId: data['assignedVolunteerId'],
       assignedNGOId: data['assignedNGOId'],
-      createdAt: data['createdAt'] != null 
-          ? (data['createdAt'] is Timestamp 
-              ? (data['createdAt'] as Timestamp).toDate() 
+      createdAt: data['createdAt'] != null
+          ? (data['createdAt'] is Timestamp
+              ? (data['createdAt'] as Timestamp).toDate()
               : DateTime.parse(data['createdAt'].toString()))
           : DateTime.now(),
       updatedAt: data['updatedAt'] != null
-          ? (data['updatedAt'] is Timestamp 
-              ? (data['updatedAt'] as Timestamp).toDate() 
+          ? (data['updatedAt'] is Timestamp
+              ? (data['updatedAt'] as Timestamp).toDate()
               : DateTime.parse(data['updatedAt'].toString()))
           : null,
       hygieneCertification: data['hygieneCertification'],
@@ -158,8 +157,8 @@ class FoodDonation {
       estimatedMeals: data['estimatedMeals'] ?? 0,
       estimatedPeopleServed: data['estimatedPeopleServed'] ?? 0,
       deliveredAt: data['deliveredAt'] != null
-          ? (data['deliveredAt'] is Timestamp 
-              ? (data['deliveredAt'] as Timestamp).toDate() 
+          ? (data['deliveredAt'] is Timestamp
+              ? (data['deliveredAt'] as Timestamp).toDate()
               : DateTime.parse(data['deliveredAt'].toString()))
           : null,
       claimedByNGO: data['claimedByNGO'],
@@ -195,7 +194,8 @@ class FoodDonation {
       'pickupAddress': pickupAddress,
       'estimatedMeals': estimatedMeals,
       'estimatedPeopleServed': estimatedPeopleServed,
-      'deliveredAt': deliveredAt != null ? Timestamp.fromDate(deliveredAt!) : null,
+      'deliveredAt':
+          deliveredAt != null ? Timestamp.fromDate(deliveredAt!) : null,
       'claimedByNGO': claimedByNGO,
       'ngoName': ngoName,
       'volunteerName': volunteerName,
@@ -248,7 +248,8 @@ class FoodDonation {
       availableFrom: availableFrom ?? this.availableFrom,
       availableUntil: availableUntil ?? this.availableUntil,
       safetyLevel: safetyLevel ?? this.safetyLevel,
-      requiresRefrigeration: requiresRefrigeration ?? this.requiresRefrigeration,
+      requiresRefrigeration:
+          requiresRefrigeration ?? this.requiresRefrigeration,
       isVegetarian: isVegetarian ?? this.isVegetarian,
       isVegan: isVegan ?? this.isVegan,
       isHalal: isHalal ?? this.isHalal,
@@ -273,7 +274,7 @@ class FoodDonation {
       DateTime.now().isAfter(availableFrom) &&
       DateTime.now().isBefore(availableUntil) &&
       !isExpired;
-  
+
   Duration get timeUntilExpiry => expiresAt.difference(DateTime.now());
   Duration get timeUntilPickupEnd => availableUntil.difference(DateTime.now());
 }

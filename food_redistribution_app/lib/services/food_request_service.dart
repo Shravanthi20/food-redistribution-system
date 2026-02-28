@@ -29,15 +29,17 @@ class FoodRequestService {
       if (query.docs.isEmpty) {
         throw Exception('NGO profile not found');
       }
-      
+
       final ngo = NGOProfile.fromFirestore(query.docs.first);
       if (!ngo.isVerified) {
         throw Exception('NGO must be verified to create food requests');
       }
 
       // Create request document
-      final docRef = await _firestore.collection(Collections.requests).add(request.toMap());
-      
+      final docRef = await _firestore
+          .collection(Collections.requests)
+          .add(request.toMap());
+
       // Log action
       await _auditService.logEvent(
         eventType: AuditEventType.dataModification,
@@ -45,7 +47,8 @@ class FoodRequestService {
         riskLevel: AuditRiskLevel.low,
         additionalData: {
           'action': 'food_request_created',
-          'description': 'NGO $ngoId created food request for ${request.requiredQuantity} ${request.unit} of ${request.requiredFoodTypes.join(", ")}',
+          'description':
+              'NGO $ngoId created food request for ${request.requiredQuantity} ${request.unit} of ${request.requiredFoodTypes.join(", ")}',
           'requestId': docRef.id,
           'ngoId': ngoId,
           'urgency': request.urgency.name,
@@ -74,19 +77,22 @@ class FoodRequestService {
   }
 
   /// Get food requests for an NGO
-  Future<List<FoodRequest>> getNGORequests(String ngoId, {RequestStatus? status}) async {
+  Future<List<FoodRequest>> getNGORequests(String ngoId,
+      {RequestStatus? status}) async {
     try {
       Query query = _firestore
           .collection(Collections.requests)
           .where('ngoId', isEqualTo: ngoId)
           .orderBy('createdAt', descending: true);
-      
+
       if (status != null) {
         query = query.where('status', isEqualTo: status.name);
       }
 
       final snapshot = await query.get();
-      return snapshot.docs.map((doc) => FoodRequest.fromFirestore(doc)).toList();
+      return snapshot.docs
+          .map((doc) => FoodRequest.fromFirestore(doc))
+          .toList();
     } catch (e) {
       await _auditService.logEvent(
         eventType: AuditEventType.dataAccess,
@@ -115,8 +121,10 @@ class FoodRequestService {
           .orderBy('urgency', descending: true)
           .orderBy('createdAt', descending: true)
           .get();
-      
-      return snapshot.docs.map((doc) => FoodRequest.fromFirestore(doc)).toList();
+
+      return snapshot.docs
+          .map((doc) => FoodRequest.fromFirestore(doc))
+          .toList();
     } catch (e) {
       await _auditService.logEvent(
         eventType: AuditEventType.dataAccess,
@@ -133,11 +141,15 @@ class FoodRequestService {
   }
 
   /// Update food request
-  Future<void> updateFoodRequest(String requestId, Map<String, dynamic> updates) async {
+  Future<void> updateFoodRequest(
+      String requestId, Map<String, dynamic> updates) async {
     try {
       updates['updatedAt'] = Timestamp.now();
-      await _firestore.collection(Collections.requests).doc(requestId).update(updates);
-      
+      await _firestore
+          .collection(Collections.requests)
+          .doc(requestId)
+          .update(updates);
+
       await _auditService.logEvent(
         eventType: AuditEventType.dataModification,
         userId: 'system',
@@ -170,7 +182,8 @@ class FoodRequestService {
   }
 
   /// Cancel food request
-  Future<void> cancelFoodRequest(String requestId, String ngoId, String reason) async {
+  Future<void> cancelFoodRequest(
+      String requestId, String ngoId, String reason) async {
     try {
       await _firestore.collection(Collections.requests).doc(requestId).update({
         'status': RequestStatus.cancelled.name,
@@ -179,7 +192,7 @@ class FoodRequestService {
         'metadata.cancelledBy': ngoId,
         'metadata.cancelledAt': Timestamp.now(),
       });
-      
+
       await _auditService.logEvent(
         eventType: AuditEventType.dataModification,
         userId: ngoId,
@@ -188,7 +201,8 @@ class FoodRequestService {
         resourceType: 'food_request',
         additionalData: {
           'action': 'food_request_cancelled',
-          'description': 'Food request $requestId cancelled by NGO $ngoId: $reason',
+          'description':
+              'Food request $requestId cancelled by NGO $ngoId: $reason',
           'requestId': requestId,
           'ngoId': ngoId,
           'reason': reason,
@@ -213,26 +227,28 @@ class FoodRequestService {
   }
 
   /// Match request with donation
-  Future<void> matchRequestWithDonation(String requestId, String donationId) async {
+  Future<void> matchRequestWithDonation(
+      String requestId, String donationId) async {
     try {
       final batch = _firestore.batch();
-      
+
       // Update request
       batch.update(_firestore.collection(Collections.requests).doc(requestId), {
         'status': RequestStatus.matched.name,
         'matchedDonationId': donationId,
         'updatedAt': Timestamp.now(),
       });
-      
+
       // Update donation
-      batch.update(_firestore.collection(Collections.donations).doc(donationId), {
+      batch.update(
+          _firestore.collection(Collections.donations).doc(donationId), {
         'status': DonationStatus.matched.name,
         'matchedRequestId': requestId,
         'updatedAt': Timestamp.now(),
       });
-      
+
       await batch.commit();
-      
+
       // Log the match
       await _auditService.logEvent(
         eventType: AuditEventType.dataModification,
@@ -242,7 +258,8 @@ class FoodRequestService {
         resourceType: 'food_request',
         additionalData: {
           'action': 'request_donation_matched',
-          'description': 'Food request $requestId matched with donation $donationId',
+          'description':
+              'Food request $requestId matched with donation $donationId',
           'requestId': requestId,
           'donationId': donationId,
         },
@@ -250,7 +267,6 @@ class FoodRequestService {
 
       // Notify stakeholders
       await _notifyMatch(requestId, donationId);
-      
     } catch (e) {
       await _auditService.logEvent(
         eventType: AuditEventType.securityAlert,
@@ -260,7 +276,8 @@ class FoodRequestService {
         resourceType: 'food_request',
         additionalData: {
           'action': 'match_request_donation_failed',
-          'description': 'Failed to match request $requestId with donation $donationId: $e',
+          'description':
+              'Failed to match request $requestId with donation $donationId: $e',
           'requestId': requestId,
           'donationId': donationId,
           'error': e.toString(),
@@ -273,30 +290,34 @@ class FoodRequestService {
   /// Find potential donations for a request
   Future<List<FoodDonation>> findPotentialDonations(String requestId) async {
     try {
-      final requestDoc = await _firestore.collection(Collections.requests).doc(requestId).get();
+      final requestDoc = await _firestore
+          .collection(Collections.requests)
+          .doc(requestId)
+          .get();
       if (!requestDoc.exists) return [];
-      
+
       final request = FoodRequest.fromFirestore(requestDoc);
-      
+
       // Get available donations within reasonable distance
       final donations = <FoodDonation>[];
       final donationsSnapshot = await _firestore
           .collection(Collections.donations)
           .where('status', isEqualTo: DonationStatus.listed.name)
           .get();
-      
+
       for (final doc in donationsSnapshot.docs) {
         final donation = FoodDonation.fromFirestore(doc);
-        
+
         // Check if donation matches request criteria
         if (await _isCompatible(request, donation)) {
           donations.add(donation);
         }
       }
-      
+
       // Sort by compatibility score
-      donations.sort((a, b) => _calculateCompatibilityScore(request, b).compareTo(_calculateCompatibilityScore(request, a)));
-      
+      donations.sort((a, b) => _calculateCompatibilityScore(request, b)
+          .compareTo(_calculateCompatibilityScore(request, a)));
+
       return donations.take(10).toList(); // Return top 10 matches
     } catch (e) {
       await _auditService.logEvent(
@@ -307,7 +328,8 @@ class FoodRequestService {
         resourceType: 'food_request',
         additionalData: {
           'action': 'find_potential_donations_failed',
-          'description': 'Failed to find potential donations for request $requestId: $e',
+          'description':
+              'Failed to find potential donations for request $requestId: $e',
           'requestId': requestId,
           'error': e.toString(),
         },
@@ -321,26 +343,28 @@ class FoodRequestService {
     try {
       // Check food type compatibility
       final hasMatchingFoodType = request.requiredFoodTypes.any((reqType) =>
-          donation.foodTypes.any((donType) => _areFoodTypesCompatible(reqType, donType)));
-      
+          donation.foodTypes
+              .any((donType) => _areFoodTypesCompatible(reqType, donType)));
+
       if (!hasMatchingFoodType) return false;
-      
+
       // Check expiry vs. needed by date
-      if (donation.expiresAt.isBefore(request.neededBy.subtract(const Duration(hours: 2)))) {
+      if (donation.expiresAt
+          .isBefore(request.neededBy.subtract(const Duration(hours: 2)))) {
         return false;
       }
-      
+
       // Check quantity (donation should be at least 30% of requested quantity)
       if (donation.quantity < (request.requiredQuantity * 0.3)) return false;
-      
+
       // Check distance (should be within 50km)
-      final distance = await _locationService.calculateDistance(
+      final distance = _locationService.calculateDistance(
         donation.pickupLocation['latitude']?.toDouble() ?? 0.0,
         donation.pickupLocation['longitude']?.toDouble() ?? 0.0,
         request.deliveryLocation['latitude']?.toDouble() ?? 0.0,
         request.deliveryLocation['longitude']?.toDouble() ?? 0.0,
       );
-      
+
       return distance <= 50.0;
     } catch (e) {
       return false;
@@ -348,9 +372,10 @@ class FoodRequestService {
   }
 
   /// Calculate compatibility score between request and donation
-  double _calculateCompatibilityScore(FoodRequest request, FoodDonation donation) {
+  double _calculateCompatibilityScore(
+      FoodRequest request, FoodDonation donation) {
     double score = 0.0;
-    
+
     // Food type match score (40%)
     double foodTypeScore = 0.0;
     for (final reqType in request.requiredFoodTypes) {
@@ -363,18 +388,19 @@ class FoodRequestService {
       if (foodTypeScore > 0) break;
     }
     score += foodTypeScore * 0.4;
-    
+
     // Quantity match score (30%)
     final quantityRatio = donation.quantity / request.requiredQuantity;
     final quantityScore = quantityRatio >= 1.0 ? 1.0 : quantityRatio;
     score += quantityScore * 0.3;
-    
+
     // Urgency vs. expiry score (20%)
     final timeToExpiry = donation.expiresAt.difference(DateTime.now()).inHours;
     final timeToNeeded = request.neededBy.difference(DateTime.now()).inHours;
-    final urgencyScore = timeToNeeded > 0 && timeToExpiry > timeToNeeded ? 1.0 : 0.5;
+    final urgencyScore =
+        timeToNeeded > 0 && timeToExpiry > timeToNeeded ? 1.0 : 0.5;
     score += urgencyScore * 0.2;
-    
+
     // Dietary compatibility (10%)
     double dietaryScore = 1.0; // Default to compatible
     for (final restriction in request.dietaryRestrictions) {
@@ -384,22 +410,36 @@ class FoodRequestService {
       }
     }
     score += dietaryScore * 0.1;
-    
+
     return score;
   }
 
   /// Check if food types are compatible
-  bool _areFoodTypesCompatible(FoodCategory requestType, FoodType donationType) {
+  bool _areFoodTypesCompatible(
+      FoodCategory requestType, FoodType donationType) {
     // Map donation food types to request categories
     switch (donationType) {
       case FoodType.cooked:
         return requestType == FoodCategory.readyToEat;
       case FoodType.raw:
-        return [FoodCategory.vegetables, FoodCategory.fruits, FoodCategory.grains, FoodCategory.meat].contains(requestType);
+        return [
+          FoodCategory.vegetables,
+          FoodCategory.fruits,
+          FoodCategory.grains,
+          FoodCategory.meat
+        ].contains(requestType);
       case FoodType.packaged:
-        return [FoodCategory.grains, FoodCategory.beverages, FoodCategory.bakery].contains(requestType);
+        return [
+          FoodCategory.grains,
+          FoodCategory.beverages,
+          FoodCategory.bakery
+        ].contains(requestType);
       case FoodType.fruits:
-        return [FoodCategory.vegetables, FoodCategory.fruits, FoodCategory.dairy].contains(requestType);
+        return [
+          FoodCategory.vegetables,
+          FoodCategory.fruits,
+          FoodCategory.dairy
+        ].contains(requestType);
       default:
         return true; // Default to compatible for other types
     }
@@ -409,13 +449,13 @@ class FoodRequestService {
   bool _isDietaryCompatible(String restriction, FoodDonation donation) {
     switch (restriction.toLowerCase()) {
       case 'vegetarian':
-        return donation.isVegetarian ?? false;
+        return donation.isVegetarian;
       case 'vegan':
-        return donation.isVegan ?? false;
+        return donation.isVegan;
       case 'gluten-free':
         return false; // Not supported in current model
       case 'halal':
-        return donation.isHalal ?? false;
+        return donation.isHalal;
       case 'kosher':
         return false; // Not supported in current model
       default:
@@ -428,16 +468,20 @@ class FoodRequestService {
     try {
       // Find potential donations
       final potentialDonations = await findPotentialDonations(requestId);
-      
+
       if (potentialDonations.isNotEmpty) {
         // Get the best match (first in sorted list)
         final bestDonation = potentialDonations.first;
-        final requestDoc = await _firestore.collection(Collections.requests).doc(requestId).get();
+        final requestDoc = await _firestore
+            .collection(Collections.requests)
+            .doc(requestId)
+            .get();
         final request = FoodRequest.fromFirestore(requestDoc);
-        
+
         // Check compatibility score threshold
         final score = _calculateCompatibilityScore(request, bestDonation);
-        if (score >= 0.7) { // 70% compatibility threshold for auto-match
+        if (score >= 0.7) {
+          // 70% compatibility threshold for auto-match
           await matchRequestWithDonation(requestId, bestDonation.id);
         }
       }
@@ -462,38 +506,45 @@ class FoodRequestService {
   Future<void> _notifyMatch(String requestId, String donationId) async {
     try {
       // Get request and donation details
-      final requestDoc = await _firestore.collection(Collections.requests).doc(requestId).get();
-      final donationDoc = await _firestore.collection(Collections.donations).doc(donationId).get();
-      
+      final requestDoc = await _firestore
+          .collection(Collections.requests)
+          .doc(requestId)
+          .get();
+      final donationDoc = await _firestore
+          .collection(Collections.donations)
+          .doc(donationId)
+          .get();
+
       if (!requestDoc.exists || !donationDoc.exists) return;
-      
+
       final request = FoodRequest.fromFirestore(requestDoc);
       final donation = FoodDonation.fromFirestore(donationDoc);
-      
+
       // Notify NGO
       await _notificationService.sendNotification(
         userId: request.ngoId,
         title: 'Food Request Matched!',
-        message: 'Your request for ${request.requiredQuantity} ${request.unit} has been matched with a donation.',
+        message:
+            'Your request for ${request.requiredQuantity} ${request.unit} has been matched with a donation.',
         type: 'request_matched',
         data: {
           'requestId': requestId,
           'donationId': donationId,
         },
       );
-      
+
       // Notify Donor
       await _notificationService.sendNotification(
         userId: donation.donorId,
         title: 'Donation Matched!',
-        message: 'Your donation has been matched with an NGO for ${request.expectedBeneficiaries} beneficiaries.',
+        message:
+            'Your donation has been matched with an NGO for ${request.expectedBeneficiaries} beneficiaries.',
         type: 'donation_matched',
         data: {
           'donationId': donationId,
           'requestId': requestId,
         },
       );
-      
     } catch (e) {
       await _auditService.logEvent(
         eventType: AuditEventType.securityAlert,
@@ -516,16 +567,23 @@ class FoodRequestService {
   Future<Map<String, dynamic>> getRequestStatistics() async {
     try {
       final snapshot = await _firestore.collection(Collections.requests).get();
-      final requests = snapshot.docs.map((doc) => FoodRequest.fromFirestore(doc)).toList();
-      
+      final requests =
+          snapshot.docs.map((doc) => FoodRequest.fromFirestore(doc)).toList();
+
       return {
         'totalRequests': requests.length,
-        'pendingRequests': requests.where((r) => r.status == RequestStatus.pending).length,
-        'matchedRequests': requests.where((r) => r.status == RequestStatus.matched).length,
-        'fulfilledRequests': requests.where((r) => r.status == RequestStatus.fulfilled).length,
-        'cancelledRequests': requests.where((r) => r.status == RequestStatus.cancelled).length,
-        'criticalRequests': requests.where((r) => r.urgency == RequestUrgency.critical).length,
-        'totalBeneficiaries': requests.fold<int>(0, (sum, r) => sum + r.expectedBeneficiaries),
+        'pendingRequests':
+            requests.where((r) => r.status == RequestStatus.pending).length,
+        'matchedRequests':
+            requests.where((r) => r.status == RequestStatus.matched).length,
+        'fulfilledRequests':
+            requests.where((r) => r.status == RequestStatus.fulfilled).length,
+        'cancelledRequests':
+            requests.where((r) => r.status == RequestStatus.cancelled).length,
+        'criticalRequests':
+            requests.where((r) => r.urgency == RequestUrgency.critical).length,
+        'totalBeneficiaries': requests.fold<int>(
+            0, (total, r) => total + r.expectedBeneficiaries),
       };
     } catch (e) {
       await _auditService.logEvent(

@@ -6,9 +6,9 @@ import '../services/user_service.dart';
 // RBAC Middleware for protecting routes and widgets
 class RBACMiddleware {
   static final AuthService _authService = AuthService();
-
   // Route guard - check if user can access route
-  static Future<bool> canAccessRoute(String routeName, UserRole? userRole) async {
+  static Future<bool> canAccessRoute(
+      String routeName, UserRole? userRole) async {
     if (userRole == null) return false;
 
     // Admin routes
@@ -56,12 +56,12 @@ class ProtectedRoute extends StatefulWidget {
   final String? routeName;
 
   const ProtectedRoute({
-    Key? key,
+    super.key,
     required this.child,
     required this.allowedRoles,
     this.unauthorizedWidget,
     this.routeName,
-  }) : super(key: key);
+  });
 
   @override
   State<ProtectedRoute> createState() => _ProtectedRouteState();
@@ -101,15 +101,16 @@ class _ProtectedRouteState extends State<ProtectedRoute> {
       }
 
       // Check role authorization
-      final hasAccess = widget.allowedRoles.contains(user.role) || user.role == UserRole.admin;
-      
+      final hasAccess = widget.allowedRoles.contains(user.role) ||
+          user.role == UserRole.admin;
+
       setState(() {
         isLoading = false;
         isAuthorized = hasAccess;
         currentUser = user;
       });
     } catch (e) {
-      print('Error checking authorization: $e');
+      debugPrint('Error checking authorization: $e');
       setState(() {
         isLoading = false;
         isAuthorized = false;
@@ -128,11 +129,11 @@ class _ProtectedRouteState extends State<ProtectedRoute> {
     }
 
     if (!isAuthorized) {
-      return widget.unauthorizedWidget ?? 
-        UnauthorizedWidget(
-          currentUser: currentUser,
-          requiredRoles: widget.allowedRoles,
-        );
+      return widget.unauthorizedWidget ??
+          UnauthorizedWidget(
+            currentUser: currentUser,
+            requiredRoles: widget.allowedRoles,
+          );
     }
 
     return widget.child;
@@ -145,10 +146,10 @@ class UnauthorizedWidget extends StatelessWidget {
   final List<UserRole>? requiredRoles;
 
   const UnauthorizedWidget({
-    Key? key,
+    super.key,
     this.currentUser,
     this.requiredRoles,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -189,9 +190,9 @@ class UnauthorizedWidget extends StatelessWidget {
               Text(
                 'Access Denied',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: Colors.red.shade700,
-                  fontWeight: FontWeight.bold,
-                ),
+                      color: Colors.red.shade700,
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               const SizedBox(height: 16),
               Text(
@@ -234,11 +235,11 @@ class RoleBasedWidget extends StatelessWidget {
   final Widget? fallback;
 
   const RoleBasedWidget({
-    Key? key,
+    super.key,
     required this.allowedRoles,
     required this.child,
     this.fallback,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

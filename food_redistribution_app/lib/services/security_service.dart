@@ -4,12 +4,13 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import '../config/firebase_schema.dart';
+import 'package:flutter/foundation.dart';
 
 class SecurityService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
-  
+
   // Brute-force protection settings
   static const int maxLoginAttempts = 5;
   static const Duration lockoutDuration = Duration(minutes: 15);
@@ -22,21 +23,21 @@ class SecurityService {
           .collection(Collections.security)
           .doc(_hashEmail(email))
           .get();
-      
+
       if (!doc.exists) return false;
-      
+
       final data = doc.data() as Map<String, dynamic>;
       final attempts = data['failedAttempts'] ?? 0;
       final lastAttempt = (data['lastAttempt'] as Timestamp?)?.toDate();
-      
+
       if (attempts >= maxLoginAttempts && lastAttempt != null) {
         final timeSinceLastAttempt = DateTime.now().difference(lastAttempt);
         return timeSinceLastAttempt < lockoutDuration;
       }
-      
+
       return false;
     } catch (e) {
-      print('Error checking account lock: $e');
+      debugPrint('Error checking account lock: $e');
       return false;
     }
   }
@@ -45,15 +46,16 @@ class SecurityService {
   Future<void> recordFailedLogin(String email, String? ipAddress) async {
     try {
       final emailHash = _hashEmail(email);
-      final securityRef = _firestore.collection(Collections.security).doc(emailHash);
-      
+      final securityRef =
+          _firestore.collection(Collections.security).doc(emailHash);
+
       await _firestore.runTransaction((transaction) async {
         final doc = await transaction.get(securityRef);
-        
+
         if (doc.exists) {
           final data = doc.data() as Map<String, dynamic>;
           final currentAttempts = data['failedAttempts'] ?? 0;
-          
+
           transaction.update(securityRef, {
             'failedAttempts': currentAttempts + 1,
             'lastAttempt': Timestamp.now(),
@@ -71,7 +73,7 @@ class SecurityService {
           });
         }
       });
-      
+
       // Log security event
       await _logSecurityEvent('failed_login', {
         'emailHash': emailHash,
@@ -79,7 +81,7 @@ class SecurityService {
         'timestamp': Timestamp.now(),
       });
     } catch (e) {
-      print('Error recording failed login: $e');
+      debugPrint('Error recording failed login: $e');
     }
   }
 
@@ -90,11 +92,14 @@ class SecurityService {
       if (user != null) {
         // Clear failed attempts
         final emailHash = _hashEmail(user.email!);
-        await _firestore.collection(Collections.security).doc(emailHash).delete();
-        
+        await _firestore
+            .collection(Collections.security)
+            .doc(emailHash)
+            .delete();
+
         // Create session record
         await _createUserSession(userId, ipAddress);
-        
+
         // Log security event
         await _logSecurityEvent('successful_login', {
           'userId': userId,
@@ -103,7 +108,7 @@ class SecurityService {
         });
       }
     } catch (e) {
-      print('Error recording successful login: $e');
+      debugPrint('Error recording successful login: $e');
     }
   }
 
@@ -119,15 +124,20 @@ class SecurityService {
         'expiresAt': Timestamp.fromDate(DateTime.now().add(sessionTimeout)),
         'isActive': true,
       };
-      
+
       // Store in Firestore
-      await _firestore.collection(Collections.security).doc(sessionId).set(sessionData);
-      
+      await _firestore
+          .collection(Collections.security)
+          .doc(sessionId)
+          .set(sessionData);
+
       // Store session ID securely on device
       await _secureStorage.write(key: 'session_id', value: sessionId);
-      await _secureStorage.write(key: 'session_expires', value: DateTime.now().add(sessionTimeout).toIso8601String());
+      await _secureStorage.write(
+          key: 'session_expires',
+          value: DateTime.now().add(sessionTimeout).toIso8601String());
     } catch (e) {
-      print('Error creating user session: $e');
+      debugPrint('Error creating user session: $e');
     }
   }
 
@@ -136,26 +146,29 @@ class SecurityService {
     try {
       final sessionId = await _secureStorage.read(key: 'session_id');
       final expiresStr = await _secureStorage.read(key: 'session_expires');
-      
+
       if (sessionId == null || expiresStr == null) return false;
-      
+
       final expires = DateTime.parse(expiresStr);
       if (DateTime.now().isAfter(expires)) {
         await invalidateSession();
         return false;
       }
-      
+
       // Check if session exists in Firestore
-      final doc = await _firestore.collection(Collections.security).doc(sessionId).get();
+      final doc = await _firestore
+          .collection(Collections.security)
+          .doc(sessionId)
+          .get();
       if (!doc.exists) {
         await invalidateSession();
         return false;
       }
-      
+
       final data = doc.data() as Map<String, dynamic>;
       return data['isActive'] == true;
     } catch (e) {
-      print('Error validating session: $e');
+      debugPrint('Error validating session: $e');
       return false;
     }
   }
@@ -164,20 +177,23 @@ class SecurityService {
   Future<void> invalidateSession() async {
     try {
       final sessionId = await _secureStorage.read(key: 'session_id');
-      
+
       if (sessionId != null) {
         // Mark session as inactive in Firestore
-        await _firestore.collection(Collections.security).doc(sessionId).update({
+        await _firestore
+            .collection(Collections.security)
+            .doc(sessionId)
+            .update({
           'isActive': false,
           'invalidatedAt': Timestamp.now(),
         });
       }
-      
+
       // Clear local session data
       await _secureStorage.delete(key: 'session_id');
       await _secureStorage.delete(key: 'session_expires');
     } catch (e) {
-      print('Error invalidating session: $e');
+      debugPrint('Error invalidating session: $e');
     }
   }
 
@@ -185,25 +201,26 @@ class SecurityService {
   Future<void> cleanupExpiredSessions() async {
     try {
       final cutoffTime = DateTime.now().subtract(const Duration(hours: 24));
-      
+
       final expiredSessions = await _firestore
           .collection(Collections.security)
           .where('expiresAt', isLessThan: Timestamp.fromDate(cutoffTime))
           .get();
-      
+
       final batch = _firestore.batch();
       for (var doc in expiredSessions.docs) {
         batch.delete(doc.reference);
       }
-      
+
       await batch.commit();
     } catch (e) {
-      print('Error cleaning up expired sessions: $e');
+      debugPrint('Error cleaning up expired sessions: $e');
     }
   }
 
   // Get active sessions for user
-  Future<List<Map<String, dynamic>>> getUserActiveSessions(String userId) async {
+  Future<List<Map<String, dynamic>>> getUserActiveSessions(
+      String userId) async {
     try {
       final query = await _firestore
           .collection(Collections.security)
@@ -213,12 +230,10 @@ class SecurityService {
           .orderBy('expiresAt')
           .orderBy('createdAt', descending: true)
           .get();
-      
-      return query.docs
-          .map((doc) => {'id': doc.id, ...doc.data()})
-          .toList();
+
+      return query.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList();
     } catch (e) {
-      print('Error getting user active sessions: $e');
+      debugPrint('Error getting user active sessions: $e');
       return [];
     }
   }
@@ -231,12 +246,13 @@ class SecurityService {
         'terminatedAt': Timestamp.now(),
       });
     } catch (e) {
-      print('Error terminating session: $e');
+      debugPrint('Error terminating session: $e');
     }
   }
 
   // Log security events
-  Future<void> _logSecurityEvent(String event, Map<String, dynamic> data) async {
+  Future<void> _logSecurityEvent(
+      String event, Map<String, dynamic> data) async {
     try {
       await _firestore.collection(Collections.security).add({
         'event': event,
@@ -244,13 +260,14 @@ class SecurityService {
         ...data,
       });
     } catch (e) {
-      print('Error logging security event: $e');
+      debugPrint('Error logging security event: $e');
     }
   }
 
   // Generate secure session ID
   String _generateSessionId() {
-    final bytes = List<int>.generate(32, (i) => DateTime.now().millisecondsSinceEpoch + i);
+    final bytes = List<int>.generate(
+        32, (i) => DateTime.now().millisecondsSinceEpoch + i);
     return sha256.convert(bytes).toString();
   }
 
@@ -264,14 +281,14 @@ class SecurityService {
     try {
       final emailHash = _hashEmail(email);
       await _firestore.collection(Collections.security).doc(emailHash).delete();
-      
+
       await _logSecurityEvent('account_unlocked', {
         'emailHash': emailHash,
         'adminId': adminId,
         'timestamp': Timestamp.now(),
       });
     } catch (e) {
-      print('Error unlocking account: $e');
+      debugPrint('Error unlocking account: $e');
       rethrow;
     }
   }
@@ -281,24 +298,24 @@ class SecurityService {
     try {
       final now = DateTime.now();
       final dayAgo = now.subtract(const Duration(days: 1));
-      
+
       final failedLogins = await _firestore
           .collection(Collections.security)
           .where('event', isEqualTo: 'failed_login')
           .where('timestamp', isGreaterThan: Timestamp.fromDate(dayAgo))
           .get();
-      
+
       final successfulLogins = await _firestore
           .collection(Collections.security)
           .where('event', isEqualTo: 'successful_login')
           .where('timestamp', isGreaterThan: Timestamp.fromDate(dayAgo))
           .get();
-      
+
       final lockedAccounts = await _firestore
           .collection(Collections.security)
           .where('failedAttempts', isGreaterThanOrEqualTo: maxLoginAttempts)
           .get();
-      
+
       return {
         'failedLoginsLast24h': failedLogins.docs.length,
         'successfulLoginsLast24h': successfulLogins.docs.length,
@@ -306,7 +323,7 @@ class SecurityService {
         'generatedAt': Timestamp.now(),
       };
     } catch (e) {
-      print('Error getting security stats: $e');
+      debugPrint('Error getting security stats: $e');
       return {};
     }
   }

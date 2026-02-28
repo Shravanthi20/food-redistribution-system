@@ -16,7 +16,7 @@ class GlassContainer extends StatelessWidget {
   final VoidCallback? onTap;
 
   const GlassContainer({
-    Key? key,
+    super.key,
     required this.child,
     this.width,
     this.height,
@@ -27,7 +27,7 @@ class GlassContainer extends StatelessWidget {
     this.showBorder = true,
     this.tintColor,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -44,8 +44,8 @@ class GlassContainer extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                (tintColor ?? Colors.white).withOpacity(0.1),
-                (tintColor ?? Colors.white).withOpacity(0.05),
+                (tintColor ?? Colors.white).withValues(alpha: 0.1),
+                (tintColor ?? Colors.white).withValues(alpha: 0.05),
               ],
             ),
             borderRadius: BorderRadius.circular(borderRadius),
@@ -82,13 +82,13 @@ class GlassCard extends StatelessWidget {
   final bool isAccent;
 
   const GlassCard({
-    Key? key,
+    super.key,
     required this.child,
     this.padding,
     this.margin,
     this.onTap,
     this.isAccent = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -113,7 +113,7 @@ class GradientButton extends StatelessWidget {
   final bool outlined;
 
   const GradientButton({
-    Key? key,
+    super.key,
     required this.text,
     this.onPressed,
     this.isLoading = false,
@@ -121,11 +121,12 @@ class GradientButton extends StatelessWidget {
     this.icon,
     this.gradientColors,
     this.outlined = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
-    final colors = gradientColors ?? [AppTheme.accentTeal, AppTheme.accentTealLight];
+    final colors =
+        gradientColors ?? [AppTheme.accentTeal, AppTheme.accentTealLight];
 
     if (outlined) {
       return Container(
@@ -162,7 +163,7 @@ class GradientButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: colors.first.withOpacity(0.4),
+            color: colors.first.withValues(alpha: 0.4),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -236,7 +237,7 @@ class GlassTextField extends StatelessWidget {
   final ValueChanged<String>? onChanged;
 
   const GlassTextField({
-    Key? key,
+    super.key,
     required this.controller,
     this.label,
     this.hintText,
@@ -248,7 +249,7 @@ class GlassTextField extends StatelessWidget {
     this.maxLines = 1,
     this.enabled = true,
     this.onChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -258,7 +259,7 @@ class GlassTextField extends StatelessWidget {
         if (label != null) ...[
           Text(
             label!,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
               color: AppTheme.textSecondary,
@@ -291,15 +292,18 @@ class GlassTextField extends StatelessWidget {
                 fillColor: AppTheme.surfaceGlassDark,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(color: AppTheme.surfaceGlassBorder),
+                  borderSide:
+                      const BorderSide(color: AppTheme.surfaceGlassBorder),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(color: AppTheme.surfaceGlassBorder),
+                  borderSide:
+                      const BorderSide(color: AppTheme.surfaceGlassBorder),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
-                  borderSide: const BorderSide(color: AppTheme.accentTeal, width: 2),
+                  borderSide:
+                      const BorderSide(color: AppTheme.accentTeal, width: 2),
                 ),
                 errorBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
@@ -323,13 +327,13 @@ class GlassIconButton extends StatelessWidget {
   final bool isAccent;
 
   const GlassIconButton({
-    Key? key,
+    super.key,
     required this.icon,
     this.onPressed,
     this.size = 48,
     this.iconColor,
     this.isAccent = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -339,7 +343,7 @@ class GlassIconButton extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
         child: Material(
           color: isAccent
-              ? AppTheme.accentTeal.withOpacity(0.2)
+              ? AppTheme.accentTeal.withValues(alpha: 0.2)
               : AppTheme.surfaceGlassDark,
           child: InkWell(
             onTap: onPressed,
@@ -351,14 +355,15 @@ class GlassIconButton extends StatelessWidget {
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: isAccent
-                      ? AppTheme.accentTeal.withOpacity(0.5)
+                      ? AppTheme.accentTeal.withValues(alpha: 0.5)
                       : AppTheme.surfaceGlassBorder,
                   width: 1.5,
                 ),
               ),
               child: Icon(
                 icon,
-                color: iconColor ?? (isAccent ? AppTheme.accentTeal : AppTheme.textSecondary),
+                color: iconColor ??
+                    (isAccent ? AppTheme.accentTeal : AppTheme.textSecondary),
                 size: size * 0.5,
               ),
             ),
@@ -378,13 +383,13 @@ class GlassChip extends StatelessWidget {
   final Color? selectedColor;
 
   const GlassChip({
-    Key? key,
+    super.key,
     required this.label,
     this.icon,
     this.isSelected = false,
     this.onTap,
     this.selectedColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -396,7 +401,9 @@ class GlassChip extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? color.withOpacity(0.2) : AppTheme.surfaceGlassDark,
+          color: isSelected
+              ? color.withValues(alpha: 0.2)
+              : AppTheme.surfaceGlassDark,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected ? color : AppTheme.surfaceGlassBorder,
@@ -439,14 +446,14 @@ class GlassStatCard extends StatelessWidget {
   final VoidCallback? onTap;
 
   const GlassStatCard({
-    Key? key,
+    super.key,
     required this.title,
     required this.value,
     required this.icon,
     this.accentColor,
     this.subtitle,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -461,7 +468,7 @@ class GlassStatCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.15),
+              color: color.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(14),
             ),
             child: Icon(icon, color: color, size: 24),
@@ -469,7 +476,7 @@ class GlassStatCard extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             value,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.w700,
               color: AppTheme.textPrimary,
@@ -479,7 +486,7 @@ class GlassStatCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             title,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
               color: AppTheme.textSecondary,
               fontWeight: FontWeight.w400,
@@ -490,7 +497,7 @@ class GlassStatCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Text(
@@ -516,11 +523,11 @@ class GlassNavigationBar extends StatelessWidget {
   final List<GlassNavigationItem> items;
 
   const GlassNavigationBar({
-    Key? key,
+    super.key,
     required this.currentIndex,
     required this.onTap,
     required this.items,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -530,8 +537,8 @@ class GlassNavigationBar extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
           decoration: BoxDecoration(
-            color: AppTheme.primaryNavy.withOpacity(0.8),
-            border: Border(
+            color: AppTheme.primaryNavy.withValues(alpha: 0.8),
+            border: const Border(
               top: BorderSide(
                 color: AppTheme.surfaceGlassBorder,
                 width: 1,
@@ -562,7 +569,9 @@ class GlassNavigationBar extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppTheme.accentTeal.withOpacity(0.15) : Colors.transparent,
+          color: isSelected
+              ? AppTheme.accentTeal.withValues(alpha: 0.15)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
@@ -612,14 +621,14 @@ class GlassListTile extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
 
   const GlassListTile({
-    Key? key,
+    super.key,
     required this.title,
     this.subtitle,
     this.leading,
     this.trailing,
     this.onTap,
     this.padding,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -650,7 +659,7 @@ class GlassListTile extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     subtitle!,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: AppTheme.textSecondary,
                       fontSize: 13,
                     ),
@@ -672,10 +681,10 @@ class GlassBadge extends StatelessWidget {
   final Color? color;
 
   const GlassBadge({
-    Key? key,
+    super.key,
     required this.text,
     this.color,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -684,10 +693,10 @@ class GlassBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: badgeColor.withOpacity(0.15),
+        color: badgeColor.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: badgeColor.withOpacity(0.3),
+          color: badgeColor.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -711,12 +720,12 @@ class GlassProgressBar extends StatelessWidget {
   final Color? backgroundColor;
 
   const GlassProgressBar({
-    Key? key,
+    super.key,
     required this.value,
     this.height = 8,
     this.color,
     this.backgroundColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -734,13 +743,13 @@ class GlassProgressBar extends StatelessWidget {
             gradient: LinearGradient(
               colors: [
                 color ?? AppTheme.accentTeal,
-                (color ?? AppTheme.accentTeal).withOpacity(0.7),
+                (color ?? AppTheme.accentTeal).withValues(alpha: 0.7),
               ],
             ),
             borderRadius: BorderRadius.circular(height / 2),
             boxShadow: [
               BoxShadow(
-                color: (color ?? AppTheme.accentTeal).withOpacity(0.4),
+                color: (color ?? AppTheme.accentTeal).withValues(alpha: 0.4),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
