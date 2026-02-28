@@ -55,7 +55,7 @@ class OfflineTrackingService {
   Future<bool> saveOfflineStatusUpdate(String taskId, String newStatus) async {
     try {
       final p = await prefs;
-      final key = '${_offlineUpdatesKey}_status';
+      const key = '${_offlineUpdatesKey}_status';
       final existingJson = p.getString(key);
       final List<dynamic> updates =
           existingJson != null ? jsonDecode(existingJson) : [];

@@ -7,7 +7,7 @@ import '../../utils/app_router.dart'; // [NEW]
 import '../../services/verification_service.dart'; // For VerificationStatus enum
 
 class AdminDashboard extends StatefulWidget {
-  const AdminDashboard({Key? key}) : super(key: key);
+  const AdminDashboard({super.key});
 
   @override
   State<AdminDashboard> createState() => _AdminDashboardState();
@@ -208,8 +208,7 @@ class _AdminDashboardState extends State<AdminDashboard>
                               leading: const Icon(Icons.file_present),
                               title: Text(doc['type']),
                               subtitle: Text(doc['information']),
-                            ))
-                        .toList(),
+                            )),
                     const SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
@@ -276,7 +275,9 @@ class _AdminDashboardState extends State<AdminDashboard>
               await Provider.of<AdminDashboardProvider>(context, listen: false)
                   .reviewVerification(submissionId, adminId,
                       VerificationStatus.rejected, noteController.text);
-              Navigator.pop(ctx);
+              if (ctx.mounted) {
+                Navigator.pop(ctx);
+              }
             },
             child: const Text('Reject', style: TextStyle(color: Colors.red)),
           ),

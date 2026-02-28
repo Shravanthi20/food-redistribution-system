@@ -8,7 +8,7 @@ import '../../widgets/loading_overlay.dart';
 import '../../widgets/gradient_scaffold.dart';
 
 class CreateDonationScreen extends StatefulWidget {
-  const CreateDonationScreen({Key? key}) : super(key: key);
+  const CreateDonationScreen({super.key});
 
   @override
   State<CreateDonationScreen> createState() => _CreateDonationScreenState();
@@ -37,7 +37,7 @@ class _CreateDonationScreenState extends State<CreateDonationScreen> {
   final _estimatedMealsController = TextEditingController();
   final _estimatedPeopleController = TextEditingController();
 
-  List<FoodType> _selectedFoodTypes = [];
+  final List<FoodType> _selectedFoodTypes = [];
   DateTime _preparedAt = DateTime.now();
   DateTime _expiresAt = DateTime.now().add(const Duration(hours: 4));
   DateTime _availableFrom = DateTime.now();
@@ -381,7 +381,7 @@ class _CreateDonationScreenState extends State<CreateDonationScreen> {
                     const SizedBox(height: 16),
 
                     DropdownButtonFormField<FoodSafetyLevel>(
-                      value: _safetyLevel,
+                      initialValue: _safetyLevel,
                       decoration: const InputDecoration(
                         labelText: 'Food Safety Level',
                       ),
@@ -537,6 +537,7 @@ class _CreateDonationScreenState extends State<CreateDonationScreen> {
         );
 
         if (date != null) {
+          if (!mounted) return;
           final time = await showTimePicker(
             context: context,
             initialTime: TimeOfDay.fromDateTime(value),

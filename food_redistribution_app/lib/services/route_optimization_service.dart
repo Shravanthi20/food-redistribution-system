@@ -478,7 +478,7 @@ class RouteOptimizationService {
       id: _generateRouteId(),
       points: bestRoute,
       totalDistance: bestDistance,
-      estimatedDuration: Duration(minutes: 0), // Will be calculated later
+      estimatedDuration: const Duration(minutes: 0), // Will be calculated later
       strategy: OptimizationStrategy.shortestDistance,
       optimizationScore: 0, // Will be calculated later
       metrics: {'iterations': iterations},

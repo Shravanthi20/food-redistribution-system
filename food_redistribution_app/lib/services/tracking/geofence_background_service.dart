@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import '../../models/tracking/location_tracking_model.dart';
+import '../../models/enums.dart';
 import 'background_tracking_service.dart';
 
 // Manages geofence entry/exit detection in background

@@ -20,7 +20,7 @@ class GradientScaffold extends StatelessWidget {
   final bool showAnimatedBackground;
 
   const GradientScaffold({
-    Key? key,
+    super.key,
     required this.body,
     this.appBar,
     this.floatingActionButton,
@@ -33,7 +33,7 @@ class GradientScaffold extends StatelessWidget {
     this.backgroundColor,
     this.gradientColors,
     this.showAnimatedBackground = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +96,7 @@ class _AnimatedBackgroundElements extends StatelessWidget {
           right: -80,
           child: _GlowingOrb(
             size: 300,
-            color: AppTheme.accentCyan.withOpacity(0.15),
+            color: AppTheme.accentCyan.withValues(alpha: 0.15),
           ),
         ),
         // Medium teal orb - center left
@@ -105,7 +105,7 @@ class _AnimatedBackgroundElements extends StatelessWidget {
           left: -120,
           child: _GlowingOrb(
             size: 250,
-            color: AppTheme.accentTeal.withOpacity(0.1),
+            color: AppTheme.accentTeal.withValues(alpha: 0.1),
           ),
         ),
         // Small accent orb - bottom right
@@ -114,7 +114,7 @@ class _AnimatedBackgroundElements extends StatelessWidget {
           right: -60,
           child: _GlowingOrb(
             size: 180,
-            color: AppTheme.accentCyanSoft.withOpacity(0.12),
+            color: AppTheme.accentCyanSoft.withValues(alpha: 0.12),
           ),
         ),
       ],
@@ -156,7 +156,7 @@ class _GlowingOrb extends StatelessWidget {
               gradient: RadialGradient(
                 colors: [
                   color,
-                  color.withOpacity(0),
+                  color.withValues(alpha: 0),
                 ],
               ),
             ),
@@ -178,7 +178,7 @@ class GlassAppBar extends StatelessWidget implements PreferredSizeWidget {
   final PreferredSizeWidget? bottom;
 
   const GlassAppBar({
-    Key? key,
+    super.key,
     this.title,
     this.titleWidget,
     this.actions,
@@ -186,7 +186,7 @@ class GlassAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.automaticallyImplyLeading = true,
     this.elevation = 0,
     this.bottom,
-  }) : super(key: key);
+  });
 
   @override
   Size get preferredSize => Size.fromHeight(
@@ -221,13 +221,13 @@ class GlassFAB extends StatelessWidget {
   final String? label;
 
   const GlassFAB({
-    Key? key,
+    super.key,
     required this.onPressed,
     required this.icon,
     this.tooltip,
     this.extended = false,
     this.label,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -251,7 +251,7 @@ class GlassFAB extends StatelessWidget {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: AppTheme.accentTeal.withOpacity(0.4),
+            color: AppTheme.accentTeal.withValues(alpha: 0.4),
             blurRadius: 16,
             offset: const Offset(0, 6),
           ),
@@ -281,13 +281,13 @@ class GlassDialog extends StatelessWidget {
   final EdgeInsetsGeometry? titlePadding;
 
   const GlassDialog({
-    Key? key,
+    super.key,
     this.title,
     this.content,
     this.actions,
     this.contentPadding,
     this.titlePadding,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -296,10 +296,10 @@ class GlassDialog extends StatelessWidget {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
         child: AlertDialog(
-          backgroundColor: AppTheme.primaryNavyLight.withOpacity(0.95),
+          backgroundColor: AppTheme.primaryNavyLight.withValues(alpha: 0.95),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24),
-            side: BorderSide(
+            side: const BorderSide(
               color: AppTheme.surfaceGlassBorder,
               width: 1,
             ),
@@ -349,10 +349,10 @@ class GlassBottomSheet extends StatelessWidget {
   final bool showHandle;
 
   const GlassBottomSheet({
-    Key? key,
+    super.key,
     required this.child,
     this.showHandle = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -362,9 +362,9 @@ class GlassBottomSheet extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
         child: Container(
           decoration: BoxDecoration(
-            color: AppTheme.primaryNavyLight.withOpacity(0.95),
+            color: AppTheme.primaryNavyLight.withValues(alpha: 0.95),
             borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-            border: Border(
+            border: const Border(
               top: BorderSide(
                 color: AppTheme.surfaceGlassBorder,
                 width: 1,

@@ -5,7 +5,7 @@ import '../../providers/auth_provider.dart';
 import '../../models/food_donation.dart';
 
 class ImpactReportsScreen extends StatefulWidget {
-  const ImpactReportsScreen({Key? key}) : super(key: key);
+  const ImpactReportsScreen({super.key});
 
   @override
   State<ImpactReportsScreen> createState() => _ImpactReportsScreenState();
@@ -272,7 +272,7 @@ class _ImpactReportsScreenState extends State<ImpactReportsScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(icon, color: color, size: 32),
@@ -404,7 +404,7 @@ class _ImpactReportsScreenState extends State<ImpactReportsScreen> {
           return Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
+              SizedBox(
                 width: 60,
                 child: Column(
                   children: [

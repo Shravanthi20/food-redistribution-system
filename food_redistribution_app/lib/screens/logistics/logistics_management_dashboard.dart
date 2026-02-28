@@ -2,45 +2,46 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 
 class LogisticsManagementDashboard extends StatefulWidget {
+  const LogisticsManagementDashboard({super.key});
+
   @override
-  _LogisticsManagementDashboardState createState() =>
+  State<LogisticsManagementDashboard> createState() =>
       _LogisticsManagementDashboardState();
 }
 
 class _LogisticsManagementDashboardState
     extends State<LogisticsManagementDashboard> {
   String _selectedTimeRange = '24h';
-  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: Text('Logistics Management',
+        title: const Text('Logistics Management',
             style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black87,
         elevation: 0,
         actions: [
           _buildTimeRangeSelector(),
-          IconButton(icon: Icon(Icons.refresh), onPressed: _refreshData),
-          IconButton(icon: Icon(Icons.download), onPressed: _exportData),
+          IconButton(icon: const Icon(Icons.refresh), onPressed: _refreshData),
+          IconButton(icon: const Icon(Icons.download), onPressed: _exportData),
         ],
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildKPICards(),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             _buildChartsSection(),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             _buildOperationalMetrics(),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             _buildResourceManagement(),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             _buildPerformanceAnalysis(),
           ],
         ),
@@ -50,7 +51,7 @@ class _LogisticsManagementDashboardState
 
   Widget _buildTimeRangeSelector() {
     return Padding(
-      padding: EdgeInsets.only(right: 8),
+      padding: const EdgeInsets.only(right: 8),
       child: DropdownButton<String>(
         value: _selectedTimeRange,
         underline: Container(),
@@ -66,43 +67,43 @@ class _LogisticsManagementDashboardState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Key Performance Indicators',
+        const Text('Key Performance Indicators',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-        SizedBox(height: 12),
+        const SizedBox(height: 12),
         Row(
           children: [
             Expanded(
                 child: _buildKPICard('Total Deliveries', '247', '+12%',
                     Colors.blue, Icons.local_shipping)),
-            SizedBox(width: 12),
+            const SizedBox(width: 12),
             Expanded(
                 child: _buildKPICard(
                     'Food Rescued', '1.2K kg', '+8%', Colors.green, Icons.eco)),
-            SizedBox(width: 12),
+            const SizedBox(width: 12),
             Expanded(
                 child: _buildKPICard('Avg Delivery Time', '32 min', '-5%',
                     Colors.orange, Icons.timer)),
-            SizedBox(width: 12),
+            const SizedBox(width: 12),
             Expanded(
                 child: _buildKPICard('Efficiency Rate', '94.2%', '+3%',
                     Colors.purple, Icons.trending_up)),
           ],
         ),
-        SizedBox(height: 12),
+        const SizedBox(height: 12),
         Row(
           children: [
             Expanded(
                 child: _buildKPICard('Active Volunteers', '28', '+2',
                     Colors.teal, Icons.people)),
-            SizedBox(width: 12),
+            const SizedBox(width: 12),
             Expanded(
                 child: _buildKPICard('Route Optimization', '87%', '+11%',
                     Colors.indigo, Icons.route)),
-            SizedBox(width: 12),
+            const SizedBox(width: 12),
             Expanded(
                 child: _buildKPICard('Cost per Delivery', '\$4.20', '-8%',
                     Colors.red, Icons.attach_money)),
-            SizedBox(width: 12),
+            const SizedBox(width: 12),
             Expanded(
                 child: _buildKPICard('Customer Satisfaction', '4.7/5', '+0.2',
                     Colors.amber, Icons.star)),
@@ -116,15 +117,15 @@ class _LogisticsManagementDashboardState
       String title, String value, String change, Color color, IconData icon) {
     final isPositive = !change.startsWith('-');
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 10,
-              offset: Offset(0, 2))
+              offset: const Offset(0, 2))
         ],
       ),
       child: Column(
@@ -133,19 +134,19 @@ class _LogisticsManagementDashboardState
           Row(
             children: [
               Container(
-                padding: EdgeInsets.all(8),
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(icon, color: color, size: 20),
               ),
-              Spacer(),
+              const Spacer(),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color:
-                      (isPositive ? Colors.green : Colors.red).withOpacity(0.1),
+                  color: (isPositive ? Colors.green : Colors.red)
+                      .withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -159,11 +160,11 @@ class _LogisticsManagementDashboardState
               ),
             ],
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           Text(value,
               style: TextStyle(
                   fontSize: 24, fontWeight: FontWeight.bold, color: color)),
-          SizedBox(height: 4),
+          const SizedBox(height: 4),
           Text(title, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
         ],
       ),
@@ -174,21 +175,21 @@ class _LogisticsManagementDashboardState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Analytics Dashboard',
+        const Text('Analytics Dashboard',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-        SizedBox(height: 12),
+        const SizedBox(height: 12),
         Row(
           children: [
             Expanded(flex: 2, child: _buildDeliveryTrendsChart()),
-            SizedBox(width: 16),
+            const SizedBox(width: 16),
             Expanded(flex: 1, child: _buildVolunteerDistributionChart()),
           ],
         ),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
         Row(
           children: [
             Expanded(child: _buildRouteEfficiencyChart()),
-            SizedBox(width: 16),
+            const SizedBox(width: 16),
             Expanded(child: _buildFoodTypeDistributionChart()),
           ],
         ),
@@ -199,46 +200,46 @@ class _LogisticsManagementDashboardState
   Widget _buildDeliveryTrendsChart() {
     return Container(
       height: 300,
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)
+          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10)
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Delivery Trends',
+          const Text('Delivery Trends',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Expanded(
             child: LineChart(
               LineChartData(
-                gridData: FlGridData(show: false),
-                titlesData: FlTitlesData(show: false),
+                gridData: const FlGridData(show: false),
+                titlesData: const FlTitlesData(show: false),
                 borderData: FlBorderData(show: false),
                 lineBarsData: [
                   LineChartBarData(
                     spots: [
-                      FlSpot(0, 3),
-                      FlSpot(1, 4),
-                      FlSpot(2, 6),
-                      FlSpot(3, 5),
-                      FlSpot(4, 7),
-                      FlSpot(5, 8),
-                      FlSpot(6, 6),
-                      FlSpot(7, 9),
+                      const FlSpot(0, 3),
+                      const FlSpot(1, 4),
+                      const FlSpot(2, 6),
+                      const FlSpot(3, 5),
+                      const FlSpot(4, 7),
+                      const FlSpot(5, 8),
+                      const FlSpot(6, 6),
+                      const FlSpot(7, 9),
                     ],
                     isCurved: true,
                     color: Colors.blue,
                     barWidth: 3,
                     belowBarData: BarAreaData(
                       show: true,
-                      color: Colors.blue.withOpacity(0.1),
+                      color: Colors.blue.withValues(alpha: 0.1),
                     ),
-                    dotData: FlDotData(show: false),
+                    dotData: const FlDotData(show: false),
                   ),
                 ],
               ),
@@ -252,20 +253,20 @@ class _LogisticsManagementDashboardState
   Widget _buildVolunteerDistributionChart() {
     return Container(
       height: 300,
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)
+          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10)
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Volunteer Status',
+          const Text('Volunteer Status',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Expanded(
             child: PieChart(
               PieChartData(
@@ -292,29 +293,29 @@ class _LogisticsManagementDashboardState
   Widget _buildRouteEfficiencyChart() {
     return Container(
       height: 250,
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)
+          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10)
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Route Efficiency',
+          const Text('Route Efficiency',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Expanded(
             child: BarChart(
               BarChartData(
                 alignment: BarChartAlignment.spaceAround,
                 maxY: 100,
-                gridData: FlGridData(show: false),
+                gridData: const FlGridData(show: false),
                 titlesData: FlTitlesData(
-                  leftTitles: AxisTitles(
-                      sideTitles: const SideTitles(showTitles: false)),
+                  leftTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
                   bottomTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
@@ -322,10 +323,10 @@ class _LogisticsManagementDashboardState
                           ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'][value.toInt()]),
                     ),
                   ),
-                  topTitles: AxisTitles(
-                      sideTitles: const SideTitles(showTitles: false)),
-                  rightTitles: AxisTitles(
-                      sideTitles: const SideTitles(showTitles: false)),
+                  topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
                 ),
                 borderData: FlBorderData(show: false),
                 barGroups: [
@@ -356,20 +357,20 @@ class _LogisticsManagementDashboardState
   Widget _buildFoodTypeDistributionChart() {
     return Container(
       height: 250,
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)
+          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10)
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Food Type Distribution',
+          const Text('Food Type Distribution',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Expanded(
             child: Row(
               children: [
@@ -391,7 +392,7 @@ class _LogisticsManagementDashboardState
                     ),
                   ),
                 ),
-                SizedBox(width: 16),
+                const SizedBox(width: 16),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -412,7 +413,7 @@ class _LogisticsManagementDashboardState
 
   Widget _buildLegendItem(String label, Color color) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 2),
+      padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -421,8 +422,8 @@ class _LogisticsManagementDashboardState
             height: 12,
             decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           ),
-          SizedBox(width: 8),
-          Text(label, style: TextStyle(fontSize: 12)),
+          const SizedBox(width: 8),
+          Text(label, style: const TextStyle(fontSize: 12)),
         ],
       ),
     );
@@ -432,35 +433,36 @@ class _LogisticsManagementDashboardState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Operational Metrics',
+        const Text('Operational Metrics',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-        SizedBox(height: 12),
+        const SizedBox(height: 12),
         Container(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
-              BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)
+              BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05), blurRadius: 10)
             ],
           ),
           child: Column(
             children: [
               _buildMetricRow('Average Pickup Time', '8 minutes',
                   'Target: 10 min', Colors.green),
-              Divider(),
+              const Divider(),
               _buildMetricRow('Average Delivery Time', '24 minutes',
                   'Target: 30 min', Colors.green),
-              Divider(),
+              const Divider(),
               _buildMetricRow(
                   'Route Deviation', '12%', 'Target: <15%', Colors.orange),
-              Divider(),
+              const Divider(),
               _buildMetricRow(
                   'Food Waste Reduction', '89%', 'Target: 85%', Colors.green),
-              Divider(),
+              const Divider(),
               _buildMetricRow(
                   'Volunteer Utilization', '76%', 'Target: 80%', Colors.orange),
-              Divider(),
+              const Divider(),
               _buildMetricRow('Customer Response Time', '3.2 min',
                   'Target: 5 min', Colors.green),
             ],
@@ -473,23 +475,23 @@ class _LogisticsManagementDashboardState
   Widget _buildMetricRow(
       String metric, String value, String target, Color statusColor) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
           Expanded(
-              child:
-                  Text(metric, style: TextStyle(fontWeight: FontWeight.w500))),
+              child: Text(metric,
+                  style: const TextStyle(fontWeight: FontWeight.w500))),
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.1),
+              color: statusColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(value,
                 style:
                     TextStyle(color: statusColor, fontWeight: FontWeight.bold)),
           ),
-          SizedBox(width: 12),
+          const SizedBox(width: 12),
           Text(target, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
         ],
       ),
@@ -500,27 +502,27 @@ class _LogisticsManagementDashboardState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Resource Management',
+        const Text('Resource Management',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-        SizedBox(height: 12),
+        const SizedBox(height: 12),
         Row(
           children: [
             Expanded(
                 child: _buildResourceCard('Active Vehicles', '18/25',
                     'Fleet utilization 72%', Colors.blue)),
-            SizedBox(width: 12),
+            const SizedBox(width: 12),
             Expanded(
                 child: _buildResourceCard('Available Volunteers', '28/40',
                     'Capacity utilization 70%', Colors.green)),
           ],
         ),
-        SizedBox(height: 12),
+        const SizedBox(height: 12),
         Row(
           children: [
             Expanded(
                 child: _buildResourceCard('Storage Capacity', '85%',
                     '2.1 tons remaining', Colors.orange)),
-            SizedBox(width: 12),
+            const SizedBox(width: 12),
             Expanded(
                 child: _buildResourceCard('Operational Budget', '67%',
                     '\$8,400 remaining', Colors.purple)),
@@ -533,12 +535,12 @@ class _LogisticsManagementDashboardState
   Widget _buildResourceCard(
       String title, String value, String subtitle, Color color) {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)
+          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10)
         ],
       ),
       child: Column(
@@ -547,11 +549,11 @@ class _LogisticsManagementDashboardState
           Text(title,
               style: TextStyle(
                   fontWeight: FontWeight.bold, color: Colors.grey[700])),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(value,
               style: TextStyle(
                   fontSize: 24, fontWeight: FontWeight.bold, color: color)),
-          SizedBox(height: 4),
+          const SizedBox(height: 4),
           Text(subtitle,
               style: TextStyle(color: Colors.grey[600], fontSize: 12)),
         ],
@@ -563,32 +565,33 @@ class _LogisticsManagementDashboardState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Performance Analysis',
+        const Text('Performance Analysis',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-        SizedBox(height: 12),
+        const SizedBox(height: 12),
         Container(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
-              BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)
+              BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05), blurRadius: 10)
             ],
           ),
           child: Column(
             children: [
               _buildPerformanceItem('Most Efficient Route', 'Downtown Circuit',
                   '94% efficiency', Icons.route, Colors.green),
-              Divider(),
+              const Divider(),
               _buildPerformanceItem('Top Performing Volunteer', 'Maria Garcia',
                   '4.9★ rating', Icons.person, Colors.blue),
-              Divider(),
+              const Divider(),
               _buildPerformanceItem('Peak Demand Time', '6:00 PM - 8:00 PM',
                   '40% of daily volume', Icons.schedule, Colors.orange),
-              Divider(),
+              const Divider(),
               _buildPerformanceItem('Cost Optimization', 'Route Consolidation',
                   '\$340 saved this week', Icons.savings, Colors.purple),
-              Divider(),
+              const Divider(),
               _buildPerformanceItem('Quality Score', 'Delivery Accuracy',
                   '97.2% success rate', Icons.check_circle, Colors.green),
             ],
@@ -601,23 +604,24 @@ class _LogisticsManagementDashboardState
   Widget _buildPerformanceItem(
       String title, String value, String metric, IconData icon, Color color) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.symmetric(vertical: 12),
       child: Row(
         children: [
           Container(
-            padding: EdgeInsets.all(8),
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, color: color, size: 20),
           ),
-          SizedBox(width: 12),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: TextStyle(fontWeight: FontWeight.w500)),
+                Text(title,
+                    style: const TextStyle(fontWeight: FontWeight.w500)),
                 Text(value,
                     style:
                         TextStyle(color: color, fontWeight: FontWeight.bold)),
@@ -631,10 +635,7 @@ class _LogisticsManagementDashboardState
   }
 
   void _refreshData() {
-    setState(() => _isLoading = true);
     // Simulate data refresh
-    Future.delayed(
-        Duration(seconds: 2), () => setState(() => _isLoading = false));
   }
 
   void _exportData() {
@@ -642,13 +643,16 @@ class _LogisticsManagementDashboardState
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Export Data'),
-        content: Text('Export logistics data for the selected time range?'),
+        title: const Text('Export Data'),
+        content:
+            const Text('Export logistics data for the selected time range?'),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context), child: Text('Cancel')),
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel')),
           ElevatedButton(
-              onPressed: () => Navigator.pop(context), child: Text('Export')),
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Export')),
         ],
       ),
     );

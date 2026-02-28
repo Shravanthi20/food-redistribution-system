@@ -7,7 +7,7 @@ import '../../models/food_donation.dart';
 class ClarifyRequestScreen extends StatefulWidget {
   final FoodDonation? donation;
 
-  const ClarifyRequestScreen({Key? key, this.donation}) : super(key: key);
+  const ClarifyRequestScreen({super.key, this.donation});
 
   @override
   State<ClarifyRequestScreen> createState() => _ClarifyRequestScreenState();

@@ -5,12 +5,11 @@ import '../../providers/auth_provider.dart';
 import '../../models/food_request.dart';
 import '../../services/location_service.dart';
 import '../../widgets/gradient_scaffold.dart';
-import '../../widgets/glass_widgets.dart';
 import '../../utils/app_theme.dart';
 import '../../widgets/custom_text_field.dart';
 
 class CreateFoodRequestScreen extends StatefulWidget {
-  const CreateFoodRequestScreen({Key? key}) : super(key: key);
+  const CreateFoodRequestScreen({super.key});
 
   @override
   State<CreateFoodRequestScreen> createState() =>
@@ -104,10 +103,12 @@ class _CreateFoodRequestScreenState extends State<CreateFoodRequestScreen> {
                       label: 'Quantity',
                       keyboardType: TextInputType.number,
                       validator: (value) {
-                        if (value?.isEmpty == true)
+                        if (value?.isEmpty == true) {
                           return 'Quantity is required';
-                        if (int.tryParse(value!) == null)
+                        }
+                        if (int.tryParse(value!) == null) {
                           return 'Enter valid number';
+                        }
                         return null;
                       },
                     ),
@@ -115,7 +116,7 @@ class _CreateFoodRequestScreenState extends State<CreateFoodRequestScreen> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: DropdownButtonFormField<String>(
-                      value: _selectedUnit,
+                      initialValue: _selectedUnit,
                       dropdownColor: AppTheme.surfaceGlassDark,
                       style: const TextStyle(color: AppTheme.textPrimary),
                       decoration: InputDecoration(
@@ -132,7 +133,7 @@ class _CreateFoodRequestScreenState extends State<CreateFoodRequestScreen> {
                               const BorderSide(color: AppTheme.accentTeal),
                         ),
                         filled: true,
-                        fillColor: Colors.white.withOpacity(0.1),
+                        fillColor: Colors.white.withValues(alpha: 0.1),
                       ),
                       items: const [
                         DropdownMenuItem(
@@ -166,8 +167,9 @@ class _CreateFoodRequestScreenState extends State<CreateFoodRequestScreen> {
                           label: Text(category.name),
                           selected: _selectedFoodTypes.contains(category),
                           backgroundColor:
-                              AppTheme.surfaceGlassDark.withOpacity(0.5),
-                          selectedColor: AppTheme.accentTeal.withOpacity(0.3),
+                              AppTheme.surfaceGlassDark.withValues(alpha: 0.5),
+                          selectedColor:
+                              AppTheme.accentTeal.withValues(alpha: 0.3),
                           checkmarkColor: AppTheme.textPrimary,
                           labelStyle: TextStyle(
                             color: _selectedFoodTypes.contains(category)
@@ -213,8 +215,9 @@ class _CreateFoodRequestScreenState extends State<CreateFoodRequestScreen> {
                           selected: _selectedDietaryRestrictions
                               .contains(restriction),
                           backgroundColor:
-                              AppTheme.surfaceGlassDark.withOpacity(0.5),
-                          selectedColor: AppTheme.accentTeal.withOpacity(0.3),
+                              AppTheme.surfaceGlassDark.withValues(alpha: 0.5),
+                          selectedColor:
+                              AppTheme.accentTeal.withValues(alpha: 0.3),
                           checkmarkColor: AppTheme.textPrimary,
                           labelStyle: TextStyle(
                             color: _selectedDietaryRestrictions
@@ -245,7 +248,7 @@ class _CreateFoodRequestScreenState extends State<CreateFoodRequestScreen> {
                 subtitle: const Text(
                     'Check if temperature controlled storage is needed',
                     style: TextStyle(color: AppTheme.textSecondary)),
-                activeColor: AppTheme.accentTeal,
+                activeThumbColor: AppTheme.accentTeal,
                 value: _requiresRefrigeration,
                 onChanged: (value) =>
                     setState(() => _requiresRefrigeration = value),
@@ -262,7 +265,7 @@ class _CreateFoodRequestScreenState extends State<CreateFoodRequestScreen> {
               const SizedBox(height: 16),
 
               DropdownButtonFormField<RequestUrgency>(
-                value: _selectedUrgency,
+                initialValue: _selectedUrgency,
                 dropdownColor: AppTheme.surfaceGlassDark,
                 style: const TextStyle(color: AppTheme.textPrimary),
                 decoration: InputDecoration(
@@ -277,7 +280,7 @@ class _CreateFoodRequestScreenState extends State<CreateFoodRequestScreen> {
                     borderSide: const BorderSide(color: AppTheme.accentTeal),
                   ),
                   filled: true,
-                  fillColor: Colors.white.withOpacity(0.1),
+                  fillColor: Colors.white.withValues(alpha: 0.1),
                 ),
                 items: RequestUrgency.values
                     .map(
@@ -296,8 +299,7 @@ class _CreateFoodRequestScreenState extends State<CreateFoodRequestScreen> {
               ListTile(
                 title: const Text('Needed By',
                     style: TextStyle(color: AppTheme.textPrimary)),
-                subtitle: Text(
-                    '${_selectedNeededBy.toString().substring(0, 16)}',
+                subtitle: Text(_selectedNeededBy.toString().substring(0, 16),
                     style: const TextStyle(color: AppTheme.textSecondary)),
                 trailing: const Icon(Icons.calendar_today,
                     color: AppTheme.accentTeal),
@@ -310,6 +312,7 @@ class _CreateFoodRequestScreenState extends State<CreateFoodRequestScreen> {
                   );
 
                   if (date != null) {
+                    if (!context.mounted) return;
                     final time = await showTimePicker(
                       context: context,
                       initialTime: TimeOfDay.fromDateTime(_selectedNeededBy),
@@ -346,8 +349,9 @@ class _CreateFoodRequestScreenState extends State<CreateFoodRequestScreen> {
                 hintText: 'How many people will this food serve?',
                 keyboardType: TextInputType.number,
                 validator: (value) {
-                  if (value?.isEmpty == true)
+                  if (value?.isEmpty == true) {
                     return 'Number of beneficiaries is required';
+                  }
                   if (int.tryParse(value!) == null) return 'Enter valid number';
                   return null;
                 },
@@ -379,8 +383,9 @@ class _CreateFoodRequestScreenState extends State<CreateFoodRequestScreen> {
                           selected:
                               _selectedServingPopulation.contains(population),
                           backgroundColor:
-                              AppTheme.surfaceGlassDark.withOpacity(0.5),
-                          selectedColor: AppTheme.accentTeal.withOpacity(0.3),
+                              AppTheme.surfaceGlassDark.withValues(alpha: 0.5),
+                          selectedColor:
+                              AppTheme.accentTeal.withValues(alpha: 0.3),
                           checkmarkColor: AppTheme.textPrimary,
                           labelStyle: TextStyle(
                             color:

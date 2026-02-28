@@ -235,7 +235,7 @@ class NotificationDispatchService {
             'System will be under maintenance from {{startTime}} to {{endTime}}. Please plan accordingly.',
         channels: [NotificationChannel.push, NotificationChannel.email],
         priority: NotificationPriority.high,
-        delay: Duration(hours: 24), // Send 24 hours in advance
+        delay: const Duration(hours: 24), // Send 24 hours in advance
       ),
       'performance_report': NotificationTemplate(
         id: 'performance_report',
@@ -266,7 +266,7 @@ class NotificationDispatchService {
             'You have a {{taskType}} scheduled for {{scheduledTime}}. Location: {{location}}',
         channels: [NotificationChannel.push],
         priority: NotificationPriority.normal,
-        delay: Duration(minutes: 30), // Send 30 minutes before
+        delay: const Duration(minutes: 30), // Send 30 minutes before
       ),
     });
   }
@@ -298,7 +298,7 @@ class NotificationDispatchService {
         targetUserTypes: ['volunteer'],
         channels: [NotificationChannel.email],
         priority: NotificationPriority.low,
-        throttleInterval: Duration(days: 7),
+        throttleInterval: const Duration(days: 7),
       ),
       'system_alerts': NotificationRule(
         id: 'system_alerts',
@@ -323,7 +323,7 @@ class NotificationDispatchService {
         targetUserTypes: ['ngo', 'donor'],
         channels: [NotificationChannel.push],
         priority: NotificationPriority.high,
-        throttleInterval: Duration(minutes: 30),
+        throttleInterval: const Duration(minutes: 30),
       ),
     });
   }
@@ -493,7 +493,6 @@ class NotificationDispatchService {
       case NotificationChannel.whatsapp:
         return await _sendWhatsAppNotification(recipientId, body, data);
     }
-    return false;
   }
 
   /// Schedule notification for future delivery
@@ -755,7 +754,7 @@ class NotificationDispatchService {
     _dailyCounter[key] = (_dailyCounter[key] ?? [])..add(DateTime.now());
 
     // Clean old entries (keep only last 24 hours)
-    final yesterday = DateTime.now().subtract(Duration(hours: 24));
+    final yesterday = DateTime.now().subtract(const Duration(hours: 24));
     _dailyCounter[key] =
         _dailyCounter[key]!.where((date) => date.isAfter(yesterday)).toList();
   }
@@ -763,7 +762,7 @@ class NotificationDispatchService {
   Future<Map<String, dynamic>> _getUserNotificationPreferences(
       String userId) async {
     final doc = await _firestoreService.get('user_preferences', userId);
-    return doc?.data() as Map<String, dynamic>? ??
+    return doc.data() as Map<String, dynamic>? ??
         {
           'push': true,
           'email': true,
@@ -832,7 +831,7 @@ class NotificationDispatchService {
     DateTime? startDate,
     DateTime? endDate,
   }) async {
-    final start = startDate ?? DateTime.now().subtract(Duration(days: 7));
+    final start = startDate ?? DateTime.now().subtract(const Duration(days: 7));
     final end = endDate ?? DateTime.now();
 
     final records = await _firestoreService.query(
@@ -857,8 +856,9 @@ class NotificationDispatchService {
       analytics['totalSent'] = (analytics['totalSent'] as int) + 1;
 
       final category = data['category'] as String? ?? 'unknown';
-      analytics['categoryBreakdown'][category] =
-          (analytics['categoryBreakdown'][category] as int? ?? 0) + 1;
+      final categoryBreakdown =
+          analytics['categoryBreakdown'] as Map<String, int>;
+      categoryBreakdown[category] = (categoryBreakdown[category] ?? 0) + 1;
 
       // Daily trends
       final sentAt = data['sentAt'];
@@ -866,8 +866,8 @@ class NotificationDispatchService {
         final date = sentAt.toDate();
         final dateKey =
             '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-        analytics['dailyTrends'][dateKey] =
-            (analytics['dailyTrends'][dateKey] as int? ?? 0) + 1;
+        final dailyTrends = analytics['dailyTrends'] as Map<String, int>;
+        dailyTrends[dateKey] = (dailyTrends[dateKey] ?? 0) + 1;
       }
     }
 

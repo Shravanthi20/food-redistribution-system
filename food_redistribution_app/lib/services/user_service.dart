@@ -4,6 +4,7 @@ import '../models/donor_profile.dart';
 import '../models/ngo_profile.dart';
 import '../models/volunteer_profile.dart';
 import '../config/firebase_schema.dart';
+import 'package:flutter/foundation.dart';
 
 class UserService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -31,7 +32,7 @@ class UserService {
       // Check specific role
       return userRole == requiredRole;
     } catch (e) {
-      print('Error checking user role: $e');
+      debugPrint('Error checking user role: $e');
       return false;
     }
   }
@@ -59,7 +60,7 @@ class UserService {
       // Check if user has any of the required roles
       return requiredRoles.contains(userRole);
     } catch (e) {
-      print('Error checking user roles: $e');
+      debugPrint('Error checking user roles: $e');
       return false;
     }
   }
@@ -97,7 +98,7 @@ class UserService {
 
       return true;
     } catch (e) {
-      print('Error checking user suspension: $e');
+      debugPrint('Error checking user suspension: $e');
       return false;
     }
   }
@@ -113,7 +114,7 @@ class UserService {
 
       return query.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList();
     } catch (e) {
-      print('Error getting users by role: $e');
+      debugPrint('Error getting users by role: $e');
       return [];
     }
   }
@@ -167,7 +168,7 @@ class UserService {
 
       await batch.commit();
     } catch (e) {
-      print('Error submitting documents: $e');
+      debugPrint('Error submitting documents: $e');
       rethrow;
     }
   }
@@ -257,7 +258,7 @@ class UserService {
 
       await batch.commit();
     } catch (e) {
-      print('Error verifying user: $e');
+      debugPrint('Error verifying user: $e');
       rethrow;
     }
   }
@@ -292,7 +293,7 @@ class UserService {
       // Schedule automatic restoration (in real implementation, use Cloud Functions)
       await _scheduleRestrictionEnd(userId, endDate);
     } catch (e) {
-      print('Error restricting user: $e');
+      debugPrint('Error restricting user: $e');
       rethrow;
     }
   }
@@ -318,7 +319,7 @@ class UserService {
         'timestamp': Timestamp.now(),
       });
     } catch (e) {
-      print('Error removing restriction: $e');
+      debugPrint('Error removing restriction: $e');
       rethrow;
     }
   }
@@ -358,7 +359,7 @@ class UserService {
       // Check role-based permissions
       return _getRolePermissions(role).contains(permission);
     } catch (e) {
-      print('Error checking permission: $e');
+      debugPrint('Error checking permission: $e');
       return false;
     }
   }
@@ -411,7 +412,7 @@ class UserService {
           return null;
       }
     } catch (e) {
-      print('Error getting user profile: $e');
+      debugPrint('Error getting user profile: $e');
       return null;
     }
   }
@@ -457,7 +458,7 @@ class UserService {
         });
       }
     } catch (e) {
-      print('Error updating user profile: $e');
+      debugPrint('Error updating user profile: $e');
       rethrow;
     }
   }
@@ -495,7 +496,7 @@ class UserService {
 
       return pendingUsers;
     } catch (e) {
-      print('Error getting pending users: $e');
+      debugPrint('Error getting pending users: $e');
       return [];
     }
   }
@@ -524,11 +525,13 @@ class UserService {
         final status = data['status'] as String?;
         final createdAt = data['createdAt'];
 
-        if (role == 'donor')
+        if (role == 'donor') {
           donors++;
-        else if (role == 'ngo')
+        } else if (role == 'ngo') {
           ngos++;
-        else if (role == 'volunteer') volunteers++;
+        } else if (role == 'volunteer') {
+          volunteers++;
+        }
 
         if (status == UserStatus.verified.name) verified++;
         if (status == UserStatus.suspended.name) suspended++;
@@ -559,7 +562,7 @@ class UserService {
         'newUsersThisMonth': newUsers,
       };
     } catch (e) {
-      print('Error getting user statistics: $e');
+      debugPrint('Error getting user statistics: $e');
       return {
         'totalUsers': 0,
         'donors': 0,
@@ -607,8 +610,6 @@ class UserService {
           'system_administration',
           'access_audit_logs',
         ];
-      default:
-        return [];
     }
   }
 

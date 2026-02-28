@@ -9,7 +9,7 @@ import '../../widgets/gradient_scaffold.dart';
 import '../../widgets/glass_widgets.dart';
 
 class VolunteerDashboard extends StatefulWidget {
-  const VolunteerDashboard({Key? key}) : super(key: key);
+  const VolunteerDashboard({super.key});
 
   @override
   State<VolunteerDashboard> createState() => _VolunteerDashboardState();
@@ -39,7 +39,7 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
         Provider.of<DonationProvider>(context, listen: false);
 
     if (user == null) {
-      return GradientScaffold(
+      return const GradientScaffold(
         body: Center(
           child: CircularProgressIndicator(color: AppTheme.accentTeal),
         ),
@@ -80,8 +80,9 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
     return StreamBuilder<List<Map<String, dynamic>>>(
       stream: provider.getPendingAssignmentsStream(userId),
       builder: (context, snapshot) {
-        if (!snapshot.hasData || snapshot.data!.isEmpty)
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return const SizedBox.shrink();
+        }
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -89,17 +90,17 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: AppTheme.warningAmber.withOpacity(0.15),
+                color: AppTheme.warningAmber.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(10),
-                border:
-                    Border.all(color: AppTheme.warningAmber.withOpacity(0.3)),
+                border: Border.all(
+                    color: AppTheme.warningAmber.withValues(alpha: 0.3)),
               ),
-              child: Row(
+              child: const Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(Icons.notification_important_rounded,
                       size: 16, color: AppTheme.warningAmber),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   Text(
                     "NEW ASSIGNMENTS",
                     style: TextStyle(
@@ -134,10 +135,11 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 10, vertical: 5),
                           decoration: BoxDecoration(
-                            color: AppTheme.warningAmber.withOpacity(0.15),
+                            color:
+                                AppTheme.warningAmber.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: Text(
+                          child: const Text(
                             "MATCHED — ACTION REQUIRED",
                             style: TextStyle(
                               color: AppTheme.warningAmber,
@@ -150,7 +152,7 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                         const SizedBox(height: 12),
                         Text(
                           donation.title,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 17,
                             color: AppTheme.textPrimary,
@@ -159,7 +161,7 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                         const SizedBox(height: 6),
                         Text(
                           "${donation.quantity} ${donation.unit} from Anonymous Donor",
-                          style: TextStyle(
+                          style: const TextStyle(
                               color: AppTheme.textSecondary, fontSize: 13),
                         ),
                         const SizedBox(height: 18),
@@ -180,7 +182,7 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                               child: GradientButton(
                                 text: 'Decline',
                                 outlined: true,
-                                gradientColors: [
+                                gradientColors: const [
                                   AppTheme.errorCoral,
                                   AppTheme.errorCoral
                                 ],
@@ -197,7 +199,7 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                   );
                 },
               );
-            }).toList(),
+            }),
           ],
         );
       },
@@ -209,14 +211,15 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
     return StreamBuilder<List<FoodDonation>>(
       stream: provider.getVolunteerTasksStream(userId),
       builder: (context, snapshot) {
-        if (!snapshot.hasData || snapshot.data!.isEmpty)
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return const SizedBox.shrink();
+        }
 
         final tasks = snapshot.data!;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               "My Active Tasks",
               style: TextStyle(
                 fontSize: 18,
@@ -225,9 +228,7 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
               ),
             ),
             const SizedBox(height: 14),
-            ...tasks
-                .map((task) => _taskCard(context, task, isActive: true))
-                .toList(),
+            ...tasks.map((task) => _taskCard(context, task, isActive: true)),
           ],
         );
       },
@@ -245,18 +246,18 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
           stream: provider.getAvailableDonationsStream(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(
+              return const Center(
                 child: CircularProgressIndicator(color: AppTheme.accentTeal),
               );
             }
             if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return GlassContainer(
-                padding: const EdgeInsets.all(24),
+              return const GlassContainer(
+                padding: EdgeInsets.all(24),
                 child: Column(
                   children: [
                     Icon(Icons.inbox_rounded,
                         size: 48, color: AppTheme.textMuted),
-                    const SizedBox(height: 12),
+                    SizedBox(height: 12),
                     Text(
                       "No available tasks nearby",
                       style: TextStyle(
@@ -286,13 +287,13 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
         children: [
           Container(
             padding: const EdgeInsets.all(3),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               shape: BoxShape.circle,
               gradient: LinearGradient(
                 colors: [AppTheme.accentTeal, AppTheme.accentCyan],
               ),
             ),
-            child: CircleAvatar(
+            child: const CircleAvatar(
               radius: 22,
               backgroundColor: AppTheme.primaryNavyLight,
               child: Icon(Icons.person_rounded, color: AppTheme.accentTeal),
@@ -303,13 +304,13 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   "Good morning,",
                   style: TextStyle(fontSize: 12, color: AppTheme.textMuted),
                 ),
                 Text(
                   name,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w600,
                     color: AppTheme.textPrimary,
@@ -331,9 +332,9 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                     padding: const EdgeInsets.all(20),
                     children: [
                       ListTile(
-                        leading: Icon(Icons.person_rounded,
+                        leading: const Icon(Icons.person_rounded,
                             color: AppTheme.accentTeal),
-                        title: Text('Edit Profile',
+                        title: const Text('Edit Profile',
                             style: TextStyle(color: AppTheme.textPrimary)),
                         onTap: () {
                           Navigator.pop(context);
@@ -341,11 +342,11 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                               context, AppRouter.volunteerProfile);
                         },
                       ),
-                      Divider(color: AppTheme.surfaceGlassBorder),
+                      const Divider(color: AppTheme.surfaceGlassBorder),
                       ListTile(
-                        leading: Icon(Icons.logout_rounded,
+                        leading: const Icon(Icons.logout_rounded,
                             color: AppTheme.errorCoral),
-                        title: Text('Sign Out',
+                        title: const Text('Sign Out',
                             style: TextStyle(color: AppTheme.errorCoral)),
                         onTap: () async {
                           Navigator.pop(context); // Close bottom sheet
@@ -381,7 +382,7 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
             children: [
               Row(
                 children: [
-                  Text(
+                  const Text(
                     "Status: ",
                     style: TextStyle(
                       fontWeight: FontWeight.w500,
@@ -393,8 +394,8 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                         const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
                       color: isOnline
-                          ? AppTheme.successTeal.withOpacity(0.15)
-                          : AppTheme.textMuted.withOpacity(0.15),
+                          ? AppTheme.successTeal.withValues(alpha: 0.15)
+                          : AppTheme.textMuted.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
@@ -426,7 +427,7 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                 ],
               ),
               const SizedBox(height: 8),
-              Text(
+              const Text(
                 "Visible to nearby surplus tasks",
                 style: TextStyle(fontSize: 12, color: AppTheme.textMuted),
               ),
@@ -434,8 +435,8 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
           ),
           Switch(
             value: isOnline,
-            activeColor: AppTheme.successTeal,
-            activeTrackColor: AppTheme.successTeal.withOpacity(0.3),
+            activeThumbColor: AppTheme.successTeal,
+            activeTrackColor: AppTheme.successTeal.withValues(alpha: 0.3),
             inactiveThumbColor: AppTheme.textMuted,
             inactiveTrackColor: AppTheme.surfaceGlassDark,
             onChanged: (value) {
@@ -451,7 +452,7 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
 
   // ================= TASK HEADER =================
   Widget _availableTasksHeader() {
-    return Row(
+    return const Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
@@ -481,8 +482,8 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             decoration: BoxDecoration(
               color: isActive
-                  ? AppTheme.successTeal.withOpacity(0.15)
-                  : AppTheme.accentCyan.withOpacity(0.15),
+                  ? AppTheme.successTeal.withValues(alpha: 0.15)
+                  : AppTheme.accentCyan.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
@@ -498,7 +499,7 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
           const SizedBox(height: 12),
           Text(
             task.title,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.w600,
               color: AppTheme.textPrimary,
@@ -507,20 +508,21 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
           const SizedBox(height: 12),
           Row(
             children: [
-              Icon(Icons.location_on_rounded,
+              const Icon(Icons.location_on_rounded,
                   size: 16, color: AppTheme.textMuted),
               const SizedBox(width: 4),
-              Text("~2.5 km",
+              const Text("~2.5 km",
                   style:
                       TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
               const SizedBox(width: 14),
-              Icon(Icons.schedule_rounded, size: 16, color: AppTheme.textMuted),
+              const Icon(Icons.schedule_rounded,
+                  size: 16, color: AppTheme.textMuted),
               const SizedBox(width: 4),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
                   color: task.isUrgent
-                      ? AppTheme.errorCoral.withOpacity(0.15)
+                      ? AppTheme.errorCoral.withValues(alpha: 0.15)
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(4),
                 ),
@@ -541,7 +543,7 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
           const SizedBox(height: 10),
           Text(
             "${task.quantity} ${task.unit} • ${task.foodTypes.map((e) => e.name).join(', ')}",
-            style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+            style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
           ),
           const SizedBox(height: 16),
           if (!isActive)
@@ -562,7 +564,10 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
               text: 'Continue Delivery',
               icon: Icons.local_shipping_rounded,
               width: double.infinity,
-              gradientColors: [AppTheme.accentCyan, AppTheme.accentCyanSoft],
+              gradientColors: const [
+                AppTheme.accentCyan,
+                AppTheme.accentCyanSoft
+              ],
               onPressed: () {
                 Navigator.pushNamed(
                   context,

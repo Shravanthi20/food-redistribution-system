@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'test_mocks.dart';
 import 'package:food_redistribution_app/models/tracking/location_tracking_model.dart';
 import 'package:food_redistribution_app/models/enums.dart';
@@ -7,10 +6,8 @@ import 'package:food_redistribution_app/providers/tracking_provider.dart';
 import 'package:food_redistribution_app/services/tracking/offline_tracking_service.dart';
 import 'package:food_redistribution_app/services/tracking/delay_detection_service.dart';
 import 'package:food_redistribution_app/services/tracking/analytics_aggregation_service.dart';
-import 'package:food_redistribution_app/services/tracking/notification_handler.dart';
 
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/services.dart';
 import 'package:firebase_core_platform_interface/firebase_core_platform_interface.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -86,7 +83,6 @@ void main() {
         () async {
       const donationId = 'donation_test_001';
       const volunteerId = 'volunteer_test_001';
-      const ngoId = 'ngo_test_001';
 
       final startResult = await trackingProvider.startTracking(
         volunteerId: volunteerId,

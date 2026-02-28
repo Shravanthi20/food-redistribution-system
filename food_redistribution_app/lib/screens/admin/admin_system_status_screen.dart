@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// Admin System Status Monitoring Screen
 class AdminSystemStatusScreen extends StatefulWidget {
-  const AdminSystemStatusScreen({Key? key}) : super(key: key);
+  const AdminSystemStatusScreen({super.key});
 
   @override
   State<AdminSystemStatusScreen> createState() =>
@@ -107,14 +107,14 @@ class _AdminSystemStatusScreenState extends State<AdminSystemStatusScreen> {
                 }
 
                 if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return Card(
+                  return const Card(
                     child: Padding(
-                      padding: const EdgeInsets.all(16),
+                      padding: EdgeInsets.all(16),
                       child: Row(
                         children: [
-                          const Icon(Icons.check_circle, color: Colors.green),
-                          const SizedBox(width: 12),
-                          const Text('No recent errors detected'),
+                          Icon(Icons.check_circle, color: Colors.green),
+                          SizedBox(width: 12),
+                          Text('No recent errors detected'),
                         ],
                       ),
                     ),
@@ -239,7 +239,7 @@ class _AdminSystemStatusScreenState extends State<AdminSystemStatusScreen> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.2),
+                color: color.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(icon, color: color),

@@ -40,9 +40,7 @@ class IssueService {
         .orderBy('createdAt', descending: true)
         .get();
 
-    return query.docs
-        .map((doc) => {'id': doc.id, ...doc.data() as Map<String, dynamic>})
-        .toList();
+    return query.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList();
   }
 
   // Resolve an issue

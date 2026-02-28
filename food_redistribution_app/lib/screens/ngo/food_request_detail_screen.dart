@@ -7,8 +7,7 @@ import '../../services/matching_service.dart';
 class FoodRequestDetailScreen extends StatefulWidget {
   final String requestId;
 
-  const FoodRequestDetailScreen({Key? key, required this.requestId})
-      : super(key: key);
+  const FoodRequestDetailScreen({super.key, required this.requestId});
 
   @override
   State<FoodRequestDetailScreen> createState() =>
@@ -67,16 +66,16 @@ class _FoodRequestDetailScreenState extends State<FoodRequestDetailScreen> {
                   children: [
                     Chip(
                       label: Text(request.status.name.toUpperCase()),
-                      backgroundColor:
-                          _getStatusColor(request.status).withOpacity(0.1),
+                      backgroundColor: _getStatusColor(request.status)
+                          .withValues(alpha: 0.1),
                       labelStyle:
                           TextStyle(color: _getStatusColor(request.status)),
                     ),
                     const SizedBox(width: 8),
                     Chip(
                       label: Text(request.urgency.name.toUpperCase()),
-                      backgroundColor:
-                          _getUrgencyColor(request.urgency).withOpacity(0.1),
+                      backgroundColor: _getUrgencyColor(request.urgency)
+                          .withValues(alpha: 0.1),
                       labelStyle:
                           TextStyle(color: _getUrgencyColor(request.urgency)),
                     ),
@@ -147,7 +146,7 @@ class _FoodRequestDetailScreenState extends State<FoodRequestDetailScreen> {
                                 .map((restriction) => Chip(
                                       label: Text(restriction),
                                       backgroundColor:
-                                          Colors.orange.withOpacity(0.1),
+                                          Colors.orange.withValues(alpha: 0.1),
                                     ))
                                 .toList(),
                           ),
@@ -197,7 +196,7 @@ class _FoodRequestDetailScreenState extends State<FoodRequestDetailScreen> {
                               .map((population) => Chip(
                                     label: Text(population),
                                     backgroundColor:
-                                        Colors.green.withOpacity(0.1),
+                                        Colors.green.withValues(alpha: 0.1),
                                   ))
                               .toList(),
                         ),
@@ -248,7 +247,7 @@ class _FoodRequestDetailScreenState extends State<FoodRequestDetailScreen> {
     final donation = ngoProvider.getDonationById(request.matchedDonationId!);
 
     return Card(
-      color: Colors.green.withOpacity(0.1),
+      color: Colors.green.withValues(alpha: 0.1),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -256,7 +255,7 @@ class _FoodRequestDetailScreenState extends State<FoodRequestDetailScreen> {
           children: [
             Row(
               children: [
-                Icon(Icons.check_circle, color: Colors.green),
+                const Icon(Icons.check_circle, color: Colors.green),
                 const SizedBox(width: 8),
                 Text(
                   'Matched Donation',
@@ -329,7 +328,7 @@ class _FoodRequestDetailScreenState extends State<FoodRequestDetailScreen> {
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: _getScoreColor(match.score).withOpacity(0.1),
+          backgroundColor: _getScoreColor(match.score).withValues(alpha: 0.1),
           child: Text(
             '${(match.score * 100).round()}%',
             style: TextStyle(
@@ -434,21 +433,19 @@ class _FoodRequestDetailScreenState extends State<FoodRequestDetailScreen> {
               );
 
               if (success) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text('Request cancelled successfully')),
-                  );
-                  Navigator.pop(context);
-                }
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                      content: Text('Request cancelled successfully')),
+                );
+                Navigator.pop(context);
               } else {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                        content: Text(ngoProvider.errorMessage ??
-                            'Failed to cancel request')),
-                  );
-                }
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                      content: Text(ngoProvider.errorMessage ??
+                          'Failed to cancel request')),
+                );
               }
             },
             child: const Text('Yes, Cancel'),
@@ -482,20 +479,17 @@ class _FoodRequestDetailScreenState extends State<FoodRequestDetailScreen> {
               );
 
               if (success) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text('Match accepted successfully!')),
-                  );
-                }
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Match accepted successfully!')),
+                );
               } else {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                        content: Text(ngoProvider.errorMessage ??
-                            'Failed to accept match')),
-                  );
-                }
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                      content: Text(ngoProvider.errorMessage ??
+                          'Failed to accept match')),
+                );
               }
             },
             child: const Text('Accept'),

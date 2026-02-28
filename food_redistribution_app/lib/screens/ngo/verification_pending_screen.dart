@@ -4,7 +4,7 @@ import '../../widgets/gradient_scaffold.dart';
 import '../../widgets/glass_widgets.dart';
 
 class VerificationPendingScreen extends StatefulWidget {
-  const VerificationPendingScreen({Key? key}) : super(key: key);
+  const VerificationPendingScreen({super.key});
 
   @override
   State<VerificationPendingScreen> createState() =>
@@ -88,7 +88,7 @@ class _VerificationPendingScreenState extends State<VerificationPendingScreen>
         ),
       ),
       body: _isLoading
-          ? Center(
+          ? const Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -96,7 +96,7 @@ class _VerificationPendingScreenState extends State<VerificationPendingScreen>
                     color: AppTheme.accentTeal,
                     strokeWidth: 3,
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   Text(
                     'Loading...',
                     style: TextStyle(color: AppTheme.textSecondary),
@@ -125,23 +125,25 @@ class _VerificationPendingScreenState extends State<VerificationPendingScreen>
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                               colors: [
-                                AppTheme.warningAmber.withOpacity(0.3),
-                                AppTheme.warningAmber.withOpacity(0.1),
+                                AppTheme.warningAmber.withValues(alpha: 0.3),
+                                AppTheme.warningAmber.withValues(alpha: 0.1),
                               ],
                             ),
                             border: Border.all(
-                              color: AppTheme.warningAmber.withOpacity(0.5),
+                              color:
+                                  AppTheme.warningAmber.withValues(alpha: 0.5),
                               width: 2,
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: AppTheme.warningAmber.withOpacity(0.3),
+                                color: AppTheme.warningAmber
+                                    .withValues(alpha: 0.3),
                                 blurRadius: 30,
                                 spreadRadius: 5,
                               ),
                             ],
                           ),
-                          child: Icon(
+                          child: const Icon(
                             Icons.hourglass_top_rounded,
                             size: 50,
                             color: AppTheme.warningAmber,
@@ -155,7 +157,7 @@ class _VerificationPendingScreenState extends State<VerificationPendingScreen>
 
                   // Status Title
                   ShaderMask(
-                    shaderCallback: (bounds) => LinearGradient(
+                    shaderCallback: (bounds) => const LinearGradient(
                       colors: [AppTheme.textPrimary, AppTheme.accentCyan],
                     ).createShader(bounds),
                     child: Text(
@@ -171,7 +173,7 @@ class _VerificationPendingScreenState extends State<VerificationPendingScreen>
 
                   const SizedBox(height: 12),
 
-                  Text(
+                  const Text(
                     'Your documents are being reviewed by our verification team.',
                     style: TextStyle(
                       fontSize: 15,
@@ -193,17 +195,18 @@ class _VerificationPendingScreenState extends State<VerificationPendingScreen>
                             Container(
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
-                                color: AppTheme.accentTeal.withOpacity(0.2),
+                                color:
+                                    AppTheme.accentTeal.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: Icon(
+                              child: const Icon(
                                 Icons.trending_up_rounded,
                                 color: AppTheme.accentTeal,
                                 size: 22,
                               ),
                             ),
                             const SizedBox(width: 12),
-                            Text(
+                            const Text(
                               'Verification Progress',
                               style: TextStyle(
                                 fontSize: 17,
@@ -226,8 +229,9 @@ class _VerificationPendingScreenState extends State<VerificationPendingScreen>
                                   child: LinearProgressIndicator(
                                     value: _progressAnimation.value,
                                     backgroundColor: AppTheme.surfaceGlass,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                        AppTheme.accentTeal),
+                                    valueColor:
+                                        const AlwaysStoppedAnimation<Color>(
+                                            AppTheme.accentTeal),
                                     minHeight: 10,
                                   ),
                                 ),
@@ -238,13 +242,13 @@ class _VerificationPendingScreenState extends State<VerificationPendingScreen>
                                   children: [
                                     Text(
                                       '${(_progressAnimation.value * 100).toInt()}% Complete',
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         color: AppTheme.accentTeal,
                                         fontWeight: FontWeight.w600,
                                         fontSize: 13,
                                       ),
                                     ),
-                                    Text(
+                                    const Text(
                                       'Step 2 of 3',
                                       style: TextStyle(
                                         color: AppTheme.textTertiary,
@@ -296,17 +300,18 @@ class _VerificationPendingScreenState extends State<VerificationPendingScreen>
                             Container(
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
-                                color: AppTheme.accentCyan.withOpacity(0.2),
+                                color:
+                                    AppTheme.accentCyan.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: Icon(
+                              child: const Icon(
                                 Icons.description_outlined,
                                 color: AppTheme.accentCyan,
                                 size: 22,
                               ),
                             ),
                             const SizedBox(width: 12),
-                            Text(
+                            const Text(
                               'Submission Details',
                               style: TextStyle(
                                 fontSize: 17,
@@ -354,17 +359,18 @@ class _VerificationPendingScreenState extends State<VerificationPendingScreen>
                             Container(
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
-                                color: AppTheme.successTeal.withOpacity(0.2),
+                                color:
+                                    AppTheme.successTeal.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: Icon(
+                              child: const Icon(
                                 Icons.lightbulb_outline_rounded,
                                 color: AppTheme.successTeal,
                                 size: 22,
                               ),
                             ),
                             const SizedBox(width: 12),
-                            Text(
+                            const Text(
                               'What Happens Next?',
                               style: TextStyle(
                                 fontSize: 17,
@@ -435,17 +441,17 @@ class _VerificationPendingScreenState extends State<VerificationPendingScreen>
                         Container(
                           padding: const EdgeInsets.all(14),
                           decoration: BoxDecoration(
-                            color: AppTheme.infoCyan.withOpacity(0.2),
+                            color: AppTheme.infoCyan.withValues(alpha: 0.2),
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(
+                          child: const Icon(
                             Icons.help_outline_rounded,
                             color: AppTheme.infoCyan,
                             size: 28,
                           ),
                         ),
                         const SizedBox(height: 16),
-                        Text(
+                        const Text(
                           'Need Help?',
                           style: TextStyle(
                             fontSize: 17,
@@ -454,7 +460,7 @@ class _VerificationPendingScreenState extends State<VerificationPendingScreen>
                           ),
                         ),
                         const SizedBox(height: 8),
-                        Text(
+                        const Text(
                           'If you have questions about the verification process or need to provide additional information, please contact our support team.',
                           style: TextStyle(
                             fontSize: 14,
@@ -468,7 +474,7 @@ class _VerificationPendingScreenState extends State<VerificationPendingScreen>
                           text: 'Contact Support',
                           icon: Icons.support_agent_rounded,
                           outlined: true,
-                          gradientColors: [
+                          gradientColors: const [
                             AppTheme.infoCyan,
                             AppTheme.accentCyanSoft
                           ],
@@ -509,7 +515,7 @@ class _VerificationPendingScreenState extends State<VerificationPendingScreen>
               children: [
                 Text(
                   label,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 12,
                     color: AppTheme.textTertiary,
                     fontWeight: FontWeight.w500,
@@ -543,7 +549,7 @@ class _VerificationPendingScreenState extends State<VerificationPendingScreen>
             height: 32,
             decoration: BoxDecoration(
               gradient: isCompleted
-                  ? LinearGradient(
+                  ? const LinearGradient(
                       colors: [AppTheme.accentTeal, AppTheme.accentTealLight])
                   : null,
               color: isCompleted ? null : AppTheme.surfaceGlass,
@@ -557,7 +563,7 @@ class _VerificationPendingScreenState extends State<VerificationPendingScreen>
               boxShadow: isCompleted
                   ? [
                       BoxShadow(
-                        color: AppTheme.accentTeal.withOpacity(0.4),
+                        color: AppTheme.accentTeal.withValues(alpha: 0.4),
                         blurRadius: 10,
                         spreadRadius: 1,
                       ),
@@ -570,7 +576,7 @@ class _VerificationPendingScreenState extends State<VerificationPendingScreen>
                       size: 18, color: Colors.white)
                   : Text(
                       '$step',
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: AppTheme.textTertiary,
                         fontWeight: FontWeight.bold,
                         fontSize: 13,
@@ -596,7 +602,7 @@ class _VerificationPendingScreenState extends State<VerificationPendingScreen>
                 const SizedBox(height: 2),
                 Text(
                   description,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 12,
                     color: AppTheme.textTertiary,
                   ),
@@ -618,7 +624,7 @@ class _VerificationPendingScreenState extends State<VerificationPendingScreen>
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: AppTheme.successTeal.withOpacity(0.15),
+              color: AppTheme.successTeal.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, size: 16, color: AppTheme.successTeal),
@@ -630,7 +636,7 @@ class _VerificationPendingScreenState extends State<VerificationPendingScreen>
               children: [
                 Text(
                   title,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: AppTheme.textPrimary,
@@ -639,7 +645,7 @@ class _VerificationPendingScreenState extends State<VerificationPendingScreen>
                 const SizedBox(height: 3),
                 Text(
                   description,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 13,
                     color: AppTheme.textSecondary,
                     height: 1.4,

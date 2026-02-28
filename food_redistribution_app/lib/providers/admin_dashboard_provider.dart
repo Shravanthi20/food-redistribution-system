@@ -7,8 +7,8 @@ import '../services/issue_service.dart';
 import '../services/audit_service.dart';
 import '../services/security_service.dart';
 import '../services/food_donation_service.dart';
-import '../models/user.dart';
 import '../models/food_donation.dart';
+import 'package:flutter/foundation.dart';
 
 class AdminDashboardProvider extends ChangeNotifier {
   final AnalyticsService _analyticsService = AnalyticsService();
@@ -82,7 +82,7 @@ class AdminDashboardProvider extends ChangeNotifier {
       ]);
     } catch (e) {
       _errorMessage = 'Failed to load dashboard data: $e';
-      print(_errorMessage);
+      debugPrint(_errorMessage);
     } finally {
       _isLoading = false;
       notifyListeners();

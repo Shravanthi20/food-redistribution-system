@@ -2,9 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uuid/uuid.dart';
 import '../models/food_donation.dart';
 import '../models/ngo_profile.dart';
-import '../models/user.dart';
 import '../config/firebase_schema.dart';
 import 'user_service.dart';
+import 'package:flutter/foundation.dart';
 
 class FoodDonationService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -62,10 +62,10 @@ class FoodDonationService {
         isUrgent: donation.isUrgent,
       );
 
-      print('--- DEBUG: CREATING DONATION ---');
-      print('DonorID: $donorId');
-      print('HasRole(donor/admin): $hasRole');
-      print('Donation Data: ${donationWithId.toFirestore()}');
+      debugPrint('--- DEBUG: CREATING DONATION ---');
+      debugPrint('DonorID: $donorId');
+      debugPrint('HasRole(donor/admin): $hasRole');
+      debugPrint('Donation Data: ${donationWithId.toFirestore()}');
 
       // Store in Firestore
       await _firestore
@@ -78,7 +78,7 @@ class FoodDonationService {
 
       return donationId;
     } catch (e) {
-      print('Error creating food donation: $e');
+      debugPrint('Error creating food donation: $e');
       rethrow;
     }
   }
@@ -95,7 +95,7 @@ class FoodDonationService {
       }
       return null;
     } catch (e) {
-      print('Error getting donation: $e');
+      debugPrint('Error getting donation: $e');
       return null;
     }
   }
@@ -167,7 +167,7 @@ class FoodDonationService {
         await _notifyStakeholders(donationId, 'donation_updated');
       }
     } catch (e) {
-      print('Error updating food donation: $e');
+      debugPrint('Error updating food donation: $e');
       rethrow;
     }
   }
@@ -188,7 +188,7 @@ class FoodDonationService {
       // Notify?
       await _notifyStakeholders(donationId, 'status_change');
     } catch (e) {
-      print('Error updating status: $e');
+      debugPrint('Error updating status: $e');
       rethrow;
     }
   }
@@ -239,7 +239,7 @@ class FoodDonationService {
       // Notify stakeholders
       await _notifyStakeholders(donationId, 'donation_cancelled');
     } catch (e) {
-      print('Error cancelling food donation: $e');
+      debugPrint('Error cancelling food donation: $e');
       rethrow;
     }
   }
@@ -272,7 +272,7 @@ class FoodDonationService {
       // Log action
       await _logDonationAction('food_request_created', null, ngoId);
     } catch (e) {
-      print('Error creating food request: $e');
+      debugPrint('Error creating food request: $e');
       rethrow;
     }
   }
@@ -287,8 +287,9 @@ class FoodDonationService {
     try {
       // Check admin role
       final isAdmin = await _userService.hasAnyRole(adminId, [UserRole.admin]);
-      if (!isAdmin)
+      if (!isAdmin) {
         throw Exception('Unauthorized: Only admins can force assignment');
+      }
 
       await _firestore
           .collection(Collections.donations)
@@ -309,7 +310,7 @@ class FoodDonationService {
       // Notify stakeholders
       await _notifyStakeholders(donationId, 'admin_forced_match');
     } catch (e) {
-      print('Error forcing NGO assignment: $e');
+      debugPrint('Error forcing NGO assignment: $e');
       rethrow;
     }
   }
@@ -324,8 +325,9 @@ class FoodDonationService {
     try {
       // Check admin role
       final isAdmin = await _userService.hasAnyRole(adminId, [UserRole.admin]);
-      if (!isAdmin)
+      if (!isAdmin) {
         throw Exception('Unauthorized: Only admins can force assignment');
+      }
 
       await _firestore
           .collection(Collections.donations)
@@ -345,7 +347,7 @@ class FoodDonationService {
       // Notify stakeholders
       await _notifyStakeholders(donationId, 'admin_forced_volunteer');
     } catch (e) {
-      print('Error forcing volunteer assignment: $e');
+      debugPrint('Error forcing volunteer assignment: $e');
       rethrow;
     }
   }
@@ -428,7 +430,7 @@ class FoodDonationService {
             additionalData: {'reason': reason});
       }
     } catch (e) {
-      print('Error reviewing donation: $e');
+      debugPrint('Error reviewing donation: $e');
       rethrow;
     }
   }
@@ -454,7 +456,7 @@ class FoodDonationService {
       // Log action
       await _logDonationAction('clarification_requested', donationId, ngoId);
     } catch (e) {
-      print('Error requesting clarification: $e');
+      debugPrint('Error requesting clarification: $e');
       rethrow;
     }
   }
@@ -501,7 +503,7 @@ class FoodDonationService {
       // Log action
       await _logDonationAction('clarification_responded', null, donorId);
     } catch (e) {
-      print('Error responding to clarification: $e');
+      debugPrint('Error responding to clarification: $e');
       rethrow;
     }
   }
@@ -517,7 +519,7 @@ class FoodDonationService {
 
       return query.docs.map((doc) => FoodDonation.fromFirestore(doc)).toList();
     } catch (e) {
-      print('Error getting donations by status: $e');
+      debugPrint('Error getting donations by status: $e');
       return [];
     }
   }
@@ -547,7 +549,7 @@ class FoodDonationService {
           .where((donation) => donation.isAvailable)
           .toList();
     } catch (e) {
-      print('Error getting available donations for NGO: $e');
+      debugPrint('Error getting available donations for NGO: $e');
       return [];
     }
   }
@@ -563,7 +565,7 @@ class FoodDonationService {
 
       return query.docs.map((doc) => FoodDonation.fromFirestore(doc)).toList();
     } catch (e) {
-      print('Error getting donor donations: $e');
+      debugPrint('Error getting donor donations: $e');
       return [];
     }
   }
@@ -598,7 +600,7 @@ class FoodDonationService {
           .where((donation) => donation.isAvailable)
           .toList();
     } catch (e) {
-      print('Error getting available donations: $e');
+      debugPrint('Error getting available donations: $e');
       return [];
     }
   }

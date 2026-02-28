@@ -7,7 +7,7 @@ import '../../models/user.dart';
 import '../../widgets/gradient_scaffold.dart';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({Key? key}) : super(key: key);
+  const SplashScreen({super.key});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -142,23 +142,24 @@ class _SplashScreenState extends State<SplashScreen> {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [
-                          AppTheme.accentTeal.withOpacity(0.2),
-                          AppTheme.accentCyan.withOpacity(0.1),
+                          AppTheme.accentTeal.withValues(alpha: 0.2),
+                          AppTheme.accentCyan.withValues(alpha: 0.1),
                         ],
                       ),
                       border: Border.all(
-                        color: AppTheme.accentTeal.withOpacity(0.4),
+                        color: AppTheme.accentTeal.withValues(alpha: 0.4),
                         width: 2,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: AppTheme.accentTeal.withOpacity(0.3 * value),
+                          color: AppTheme.accentTeal
+                              .withValues(alpha: 0.3 * value),
                           blurRadius: 40 * value,
                           spreadRadius: 10 * value,
                         ),
                       ],
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.restaurant_menu_rounded,
                       size: 60,
                       color: AppTheme.accentTeal,
@@ -185,7 +186,7 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
             ),
             const SizedBox(height: 12),
-            Text(
+            const Text(
               'Reducing waste, feeding hope',
               style: TextStyle(
                 fontSize: 16,
@@ -196,13 +197,12 @@ class _SplashScreenState extends State<SplashScreen> {
             const SizedBox(height: 60),
 
             // Elegant loading indicator
-            SizedBox(
+            const SizedBox(
               width: 32,
               height: 32,
               child: CircularProgressIndicator(
                 strokeWidth: 3,
-                valueColor:
-                    const AlwaysStoppedAnimation<Color>(AppTheme.accentTeal),
+                valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentTeal),
                 backgroundColor: AppTheme.surfaceGlassDark,
               ),
             ),

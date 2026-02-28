@@ -7,7 +7,7 @@ import '../../widgets/glass_widgets.dart';
 import '../../utils/app_theme.dart';
 
 class AvailableDonationsScreen extends StatefulWidget {
-  const AvailableDonationsScreen({Key? key}) : super(key: key);
+  const AvailableDonationsScreen({super.key});
 
   @override
   State<AvailableDonationsScreen> createState() =>
@@ -76,8 +76,9 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
                             setState(() => _selectedFoodType = null);
                           },
                           backgroundColor:
-                              AppTheme.surfaceGlassDark.withOpacity(0.5),
-                          selectedColor: AppTheme.accentTeal.withOpacity(0.3),
+                              AppTheme.surfaceGlassDark.withValues(alpha: 0.5),
+                          selectedColor:
+                              AppTheme.accentTeal.withValues(alpha: 0.3),
                           checkmarkColor: AppTheme.textPrimary,
                           labelStyle: TextStyle(
                             color: _selectedFoodType == null
@@ -95,10 +96,10 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
                                   setState(() => _selectedFoodType =
                                       selected ? type : null);
                                 },
-                                backgroundColor:
-                                    AppTheme.surfaceGlassDark.withOpacity(0.5),
+                                backgroundColor: AppTheme.surfaceGlassDark
+                                    .withValues(alpha: 0.5),
                                 selectedColor:
-                                    AppTheme.accentTeal.withOpacity(0.3),
+                                    AppTheme.accentTeal.withValues(alpha: 0.3),
                                 checkmarkColor: AppTheme.textPrimary,
                                 labelStyle: TextStyle(
                                   color: _selectedFoodType == type
@@ -205,7 +206,7 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.1),
+                      color: Colors.red.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Text(
@@ -225,7 +226,7 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
             // Description
             Text(
               donation.description,
-              style: TextStyle(color: AppTheme.textSecondary),
+              style: const TextStyle(color: AppTheme.textSecondary),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
@@ -238,7 +239,7 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
+                    color: Colors.blue.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -262,8 +263,8 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: isUrgent
-                        ? Colors.red.withOpacity(0.1)
-                        : Colors.green.withOpacity(0.1),
+                        ? Colors.red.withValues(alpha: 0.1)
+                        : Colors.green.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -297,7 +298,7 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
               children: donation.foodTypes
                   .map((type) => Chip(
                         label: Text(type.name),
-                        backgroundColor: Colors.grey.withOpacity(0.1),
+                        backgroundColor: Colors.grey.withValues(alpha: 0.1),
                         labelStyle: const TextStyle(fontSize: 12),
                       ))
                   .toList(),

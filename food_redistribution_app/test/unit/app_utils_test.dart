@@ -161,10 +161,10 @@ void main() {
   group('Location Utilities Tests', () {
     test('should calculate distance between coordinates', () {
       // New York to Los Angeles
-      final double lat1 = 40.7128;
-      final double lon1 = -74.0060;
-      final double lat2 = 34.0522;
-      final double lon2 = -118.2437;
+      const double lat1 = 40.7128;
+      const double lon1 = -74.0060;
+      const double lat2 = 34.0522;
+      const double lon2 = -118.2437;
 
       final distance = AppUtils.calculateDistance(lat1, lon1, lat2, lon2);
       expect(distance, greaterThan(3500)); // Approximately 3944 km

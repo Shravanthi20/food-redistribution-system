@@ -7,7 +7,7 @@ import '../../widgets/glass_widgets.dart';
 import '../../utils/app_theme.dart';
 
 class QueriesScreen extends StatefulWidget {
-  const QueriesScreen({Key? key}) : super(key: key);
+  const QueriesScreen({super.key});
 
   @override
   State<QueriesScreen> createState() => _QueriesScreenState();
@@ -34,7 +34,7 @@ class _QueriesScreenState extends State<QueriesScreen> {
                     children: [
                       Expanded(
                         child: DropdownButtonFormField<QueryStatus>(
-                          value: _selectedStatus,
+                          initialValue: _selectedStatus,
                           dropdownColor: AppTheme.surfaceGlassDark,
                           style: const TextStyle(color: AppTheme.textPrimary),
                           decoration: const InputDecoration(
@@ -68,7 +68,7 @@ class _QueriesScreenState extends State<QueriesScreen> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: DropdownButtonFormField<QueryType>(
-                          value: _selectedType,
+                          initialValue: _selectedType,
                           dropdownColor: AppTheme.surfaceGlassDark,
                           style: const TextStyle(color: AppTheme.textPrimary),
                           decoration: const InputDecoration(
@@ -169,7 +169,7 @@ class _QueriesScreenState extends State<QueriesScreen> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: _getTypeColor(query.type).withOpacity(0.1),
+                    color: _getTypeColor(query.type).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -186,7 +186,8 @@ class _QueriesScreenState extends State<QueriesScreen> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: _getPriorityColor(query.priority).withOpacity(0.1),
+                    color: _getPriorityColor(query.priority)
+                        .withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -203,7 +204,7 @@ class _QueriesScreenState extends State<QueriesScreen> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: _getStatusColor(query.status).withOpacity(0.1),
+                    color: _getStatusColor(query.status).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -235,7 +236,7 @@ class _QueriesScreenState extends State<QueriesScreen> {
             // Description
             Text(
               query.description,
-              style: TextStyle(color: AppTheme.textSecondary),
+              style: const TextStyle(color: AppTheme.textSecondary),
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
             ),
@@ -245,19 +246,22 @@ class _QueriesScreenState extends State<QueriesScreen> {
             // Metadata
             Row(
               children: [
-                Icon(Icons.access_time, size: 16, color: AppTheme.textMuted),
+                const Icon(Icons.access_time,
+                    size: 16, color: AppTheme.textMuted),
                 const SizedBox(width: 4),
                 Text(
                   'Created ${_formatDate(query.createdAt)}',
-                  style: TextStyle(color: AppTheme.textMuted, fontSize: 12),
+                  style:
+                      const TextStyle(color: AppTheme.textMuted, fontSize: 12),
                 ),
                 const SizedBox(width: 16),
                 if (query.updates.isNotEmpty) ...[
-                  Icon(Icons.update, size: 16, color: AppTheme.textMuted),
+                  const Icon(Icons.update, size: 16, color: AppTheme.textMuted),
                   const SizedBox(width: 4),
                   Text(
                     'Last updated ${_formatDate(query.updates.last.timestamp)}',
-                    style: TextStyle(color: AppTheme.textMuted, fontSize: 12),
+                    style: const TextStyle(
+                        color: AppTheme.textMuted, fontSize: 12),
                   ),
                 ],
               ],
@@ -336,7 +340,8 @@ class _QueriesScreenState extends State<QueriesScreen> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: _getStatusColor(query.status).withOpacity(0.1),
+                        color: _getStatusColor(query.status)
+                            .withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(

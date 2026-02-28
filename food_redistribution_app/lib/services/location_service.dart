@@ -3,6 +3,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dart_geohash/dart_geohash.dart';
+import 'package:flutter/foundation.dart';
 
 class LocationService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -30,7 +31,7 @@ class LocationService {
 
       return await Geolocator.getCurrentPosition();
     } catch (e) {
-      print('Error getting current location: $e');
+      debugPrint('Error getting current location: $e');
       return null;
     }
   }
@@ -45,7 +46,7 @@ class LocationService {
       return permission == LocationPermission.always ||
           permission == LocationPermission.whileInUse;
     } catch (e) {
-      print('Error requesting location permission: $e');
+      debugPrint('Error requesting location permission: $e');
       return false;
     }
   }
@@ -67,7 +68,7 @@ class LocationService {
       }
       return null;
     } catch (e) {
-      print('Error geocoding address: $e');
+      debugPrint('Error geocoding address: $e');
       return null;
     }
   }
@@ -83,7 +84,7 @@ class LocationService {
       }
       return null;
     } catch (e) {
-      print('Error reverse geocoding: $e');
+      debugPrint('Error reverse geocoding: $e');
       return null;
     }
   }
@@ -149,7 +150,7 @@ class LocationService {
 
       return nearbyDonations;
     } catch (e) {
-      print('Error finding nearby donations: $e');
+      debugPrint('Error finding nearby donations: $e');
       return [];
     }
   }
@@ -168,7 +169,7 @@ class LocationService {
         'timestamp': Timestamp.now(),
       });
     } catch (e) {
-      print('Error updating user location: $e');
+      debugPrint('Error updating user location: $e');
     }
   }
   // LIVE TRACKING
@@ -199,9 +200,9 @@ class LocationService {
         updateUserLocation(userId, position);
       });
 
-      print('Started location tracking for $userId');
+      debugPrint('Started location tracking for $userId');
     } catch (e) {
-      print('Error starting location tracking: $e');
+      debugPrint('Error starting location tracking: $e');
     }
   }
 
@@ -209,7 +210,7 @@ class LocationService {
   Future<void> stopLocationTracking(String userId) async {
     await _trackingSubscriptions[userId]?.cancel();
     _trackingSubscriptions.remove(userId);
-    print('Stopped location tracking for $userId');
+    debugPrint('Stopped location tracking for $userId');
   }
 
   // Stream of specific user's location

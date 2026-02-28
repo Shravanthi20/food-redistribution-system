@@ -6,7 +6,7 @@ import '../../widgets/gradient_scaffold.dart';
 
 /// Admin Analytics & Predictions Screen
 class AdminAnalyticsScreen extends StatefulWidget {
-  const AdminAnalyticsScreen({Key? key}) : super(key: key);
+  const AdminAnalyticsScreen({super.key});
 
   @override
   State<AdminAnalyticsScreen> createState() => _AdminAnalyticsScreenState();
@@ -267,7 +267,7 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: Colors.redAccent.withOpacity(0.1),
+                              color: Colors.redAccent.withValues(alpha: 0.1),
                               border: Border.all(color: Colors.redAccent),
                               borderRadius: BorderRadius.circular(8),
                             ),
@@ -323,7 +323,7 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
                           data['predictedDailyDonations'].toString(),
                         ),
                         _buildMetricRow(
-                          'Total (${_selectedMetricDays} days)',
+                          'Total ($_selectedMetricDays days)',
                           data['predictedTotalDonations'].toString(),
                         ),
                         _buildMetricRow(
@@ -392,10 +392,12 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
                                     style:
                                         const TextStyle(color: Colors.white)),
                                 backgroundColor: status == 'critical'
-                                    ? Colors.redAccent.withOpacity(0.4)
+                                    ? Colors.redAccent.withValues(alpha: 0.4)
                                     : status == 'warning'
-                                        ? Colors.orangeAccent.withOpacity(0.4)
-                                        : Colors.greenAccent.withOpacity(0.4),
+                                        ? Colors.orangeAccent
+                                            .withValues(alpha: 0.4)
+                                        : Colors.greenAccent
+                                            .withValues(alpha: 0.4),
                               ),
                             ],
                           ),
@@ -459,7 +461,7 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
                         ),
                         const SizedBox(height: 16),
                         _buildMetricRow(
-                          'Total Requests (${_selectedMetricDays} days)',
+                          'Total Requests ($_selectedMetricDays days)',
                           totalRequests.toString(),
                         ),
                         if (topTypes.isNotEmpty) ...[
@@ -476,7 +478,8 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
                                 label: Text('${e.key}: ${e.value}',
                                     style: const TextStyle(
                                         fontSize: 10, color: Colors.white)),
-                                backgroundColor: Colors.white.withOpacity(0.1),
+                                backgroundColor:
+                                    Colors.white.withValues(alpha: 0.1),
                                 padding: EdgeInsets.zero,
                                 materialTapTargetSize:
                                     MaterialTapTargetSize.shrinkWrap,
@@ -528,7 +531,7 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
                           data['predictedDailyRequests'].toString(),
                         ),
                         _buildMetricRow(
-                          'Total (${_selectedMetricDays} days ahead)',
+                          'Total ($_selectedMetricDays days ahead)',
                           data['predictedTotalRequests'].toString(),
                         ),
                         _buildMetricRow(

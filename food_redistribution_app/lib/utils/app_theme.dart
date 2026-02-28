@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -100,7 +99,7 @@ class AppTheme {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -111,7 +110,7 @@ class AppTheme {
         color: surfaceGlassDark,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: surfaceGlassBorder.withOpacity(0.5),
+          color: surfaceGlassBorder.withValues(alpha: 0.5),
           width: 1,
         ),
       );
@@ -121,13 +120,13 @@ class AppTheme {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            accentTeal.withOpacity(0.2),
-            accentCyan.withOpacity(0.1),
+            accentTeal.withValues(alpha: 0.2),
+            accentCyan.withValues(alpha: 0.1),
           ],
         ),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: accentTeal.withOpacity(0.3),
+          color: accentTeal.withValues(alpha: 0.3),
           width: 1.5,
         ),
       );
@@ -148,15 +147,13 @@ class AppTheme {
         secondary: accentCyan,
         tertiary: accentTealLight,
         surface: primaryNavyLight,
-        background: primaryNavy,
         error: errorCoral,
         onPrimary: primaryNavy,
         onSecondary: primaryNavy,
         onTertiary: primaryNavy,
         onSurface: textPrimary,
-        onBackground: textPrimary,
         onError: textPrimary,
-        surfaceVariant: primaryNavyMedium,
+        surfaceContainerHighest: primaryNavyMedium,
         outline: surfaceGlassBorder,
       ),
       textTheme:
@@ -243,7 +240,7 @@ class AppTheme {
           foregroundColor: primaryNavy,
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
           elevation: 0,
-          shadowColor: accentTeal.withOpacity(0.4),
+          shadowColor: accentTeal.withValues(alpha: 0.4),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -293,11 +290,11 @@ class AppTheme {
             const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: surfaceGlassBorder),
+          borderSide: const BorderSide(color: surfaceGlassBorder),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: surfaceGlassBorder),
+          borderSide: const BorderSide(color: surfaceGlassBorder),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
@@ -327,18 +324,18 @@ class AppTheme {
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: BorderSide(color: surfaceGlassBorder),
+          side: const BorderSide(color: surfaceGlassBorder),
         ),
         margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
       ),
       chipTheme: ChipThemeData(
         backgroundColor: surfaceGlassDark,
-        selectedColor: accentTeal.withOpacity(0.2),
+        selectedColor: accentTeal.withValues(alpha: 0.2),
         labelStyle: GoogleFonts.inter(
           color: textSecondary,
           fontSize: 12,
         ),
-        side: BorderSide(color: surfaceGlassBorder),
+        side: const BorderSide(color: surfaceGlassBorder),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
@@ -353,10 +350,10 @@ class AppTheme {
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: surfaceGlassDark,
-        indicatorColor: accentTeal.withOpacity(0.2),
+        indicatorColor: accentTeal.withValues(alpha: 0.2),
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-        iconTheme: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) {
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
             return const IconThemeData(color: accentTeal, size: 24);
           }
           return const IconThemeData(color: textMuted, size: 24);
@@ -386,7 +383,7 @@ class AppTheme {
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
       ),
-      dividerTheme: DividerThemeData(
+      dividerTheme: const DividerThemeData(
         color: surfaceGlassBorder,
         thickness: 1,
       ),
@@ -402,38 +399,38 @@ class AppTheme {
         activeTrackColor: accentTeal,
         inactiveTrackColor: surfaceGlassDark,
         thumbColor: accentTeal,
-        overlayColor: accentTeal.withOpacity(0.2),
+        overlayColor: accentTeal.withValues(alpha: 0.2),
       ),
       switchTheme: SwitchThemeData(
-        thumbColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) {
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
             return accentTeal;
           }
           return textMuted;
         }),
-        trackColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) {
-            return accentTeal.withOpacity(0.5);
+        trackColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return accentTeal.withValues(alpha: 0.5);
           }
           return surfaceGlassDark;
         }),
       ),
       checkboxTheme: CheckboxThemeData(
-        fillColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) {
+        fillColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
             return accentTeal;
           }
           return Colors.transparent;
         }),
-        checkColor: MaterialStateProperty.all(primaryNavy),
+        checkColor: WidgetStateProperty.all(primaryNavy),
         side: const BorderSide(color: textSecondary, width: 1.5),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(4),
         ),
       ),
       radioTheme: RadioThemeData(
-        fillColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) {
+        fillColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
             return accentTeal;
           }
           return textSecondary;

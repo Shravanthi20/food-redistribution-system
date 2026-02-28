@@ -5,7 +5,7 @@ import '../../services/user_service.dart';
 import '../../models/volunteer_profile.dart'; // [NEW]
 
 class VolunteerProfileScreen extends StatefulWidget {
-  const VolunteerProfileScreen({Key? key}) : super(key: key);
+  const VolunteerProfileScreen({super.key});
 
   @override
   State<VolunteerProfileScreen> createState() => _VolunteerProfileScreenState();
@@ -58,7 +58,7 @@ class _VolunteerProfileScreenState extends State<VolunteerProfileScreen> {
         });
       }
     } catch (e) {
-      print("Error loading profile: $e");
+      debugPrint("Error loading profile: $e");
     } finally {
       if (mounted) setState(() => _isLoadingProfile = false);
     }
@@ -186,7 +186,7 @@ class _VolunteerProfileScreenState extends State<VolunteerProfileScreen> {
                               }
                             });
                           },
-                          selectedColor: Colors.green.withOpacity(0.2),
+                          selectedColor: Colors.green.withValues(alpha: 0.2),
                           checkmarkColor: Colors.green,
                           labelStyle: TextStyle(
                             color:
