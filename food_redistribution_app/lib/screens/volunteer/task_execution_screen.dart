@@ -8,8 +8,7 @@ import '../../providers/auth_provider.dart';
 class TaskExecutionScreen extends StatefulWidget {
   final String donationId;
 
-  const TaskExecutionScreen({Key? key, required this.donationId})
-      : super(key: key);
+  const TaskExecutionScreen({super.key, required this.donationId});
 
   @override
   State<TaskExecutionScreen> createState() => _TaskExecutionScreenState();
@@ -99,13 +98,12 @@ class _TaskExecutionScreenState extends State<TaskExecutionScreen> {
                     Provider.of<AuthProvider>(context, listen: false).user!.uid;
                 await _locationService.stopLocationTracking(userId);
                 await _updateStatus(DonationStatus.delivered);
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text("Delivery Confirmed! Tracking Stopped.")),
-                  );
-                  Navigator.pop(context);
-                }
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                      content: Text("Delivery Confirmed! Tracking Stopped.")),
+                );
+                Navigator.pop(context);
               }),
           ]
         ],
@@ -119,10 +117,14 @@ class _TaskExecutionScreenState extends State<TaskExecutionScreen> {
       await _donationService.updateDonationStatus(
           donationId: widget.donationId, status: newStatus);
     } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text("Error: $e")));
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text("Error: $e")));
+      }
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 

@@ -14,7 +14,7 @@ import 'admin_analytics_screen.dart';
 import '../../widgets/glass_widgets.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
-  const AdminDashboardScreen({Key? key}) : super(key: key);
+  const AdminDashboardScreen({super.key});
 
   @override
   State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
@@ -87,7 +87,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                             themeProvider.isDarkMode
                                 ? Icons.light_mode
                                 : Icons.dark_mode,
-                            color: Colors.white.withOpacity(0.8),
+                            color: Colors.white.withValues(alpha: 0.8),
                           ),
                           onPressed: () => themeProvider.toggleTheme(),
                           tooltip: 'Toggle Theme',
@@ -96,13 +96,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     ),
                     IconButton(
                       icon: Icon(Icons.refresh,
-                          color: Colors.white.withOpacity(0.8)),
+                          color: Colors.white.withValues(alpha: 0.8)),
                       onPressed: () => provider.loadDashboardData(),
                       tooltip: 'Refresh Data',
                     ),
                     IconButton(
                       icon: Icon(Icons.logout,
-                          color: Colors.white.withOpacity(0.8)),
+                          color: Colors.white.withValues(alpha: 0.8)),
                       onPressed: () => _handleSignOut(context),
                       tooltip: 'Sign Out',
                     ),
@@ -117,10 +117,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 bottomNavigationBar: !isDesktop
                     ? Container(
                         decoration: BoxDecoration(
-                          color: AppTheme.primaryNavy.withOpacity(0.95),
+                          color: AppTheme.primaryNavy.withValues(alpha: 0.95),
                           border: Border(
                             top: BorderSide(
-                              color: AppTheme.accentTeal.withOpacity(0.3),
+                              color: AppTheme.accentTeal.withValues(alpha: 0.3),
                               width: 1,
                             ),
                           ),
@@ -132,7 +132,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           type: BottomNavigationBarType.fixed,
                           backgroundColor: Colors.transparent,
                           selectedItemColor: AppTheme.accentTeal,
-                          unselectedItemColor: Colors.white.withOpacity(0.5),
+                          unselectedItemColor:
+                              Colors.white.withValues(alpha: 0.5),
                           selectedLabelStyle: const TextStyle(fontSize: 10),
                           unselectedLabelStyle: const TextStyle(fontSize: 10),
                           items: const [
@@ -245,9 +246,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     const Text('Top Matches:',
                         style: TextStyle(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
-                    ...matches
-                        .map((match) => _buildMatchDetail(match))
-                        .toList(),
+                    ...matches.map((match) => _buildMatchDetail(match)),
                   ],
                 ),
               ),
@@ -265,7 +264,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.withOpacity(0.3)),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -279,7 +278,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.1),
+                  color: Colors.green.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -306,7 +305,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               return Chip(
                 label: Text('$label: ${(e.value as num).toStringAsFixed(1)}',
                     style: const TextStyle(fontSize: 10)),
-                backgroundColor: Colors.blue.withOpacity(0.05),
+                backgroundColor: Colors.blue.withValues(alpha: 0.05),
                 padding: EdgeInsets.zero,
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               );
@@ -408,7 +407,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.white.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: TabBar(
@@ -417,7 +416,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 Tab(text: 'High-Volume Donors'),
               ],
               labelColor: AppTheme.accentTeal,
-              unselectedLabelColor: Colors.white.withOpacity(0.6),
+              unselectedLabelColor: Colors.white.withValues(alpha: 0.6),
               indicatorColor: AppTheme.accentTeal,
               indicatorSize: TabBarIndicatorSize.tab,
               dividerColor: Colors.transparent,
@@ -447,11 +446,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.verified_user_outlined,
-                size: 64, color: Colors.white.withOpacity(0.3)),
+                size: 64, color: Colors.white.withValues(alpha: 0.3)),
             const SizedBox(height: 16),
             Text(
               'No pending verifications for this role',
-              style: TextStyle(color: Colors.white.withOpacity(0.6)),
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
             ),
           ],
         ),
@@ -471,7 +470,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppTheme.accentTeal.withOpacity(0.2),
+                  color: AppTheme.accentTeal.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child:
@@ -494,7 +493,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     Text(
                       'Submitted: ${_formatDate(item['submission']['submittedAt'])}',
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.6),
+                        color: Colors.white.withValues(alpha: 0.6),
                         fontSize: 13,
                       ),
                     ),
@@ -538,18 +537,18 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     decoration: InputDecoration(
                       hintText: 'Search by email or name...',
                       hintStyle:
-                          TextStyle(color: Colors.white.withOpacity(0.5)),
+                          TextStyle(color: Colors.white.withValues(alpha: 0.5)),
                       prefixIcon: Icon(Icons.search,
-                          color: Colors.white.withOpacity(0.6)),
+                          color: Colors.white.withValues(alpha: 0.6)),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide:
-                            BorderSide(color: Colors.white.withOpacity(0.3)),
+                        borderSide: BorderSide(
+                            color: Colors.white.withValues(alpha: 0.3)),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide:
-                            BorderSide(color: Colors.white.withOpacity(0.3)),
+                        borderSide: BorderSide(
+                            color: Colors.white.withValues(alpha: 0.3)),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -557,7 +556,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                             const BorderSide(color: AppTheme.accentTeal),
                       ),
                       filled: true,
-                      fillColor: Colors.white.withOpacity(0.05),
+                      fillColor: Colors.white.withValues(alpha: 0.05),
                     ),
                     onSubmitted: (val) => provider.searchUsers(val),
                   ),
@@ -579,12 +578,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.people_outline,
-                            size: 64, color: Colors.white.withOpacity(0.3)),
+                            size: 64,
+                            color: Colors.white.withValues(alpha: 0.3)),
                         const SizedBox(height: 16),
                         Text(
                           'Search for users to manage roles and restrictions',
-                          style:
-                              TextStyle(color: Colors.white.withOpacity(0.6)),
+                          style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.6)),
                         ),
                       ],
                     ),
@@ -610,11 +610,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.check_circle_outline,
-                size: 64, color: Colors.white.withOpacity(0.3)),
+                size: 64, color: Colors.white.withValues(alpha: 0.3)),
             const SizedBox(height: 16),
             Text(
               'All donations are currently matched or non-pending.',
-              style: TextStyle(color: Colors.white.withOpacity(0.6)),
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
             ),
           ],
         ),
@@ -634,7 +634,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               leading: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppTheme.warningAmber.withOpacity(0.2),
+                  color: AppTheme.warningAmber.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(Icons.warning, color: AppTheme.warningAmber),
@@ -644,10 +644,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       color: Colors.white, fontWeight: FontWeight.bold)),
               subtitle: Text(
                 'Status: ${donation.status.name} • Available Until: ${_formatDate(donation.availableUntil)}',
-                style: TextStyle(color: Colors.white.withOpacity(0.6)),
+                style: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
               ),
-              iconColor: Colors.white.withOpacity(0.6),
-              collapsedIconColor: Colors.white.withOpacity(0.6),
+              iconColor: Colors.white.withValues(alpha: 0.6),
+              collapsedIconColor: Colors.white.withValues(alpha: 0.6),
               children: [
                 Padding(
                   padding: const EdgeInsets.all(16),
@@ -655,8 +655,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('Pickup: ${donation.pickupAddress}',
-                          style:
-                              TextStyle(color: Colors.white.withOpacity(0.8))),
+                          style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.8))),
                       const SizedBox(height: 16),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -827,7 +827,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.2),
+              color: color.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: color, size: 28),
@@ -839,7 +839,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   fontWeight: FontWeight.bold,
                   color: Colors.white)),
           const SizedBox(height: 4),
-          Text(title, style: TextStyle(color: Colors.white.withOpacity(0.6))),
+          Text(title,
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.6))),
         ],
       ),
     );
@@ -864,7 +865,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       color: Colors.white)),
             ],
           ),
-          Divider(height: 32, color: Colors.white.withOpacity(0.2)),
+          Divider(height: 32, color: Colors.white.withValues(alpha: 0.2)),
           child,
         ],
       ),
@@ -877,7 +878,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       child: Row(
         children: [
           Icon(Icons.notification_important_outlined,
-              color: Colors.white.withOpacity(0.6), size: 20),
+              color: Colors.white.withValues(alpha: 0.6), size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -891,7 +892,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 Text(
                   'User: ${log['userId'] ?? 'System'} • IP: ${log['ipAddress'] ?? 'N/A'}',
                   style: TextStyle(
-                      color: Colors.white.withOpacity(0.5), fontSize: 12),
+                      color: Colors.white.withValues(alpha: 0.5), fontSize: 12),
                 ),
               ],
             ),
@@ -901,7 +902,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             children: [
               Text(_formatDate(log['timestamp']),
                   style: TextStyle(
-                      fontSize: 11, color: Colors.white.withOpacity(0.5))),
+                      fontSize: 11,
+                      color: Colors.white.withValues(alpha: 0.5))),
               if (showDetails)
                 Text(log['riskLevel'] ?? 'low',
                     style: TextStyle(
@@ -952,7 +954,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               value: value,
               color: color,
               minHeight: 6,
-              backgroundColor: color.withOpacity(0.1)),
+              backgroundColor: color.withValues(alpha: 0.1)),
         ],
       ),
     );
@@ -968,7 +970,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppTheme.accentCyan.withOpacity(0.2),
+              color: AppTheme.accentCyan.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(Icons.person, color: AppTheme.accentCyan),
@@ -987,13 +989,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 Text(
                   'Role: ${user['role']} • Status: ${user['status']}',
                   style: TextStyle(
-                      color: Colors.white.withOpacity(0.6), fontSize: 13),
+                      color: Colors.white.withValues(alpha: 0.6), fontSize: 13),
                 ),
               ],
             ),
           ),
           PopupMenuButton<String>(
-            icon: Icon(Icons.more_vert, color: Colors.white.withOpacity(0.6)),
+            icon: Icon(Icons.more_vert,
+                color: Colors.white.withValues(alpha: 0.6)),
             color: AppTheme.primaryNavyLight,
             onSelected: (val) {
               if (val == 'suspend') _handleSuspendUser(user['id']);
@@ -1002,17 +1005,20 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               PopupMenuItem(
                 value: 'suspend',
                 child: Text('Suspend (7 Days)',
-                    style: TextStyle(color: Colors.white.withOpacity(0.9))),
+                    style:
+                        TextStyle(color: Colors.white.withValues(alpha: 0.9))),
               ),
               PopupMenuItem(
                 value: 'restrict',
                 child: Text('Restrict Role',
-                    style: TextStyle(color: Colors.white.withOpacity(0.9))),
+                    style:
+                        TextStyle(color: Colors.white.withValues(alpha: 0.9))),
               ),
               PopupMenuItem(
                 value: 'history',
                 child: Text('Audit History',
-                    style: TextStyle(color: Colors.white.withOpacity(0.9))),
+                    style:
+                        TextStyle(color: Colors.white.withValues(alpha: 0.9))),
               ),
             ],
           ),
@@ -1042,15 +1048,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   Future<void> _handleSignOut(BuildContext context) async {
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Sign Out'),
         content: const Text('Are you sure you want to sign out?'),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context, false),
+              onPressed: () => Navigator.pop(dialogContext, false),
               child: const Text('Cancel')),
           TextButton(
-              onPressed: () => Navigator.pop(context, true),
+              onPressed: () => Navigator.pop(dialogContext, true),
               child: const Text('Sign Out')),
         ],
       ),
@@ -1082,9 +1088,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               'Approved from System Dashboard',
             );
 
-    if (mounted && success) {
+    if (!context.mounted) return;
+
+    if (success) {
       _showSnackbar('Verification Successful');
-    } else if (mounted) {
+    } else {
       _showSnackbar(
           'Review failed: ${context.read<AdminDashboardProvider>().errorMessage}');
     }
@@ -1096,7 +1104,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Confirm Suspension'),
         content: const Text(
             'Are you sure you want to suspend this user for 7 days? This will revoke their access immediately.'),
@@ -1112,13 +1120,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
 
     if (confirm == true) {
+      if (!mounted) return;
       final success = await context.read<AdminDashboardProvider>().suspendUser(
             userId,
             adminId,
             'Flagged for policy violation',
             DateTime.now().add(const Duration(days: 7)),
           );
-      if (mounted && success) {
+      if (!mounted) return;
+      if (success) {
         _showSnackbar('User status updated to SUSPENDED');
       }
     }

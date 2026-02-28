@@ -6,16 +6,16 @@ class AdminDashboardRail extends StatelessWidget {
   final Function(int) onDestinationSelected;
 
   const AdminDashboardRail({
-    Key? key,
+    super.key,
     required this.selectedIndex,
     required this.onDestinationSelected,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
@@ -25,7 +25,7 @@ class AdminDashboardRail extends StatelessWidget {
         ),
         border: Border(
           right: BorderSide(
-            color: AppTheme.accentTeal.withOpacity(0.3),
+            color: AppTheme.accentTeal.withValues(alpha: 0.3),
             width: 1,
           ),
         ),
@@ -37,17 +37,17 @@ class AdminDashboardRail extends StatelessWidget {
         backgroundColor: Colors.transparent,
         selectedIconTheme: const IconThemeData(color: AppTheme.accentTeal),
         unselectedIconTheme:
-            IconThemeData(color: Colors.white.withOpacity(0.6)),
+            IconThemeData(color: Colors.white.withValues(alpha: 0.6)),
         selectedLabelTextStyle: const TextStyle(
           color: AppTheme.accentTeal,
           fontWeight: FontWeight.bold,
           fontSize: 12,
         ),
         unselectedLabelTextStyle: TextStyle(
-          color: Colors.white.withOpacity(0.6),
+          color: Colors.white.withValues(alpha: 0.6),
           fontSize: 11,
         ),
-        indicatorColor: AppTheme.accentTeal.withOpacity(0.2),
+        indicatorColor: AppTheme.accentTeal.withValues(alpha: 0.2),
         destinations: const [
           NavigationRailDestination(
             icon: Icon(Icons.dashboard_outlined),

@@ -135,7 +135,8 @@ class VolunteerDispatchService {
       deliveryAddress: deliveryAddress,
       pickupLocation: pickupLocation,
       deliveryLocation: deliveryLocation,
-      scheduledTime: scheduledTime ?? DateTime.now().add(Duration(hours: 1)),
+      scheduledTime:
+          scheduledTime ?? DateTime.now().add(const Duration(hours: 1)),
       priority: calculatedPriority,
       specialInstructions: specialInstructions,
       requiredSkills: requiredSkills,
@@ -473,7 +474,7 @@ class VolunteerDispatchService {
 
     final totalDistance = distance * 2; // Round trip
     final travelTime = (totalDistance / baseSpeed) * 60; // minutes
-    final loadingTime = 15; // minutes for pickup/delivery
+    const loadingTime = 15; // minutes for pickup/delivery
 
     return travelTime + loadingTime;
   }
@@ -516,7 +517,7 @@ class VolunteerDispatchService {
 
   Future<Map<String, dynamic>?> _getTask(String taskId) async {
     final doc = await _firestoreService.get('delivery_tasks', taskId);
-    return doc?.data() as Map<String, dynamic>?;
+    return doc.data() as Map<String, dynamic>?;
   }
 
   DispatchPriority _calculatePriority(FoodDonation donation) {

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/food_donation.dart';
 import '../config/firebase_schema.dart';
+import 'package:flutter/foundation.dart';
 
 class TrackingService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -59,7 +60,7 @@ class TrackingService {
       // Send real-time notification
       await _notifyStakeholders(donationId, status);
     } catch (e) {
-      print('Error updating donation status: $e');
+      debugPrint('Error updating donation status: $e');
       rethrow;
     }
   }
@@ -76,7 +77,7 @@ class TrackingService {
 
       return query.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList();
     } catch (e) {
-      print('Error getting tracking history: $e');
+      debugPrint('Error getting tracking history: $e');
       return [];
     }
   }
@@ -96,7 +97,7 @@ class TrackingService {
         'timestamp': Timestamp.now(),
       });
     } catch (e) {
-      print('Error updating volunteer location: $e');
+      debugPrint('Error updating volunteer location: $e');
     }
   }
 
@@ -132,7 +133,7 @@ class TrackingService {
 
       return query.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList();
     } catch (e) {
-      print('Error getting delayed deliveries: $e');
+      debugPrint('Error getting delayed deliveries: $e');
       return [];
     }
   }
@@ -164,7 +165,7 @@ class TrackingService {
         'optimizedOrder': donationIds, // Would be reordered by actual algorithm
       };
     } catch (e) {
-      print('Error optimizing delivery route: $e');
+      debugPrint('Error optimizing delivery route: $e');
       return {};
     }
   }
@@ -192,7 +193,7 @@ class TrackingService {
         'message': _getStatusMessage(status),
       });
     } catch (e) {
-      print('Error notifying stakeholders: $e');
+      debugPrint('Error notifying stakeholders: $e');
     }
   }
 

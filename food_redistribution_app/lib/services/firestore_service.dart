@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../config/firestore_schema.dart';
 import '../config/firebase_schema.dart';
+import 'package:flutter/foundation.dart';
 
 /// Firestore Database Service for centralized Firestore operations
 /// Updated for Firebase Schema v2.0
@@ -19,7 +19,7 @@ class FirestoreService {
       data[Fields.updatedAt] = Timestamp.now();
       await _firestore.collection(collection).doc(docId).set(data);
     } catch (e) {
-      print('Error creating document in $collection: $e');
+      debugPrint('Error creating document in $collection: $e');
       rethrow;
     }
   }
@@ -30,7 +30,7 @@ class FirestoreService {
       data[Fields.updatedAt] = Timestamp.now();
       await _firestore.collection(collection).doc(docId).update(data);
     } catch (e) {
-      print('Error updating document in $collection: $e');
+      debugPrint('Error updating document in $collection: $e');
       rethrow;
     }
   }
@@ -39,7 +39,7 @@ class FirestoreService {
     try {
       return await _firestore.collection(collection).doc(docId).get();
     } catch (e) {
-      print('Error getting document from $collection: $e');
+      debugPrint('Error getting document from $collection: $e');
       rethrow;
     }
   }
@@ -48,13 +48,13 @@ class FirestoreService {
     try {
       await _firestore.collection(collection).doc(docId).delete();
     } catch (e) {
-      print('Error deleting document from $collection: $e');
+      debugPrint('Error deleting document from $collection: $e');
       rethrow;
     }
   }
 
   Future<QuerySnapshot> query(String collection,
-      {Map<String, dynamic>? where,
+      {dynamic where,
       String? orderBy,
       bool isDescending = false,
       int? limit}) async {
@@ -62,9 +62,42 @@ class FirestoreService {
       Query query = _firestore.collection(collection);
 
       if (where != null) {
-        where.forEach((field, value) {
-          query = query.where(field, isEqualTo: value);
-        });
+        if (where is Map<String, dynamic>) {
+          where.forEach((field, value) {
+            query = query.where(field, isEqualTo: value);
+          });
+        } else if (where is List) {
+          for (var condition in where) {
+            if (condition is Map<String, dynamic>) {
+              final field = condition['field'];
+              final op = condition['operator'];
+              final value = condition['value'];
+
+              switch (op) {
+                case '==':
+                  query = query.where(field, isEqualTo: value);
+                  break;
+                case '>=':
+                  query = query.where(field, isGreaterThanOrEqualTo: value);
+                  break;
+                case '<=':
+                  query = query.where(field, isLessThanOrEqualTo: value);
+                  break;
+                case '>':
+                  query = query.where(field, isGreaterThan: value);
+                  break;
+                case '<':
+                  query = query.where(field, isLessThan: value);
+                  break;
+                case 'array-contains':
+                  query = query.where(field, arrayContains: value);
+                  break;
+                default:
+                  query = query.where(field, isEqualTo: value);
+              }
+            }
+          }
+        }
       }
 
       if (orderBy != null) {
@@ -77,7 +110,7 @@ class FirestoreService {
 
       return await query.get();
     } catch (e) {
-      print('Error querying collection $collection: $e');
+      debugPrint('Error querying collection $collection: $e');
       rethrow;
     }
   }
@@ -260,8 +293,9 @@ class FirestoreService {
       {String? userId, String? eventType, int limit = 50}) async {
     Map<String, dynamic>? whereClause;
     if (userId != null) whereClause = {'userId': userId};
-    if (eventType != null)
+    if (eventType != null) {
       whereClause = {...?whereClause, 'eventType': eventType};
+    }
 
     return await query(Collections.audit,
         where: whereClause,
@@ -466,7 +500,7 @@ class FirestoreService {
         'generatedAt': Timestamp.now(),
       };
     } catch (e) {
-      print('Error getting user statistics: $e');
+      debugPrint('Error getting user statistics: $e');
       return {};
     }
   }
@@ -486,7 +520,7 @@ class FirestoreService {
         'generatedAt': Timestamp.now(),
       };
     } catch (e) {
-      print('Error getting donation statistics: $e');
+      debugPrint('Error getting donation statistics: $e');
       return {};
     }
   }
@@ -507,11 +541,11 @@ class FirestoreService {
 
       if (expiredSessions.docs.isNotEmpty) {
         await batch.commit();
-        print(
+        debugPrint(
             'Cleaned up ${expiredSessions.docs.length} expired sessions from Firestore');
       }
     } catch (e) {
-      print('Error cleaning up expired sessions: $e');
+      debugPrint('Error cleaning up expired sessions: $e');
     }
   }
 
@@ -530,11 +564,11 @@ class FirestoreService {
           batch.delete(doc.reference);
         }
         await batch.commit();
-        print(
+        debugPrint(
             'Cleaned up ${oldLogs.docs.length} old audit logs from Firestore');
       }
     } catch (e) {
-      print('Error cleaning up old audit logs: $e');
+      debugPrint('Error cleaning up old audit logs: $e');
     }
   }
 }

@@ -7,7 +7,7 @@ import 'auth/ngo_registration_screen.dart';
 import 'auth/volunteer_registration_screen.dart';
 
 class WelcomeScreen extends StatelessWidget {
-  const WelcomeScreen({Key? key}) : super(key: key);
+  const WelcomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -30,17 +30,17 @@ class WelcomeScreen extends StatelessWidget {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [
-                          AppTheme.accentTeal.withOpacity(0.2),
-                          AppTheme.accentCyan.withOpacity(0.1),
+                          AppTheme.accentTeal.withValues(alpha: 0.2),
+                          AppTheme.accentCyan.withValues(alpha: 0.1),
                         ],
                       ),
                       border: Border.all(
-                        color: AppTheme.accentTeal.withOpacity(0.3),
+                        color: AppTheme.accentTeal.withValues(alpha: 0.3),
                         width: 2,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: AppTheme.accentTeal.withOpacity(0.3),
+                          color: AppTheme.accentTeal.withValues(alpha: 0.3),
                           blurRadius: 30,
                           spreadRadius: 5,
                         ),
@@ -70,7 +70,7 @@ class WelcomeScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
+                  const Text(
                     'Reducing waste, feeding communities',
                     style: TextStyle(
                       fontSize: 15,
@@ -79,7 +79,7 @@ class WelcomeScreen extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 48),
-                  Text(
+                  const Text(
                     'Choose your role',
                     style: TextStyle(
                       fontSize: 16,
@@ -128,13 +128,13 @@ class WelcomeScreen extends StatelessWidget {
                     alignment: WrapAlignment.center,
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
-                      Text(
+                      const Text(
                         'Already have an account? ',
                         style: TextStyle(color: AppTheme.textSecondary),
                       ),
                       TextButton(
                         onPressed: () => _navigateToLogin(context),
-                        child: Text(
+                        child: const Text(
                           'Sign In',
                           style: TextStyle(
                             color: AppTheme.accentTeal,
@@ -170,10 +170,10 @@ class WelcomeScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.15),
+              color: color.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
-                color: color.withOpacity(0.3),
+                color: color.withValues(alpha: 0.3),
                 width: 1,
               ),
             ),
@@ -190,7 +190,7 @@ class WelcomeScreen extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w600,
                     color: AppTheme.textPrimary,
@@ -199,7 +199,7 @@ class WelcomeScreen extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   description,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 13,
                     color: AppTheme.textSecondary,
                   ),
@@ -210,7 +210,7 @@ class WelcomeScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(
@@ -239,7 +239,7 @@ class WelcomeScreen extends StatelessWidget {
         break;
       default:
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text('Registration for this role is coming soon!'),
             backgroundColor: Colors.orange,
           ),
@@ -261,7 +261,7 @@ class WelcomeScreen extends StatelessWidget {
 class RoleDashboard extends StatelessWidget {
   final String role;
 
-  const RoleDashboard({Key? key, required this.role}) : super(key: key);
+  const RoleDashboard({super.key, required this.role});
 
   @override
   Widget build(BuildContext context) {
@@ -279,7 +279,7 @@ class RoleDashboard extends StatelessWidget {
             end: Alignment.bottomCenter,
             colors: [
               _getRoleColor(role),
-              _getRoleColor(role).withOpacity(0.1),
+              _getRoleColor(role).withValues(alpha: 0.1),
             ],
           ),
         ),
@@ -321,7 +321,7 @@ class RoleDashboard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: _getRoleColor(role).withOpacity(0.1),
+                color: _getRoleColor(role).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(

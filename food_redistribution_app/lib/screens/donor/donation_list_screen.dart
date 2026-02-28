@@ -6,7 +6,7 @@ import '../../models/food_donation.dart';
 import 'donation_detail_screen.dart';
 
 class DonationListScreen extends StatefulWidget {
-  const DonationListScreen({Key? key}) : super(key: key);
+  const DonationListScreen({super.key});
 
   @override
   State<DonationListScreen> createState() => _DonationListScreenState();
@@ -59,7 +59,7 @@ class _DonationListScreenState extends State<DonationListScreen> {
                   value: status,
                   child: Text(_getStatusDisplayName(status)),
                 );
-              }).toList(),
+              }),
             ],
           ),
         ],
@@ -166,7 +166,7 @@ class _DonationListScreenState extends State<DonationListScreen> {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.1),
+                      color: statusColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(color: statusColor),
                     ),
@@ -274,7 +274,7 @@ class _DonationListScreenState extends State<DonationListScreen> {
   Future<void> _cancelDonation(FoodDonation donation) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Cancel Donation'),
         content: const Text('Are you sure you want to cancel this donation?'),
         actions: [
@@ -291,6 +291,7 @@ class _DonationListScreenState extends State<DonationListScreen> {
     );
 
     if (confirmed == true) {
+      if (!mounted) return;
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final donationProvider =
           Provider.of<DonationProvider>(context, listen: false);
@@ -303,14 +304,15 @@ class _DonationListScreenState extends State<DonationListScreen> {
           'Cancelled by donor',
         );
 
-        if (success && mounted) {
+        if (!mounted) return;
+        if (success) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Donation cancelled successfully'),
               backgroundColor: Colors.green,
             ),
           );
-        } else if (mounted && donationProvider.errorMessage != null) {
+        } else if (donationProvider.errorMessage != null) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(donationProvider.errorMessage!),

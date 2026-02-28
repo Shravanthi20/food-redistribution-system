@@ -11,7 +11,7 @@ import '../../utils/app_router.dart';
 class OnboardingScreen extends StatefulWidget {
   final dynamic userRole;
 
-  const OnboardingScreen({Key? key, this.userRole}) : super(key: key);
+  const OnboardingScreen({super.key, this.userRole});
 
   @override
   State<OnboardingScreen> createState() => _OnboardingScreenState();
@@ -288,6 +288,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       );
 
       // 3. Refresh Provider State (Optional, logic usually listens to stream)
+      if (!context.mounted) return;
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       await authProvider
           .updateOnboardingState(OnboardingState.documentSubmitted);
@@ -302,6 +303,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Future<void> _signOut(BuildContext context) async {
     await Provider.of<AuthProvider>(context, listen: false).signOut();
+    if (!context.mounted) return;
     Navigator.pushReplacementNamed(context, AppRouter.login);
   }
 

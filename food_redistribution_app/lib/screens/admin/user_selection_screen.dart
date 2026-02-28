@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart'; // [NEW]
-import 'package:google_maps_flutter/google_maps_flutter.dart'; // [NEW] For LatLng
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../models/user.dart';
 import '../../services/user_service.dart';
 
 class UserSelectionScreen extends StatefulWidget {
   final UserRole role;
   final String title;
-  final LatLng? origin; // [NEW]
+  final LatLng? origin;
 
   const UserSelectionScreen({
-    Key? key,
+    super.key,
     required this.role,
     required this.title,
     this.origin,
-  }) : super(key: key);
+  });
 
   @override
   State<UserSelectionScreen> createState() => _UserSelectionScreenState();
@@ -81,7 +81,7 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
         _isLoading = false;
       });
     } catch (e) {
-      print('Error loading users: $e');
+      debugPrint('Error loading users: $e');
       setState(() => _isLoading = false);
     }
   }
@@ -124,10 +124,10 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
             ),
           ),
           if (widget.origin != null)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
               child: Row(
-                children: const [
+                children: [
                   Icon(Icons.sort, size: 16, color: Colors.blue),
                   SizedBox(width: 4),
                   Text('Sorted by proximity',

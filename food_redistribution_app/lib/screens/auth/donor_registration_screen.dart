@@ -9,7 +9,7 @@ import '../../widgets/gradient_scaffold.dart';
 import '../../widgets/glass_widgets.dart';
 
 class DonorRegistrationScreen extends StatefulWidget {
-  const DonorRegistrationScreen({Key? key}) : super(key: key);
+  const DonorRegistrationScreen({super.key});
 
   @override
   State<DonorRegistrationScreen> createState() =>
@@ -128,7 +128,7 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
 
   // Other State
   DonorType _selectedDonorType = DonorType.restaurant;
-  List<String> _selectedFoodTypes = [];
+  final List<String> _selectedFoodTypes = [];
   bool _pickupAvailable = false;
   bool _deliveryAvailable = false;
   bool _obscurePassword = true;
@@ -225,8 +225,8 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
     return InputDecoration(
       labelText: label,
       hintText: hintText,
-      labelStyle: TextStyle(color: AppTheme.textSecondary),
-      hintStyle: TextStyle(color: AppTheme.textTertiary),
+      labelStyle: const TextStyle(color: AppTheme.textSecondary),
+      hintStyle: const TextStyle(color: AppTheme.textTertiary),
       prefixIcon: prefixIcon != null
           ? Icon(prefixIcon, color: AppTheme.textTertiary, size: 20)
           : null,
@@ -235,23 +235,23 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
       fillColor: AppTheme.surfaceGlass,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: AppTheme.surfaceGlassBorder),
+        borderSide: const BorderSide(color: AppTheme.surfaceGlassBorder),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: AppTheme.surfaceGlassBorder),
+        borderSide: const BorderSide(color: AppTheme.surfaceGlassBorder),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: AppTheme.accentTeal, width: 1.5),
+        borderSide: const BorderSide(color: AppTheme.accentTeal, width: 1.5),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: AppTheme.errorRed),
+        borderSide: const BorderSide(color: AppTheme.errorRed),
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: AppTheme.errorRed, width: 1.5),
+        borderSide: const BorderSide(color: AppTheme.errorRed, width: 1.5),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     );
@@ -287,7 +287,7 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
                 children: [
                   TextFormField(
                     controller: _emailController,
-                    style: TextStyle(color: AppTheme.textPrimary),
+                    style: const TextStyle(color: AppTheme.textPrimary),
                     keyboardType: TextInputType.emailAddress,
                     decoration: _buildInputDecoration('Email Address',
                         prefixIcon: Icons.email_outlined),
@@ -300,7 +300,7 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _passwordController,
-                    style: TextStyle(color: AppTheme.textPrimary),
+                    style: const TextStyle(color: AppTheme.textPrimary),
                     obscureText: _obscurePassword,
                     decoration: _buildInputDecoration(
                       'Password',
@@ -323,7 +323,7 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _confirmPasswordController,
-                    style: TextStyle(color: AppTheme.textPrimary),
+                    style: const TextStyle(color: AppTheme.textPrimary),
                     obscureText: _obscureConfirmPassword,
                     decoration: _buildInputDecoration(
                       'Confirm Password',
@@ -351,15 +351,15 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
                         flex: 3,
                         child: DropdownButtonFormField<String>(
                           isExpanded: true,
-                          value: _selectedCountryCode,
+                          initialValue: _selectedCountryCode,
                           dropdownColor: AppTheme.primaryNavyLight,
-                          style: TextStyle(color: AppTheme.textPrimary),
+                          style: const TextStyle(color: AppTheme.textPrimary),
                           decoration: _buildInputDecoration('Code'),
                           items: _countryCodes
                               .map((code) => DropdownMenuItem(
                                     value: code,
                                     child: Text(code,
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                             color: AppTheme.textPrimary)),
                                   ))
                               .toList(),
@@ -372,7 +372,7 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
                         flex: 7,
                         child: TextFormField(
                           controller: _phoneController,
-                          style: TextStyle(color: AppTheme.textPrimary),
+                          style: const TextStyle(color: AppTheme.textPrimary),
                           keyboardType: TextInputType.phone,
                           decoration: _buildInputDecoration('Phone Number',
                               prefixIcon: Icons.phone_outlined),
@@ -389,16 +389,17 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
                 icon: Icons.store_outlined,
                 children: [
                   DropdownButtonFormField<DonorType>(
-                    value: _selectedDonorType,
+                    initialValue: _selectedDonorType,
                     dropdownColor: AppTheme.primaryNavyLight,
-                    style: TextStyle(color: AppTheme.textPrimary),
+                    style: const TextStyle(color: AppTheme.textPrimary),
                     decoration: _buildInputDecoration('Business Type',
                         prefixIcon: Icons.category_outlined),
                     items: DonorType.values.map((type) {
                       return DropdownMenuItem(
                         value: type,
                         child: Text(_getDonorTypeDisplayName(type),
-                            style: TextStyle(color: AppTheme.textPrimary)),
+                            style:
+                                const TextStyle(color: AppTheme.textPrimary)),
                       );
                     }).toList(),
                     onChanged: (val) =>
@@ -407,7 +408,7 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _businessNameController,
-                    style: TextStyle(color: AppTheme.textPrimary),
+                    style: const TextStyle(color: AppTheme.textPrimary),
                     decoration: _buildInputDecoration('Business Name',
                         prefixIcon: Icons.business_rounded),
                     validator: (v) => v!.isEmpty ? 'Required' : null,
@@ -415,7 +416,7 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _registrationNumberController,
-                    style: TextStyle(color: AppTheme.textPrimary),
+                    style: const TextStyle(color: AppTheme.textPrimary),
                     decoration: _buildInputDecoration('Registration Number',
                         prefixIcon: Icons.numbers_rounded),
                     validator: (v) => v!.isEmpty ? 'Required' : null,
@@ -423,7 +424,7 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _operatingHoursController,
-                    style: TextStyle(color: AppTheme.textPrimary),
+                    style: const TextStyle(color: AppTheme.textPrimary),
                     decoration: _buildInputDecoration(
                       'Operating Hours',
                       prefixIcon: Icons.access_time_rounded,
@@ -439,17 +440,17 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
                 icon: Icons.location_on_outlined,
                 children: [
                   DropdownButtonFormField<String>(
-                    value: _selectedCountry,
+                    initialValue: _selectedCountry,
                     dropdownColor: AppTheme.primaryNavyLight,
-                    style: TextStyle(color: AppTheme.textPrimary),
+                    style: const TextStyle(color: AppTheme.textPrimary),
                     decoration: _buildInputDecoration('Country',
                         prefixIcon: Icons.public_rounded),
                     items: _countryStates.keys
                         .map((country) => DropdownMenuItem(
                               value: country,
                               child: Text(country,
-                                  style:
-                                      TextStyle(color: AppTheme.textPrimary)),
+                                  style: const TextStyle(
+                                      color: AppTheme.textPrimary)),
                             ))
                         .toList(),
                     onChanged: (val) {
@@ -462,9 +463,9 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
-                    value: _selectedState,
+                    initialValue: _selectedState,
                     dropdownColor: AppTheme.primaryNavyLight,
-                    style: TextStyle(color: AppTheme.textPrimary),
+                    style: const TextStyle(color: AppTheme.textPrimary),
                     decoration: _buildInputDecoration('State',
                         prefixIcon: Icons.map_outlined),
                     items: _selectedCountry == null
@@ -473,7 +474,7 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
                             .map((state) => DropdownMenuItem(
                                   value: state,
                                   child: Text(state,
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                           color: AppTheme.textPrimary)),
                                 ))
                             .toList(),
@@ -485,7 +486,7 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _cityController,
-                    style: TextStyle(color: AppTheme.textPrimary),
+                    style: const TextStyle(color: AppTheme.textPrimary),
                     decoration: _buildInputDecoration('City',
                         prefixIcon: Icons.location_city_rounded),
                     validator: (v) => v!.isEmpty ? 'Required' : null,
@@ -493,7 +494,7 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _addressController,
-                    style: TextStyle(color: AppTheme.textPrimary),
+                    style: const TextStyle(color: AppTheme.textPrimary),
                     decoration: _buildInputDecoration('Street Address',
                         prefixIcon: Icons.home_outlined),
                     maxLines: 2,
@@ -502,7 +503,7 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _zipCodeController,
-                    style: TextStyle(color: AppTheme.textPrimary),
+                    style: const TextStyle(color: AppTheme.textPrimary),
                     keyboardType: TextInputType.number,
                     decoration: _buildInputDecoration('ZIP / Postal Code',
                         prefixIcon: Icons.pin_drop_outlined),
@@ -515,7 +516,7 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
                 title: 'Donation Preferences',
                 icon: Icons.set_meal_outlined,
                 children: [
-                  Text(
+                  const Text(
                     'What do you usually donate?',
                     style: TextStyle(
                       color: AppTheme.textSecondary,
@@ -558,7 +559,7 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
                     }).toList(),
                   ),
                   const SizedBox(height: 20),
-                  Divider(color: AppTheme.surfaceGlassBorder),
+                  const Divider(color: AppTheme.surfaceGlassBorder),
                   _buildCheckboxTile(
                     'Pickup Available',
                     Icons.local_shipping_outlined,
@@ -584,12 +585,12 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('Already have an account?',
+                  const Text('Already have an account?',
                       style: TextStyle(color: AppTheme.textSecondary)),
                   TextButton(
                     onPressed: () => Navigator.pushReplacementNamed(
                         context, AppRouter.login),
-                    child: Text(
+                    child: const Text(
                       'Sign In',
                       style: TextStyle(
                         color: AppTheme.accentTeal,
@@ -637,7 +638,7 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
             const SizedBox(width: 12),
             Text(
               title,
-              style: TextStyle(
+              style: const TextStyle(
                 color: AppTheme.textPrimary,
                 fontSize: 15,
               ),
@@ -654,10 +655,10 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: AppTheme.accentTeal.withOpacity(0.2),
+            color: AppTheme.accentTeal.withValues(alpha: 0.2),
             shape: BoxShape.circle,
           ),
-          child: Icon(
+          child: const Icon(
             Icons.volunteer_activism_rounded,
             size: 40,
             color: AppTheme.accentTeal,
@@ -665,7 +666,7 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
         ),
         const SizedBox(height: 16),
         ShaderMask(
-          shaderCallback: (bounds) => LinearGradient(
+          shaderCallback: (bounds) => const LinearGradient(
             colors: [AppTheme.textPrimary, AppTheme.accentCyan],
           ).createShader(bounds),
           child: Text(
@@ -677,7 +678,7 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
           ),
         ),
         const SizedBox(height: 8),
-        Text(
+        const Text(
           'Register as a Donor to stop food waste.',
           style: TextStyle(color: AppTheme.textSecondary, fontSize: 15),
         ),
@@ -700,7 +701,7 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: AppTheme.accentTeal.withOpacity(0.2),
+                  color: AppTheme.accentTeal.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(icon, color: AppTheme.accentTeal, size: 22),
@@ -708,7 +709,7 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
               const SizedBox(width: 12),
               Text(
                 title,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.bold,
                   color: AppTheme.textPrimary,
@@ -717,7 +718,7 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
             ],
           ),
           const SizedBox(height: 20),
-          Divider(color: AppTheme.surfaceGlassBorder),
+          const Divider(color: AppTheme.surfaceGlassBorder),
           const SizedBox(height: 16),
           ...children,
         ],

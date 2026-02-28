@@ -12,7 +12,7 @@ import '../../widgets/glass_widgets.dart';
 import '../../utils/app_theme.dart';
 
 class NGODashboard extends StatefulWidget {
-  const NGODashboard({Key? key}) : super(key: key);
+  const NGODashboard({super.key});
 
   @override
   State<NGODashboard> createState() => _NGODashboardState();
@@ -259,7 +259,7 @@ class _NGODashboardState extends State<NGODashboard>
 
   Widget _buildAvailableDonationsTab(
       NGOProvider ngoProvider, AuthProvider authProvider) {
-    return AvailableDonationsScreen();
+    return const AvailableDonationsScreen();
   }
 
   Widget _buildQueriesTab(NGOProvider ngoProvider, AuthProvider authProvider) {
@@ -307,7 +307,7 @@ class _NGODashboardState extends State<NGODashboard>
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(icon, color: color),
@@ -327,7 +327,7 @@ class _NGODashboardState extends State<NGODashboard>
           const SizedBox(height: 4),
           Text(
             title,
-            style: TextStyle(
+            style: const TextStyle(
               color: AppTheme.textSecondary,
               fontSize: 14,
             ),
@@ -345,7 +345,7 @@ class _NGODashboardState extends State<NGODashboard>
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: _getStatusColor(request.status).withOpacity(0.1),
+            color: _getStatusColor(request.status).withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
@@ -356,7 +356,7 @@ class _NGODashboardState extends State<NGODashboard>
         title: request.title,
         subtitle:
             '${request.requiredQuantity} ${request.unit} • ${request.expectedBeneficiaries} beneficiaries\nStatus: ${request.status.name.toUpperCase()}',
-        trailing: Icon(Icons.arrow_forward_ios_rounded,
+        trailing: const Icon(Icons.arrow_forward_ios_rounded,
             color: AppTheme.textMuted, size: 16),
         onTap: () => Navigator.push(
           context,

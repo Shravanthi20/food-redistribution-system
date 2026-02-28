@@ -1,15 +1,11 @@
 #!/usr/bin/env dart
 
-/// Quick test script for matching algorithms
-/// Run with: dart run test_matching.dart
-
-import 'dart:io';
-import 'dart:convert';
 import 'dart:math';
+import 'package:flutter/foundation.dart';
 
 void main() async {
-  print('🍽️  Food Redistribution App - Matching Algorithm Test');
-  print('=' * 50);
+  debugPrint('🍽️  Food Redistribution App - Matching Algorithm Test');
+  debugPrint('=' * 50);
 
   // Test Data Setup
   final testDonation = {
@@ -19,7 +15,7 @@ void main() async {
     'foodTypes': ['cooked', 'packaged'],
     'location': {'latitude': 40.7128, 'longitude': -74.0060},
     'isUrgent': true,
-    'expiresAt': DateTime.now().add(Duration(hours: 4)).toIso8601String(),
+    'expiresAt': DateTime.now().add(const Duration(hours: 4)).toIso8601String(),
   };
 
   final testNGOs = [
@@ -49,47 +45,50 @@ void main() async {
     }
   ];
 
-  print('📍 Test Donation: ${testDonation['title']}');
-  print('   Quantity: ${testDonation['quantity']} servings');
-  print('   Food Types: ${testDonation['foodTypes']}');
-  print('   Expires: ${testDonation['expiresAt']}');
-  print('');
+  debugPrint('📍 Test Donation: ${testDonation['title']}');
+  debugPrint('   Quantity: ${testDonation['quantity']} servings');
+  debugPrint('   Food Types: ${testDonation['foodTypes']}');
+  debugPrint('   Expires: ${testDonation['expiresAt']}');
+  debugPrint('');
 
-  print('🏢 Available NGOs:');
+  debugPrint('🏢 Available NGOs:');
   for (int i = 0; i < testNGOs.length; i++) {
     final ngo = testNGOs[i];
-    print('   ${i + 1}. ${ngo['organizationName']}');
-    print('      Serves: ${ngo['servingPopulation']}');
-    print('      Capacity: ${ngo['capacity']} people');
-    print('      Preferred: ${ngo['preferredFoodTypes']}');
+    debugPrint('   ${i + 1}. ${ngo['organizationName']}');
+    debugPrint('      Serves: ${ngo['servingPopulation']}');
+    debugPrint('      Capacity: ${ngo['capacity']} people');
+    debugPrint('      Preferred: ${ngo['preferredFoodTypes']}');
   }
-  print('');
+  debugPrint('');
 
   // Simulate Matching Algorithm
-  print('🎯 Running Matching Algorithm...');
+  debugPrint('🎯 Running Matching Algorithm...');
   final matches = _simulateMatching(testDonation, testNGOs);
 
-  print('📊 Matching Results:');
-  print('=' * 30);
+  debugPrint('📊 Matching Results:');
+  debugPrint('=' * 30);
 
   for (int i = 0; i < matches.length; i++) {
     final match = matches[i];
-    print(
+    debugPrint(
         'Rank ${i + 1}: ${match['ngoName']} (Score: ${match['score'].toStringAsFixed(2)})');
-    print('   Distance: ${match['distance'].toStringAsFixed(1)}km');
-    print('   Food Match: ${match['foodCompatibility'].toStringAsFixed(2)}');
-    print('   Capacity Match: ${match['capacityScore'].toStringAsFixed(2)}');
-    print(
+    debugPrint('   Distance: ${match['distance'].toStringAsFixed(1)}km');
+    debugPrint(
+        '   Food Match: ${match['foodCompatibility'].toStringAsFixed(2)}');
+    debugPrint(
+        '   Capacity Match: ${match['capacityScore'].toStringAsFixed(2)}');
+    debugPrint(
         '   Population Match: ${match['populationScore'].toStringAsFixed(2)}');
-    print('');
+    debugPrint('');
   }
 
-  print('✅ Algorithm Testing Complete!');
-  print('💡 The matching system is working with weighted scoring based on:');
-  print('   • Geographic proximity (30%)');
-  print('   • Food type compatibility (25%)');
-  print('   • NGO capacity (25%)');
-  print('   • Population served compatibility (20%)');
+  debugPrint('✅ Algorithm Testing Complete!');
+  debugPrint(
+      '💡 The matching system is working with weighted scoring based on:');
+  debugPrint('   • Geographic proximity (30%)');
+  debugPrint('   • Food type compatibility (25%)');
+  debugPrint('   • NGO capacity (25%)');
+  debugPrint('   • Population served compatibility (20%)');
 }
 
 List<Map<String, dynamic>> _simulateMatching(
@@ -183,12 +182,15 @@ double _calculatePopulationScore(
     List<String> foodTypes, List<String> populations) {
   double score = 0.6; // Base score
 
-  if (populations.contains('Children') && foodTypes.contains('fruits'))
+  if (populations.contains('Children') && foodTypes.contains('fruits')) {
     score += 0.2;
-  if (populations.contains('Homeless') && foodTypes.contains('cooked'))
+  }
+  if (populations.contains('Homeless') && foodTypes.contains('cooked')) {
     score += 0.3;
-  if (populations.contains('Elderly') && foodTypes.contains('cooked'))
+  }
+  if (populations.contains('Elderly') && foodTypes.contains('cooked')) {
     score += 0.2;
+  }
 
   return score.clamp(0.0, 1.0);
 }

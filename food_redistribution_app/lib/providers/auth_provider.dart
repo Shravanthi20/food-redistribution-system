@@ -1,5 +1,4 @@
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart'; // [NEW]
@@ -40,7 +39,7 @@ class AuthProvider extends ChangeNotifier {
         try {
           _appUser = await _authService.getCurrentAppUser();
         } catch (e) {
-          print('Error getting app user: $e');
+          debugPrint('Error getting app user: $e');
           _appUser = null;
         }
       } else {
@@ -228,7 +227,7 @@ class AuthProvider extends ChangeNotifier {
     } catch (e) {
       _errorMessage = e.toString();
       notifyListeners();
-      throw e;
+      rethrow;
     } finally {
       _setLoading(false);
     }
@@ -283,7 +282,7 @@ class AuthProvider extends ChangeNotifier {
       _appUser = await _authService.getCurrentAppUser();
       notifyListeners();
     } catch (e) {
-      print('Error refreshing user: $e');
+      debugPrint('Error refreshing user: $e');
     }
   }
 
@@ -323,7 +322,7 @@ class AuthProvider extends ChangeNotifier {
       return await _verificationService
           .checkVerificationStatus(_firebaseUser!.uid);
     } catch (e) {
-      print('Error checking verification status: $e');
+      debugPrint('Error checking verification status: $e');
       return null;
     }
   }
@@ -354,7 +353,7 @@ class AuthProvider extends ChangeNotifier {
 
       return false;
     } catch (e) {
-      print('Error checking and updating verification status: $e');
+      debugPrint('Error checking and updating verification status: $e');
       return false;
     }
   }

@@ -21,7 +21,7 @@ void main() async {
 }
 
 class FoodRedistributionApp extends StatelessWidget {
-  const FoodRedistributionApp({Key? key}) : super(key: key);
+  const FoodRedistributionApp({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -4,7 +4,6 @@ import '../models/food_donation.dart';
 import '../models/food_request.dart';
 import '../models/ngo_profile.dart';
 import '../models/matching.dart';
-import '../models/enums.dart';
 import '../services/firestore_service.dart';
 import '../services/location_service.dart';
 import '../services/notification_service.dart';
@@ -126,7 +125,7 @@ class FoodDonationMatchingService {
   }) async {
     try {
       // Calculate distance score
-      final distance = await _locationService.calculateDistance(
+      final distance = _locationService.calculateDistance(
         donation.pickupLocation['latitude']?.toDouble() ?? 0.0,
         donation.pickupLocation['longitude']?.toDouble() ?? 0.0,
         ngo.location['latitude']?.toDouble() ?? 0.0,
@@ -201,7 +200,7 @@ class FoodDonationMatchingService {
   /// Calculate capacity compatibility score
   double _calculateCapacityScore(FoodDonation donation, NGOProfile ngo) {
     final donationQuantity = donation.quantity.toDouble();
-    final ngoCapacity = (ngo.capacity ?? 100).toDouble(); // Default capacity
+    final ngoCapacity = (ngo.capacity).toDouble(); // Default capacity
 
     // Prevent division by zero
     if (ngoCapacity <= 0) return 0.5;
@@ -350,7 +349,6 @@ class FoodDonationMatchingService {
   /// Get donation details by ID
   Future<FoodDonation?> _getDonation(String donationId) async {
     final doc = await _firestoreService.get('food_donations', donationId);
-    if (doc == null) return null;
     return FoodDonation.fromFirestore(doc);
   }
 
@@ -388,7 +386,7 @@ class FoodDonationMatchingService {
           final ngoLng = ngo.location['longitude']!.toDouble();
 
           // Calculate distance
-          final distance = await _locationService.calculateDistance(
+          final distance = _locationService.calculateDistance(
             donationLat,
             donationLng,
             ngoLat,
@@ -856,7 +854,7 @@ class EnhancedMatchingService {
 
       // Distance score (20%)
       try {
-        final distance = await _locationService.calculateDistance(
+        final distance = _locationService.calculateDistance(
           donation.pickupLocation['latitude']?.toDouble() ?? 0.0,
           donation.pickupLocation['longitude']?.toDouble() ?? 0.0,
           request.deliveryLocation['latitude']?.toDouble() ?? 0.0,
@@ -962,13 +960,13 @@ class EnhancedMatchingService {
   bool _isDietaryCompatible(String restriction, FoodDonation donation) {
     switch (restriction.toLowerCase()) {
       case 'vegetarian':
-        return donation.isVegetarian ?? false;
+        return donation.isVegetarian;
       case 'vegan':
-        return donation.isVegan ?? false;
+        return donation.isVegan;
       case 'gluten-free':
         return false; // Not supported in current model
       case 'halal':
-        return donation.isHalal ?? false;
+        return donation.isHalal;
       case 'kosher':
         return false; // Not supported in current model
       default:
@@ -1025,13 +1023,11 @@ class EnhancedMatchingService {
   /// Helper methods for the enhanced matching
   Future<FoodRequest?> _getRequest(String requestId) async {
     final doc = await _firestoreService.get('food_requests', requestId);
-    if (doc == null) return null;
     return FoodRequest.fromMap(doc.data()! as Map<String, dynamic>);
   }
 
   Future<FoodDonation?> _getDonation(String donationId) async {
     final doc = await _firestoreService.get('food_donations', donationId);
-    if (doc == null) return null;
     return FoodDonation.fromFirestore(doc);
   }
 
@@ -1052,7 +1048,7 @@ class EnhancedMatchingService {
       final donation = FoodDonation.fromFirestore(doc);
 
       // Check if donation is within range
-      final distance = await _locationService.calculateDistance(
+      final distance = _locationService.calculateDistance(
         requestLocation['latitude']?.toDouble() ?? 0.0,
         requestLocation['longitude']?.toDouble() ?? 0.0,
         donation.pickupLocation['latitude']?.toDouble() ?? 0.0,
@@ -1074,7 +1070,7 @@ class EnhancedMatchingService {
   }) async {
     try {
       // Calculate distance score
-      final distance = await _locationService.calculateDistance(
+      final distance = _locationService.calculateDistance(
         request.deliveryLocation['latitude']?.toDouble() ?? 0.0,
         request.deliveryLocation['longitude']?.toDouble() ?? 0.0,
         donation.pickupLocation['latitude']?.toDouble() ?? 0.0,

@@ -4,6 +4,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'dart:io';
 import '../models/enums.dart';
 import '../config/firebase_schema.dart';
+import 'package:flutter/foundation.dart';
 
 export '../models/enums.dart' show AuditEventType, AuditRiskLevel;
 
@@ -53,7 +54,7 @@ class AuditService {
         await _createSecurityAlert(auditLog);
       }
     } catch (e) {
-      print('Error logging audit event: $e');
+      debugPrint('Error logging audit event: $e');
       // Don't throw - audit logging should not break app functionality
     }
   }
@@ -228,7 +229,7 @@ class AuditService {
 
       // Filter by risk level if specified (Firestore doesn't support enum ordering)
       if (minRiskLevel != null) {
-        final riskLevels = AuditRiskLevel.values;
+        const riskLevels = AuditRiskLevel.values;
         final minIndex = riskLevels.indexOf(minRiskLevel);
 
         logs = logs.where((log) {
@@ -241,7 +242,7 @@ class AuditService {
 
       return logs;
     } catch (e) {
-      print('Error getting audit logs: $e');
+      debugPrint('Error getting audit logs: $e');
       return [];
     }
   }
@@ -291,7 +292,7 @@ class AuditService {
         'generatedAt': DateTime.now().toIso8601String(),
       };
     } catch (e) {
-      print('Error getting audit statistics: $e');
+      debugPrint('Error getting audit statistics: $e');
       return {};
     }
   }
@@ -312,7 +313,7 @@ class AuditService {
         'createdAt': Timestamp.now(),
       });
     } catch (e) {
-      print('Error creating security alert: $e');
+      debugPrint('Error creating security alert: $e');
     }
   }
 
@@ -381,10 +382,10 @@ class AuditService {
         }
         await batch.commit();
 
-        print('Cleaned up ${oldLogsQuery.docs.length} old audit logs');
+        debugPrint('Cleaned up ${oldLogsQuery.docs.length} old audit logs');
       }
     } catch (e) {
-      print('Error cleaning up old audit logs: $e');
+      debugPrint('Error cleaning up old audit logs: $e');
     }
   }
 }

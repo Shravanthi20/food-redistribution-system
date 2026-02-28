@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 // Collect data from all deliveries to see patterns and predict trends
@@ -31,7 +32,7 @@ class AnalyticsAggregationService {
 
     double mean = values.reduce((a, b) => a + b) / values.length;
     double sumSquares =
-        values.fold(0.0, (sum, val) => sum + ((val - mean) * (val - mean)));
+        values.fold(0.0, (total, val) => total + ((val - mean) * (val - mean)));
     return sumSquares / (values.length - 1);
   }
 
@@ -117,7 +118,7 @@ class AnalyticsAggregationService {
             total > 0 ? (completed / total * 100).toStringAsFixed(2) : 0.0,
       };
     } catch (e) {
-      print('Error getting volunteer stats: $e');
+      debugPrint('Error getting volunteer stats: $e');
       return {};
     }
   }
@@ -170,7 +171,7 @@ class AnalyticsAggregationService {
         'totalDeliveries': snapshot.docs.length,
       };
     } catch (e) {
-      print('Error getting duration history: $e');
+      debugPrint('Error getting duration history: $e');
       return {};
     }
   }
@@ -210,7 +211,7 @@ class AnalyticsAggregationService {
         'totalWeightDistributed': weightDistributed.toStringAsFixed(2),
       };
     } catch (e) {
-      print('Error getting NGO stats: $e');
+      debugPrint('Error getting NGO stats: $e');
       return {};
     }
   }
@@ -240,7 +241,7 @@ class AnalyticsAggregationService {
         }
       }
 
-      final performanceIndex = snapshot.docs.length > 0
+      final performanceIndex = snapshot.docs.isNotEmpty
           ? (onTimeDeliveries / snapshot.docs.length * 100)
           : 0;
 
@@ -250,7 +251,7 @@ class AnalyticsAggregationService {
         'performanceIndex': performanceIndex.toStringAsFixed(2),
       };
     } catch (e) {
-      print('Error getting regional stats: $e');
+      debugPrint('Error getting regional stats: $e');
       return {};
     }
   }
@@ -278,7 +279,7 @@ class AnalyticsAggregationService {
         'confidence': 0.85,
       };
     } catch (e) {
-      print('Error predicting demand: $e');
+      debugPrint('Error predicting demand: $e');
       return {};
     }
   }
@@ -313,7 +314,7 @@ class AnalyticsAggregationService {
         'totalDonations': snapshot.docs.length,
       };
     } catch (e) {
-      print('Error getting surplus trends: $e');
+      debugPrint('Error getting surplus trends: $e');
       return {};
     }
   }
@@ -353,7 +354,7 @@ class AnalyticsAggregationService {
         'averageDelay': 0,
       };
     } catch (e) {
-      print('Error getting risk indicators: $e');
+      debugPrint('Error getting risk indicators: $e');
       return {};
     }
   }
@@ -452,7 +453,7 @@ class AnalyticsAggregationService {
             (_calculateStdDev(donationTrend) * 100).toStringAsFixed(2),
       };
     } catch (e) {
-      print('Error predicting surplus: $e');
+      debugPrint('Error predicting surplus: $e');
       return {};
     }
   }
@@ -524,8 +525,7 @@ class AnalyticsAggregationService {
         final availHours = doc.data()['availabilityHours'] as List?;
         if (availHours != null) {
           for (var slot in availHours) {
-            availabilitySlots[slot as String] =
-                (availabilitySlots[slot as String] ?? 0) + 1;
+            availabilitySlots[slot] = (availabilitySlots[slot] ?? 0) + 1;
           }
         }
       }
@@ -544,12 +544,12 @@ class AnalyticsAggregationService {
         'confidence': 0.85,
         'availabilityDistribution': availabilitySlots,
         'criticalTimeSlots': availabilitySlots.entries
-            .where((e) => (e.value as int) < 3)
+            .where((e) => (e.value) < 3)
             .map((e) => e.key)
             .toList(),
       };
     } catch (e) {
-      print('Error predicting volunteer demand: $e');
+      debugPrint('Error predicting volunteer demand: $e');
       return {};
     }
   }
@@ -616,7 +616,7 @@ class AnalyticsAggregationService {
         'pendingDonations': totalDonations,
       };
     } catch (e) {
-      print('Error calculating supply-demand gap: $e');
+      debugPrint('Error calculating supply-demand gap: $e');
       return {};
     }
   }
@@ -679,7 +679,7 @@ class AnalyticsAggregationService {
         'basedOnDeliveries': durations.length,
       };
     } catch (e) {
-      print('Error predicting delivery time: $e');
+      debugPrint('Error predicting delivery time: $e');
       return {};
     }
   }
@@ -728,7 +728,7 @@ class AnalyticsAggregationService {
         'totalRequests': snapshot.docs.length,
       };
     } catch (e) {
-      print('Error getting NGO demand trends: $e');
+      debugPrint('Error getting NGO demand trends: $e');
       return {};
     }
   }
@@ -815,7 +815,7 @@ class AnalyticsAggregationService {
         'volatility': (_calculateStdDev(demandTrend) * 100).toStringAsFixed(2),
       };
     } catch (e) {
-      print('Error predicting NGO demand: $e');
+      debugPrint('Error predicting NGO demand: $e');
       return {};
     }
   }
@@ -824,7 +824,7 @@ class AnalyticsAggregationService {
   Future<Map<String, dynamic>> generateSummaryReport() async {
     try {
       // Combine high-level metrics across all systems into a single summary report
-      final recentDays = 30; // standard monthly report
+      const recentDays = 30; // standard monthly report
 
       final surplusTrends = await getSurplusTrends(days: recentDays);
       final volunteerDemand =
@@ -855,7 +855,7 @@ class AnalyticsAggregationService {
         'highRiskRegions': highRiskRegions,
       };
     } catch (e) {
-      print('Error generating summary report: $e');
+      debugPrint('Error generating summary report: $e');
       return {};
     }
   }

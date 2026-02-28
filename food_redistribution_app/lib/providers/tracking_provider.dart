@@ -3,14 +3,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/tracking/location_tracking_model.dart';
 import '../models/enums.dart';
 import '../services/tracking/notification_handler.dart';
-import '../services/tracking/delay_detection_service.dart';
-import '../services/tracking/analytics_aggregation_service.dart';
 
 // Keep track of all deliveries happening right now
 class TrackingProvider extends ChangeNotifier {
-  late final DelayDetectionService _delayDetectionService;
-  final AnalyticsAggregationService _analyticsService =
-      AnalyticsAggregationService();
   late final FirebaseFirestore _firestore;
 
   TrackingProvider({
@@ -18,10 +13,6 @@ class TrackingProvider extends ChangeNotifier {
     NotificationHandler? notificationHandler,
   }) {
     _firestore = firestore ?? FirebaseFirestore.instance;
-    _delayDetectionService = DelayDetectionService(
-      notificationHandler: notificationHandler ?? NotificationHandler(),
-      firestore: _firestore,
-    );
   }
 
   // Tracking state

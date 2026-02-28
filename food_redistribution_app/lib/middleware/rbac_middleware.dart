@@ -6,7 +6,6 @@ import '../services/user_service.dart';
 // RBAC Middleware for protecting routes and widgets
 class RBACMiddleware {
   static final AuthService _authService = AuthService();
-
   // Route guard - check if user can access route
   static Future<bool> canAccessRoute(
       String routeName, UserRole? userRole) async {
@@ -57,12 +56,12 @@ class ProtectedRoute extends StatefulWidget {
   final String? routeName;
 
   const ProtectedRoute({
-    Key? key,
+    super.key,
     required this.child,
     required this.allowedRoles,
     this.unauthorizedWidget,
     this.routeName,
-  }) : super(key: key);
+  });
 
   @override
   State<ProtectedRoute> createState() => _ProtectedRouteState();
@@ -111,7 +110,7 @@ class _ProtectedRouteState extends State<ProtectedRoute> {
         currentUser = user;
       });
     } catch (e) {
-      print('Error checking authorization: $e');
+      debugPrint('Error checking authorization: $e');
       setState(() {
         isLoading = false;
         isAuthorized = false;
@@ -147,10 +146,10 @@ class UnauthorizedWidget extends StatelessWidget {
   final List<UserRole>? requiredRoles;
 
   const UnauthorizedWidget({
-    Key? key,
+    super.key,
     this.currentUser,
     this.requiredRoles,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -236,11 +235,11 @@ class RoleBasedWidget extends StatelessWidget {
   final Widget? fallback;
 
   const RoleBasedWidget({
-    Key? key,
+    super.key,
     required this.allowedRoles,
     required this.child,
     this.fallback,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

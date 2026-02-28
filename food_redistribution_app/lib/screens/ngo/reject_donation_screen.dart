@@ -7,7 +7,7 @@ import '../../models/food_donation.dart';
 class RejectDonationScreen extends StatefulWidget {
   final FoodDonation? donation;
 
-  const RejectDonationScreen({Key? key, this.donation}) : super(key: key);
+  const RejectDonationScreen({super.key, this.donation});
 
   @override
   State<RejectDonationScreen> createState() => _RejectDonationScreenState();
@@ -162,24 +162,29 @@ class _RejectDonationScreenState extends State<RejectDonationScreen> {
                     // Common Reasons
                     Column(
                       children: _commonReasons.map((reason) {
-                        return RadioListTile<String>(
+                        final isSelected = _selectedReason == reason;
+                        return ListTile(
                           title: Text(
                             reason,
                             style: const TextStyle(fontSize: 14),
                           ),
-                          value: reason,
-                          groupValue: _selectedReason,
-                          onChanged: (value) {
+                          leading: Icon(
+                            isSelected
+                                ? Icons.radio_button_checked
+                                : Icons.radio_button_unchecked,
+                            color:
+                                isSelected ? Colors.red.shade700 : Colors.grey,
+                          ),
+                          onTap: () {
                             setState(() {
-                              _selectedReason = value;
-                              if (value != 'Other (specify below)') {
-                                _reasonController.text = value ?? '';
+                              _selectedReason = reason;
+                              if (reason != 'Other (specify below)') {
+                                _reasonController.text = reason;
                               } else {
                                 _reasonController.clear();
                               }
                             });
                           },
-                          activeColor: Colors.red.shade700,
                         );
                       }).toList(),
                     ),

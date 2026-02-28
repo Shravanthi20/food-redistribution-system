@@ -1,3 +1,5 @@
+// ignore_for_file: subtype_of_sealed_class, must_be_immutable
+
 import 'package:mockito/mockito.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:food_redistribution_app/services/firestore_service.dart';
@@ -5,7 +7,6 @@ import 'package:food_redistribution_app/services/location_service.dart';
 import 'package:food_redistribution_app/services/real_time_tracking_service.dart';
 import 'package:food_redistribution_app/services/tracking_service.dart';
 import 'package:food_redistribution_app/services/tracking/notification_handler.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 
 // Mock classes for testing
 class MockFirestoreService extends Mock implements FirestoreService {}
@@ -30,7 +31,9 @@ class FakeFirebaseFirestore extends Fake implements FirebaseFirestore {
 
 class FakeCollectionReference extends Fake
     implements CollectionReference<Map<String, dynamic>> {
+  @override
   final String path;
+  @override
   final FakeFirebaseFirestore firestore;
 
   FakeCollectionReference(this.path, this.firestore);
@@ -62,6 +65,7 @@ class FakeDocumentReference extends Fake
     implements DocumentReference<Map<String, dynamic>> {
   final String collectionPath;
   final String docId;
+  @override
   final FakeFirebaseFirestore firestore;
 
   FakeDocumentReference(this.collectionPath, this.docId, this.firestore);
@@ -112,6 +116,7 @@ class FakeDocumentSnapshot extends Fake
 
 class FakeQuery extends Fake implements Query<Map<String, dynamic>> {
   final String path;
+  @override
   final FakeFirebaseFirestore firestore;
 
   FakeQuery(this.path, this.firestore);
@@ -324,7 +329,7 @@ class TrackingTestScenarios {
     return {
       'volunteerId': 'scenario_volunteer_offline',
       'taskId': 'scenario_task_offline',
-      'offlineDuration': Duration(minutes: 15),
+      'offlineDuration': const Duration(minutes: 15),
       'updatesWhileOffline': 6,
       'syncTimeTakenSeconds': 3,
       'expectedSyncedUpdates': 6,

@@ -7,7 +7,7 @@ void main() {
     testWidgets('should display app title and subtitle',
         (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: WelcomeScreen(),
         ),
       );
@@ -24,7 +24,7 @@ void main() {
     testWidgets('should display all role selection cards',
         (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: WelcomeScreen(),
         ),
       );
@@ -43,7 +43,7 @@ void main() {
     testWidgets('should display role descriptions',
         (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: WelcomeScreen(),
         ),
       );
@@ -64,7 +64,7 @@ void main() {
 
     testWidgets('should display app logo', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: WelcomeScreen(),
         ),
       );
@@ -76,7 +76,7 @@ void main() {
     testWidgets('should display call-to-action buttons',
         (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: WelcomeScreen(),
         ),
       );

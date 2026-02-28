@@ -1,20 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:geolocator/geolocator.dart';
 import '../../services/dispatch_service.dart';
 import '../../services/real_time_tracking_service.dart';
 import '../../services/route_optimization_service.dart';
 // import '../../services/matching_service.dart';
-import '../../providers/auth_provider.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../widgets/loading_overlay.dart';
-import '../../models/enums.dart';
-import '../../models/dispatch.dart';
 import '../../models/matching.dart';
 
 class DeliveryCoordinationScreen extends StatefulWidget {
+  const DeliveryCoordinationScreen({super.key});
+
   @override
-  _DeliveryCoordinationScreenState createState() =>
+  State<DeliveryCoordinationScreen> createState() =>
       _DeliveryCoordinationScreenState();
 }
 
@@ -28,12 +25,11 @@ class _DeliveryCoordinationScreenState
   late final RouteOptimizationService _routeService;
   // late FoodDonationMatchingService _matchingService;
 
-  List<DeliveryTask> _activeTasks = [];
+  final List<DeliveryTask> _activeTasks = [];
   // ignore: unused_field
-  List<MatchingResult> _availableMatches = [];
+  final List<MatchingResult> _availableMatches = [];
   DeliveryTask? _selectedTask;
   bool _isLoading = false;
-  String _searchQuery = '';
 
   // TextControllers for create task dialog
   final _donationIdController = TextEditingController();
@@ -56,7 +52,7 @@ class _DeliveryCoordinationScreenState
     setState(() => _isLoading = true);
     try {
       // Load active delivery tasks
-      await Future.delayed(Duration(seconds: 1)); // Simulate loading
+      await Future.delayed(const Duration(seconds: 1)); // Simulate loading
       // _activeTasks = await _dispatchService.getActiveTasks();
     } finally {
       setState(() => _isLoading = false);
@@ -68,18 +64,18 @@ class _DeliveryCoordinationScreenState
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: Text('Delivery Coordination',
+        title: const Text('Delivery Coordination',
             style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black87,
         elevation: 0,
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh),
             onPressed: _loadActiveTasks,
           ),
           IconButton(
-            icon: Icon(Icons.settings),
+            icon: const Icon(Icons.settings),
             onPressed: () => _showSettingsDialog(),
           ),
         ],
@@ -104,8 +100,8 @@ class _DeliveryCoordinationScreenState
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _createNewDeliveryTask(),
-        icon: Icon(Icons.add),
-        label: Text('New Task'),
+        icon: const Icon(Icons.add),
+        label: const Text('New Task'),
         backgroundColor: Theme.of(context).primaryColor,
       ),
     );
@@ -113,7 +109,7 @@ class _DeliveryCoordinationScreenState
 
   Widget _buildSearchAndFilters() {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       color: Colors.white,
       child: Row(
         children: [
@@ -122,22 +118,22 @@ class _DeliveryCoordinationScreenState
             child: TextField(
               decoration: InputDecoration(
                 hintText: 'Search tasks, volunteers, or locations...',
-                prefixIcon: Icon(Icons.search),
+                prefixIcon: const Icon(Icons.search),
                 border:
                     OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                 filled: true,
                 fillColor: Colors.grey[50],
               ),
-              onChanged: (value) => setState(() => _searchQuery = value),
+              onChanged: (value) {},
             ),
           ),
-          SizedBox(width: 12),
+          const SizedBox(width: 12),
           _buildFilterChip('All Tasks', true),
-          SizedBox(width: 8),
+          const SizedBox(width: 8),
           _buildFilterChip('Urgent', false),
-          SizedBox(width: 8),
+          const SizedBox(width: 8),
           _buildFilterChip('In Transit', false),
-          SizedBox(width: 8),
+          const SizedBox(width: 8),
           _buildFilterChip('Delayed', false),
         ],
       ),
@@ -152,23 +148,23 @@ class _DeliveryCoordinationScreenState
         // Implement filtering logic
       },
       backgroundColor: Colors.grey[100],
-      selectedColor: Theme.of(context).primaryColor.withOpacity(0.2),
+      selectedColor: Theme.of(context).primaryColor.withValues(alpha: 0.2),
     );
   }
 
   Widget _buildTaskSummary() {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       color: Colors.white,
       child: Row(
         children: [
           _buildSummaryCard(
               'Active Tasks', '${_activeTasks.length}', Colors.blue),
-          SizedBox(width: 12),
+          const SizedBox(width: 12),
           _buildSummaryCard('In Transit', '3', Colors.orange),
-          SizedBox(width: 12),
+          const SizedBox(width: 12),
           _buildSummaryCard('Completed Today', '12', Colors.green),
-          SizedBox(width: 12),
+          const SizedBox(width: 12),
           _buildSummaryCard('Delayed', '1', Colors.red),
         ],
       ),
@@ -178,18 +174,18 @@ class _DeliveryCoordinationScreenState
   Widget _buildSummaryCard(String title, String value, Color color) {
     return Expanded(
       child: Container(
-        padding: EdgeInsets.all(12),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: color.withOpacity(0.3)),
+          border: Border.all(color: color.withValues(alpha: 0.3)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(title,
                 style: TextStyle(color: Colors.grey[600], fontSize: 12)),
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             Text(value,
                 style: TextStyle(
                     color: color, fontSize: 24, fontWeight: FontWeight.bold)),
@@ -205,7 +201,7 @@ class _DeliveryCoordinationScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
+          const Padding(
             padding: EdgeInsets.all(16),
             child: Text('Active Tasks',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
@@ -265,10 +261,11 @@ class _DeliveryCoordinationScreenState
     final isSelected = _selectedTask?.id == task['id'];
 
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color:
-            isSelected ? Theme.of(context).primaryColor.withOpacity(0.1) : null,
+        color: isSelected
+            ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
+            : null,
         borderRadius: BorderRadius.circular(8),
         border: isSelected
             ? Border.all(color: Theme.of(context).primaryColor)
@@ -287,19 +284,19 @@ class _DeliveryCoordinationScreenState
           ),
         ),
         title: Text(task['id'] as String,
-            style: TextStyle(fontWeight: FontWeight.bold)),
+            style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('${task['donor']} → ${task['ngo']}'),
-            SizedBox(height: 2),
+            const SizedBox(height: 2),
             Row(
               children: [
                 Icon(Icons.person, size: 14, color: Colors.grey[600]),
-                SizedBox(width: 4),
+                const SizedBox(width: 4),
                 Text(task['volunteer'] as String,
-                    style: TextStyle(fontSize: 12)),
-                Spacer(),
+                    style: const TextStyle(fontSize: 12)),
+                const Spacer(),
                 Text(task['distance'] as String,
                     style: TextStyle(fontSize: 12, color: Colors.grey[600])),
               ],
@@ -310,9 +307,9 @@ class _DeliveryCoordinationScreenState
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: (task['color'] as Color).withOpacity(0.1),
+                color: (task['color'] as Color).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
@@ -323,7 +320,7 @@ class _DeliveryCoordinationScreenState
                     fontWeight: FontWeight.bold),
               ),
             ),
-            SizedBox(height: 2),
+            const SizedBox(height: 2),
             Text('ETA: ${task['eta']}',
                 style: TextStyle(fontSize: 10, color: Colors.grey[600])),
           ],
@@ -341,7 +338,7 @@ class _DeliveryCoordinationScreenState
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(Icons.assignment, size: 64, color: Colors.grey[400]),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Text('Select a task to view details',
                   style: TextStyle(color: Colors.grey[600])),
             ],
@@ -352,18 +349,18 @@ class _DeliveryCoordinationScreenState
 
     return Container(
       color: Colors.white,
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildTaskHeader(),
-          Divider(height: 32),
+          const Divider(height: 32),
           _buildLocationDetails(),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           _buildVolunteerInfo(),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           _buildTrackingMap(),
-          Spacer(),
+          const Spacer(),
           _buildActionButtons(),
         ],
       ),
@@ -376,31 +373,31 @@ class _DeliveryCoordinationScreenState
       children: [
         Row(
           children: [
-            Text('TASK-001',
+            const Text('TASK-001',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-            Spacer(),
+            const Spacer(),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.1),
+                color: Colors.orange.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Text('In Transit',
+              child: const Text('In Transit',
                   style: TextStyle(
                       color: Colors.orange, fontWeight: FontWeight.bold)),
             ),
           ],
         ),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         Text('Food delivery from Central Kitchen to Hope Foundation',
             style: TextStyle(color: Colors.grey[600])),
-        SizedBox(height: 12),
+        const SizedBox(height: 12),
         Row(
           children: [
             _buildInfoChip(Icons.schedule, 'Priority: High', Colors.red),
-            SizedBox(width: 8),
+            const SizedBox(width: 8),
             _buildInfoChip(Icons.route, '2.3 km', Colors.blue),
-            SizedBox(width: 8),
+            const SizedBox(width: 8),
             _buildInfoChip(Icons.timer, 'ETA: 15 min', Colors.green),
           ],
         ),
@@ -410,16 +407,16 @@ class _DeliveryCoordinationScreenState
 
   Widget _buildInfoChip(IconData icon, String text, Color color) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 14, color: color),
-          SizedBox(width: 4),
+          const SizedBox(width: 4),
           Text(text, style: TextStyle(fontSize: 12, color: color)),
         ],
       ),
@@ -430,9 +427,9 @@ class _DeliveryCoordinationScreenState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Route Details',
+        const Text('Route Details',
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        SizedBox(height: 12),
+        const SizedBox(height: 12),
         _buildLocationCard(
           icon: Icons.restaurant,
           title: 'Pickup Location',
@@ -441,7 +438,7 @@ class _DeliveryCoordinationScreenState
           status: 'Completed',
           statusColor: Colors.green,
         ),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         _buildLocationCard(
           icon: Icons.home,
           title: 'Delivery Location',
@@ -463,7 +460,7 @@ class _DeliveryCoordinationScreenState
     required Color statusColor,
   }) {
     return Container(
-      padding: EdgeInsets.all(12),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         border: Border.all(color: Colors.grey[300]!),
         borderRadius: BorderRadius.circular(8),
@@ -471,19 +468,20 @@ class _DeliveryCoordinationScreenState
       child: Row(
         children: [
           Container(
-            padding: EdgeInsets.all(8),
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.1),
+              color: statusColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, color: statusColor),
           ),
-          SizedBox(width: 12),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: TextStyle(fontWeight: FontWeight.bold)),
+                Text(title,
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
                 Text(subtitle, style: TextStyle(color: Colors.grey[600])),
                 Text(address,
                     style: TextStyle(fontSize: 12, color: Colors.grey[500])),
@@ -491,9 +489,9 @@ class _DeliveryCoordinationScreenState
             ),
           ),
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.1),
+              color: statusColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(status,
@@ -511,29 +509,29 @@ class _DeliveryCoordinationScreenState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Volunteer Information',
+        const Text('Volunteer Information',
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        SizedBox(height: 12),
+        const SizedBox(height: 12),
         Container(
-          padding: EdgeInsets.all(12),
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             border: Border.all(color: Colors.grey[300]!),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Row(
             children: [
-              CircleAvatar(
+              const CircleAvatar(
                 backgroundColor: Colors.blue,
                 child: Text('JS', style: TextStyle(color: Colors.white)),
               ),
-              SizedBox(width: 12),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('John Smith',
+                    const Text('John Smith',
                         style: TextStyle(fontWeight: FontWeight.bold)),
-                    Text('4.8 ⭐ • 127 deliveries completed'),
+                    const Text('4.8 ⭐ • 127 deliveries completed'),
                     Text('Phone: +1 (555) 123-4567',
                         style: TextStyle(color: Colors.grey[600])),
                   ],
@@ -542,11 +540,11 @@ class _DeliveryCoordinationScreenState
               Column(
                 children: [
                   IconButton(
-                    icon: Icon(Icons.phone, color: Colors.green),
+                    icon: const Icon(Icons.phone, color: Colors.green),
                     onPressed: () => _callVolunteer(),
                   ),
                   IconButton(
-                    icon: Icon(Icons.message, color: Colors.blue),
+                    icon: const Icon(Icons.message, color: Colors.blue),
                     onPressed: () => _messageVolunteer(),
                   ),
                 ],
@@ -562,9 +560,9 @@ class _DeliveryCoordinationScreenState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Live Tracking',
+        const Text('Live Tracking',
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        SizedBox(height: 12),
+        const SizedBox(height: 12),
         Container(
           height: 200,
           decoration: BoxDecoration(
@@ -577,10 +575,10 @@ class _DeliveryCoordinationScreenState
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(Icons.map, size: 48, color: Colors.grey[400]),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Text('Live Map View',
                     style: TextStyle(color: Colors.grey[600])),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text('Last updated: 2 minutes ago',
                     style: TextStyle(fontSize: 12, color: Colors.grey[500])),
               ],
@@ -597,38 +595,38 @@ class _DeliveryCoordinationScreenState
         Expanded(
           child: ElevatedButton.icon(
             onPressed: () => _optimizeRoute(),
-            icon: Icon(Icons.route),
-            label: Text('Optimize Route'),
+            icon: const Icon(Icons.route),
+            label: const Text('Optimize Route'),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.blue,
               foregroundColor: Colors.white,
-              padding: EdgeInsets.symmetric(vertical: 12),
+              padding: const EdgeInsets.symmetric(vertical: 12),
             ),
           ),
         ),
-        SizedBox(width: 8),
+        const SizedBox(width: 8),
         Expanded(
           child: ElevatedButton.icon(
             onPressed: () => _reassignVolunteer(),
-            icon: Icon(Icons.swap_horiz),
-            label: Text('Reassign'),
+            icon: const Icon(Icons.swap_horiz),
+            label: const Text('Reassign'),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.orange,
               foregroundColor: Colors.white,
-              padding: EdgeInsets.symmetric(vertical: 12),
+              padding: const EdgeInsets.symmetric(vertical: 12),
             ),
           ),
         ),
-        SizedBox(width: 8),
+        const SizedBox(width: 8),
         Expanded(
           child: ElevatedButton.icon(
             onPressed: () => _markComplete(),
-            icon: Icon(Icons.check_circle),
-            label: Text('Mark Complete'),
+            icon: const Icon(Icons.check_circle),
+            label: const Text('Mark Complete'),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.green,
               foregroundColor: Colors.white,
-              padding: EdgeInsets.symmetric(vertical: 12),
+              padding: const EdgeInsets.symmetric(vertical: 12),
             ),
           ),
         ),
@@ -645,8 +643,8 @@ class _DeliveryCoordinationScreenState
 
   Widget _buildCreateTaskDialog() {
     return AlertDialog(
-      title: Text('Create New Delivery Task'),
-      content: Container(
+      title: const Text('Create New Delivery Task'),
+      content: SizedBox(
         width: 400,
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -656,21 +654,21 @@ class _DeliveryCoordinationScreenState
               label: 'Donation ID',
               hintText: 'Enter donation identifier',
             ),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             CustomTextField(
               controller: _pickupAddressController,
               label: 'Pickup Address',
               hintText: 'Enter pickup location',
             ),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             CustomTextField(
               controller: _deliveryAddressController,
               label: 'Delivery Address',
               hintText: 'Enter delivery location',
             ),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Priority Level',
                 border: OutlineInputBorder(),
               ),
@@ -686,14 +684,14 @@ class _DeliveryCoordinationScreenState
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text('Cancel'),
+          child: const Text('Cancel'),
         ),
         ElevatedButton(
           onPressed: () {
             Navigator.pop(context);
             _createTask();
           },
-          child: Text('Create Task'),
+          child: const Text('Create Task'),
         ),
       ],
     );
@@ -703,22 +701,22 @@ class _DeliveryCoordinationScreenState
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Coordination Settings'),
+        title: const Text('Coordination Settings'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             SwitchListTile(
-              title: Text('Auto-assign volunteers'),
+              title: const Text('Auto-assign volunteers'),
               value: true,
               onChanged: (value) {},
             ),
             SwitchListTile(
-              title: Text('Real-time notifications'),
+              title: const Text('Real-time notifications'),
               value: true,
               onChanged: (value) {},
             ),
             SwitchListTile(
-              title: Text('Route optimization'),
+              title: const Text('Route optimization'),
               value: true,
               onChanged: (value) {},
             ),
@@ -727,7 +725,7 @@ class _DeliveryCoordinationScreenState
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Close'),
+            child: const Text('Close'),
           ),
         ],
       ),

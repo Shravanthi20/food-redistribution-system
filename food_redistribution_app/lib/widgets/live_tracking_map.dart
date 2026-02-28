@@ -9,12 +9,12 @@ class LiveTrackingMap extends StatefulWidget {
   final DonationStatus status;
 
   const LiveTrackingMap({
-    Key? key,
+    super.key,
     required this.pickupLocation,
     required this.dropoffLocation,
     this.volunteerLocation,
     required this.status,
-  }) : super(key: key);
+  });
 
   @override
   State<LiveTrackingMap> createState() => _LiveTrackingMapState();
@@ -72,7 +72,7 @@ class _LiveTrackingMapState extends State<LiveTrackingMap> {
             infoWindow: const InfoWindow(title: 'Volunteer'),
             icon: BitmapDescriptor.defaultMarkerWithHue(
                 BitmapDescriptor.hueGreen),
-            zIndex: 2, // Show on top
+            zIndexInt: 2, // Show on top
           ),
         );
       }
@@ -88,24 +88,32 @@ class _LiveTrackingMapState extends State<LiveTrackingMap> {
     double minLng = widget.pickupLocation.longitude;
     double maxLng = widget.pickupLocation.longitude;
 
-    if (widget.dropoffLocation.latitude < minLat)
+    if (widget.dropoffLocation.latitude < minLat) {
       minLat = widget.dropoffLocation.latitude;
-    if (widget.dropoffLocation.latitude > maxLat)
+    }
+    if (widget.dropoffLocation.latitude > maxLat) {
       maxLat = widget.dropoffLocation.latitude;
-    if (widget.dropoffLocation.longitude < minLng)
+    }
+    if (widget.dropoffLocation.longitude < minLng) {
       minLng = widget.dropoffLocation.longitude;
-    if (widget.dropoffLocation.longitude > maxLng)
+    }
+    if (widget.dropoffLocation.longitude > maxLng) {
       maxLng = widget.dropoffLocation.longitude;
+    }
 
     if (widget.volunteerLocation != null) {
-      if (widget.volunteerLocation!.latitude < minLat)
+      if (widget.volunteerLocation!.latitude < minLat) {
         minLat = widget.volunteerLocation!.latitude;
-      if (widget.volunteerLocation!.latitude > maxLat)
+      }
+      if (widget.volunteerLocation!.latitude > maxLat) {
         maxLat = widget.volunteerLocation!.latitude;
-      if (widget.volunteerLocation!.longitude < minLng)
+      }
+      if (widget.volunteerLocation!.longitude < minLng) {
         minLng = widget.volunteerLocation!.longitude;
-      if (widget.volunteerLocation!.longitude > maxLng)
+      }
+      if (widget.volunteerLocation!.longitude > maxLng) {
         maxLng = widget.volunteerLocation!.longitude;
+      }
     }
 
     _controller.animateCamera(

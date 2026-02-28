@@ -7,8 +7,7 @@ import '../../models/food_donation.dart';
 class InspectDeliveryScreen extends StatefulWidget {
   final FoodDonation donation;
 
-  const InspectDeliveryScreen({Key? key, required this.donation})
-      : super(key: key);
+  const InspectDeliveryScreen({super.key, required this.donation});
 
   @override
   State<InspectDeliveryScreen> createState() => _InspectDeliveryScreenState();
@@ -209,7 +208,7 @@ class _InspectDeliveryScreenState extends State<InspectDeliveryScreen> {
                             ),
                       ),
                       const SizedBox(height: 16),
-                      RadioListTile<bool>(
+                      ListTile(
                         title: const Text('Accept Delivery'),
                         subtitle: Text(
                           'Food meets safety standards and can be distributed',
@@ -218,16 +217,21 @@ class _InspectDeliveryScreenState extends State<InspectDeliveryScreen> {
                             fontSize: 12,
                           ),
                         ),
-                        value: true,
-                        groupValue: _overallApproval,
-                        onChanged: (bool? value) {
+                        leading: Icon(
+                          _overallApproval == true
+                              ? Icons.radio_button_checked
+                              : Icons.radio_button_unchecked,
+                          color: _overallApproval == true
+                              ? Colors.green.shade700
+                              : Colors.grey,
+                        ),
+                        onTap: () {
                           setState(() {
-                            _overallApproval = value;
+                            _overallApproval = true;
                           });
                         },
-                        activeColor: Colors.green.shade700,
                       ),
-                      RadioListTile<bool>(
+                      ListTile(
                         title: const Text('Reject Delivery'),
                         subtitle: Text(
                           'Food does not meet safety standards',
@@ -236,14 +240,19 @@ class _InspectDeliveryScreenState extends State<InspectDeliveryScreen> {
                             fontSize: 12,
                           ),
                         ),
-                        value: false,
-                        groupValue: _overallApproval,
-                        onChanged: (bool? value) {
+                        leading: Icon(
+                          _overallApproval == false
+                              ? Icons.radio_button_checked
+                              : Icons.radio_button_unchecked,
+                          color: _overallApproval == false
+                              ? Colors.red.shade700
+                              : Colors.grey,
+                        ),
+                        onTap: () {
                           setState(() {
-                            _overallApproval = value;
+                            _overallApproval = false;
                           });
                         },
-                        activeColor: Colors.red.shade700,
                       ),
                     ],
                   ),

@@ -3,9 +3,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:io';
-import 'dart:typed_data';
+
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import '../models/user.dart';
 import '../models/donor_profile.dart';
@@ -41,8 +41,8 @@ class AuthService {
       if (!doc.exists) return null;
       return AppUser.fromFirestore(doc);
     } catch (e) {
-      print('Error getting current app user: $e');
-      return null;
+      // Re-throw or handle
+      rethrow;
     }
   }
 
@@ -96,7 +96,7 @@ class AuthService {
         return credential;
       }
     } catch (e) {
-      print('Error registering donor: $e');
+      debugPrint('Error registering donor: $e');
       rethrow;
     }
     return null;
@@ -185,7 +185,7 @@ class AuthService {
         return credential;
       }
     } catch (e) {
-      print('Error registering NGO: $e');
+      debugPrint('Error registering NGO: $e');
       rethrow;
     }
     return null;
@@ -195,7 +195,7 @@ class AuthService {
   Future<String?> uploadVerificationCertificate(
       String userId, PlatformFile file) async {
     try {
-      print('Using Storage Bucket: ${FirebaseStorage.instance.bucket}');
+      debugPrint('Using Storage Bucket: ${FirebaseStorage.instance.bucket}');
       final ref = FirebaseStorage.instance
           .ref()
           .child('verification_certificates')
@@ -207,11 +207,11 @@ class AuthService {
       final isImage =
           ['jpg', 'jpeg', 'png'].contains(file.extension?.toLowerCase());
 
-      print('Starting upload for ${file.name} (isImage: $isImage)');
+      debugPrint('Starting upload for ${file.name} (isImage: $isImage)');
 
       if (isImage) {
         try {
-          print('Attempting compression...');
+          debugPrint('Attempting compression...');
           // Attempt compression
           if (kIsWeb) {
             if (file.bytes != null) {
@@ -234,30 +234,30 @@ class AuthService {
               dataToUpload = result; // Use bytes for upload
             }
           }
-          print('Compression done.');
+          debugPrint('Compression done.');
         } catch (e) {
-          print(
+          debugPrint(
               'Compression failed or not supported, falling back to original file: $e');
           // Fallback handled below (dataToUpload remains null)
         }
       }
 
-      print('Uploading to ${ref.fullPath}...');
+      debugPrint('Uploading to ${ref.fullPath}...');
       if (dataToUpload != null) {
         await ref.putData(dataToUpload);
       } else if (kIsWeb) {
         await ref.putData(file.bytes!);
       } else {
-        print('Uploading file from path: ${file.path}');
+        debugPrint('Uploading file from path: ${file.path}');
         await ref.putFile(File(file.path!));
       }
-      print('Upload complete. Getting download URL...');
+      debugPrint('Upload complete. Getting download URL...');
 
       final url = await ref.getDownloadURL();
-      print('Got URL: $url');
+      debugPrint('Got URL: $url');
       return url;
     } catch (e) {
-      print('Error uploading certificate: $e');
+      debugPrint('Error uploading certificate: $e');
       return null; // Don't block registration if upload fails, but prefer to handle it
     }
   }
@@ -318,7 +318,7 @@ class AuthService {
         return credential;
       }
     } catch (e) {
-      print('Error registering volunteer: $e');
+      debugPrint('Error registering volunteer: $e');
       rethrow;
     }
     return null;
@@ -347,7 +347,7 @@ class AuthService {
 
       return credential;
     } catch (e) {
-      print('Error signing in: $e');
+      debugPrint('Error signing in: $e');
       rethrow;
     }
   }
@@ -367,7 +367,7 @@ class AuthService {
             'onboardingState': 'active',
             'updatedAt': FieldValue.serverTimestamp(),
           });
-          print('Auto-set admin role for $email');
+          debugPrint('Auto-set admin role for $email');
         }
       } else {
         // Create admin user document
@@ -379,10 +379,10 @@ class AuthService {
           'createdAt': FieldValue.serverTimestamp(),
           'updatedAt': FieldValue.serverTimestamp(),
         });
-        print('Created admin user document for $email');
+        debugPrint('Created admin user document for $email');
       }
     } catch (e) {
-      print('Error ensuring admin role: $e');
+      debugPrint('Error ensuring admin role: $e');
       // Don't rethrow - this is a best-effort operation
     }
   }
@@ -399,11 +399,11 @@ class AuthService {
           'timestamp': Timestamp.now(),
         });
       } catch (logError) {
-        print('Failed to log password reset request: $logError');
+        debugPrint('Failed to log password reset request: $logError');
         // Retrieve silently so user flow isn't interrupted
       }
     } catch (e) {
-      print('Error sending password reset email: $e');
+      debugPrint('Error sending password reset email: $e');
       rethrow;
     }
   }
@@ -421,7 +421,7 @@ class AuthService {
       await _auth.signOut();
       await _secureStorage.deleteAll();
     } catch (e) {
-      print('Error signing out: $e');
+      debugPrint('Error signing out: $e');
       rethrow;
     }
   }
@@ -439,7 +439,7 @@ class AuthService {
         'newState': state.name,
       });
     } catch (e) {
-      print('Error updating onboarding state: $e');
+      debugPrint('Error updating onboarding state: $e');
       rethrow;
     }
   }
@@ -455,21 +455,12 @@ class AuthService {
     try {
       await currentUser?.sendEmailVerification();
     } catch (e) {
-      print('Error resending email verification: $e');
+      debugPrint('Error resending email verification: $e');
       rethrow;
     }
   }
 
   // Private helper methods
-  @Deprecated('Use verifications collection directly')
-  Future<void> _addToReviewQueue(String type, String userId) async {
-    await _firestore.collection(Collections.verifications).add({
-      'type': type,
-      Fields.userId: userId,
-      Fields.status: 'pending',
-      Fields.createdAt: Timestamp.now(),
-    });
-  }
 
   Future<void> _logAction(String action, String? userId,
       {Map<String, dynamic>? additionalData}) async {
@@ -535,7 +526,7 @@ class AuthService {
         },
       );
     } catch (e) {
-      print('Error verifying phone number: $e');
+      debugPrint('Error verifying phone number: $e');
       onError('Failed to send verification code');
     }
   }
@@ -559,7 +550,7 @@ class AuthService {
 
       return userCredential;
     } on FirebaseAuthException catch (e) {
-      print('Error verifying OTP: ${e.code} - ${e.message}');
+      debugPrint('Error verifying OTP: ${e.code} - ${e.message}');
       rethrow;
     }
   }
@@ -576,7 +567,7 @@ class AuthService {
 
       return userCredential;
     } catch (e) {
-      print('Error signing in with phone credential: $e');
+      debugPrint('Error signing in with phone credential: $e');
       rethrow;
     }
   }
@@ -635,7 +626,7 @@ class AuthService {
         return credential;
       }
     } catch (e) {
-      print('Error registering volunteer with phone: $e');
+      debugPrint('Error registering volunteer with phone: $e');
       rethrow;
     }
     return null;
@@ -651,7 +642,7 @@ class AuthService {
           .get();
       return querySnapshot.docs.isNotEmpty;
     } catch (e) {
-      print('Error checking phone user: $e');
+      debugPrint('Error checking phone user: $e');
       return false;
     }
   }

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../config/firebase_schema.dart';
+import 'package:flutter/foundation.dart';
 
 class AnalyticsService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -19,7 +20,7 @@ class AnalyticsService {
         'timestamp': Timestamp.now(),
       });
     } catch (e) {
-      print('Error tracking donation created: $e');
+      debugPrint('Error tracking donation created: $e');
     }
   }
 
@@ -42,7 +43,7 @@ class AnalyticsService {
         'timestamp': Timestamp.now(),
       });
     } catch (e) {
-      print('Error tracking donation completed: $e');
+      debugPrint('Error tracking donation completed: $e');
     }
   }
 
@@ -75,7 +76,7 @@ class AnalyticsService {
             : 0,
       };
     } catch (e) {
-      print('Error getting donation statistics: $e');
+      debugPrint('Error getting donation statistics: $e');
       return {};
     }
   }
@@ -104,7 +105,7 @@ class AnalyticsService {
         'wasteReduced': _calculateWasteReduced(completedDonations.docs),
       };
     } catch (e) {
-      print('Error getting system analytics: $e');
+      debugPrint('Error getting system analytics: $e');
       return {};
     }
   }
@@ -140,14 +141,15 @@ class AnalyticsService {
         final address =
             (doc.data()['pickupAddress'] as String? ?? 'Unknown').toLowerCase();
         String region = 'Other';
-        if (address.contains('downtown'))
+        if (address.contains('downtown')) {
           region = 'Downtown';
-        else if (address.contains('uptown'))
+        } else if (address.contains('uptown')) {
           region = 'Uptown';
-        else if (address.contains('north'))
+        } else if (address.contains('north')) {
           region = 'North Side';
-        else if (address.contains('south')) region = 'South Side';
-
+        } else if (address.contains('south')) {
+          region = 'South Side';
+        }
         counts[region] = (counts[region] ?? 0) + 1;
       }
 
@@ -156,7 +158,7 @@ class AnalyticsService {
 
       return counts.map((key, value) => MapEntry(key, value / total));
     } catch (e) {
-      print('Error getting regional analytics: $e');
+      debugPrint('Error getting regional analytics: $e');
       return {};
     }
   }
@@ -186,7 +188,7 @@ class AnalyticsService {
         'totalCompleted': total,
       };
     } catch (e) {
-      print('Error getting delivery performance: $e');
+      debugPrint('Error getting delivery performance: $e');
       return {};
     }
   }

@@ -358,7 +358,7 @@ class FoodRequestService {
       if (donation.quantity < (request.requiredQuantity * 0.3)) return false;
 
       // Check distance (should be within 50km)
-      final distance = await _locationService.calculateDistance(
+      final distance = _locationService.calculateDistance(
         donation.pickupLocation['latitude']?.toDouble() ?? 0.0,
         donation.pickupLocation['longitude']?.toDouble() ?? 0.0,
         request.deliveryLocation['latitude']?.toDouble() ?? 0.0,
@@ -449,13 +449,13 @@ class FoodRequestService {
   bool _isDietaryCompatible(String restriction, FoodDonation donation) {
     switch (restriction.toLowerCase()) {
       case 'vegetarian':
-        return donation.isVegetarian ?? false;
+        return donation.isVegetarian;
       case 'vegan':
-        return donation.isVegan ?? false;
+        return donation.isVegan;
       case 'gluten-free':
         return false; // Not supported in current model
       case 'halal':
-        return donation.isHalal ?? false;
+        return donation.isHalal;
       case 'kosher':
         return false; // Not supported in current model
       default:
@@ -582,8 +582,8 @@ class FoodRequestService {
             requests.where((r) => r.status == RequestStatus.cancelled).length,
         'criticalRequests':
             requests.where((r) => r.urgency == RequestUrgency.critical).length,
-        'totalBeneficiaries':
-            requests.fold<int>(0, (sum, r) => sum + r.expectedBeneficiaries),
+        'totalBeneficiaries': requests.fold<int>(
+            0, (total, r) => total + r.expectedBeneficiaries),
       };
     } catch (e) {
       await _auditService.logEvent(

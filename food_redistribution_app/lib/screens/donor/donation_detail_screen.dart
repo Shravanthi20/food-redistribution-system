@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // [NEW] for Timestamp
 import '../../models/food_donation.dart';
-import '../../models/user.dart';
 import '../../providers/auth_provider.dart';
 import 'package:provider/provider.dart';
 import '../../providers/donation_provider.dart';
@@ -16,8 +15,7 @@ class DonationDetailScreen extends StatelessWidget {
   final FoodDonation
       initialDonation; // Renamed from donation to initialDonation
 
-  const DonationDetailScreen({Key? key, required this.initialDonation})
-      : super(key: key);
+  const DonationDetailScreen({super.key, required this.initialDonation});
 
   @override
   Widget build(BuildContext context) {
@@ -77,8 +75,8 @@ class DonationDetailScreen extends StatelessWidget {
                       // Status Header
                       Container(
                         padding: const EdgeInsets.all(20),
-                        color:
-                            _getStatusColor(donation.status).withOpacity(0.1),
+                        color: _getStatusColor(donation.status)
+                            .withValues(alpha: 0.1),
                         child: Column(
                           children: [
                             Icon(
@@ -250,8 +248,9 @@ class DonationDetailScreen extends StatelessWidget {
                       // Admin Controls
                       Consumer<AuthProvider>(
                         builder: (context, auth, _) {
-                          if (auth.appUser?.role != UserRole.admin)
+                          if (auth.appUser?.role != UserRole.admin) {
                             return const SizedBox.shrink();
+                          }
 
                           return _buildSection(
                             context,
@@ -305,34 +304,34 @@ class DonationDetailScreen extends StatelessWidget {
 
   Widget _buildLiveTracking(BuildContext context, FoodDonation donation) {
     // NOTE: In a real app, you would inject the LocationService properly.
-    final LocationService _locationService = LocationService();
+    final LocationService locationService = LocationService();
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.infoCyan.withOpacity(0.1),
+        color: AppTheme.infoCyan.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.infoCyan.withOpacity(0.3)),
+        border: Border.all(color: AppTheme.infoCyan.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          const Row(
             // Header
             children: [
               Icon(Icons.location_searching, color: AppTheme.infoCyan),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Text('Live Volunteer Location',
                   style: TextStyle(
                       fontWeight: FontWeight.bold, color: AppTheme.infoCyan)),
-              const Spacer(),
+              Spacer(),
               // Blink indicator could go here
             ],
           ),
           const SizedBox(height: 12),
           StreamBuilder<Map<String, dynamic>>(
-            stream: _locationService
+            stream: locationService
                 .getUserLocationStream(donation.assignedVolunteerId!),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -469,7 +468,7 @@ class DonationDetailScreen extends StatelessWidget {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, -5),
           ),

@@ -14,8 +14,6 @@ class _AdminRealTimeTrackingScreenState
     extends State<AdminRealTimeTrackingScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   String _filterStatus = 'all'; // all, active, delayed, completed
-  String _searchQuery = '';
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,7 +38,7 @@ class _AdminRealTimeTrackingScreenState
                     ),
                   ),
                   onChanged: (value) {
-                    setState(() => _searchQuery = value);
+                    // Search not implemented in Firestore stream directly
                   },
                 ),
                 const SizedBox(height: 12),

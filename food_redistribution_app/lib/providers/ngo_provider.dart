@@ -10,6 +10,7 @@ import '../services/firestore_service.dart';
 import '../services/location_service.dart';
 import '../services/notification_service.dart';
 import '../services/audit_service.dart';
+import 'package:flutter/foundation.dart';
 
 class NGOProvider extends ChangeNotifier {
   final FoodRequestService _requestService = FoodRequestService();
@@ -76,7 +77,7 @@ class NGOProvider extends ChangeNotifier {
       await _loadDashboardStats(ngoId);
     } catch (e) {
       _errorMessage = 'Failed to load NGO data: $e';
-      print('NGO Provider Error: $e');
+      debugPrint('NGO Provider Error: $e');
     } finally {
       _isLoading = false;
       notifyListeners();
