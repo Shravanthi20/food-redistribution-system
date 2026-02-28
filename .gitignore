@@ -1,11 +1,67 @@
-node_modules/
-dist/
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# Flutter/Dart specific
+.dart_tool/
+.packages
 build/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# IDE - IntelliJ
+.idea/
+*.iml
+*.iws
+
+# IDE - VSCode
+.vscode/
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Local env files
 .env
 .env.local
-.env.production
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Firebase
+firebase-debug.log
+.firebase/
 serviceAccountKey.json
+
+# Dependencies
+node_modules/
+.pnp/
+.pnp.js
+
+# Testing
+coverage/
+
+# Production builds
+dist/
+out/
+
+# Runtime data
+pids/
+*.pid
+*.seed
 *.log
-.DS_Store
-.vscode/
-.idea/
+
+# Old project files (React/Node.js) - keep for reference but ignore
+frontend/
+backend/
+*.bat
+demo.html
+multi-user-demo.html
+INSTALL_*.md
+SETUP_GUIDE.md
+START_*.bat
+setup-*.bat
+install-*.bat
+
+# Keep Flutter app and important docs
+!food_redistribution_app/**
+!README.md
+!.gitignore

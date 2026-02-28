@@ -1,116 +1,232 @@
-# FreshSave - Food Rescue Platform
+# Food Redistribution Platform
 
-A professional multi-user registration system for a food rescue platform, built with the MERN stack and Firebase authentication.
+A comprehensive Flutter application for reducing food waste and improving food distribution to those in need.
 
-## 🌟 Features
+## 🎯 Project Overview
 
-- **Multi-User System**: Separate registration flows for Volunteers, NGOs, and Donors
-- **Firebase Authentication**: Email/Password, Google, and Apple sign-in
-- **Professional UI**: Clean, modern design inspired by "Too Good To Go"
-- **Responsive Design**: Works perfectly on mobile, tablet, and desktop
-- **Type-Safe Forms**: Comprehensive validation and error handling
-- **Secure Backend**: MongoDB storage with Firebase token verification
+This platform connects food donors (restaurants, grocery stores, caterers) with NGOs and volunteers to efficiently redistribute surplus food, reducing waste while feeding communities.
 
-## 🚀 Quick Start
+## 🏗️ Architecture
 
-### Prerequisites
-- Node.js (v18+)
-- MongoDB (local or Atlas)
-- Firebase account
+### **Backend: Firebase + Firestore**
+- **Authentication**: Firebase Auth with email/password
+- **Database**: Firestore for real-time data
+- **Security**: RBAC, audit logging, session management
+- **No Storage**: Text-based verification system
 
-### Installation
+### **Frontend: Flutter**
+- **Platform**: Cross-platform (Mobile, Web, Desktop)
+- **UI**: Material Design 3
+- **State Management**: Provider pattern
+- **Navigation**: GoRouter
 
-1. **Clone or navigate to the project**
+## 👥 User Roles
+
+### **🏢 Donors (Businesses)**
+- Register surplus food donations
+- Manage donation lifecycle
+- Track impact analytics
+- Business verification system
+
+### **🏥 NGOs (Organizations)**
+- Browse and claim food donations
+- Manage distribution logistics
+- Coordinate with volunteers
+- Service area management
+
+### **👨‍💼 Volunteers**
+- Accept pickup/delivery tasks
+- Real-time location tracking
+- Rating and feedback system
+- Availability scheduling
+
+### **👮‍♀️ Admins**
+- User verification and management
+- System oversight and analytics
+- Security monitoring
+- Role-based access control
+
+## 🛡️ Security Features
+
+- **RBAC Middleware**: Role-based access control
+- **Audit Logging**: Comprehensive security tracking
+- **Session Management**: Secure authentication flow
+- **Brute-force Protection**: Account lockout system
+- **Document Verification**: Text-based verification workflow
+
+## 📊 Core Modules
+
+### **Module 1: User Authentication & Role Management**
+- ✅ Secure registration/login for all user types
+- ✅ Role-based access control (RBAC)
+- ✅ Email verification & password recovery
+- ✅ Account suspension system
+- ✅ Admin approval workflow
+
+### **Module 2: Food Donation Management**
+- ✅ Donation creation and lifecycle tracking
+- ✅ Status management (available → reserved → completed)
+- ✅ NGO assignment system
+- ✅ Volunteer coordination
+- ✅ Real-time notifications
+
+## 🔧 Technical Stack
+
+**Frontend:**
+- Flutter 3.0+
+- Provider (State Management)
+- GoRouter (Navigation)
+- Material Design 3
+- Form Builder & Validators
+
+**Backend:**
+- Firebase Authentication
+- Cloud Firestore
+- Firebase Analytics
+- Firebase Messaging
+
+**Security & Monitoring:**
+- Audit Service with risk levels
+- Session management
+- Device info tracking
+- Security alerts system
+
+## 📱 Installation
+
+1. **Prerequisites**
    ```bash
-   cd /d "%~dp0"
+   flutter --version  # Ensure Flutter 3.0+
+   dart --version     # Ensure Dart 3.0+
    ```
 
-2. **Setup Backend**
+2. **Firebase Setup**
+   - Create Firebase project
+   - Enable Authentication (Email/Password)
+   - Enable Firestore Database
+   - Download configuration files
+
+3. **Install Dependencies**
    ```bash
-   # Run the setup script
-   setup-backend.bat
-   
-   # Or manually:
-   cd backend
-   npm install
-   # Add serviceAccountKey.json
-   # Update .env with MongoDB URI
-   npm run dev
+   cd food_redistribution_app
+   flutter pub get
    ```
 
-3. **Setup Frontend** (in a new terminal)
+4. **Run Application**
    ```bash
-   # Run the setup script
-   setup-frontend.bat
-   
-   # Or manually:
-   cd frontend
-   npm install
-   # Update src/firebase/config.js
-   npm run dev
+   flutter run -d windows  # Or your preferred platform
    ```
 
-4. **Open browser to** `http://localhost:5173`
+## 🏃‍♀️ Getting Started
 
-## 📖 Full Setup Guide
+### **For Development:**
+1. Configure Firebase project credentials
+2. Update `lib/firebase_options.dart`
+3. Run `flutter run` to start development server
+4. Access admin dashboard for user management
 
-See [SETUP_GUIDE.md](./SETUP_GUIDE.md) for detailed instructions including:
-- Firebase project setup
-- MongoDB configuration
-- Troubleshooting common issues
-- Production deployment
+### **For Testing:**
+1. Register test users for each role
+2. Complete verification workflow
+3. Test donation creation and assignment
+4. Verify security features (failed logins, RBAC)
 
-## 🏗️ Project Structure
+## 📂 Project Structure
 
 ```
-c:\software_eval\
-├── backend/              # Node.js/Express API
-│   ├── models/          # MongoDB schemas
-│   ├── routes/          # API endpoints
-│   ├── middleware/      # Auth middleware
-│   └── server.js        # Entry point
-│
-├── frontend/            # React/Vite app
-│   ├── src/
-│   │   ├── pages/      # Page components
-│   │   ├── components/ # Reusable components
-│   │   └── firebase/   # Firebase config
-│   └── package.json
-│
-├── SETUP_GUIDE.md      # Detailed setup instructions
-└── README.md           # This file
+food_redistribution_app/
+├── lib/
+│   ├── config/
+│   │   └── firestore_schema.dart      # Database structure
+│   ├── middleware/
+│   │   └── rbac_middleware.dart       # Access control
+│   ├── models/
+│   │   ├── user.dart                  # User data models
+│   │   ├── food_donation.dart         # Donation models
+│   │   └── *_profile.dart             # Role-specific profiles
+│   ├── services/
+│   │   ├── auth_service.dart          # Authentication
+│   │   ├── firestore_service.dart     # Database operations
+│   │   ├── security_service.dart      # Security & sessions
+│   │   ├── audit_service.dart         # Audit logging
+│   │   ├── verification_service.dart  # Document verification
+│   │   └── user_service.dart          # User management
+│   ├── screens/
+│   │   ├── auth/                      # Login/Register screens
+│   │   ├── dashboard/                 # Role-based dashboards
+│   │   ├── admin/                     # Admin interface
+│   │   └── verification/              # Verification flows
+│   └── providers/
+│       ├── auth_provider.dart         # Auth state management
+│       └── user_provider.dart         # User state management
+├── pubspec.yaml                       # Dependencies
+└── README.md                          # This file
 ```
 
-## 👥 User Types
+## 🔐 Security Implementation
 
-### Volunteer
-Register to help rescue and distribute food with fields for availability, transportation, and emergency contacts.
+### **Person 1 Deliverables (✅ Complete):**
+- **Auth Service**: Secure Firebase authentication
+- **RBAC Middleware**: Route and widget protection
+- **Audit Log Service**: Comprehensive event tracking
+- **Verified-User Trust Layer**: Document verification system
 
-### NGO
-Organizations can register with details about capacity, operating hours, and services provided.
+### **Security Features:**
+- Failed login protection (5 attempts = 15min lockout)
+- Session timeout and management
+- Device info tracking
+- Risk-based audit logging
+- Admin oversight dashboard
 
-### Donor
-Restaurants, stores, and individuals can register to donate surplus food with pickup/delivery options.
+## 🚀 Deployment
 
-## 🔐 Security
+### **Development**
+```bash
+flutter run -d chrome     # Web development
+flutter run -d windows    # Desktop development
+flutter run -d android    # Mobile development
+```
 
-- Firebase Authentication for secure user management
-- Token-based API authentication
-- Environment variables for sensitive data
-- MongoDB for encrypted data storage
+### **Production**
+```bash
+flutter build web --release
+flutter build windows --release
+flutter build apk --release
+```
 
-## 🛠️ Tech Stack
+## 📈 Analytics & Monitoring
 
-- **Frontend**: React, Vite, React Router, Framer Motion
-- **Backend**: Node.js, Express, MongoDB, Mongoose
-- **Authentication**: Firebase Auth (Email, Google, Apple)
-- **Styling**: Custom CSS with design system
-- **Icons**: Lucide React
+- User registration and verification rates
+- Food donation success metrics
+- Security event monitoring
+- System performance tracking
+- Real-time notification delivery
 
-## 📝 License
+## 🤝 Contributing
 
-This project is created for educational purposes.
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Create Pull Request
 
-## 🤝 Support
+## 📄 License
 
-For issues or questions, refer to the [SETUP_GUIDE.md](./SETUP_GUIDE.md) troubleshooting section.
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 📞 Support
+
+For support and questions:
+- Create an issue in this repository
+- Contact the development team
+- Check the documentation in `/docs`
+
+## 🙏 Acknowledgments
+
+- Flutter team for the amazing framework
+- Firebase for backend services
+- Material Design for UI components
+- Community contributors
+
+---
+
+**Built with ❤️ for reducing food waste and feeding communities**
