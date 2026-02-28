@@ -570,6 +570,22 @@ class FoodDonationService {
     }
   }
 
+  // Get donations matched/assigned to specific NGO
+  Future<List<FoodDonation>> getDonationsMatchedToNGO(String ngoId) async {
+    try {
+      final query = await _firestore
+          .collection(Collections.donations)
+          .where('assignedNGOId', isEqualTo: ngoId)
+          .orderBy('createdAt', descending: true)
+          .get();
+
+      return query.docs.map((doc) => FoodDonation.fromFirestore(doc)).toList();
+    } catch (e) {
+      debugPrint('Error getting donations matched to NGO: $e');
+      return [];
+    }
+  }
+
   // Get available donations with optional filters
   Future<List<FoodDonation>> getAvailableDonations({
     Map<String, dynamic>? filters,
