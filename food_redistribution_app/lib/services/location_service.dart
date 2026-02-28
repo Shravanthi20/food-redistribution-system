@@ -169,6 +169,7 @@ class LocationService {
   // LIVE TRACKING
 
   final Map<String, StreamSubscription<Position>> _trackingSubscriptions = {};
+  StreamSubscription? _locationRequestSubscription;
 
   // Start tracking user location
   Future<void> startLocationTracking(String userId) async {
@@ -200,6 +201,69 @@ class LocationService {
     }
   }
 
+  /// Listen for one-off location requests written to Firestore by donors/admins.
+  /// When a request is received, obtain current location and write it to
+  /// `user_locations/{userId}` and append to `location_updates` so other clients can read it.
+  void listenForLocationRequests(String userId) {
+    // cancel existing
+    _locationRequestSubscription?.cancel();
+
+    _locationRequestSubscription = _firestore
+        .collection('location_requests')
+        .where('volunteerId', isEqualTo: userId)
+        .snapshots()
+        .listen((snapshot) async {
+      for (var docChange in snapshot.docChanges) {
+        final doc = docChange.doc;
+        final data = doc.data();
+        if (data == null) continue;
+        final handled = data['handled'] == true;
+        if (handled) continue;
+
+        try {
+          final pos = await getCurrentLocation();
+          if (pos != null) {
+            final geohash = _geoHasher.encode(pos.latitude, pos.longitude);
+
+            final normalized = {
+              'latitude': pos.latitude,
+              'longitude': pos.longitude,
+              'geopoint': GeoPoint(pos.latitude, pos.longitude),
+              'geohash': geohash,
+              'accuracy': pos.accuracy,
+              'timestamp': Timestamp.now(),
+            };
+
+            // Write canonical latest location
+            await _firestore.collection('user_locations').doc(userId).set(normalized, SetOptions(merge: true));
+
+            // Append to location_updates for history/consumers
+            await _firestore.collection('location_updates').add({
+              'volunteerId': userId,
+              'latitude': pos.latitude,
+              'longitude': pos.longitude,
+              'geopoint': GeoPoint(pos.latitude, pos.longitude),
+              'accuracy': pos.accuracy,
+              'timestamp': Timestamp.now(),
+            });
+          }
+
+          // Mark request handled to avoid duplicate processing
+          await doc.reference.update({'handled': true, 'handledAt': Timestamp.now()});
+        } catch (e) {
+          // Log but don't rethrow
+          print('Error handling location request for $userId: $e');
+        }
+      }
+    });
+  }
+
+  /// Stop listening for location requests
+  Future<void> stopListeningForLocationRequests() async {
+    await _locationRequestSubscription?.cancel();
+    _locationRequestSubscription = null;
+  }
+
   // Stop tracking
   Future<void> stopLocationTracking(String userId) async {
     await _trackingSubscriptions[userId]?.cancel();
@@ -209,13 +273,56 @@ class LocationService {
 
   // Stream of specific user's location
   Stream<Map<String, dynamic>> getUserLocationStream(String userId) {
-    return _firestore
-        .collection('user_locations')
-        .doc(userId)
+    // Merge two possible sources: realtime `user_locations/{userId}` doc
+    // (preferred) and fallback to latest `location_updates` entry for the user.
+    final controller = StreamController<Map<String, dynamic>>();
+
+    StreamSubscription? docSub;
+    StreamSubscription? updatesSub;
+
+    void emitIfNotEmpty(Map<String, dynamic>? data) {
+      if (data != null && data.isNotEmpty) controller.add(data);
+    }
+
+    // Listen to canonical user_locations document
+    docSub = _firestore.collection('user_locations').doc(userId).snapshots().listen((doc) {
+      if (doc.exists) {
+        emitIfNotEmpty(doc.data() as Map<String, dynamic>);
+      }
+    }, onError: (e) {
+      // ignore errors but keep stream alive
+    });
+
+    // Also listen to latest location_updates as a fallback (some background services write here)
+    updatesSub = _firestore
+        .collection('location_updates')
+        .where('volunteerId', isEqualTo: userId)
+        .orderBy('timestamp', descending: true)
+        .limit(1)
         .snapshots()
-        .map((doc) {
-          if (!doc.exists) return {};
-          return doc.data() as Map<String, dynamic>;
-        });
+        .listen((snapshot) {
+      if (snapshot.docs.isNotEmpty) {
+        final data = snapshot.docs.first.data();
+        // Normalize fields to match user_locations doc shape
+        final normalized = <String, dynamic>{
+          'latitude': data['latitude'] ?? data['lat'],
+          'longitude': data['longitude'] ?? data['lng'],
+          'geopoint': data['geopoint'] ?? data['location'] ?? null,
+          'timestamp': data['timestamp'] ?? data['ts'] ?? FieldValue.serverTimestamp(),
+          ...data,
+        };
+        emitIfNotEmpty(normalized);
+      }
+    }, onError: (e) {
+      // ignore
+    });
+
+    controller.onCancel = () async {
+      await docSub?.cancel();
+      await updatesSub?.cancel();
+      await controller.close();
+    };
+
+    return controller.stream;
   }
 }

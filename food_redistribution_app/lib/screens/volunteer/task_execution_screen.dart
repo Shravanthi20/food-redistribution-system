@@ -21,6 +21,25 @@ class _TaskExecutionScreenState extends State<TaskExecutionScreen> {
   bool _isLoading = false;
 
   @override
+  void initState() {
+    super.initState();
+    // Start listening for one-off location requests when the volunteer opens this screen
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final userId = Provider.of<AuthProvider>(context, listen: false).user?.uid;
+      if (userId != null) {
+        _locationService.listenForLocationRequests(userId);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    // Stop background listeners
+    _locationService.stopListeningForLocationRequests();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF7F9FC),

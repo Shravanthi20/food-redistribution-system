@@ -11,6 +11,7 @@ import '../../utils/app_router.dart'; // [NEW]
 import '../../utils/app_theme.dart';
 import '../admin/user_selection_screen.dart';
 import '../../services/location_service.dart'; // Import LocationService
+import '../../config/firebase_schema.dart';
 
 class DonationDetailScreen extends StatelessWidget {
   final FoodDonation initialDonation; // Renamed from donation to initialDonation
@@ -199,6 +200,15 @@ class DonationDetailScreen extends StatelessWidget {
                         // Live Tracking Section
                         if (donation.status == DonationStatus.inTransit && donation.assignedVolunteerId != null)
                           _buildLiveTracking(context, donation),
+                      
+                        // Messages / Donor-Volunteer Chat
+                        _buildSection(
+                          context,
+                          'Messages',
+                          [
+                            _buildMessagesWidget(donation.id),
+                          ],
+                        ),
                       ],
 
 
@@ -252,6 +262,82 @@ class DonationDetailScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildMessagesWidget(String donationId) {
+    final _messageController = TextEditingController();
+
+    final messagesStream = FirebaseFirestore.instance
+        .collection(Collections.donations)
+        .doc(donationId)
+        .collection(Subcollections.messages)
+        .orderBy('createdAt', descending: false)
+        .snapshots();
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey[300]!),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        children: [
+          SizedBox(
+            height: 200,
+            child: StreamBuilder<QuerySnapshot>(
+              stream: messagesStream,
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) return const Center(child: Text('No messages'));
+                final docs = snapshot.data!.docs;
+                return ListView.builder(
+                  itemCount: docs.length,
+                  itemBuilder: (context, index) {
+                    final data = docs[index].data() as Map<String, dynamic>;
+                    final from = data['from'] ?? 'Unknown';
+                    final text = data['text'] ?? '';
+                    final ts = data['createdAt'] is Timestamp ? (data['createdAt'] as Timestamp).toDate() : null;
+                    return ListTile(
+                      title: Text(from, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                      subtitle: Text(text),
+                      trailing: ts != null ? Text('${ts.hour}:${ts.minute.toString().padLeft(2, '0')}', style: const TextStyle(fontSize: 11)) : null,
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _messageController,
+                  decoration: const InputDecoration(hintText: 'Type a message...'),
+                ),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton(
+                onPressed: () async {
+                  final text = _messageController.text.trim();
+                  if (text.isEmpty) return;
+                  await FirebaseFirestore.instance
+                      .collection(Collections.donations)
+                      .doc(donationId)
+                      .collection(Subcollections.messages)
+                      .add({
+                    'text': text,
+                    'from': 'donor',
+                    'createdAt': Timestamp.now(),
+                  });
+                  _messageController.clear();
+                },
+                child: const Text('Send'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildLiveTracking(BuildContext context, FoodDonation donation) {
     // NOTE: In a real app, you would inject the LocationService properly.
     final LocationService locationService = LocationService(); 
@@ -287,7 +373,78 @@ class DonationDetailScreen extends StatelessWidget {
                 return const Text('Locating volunteer...');
               }
               if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                 return const Text('Volunteer location unavailable');
+                 // Show a small visual indicator and an action to request a location update
+                 return Column(
+                   crossAxisAlignment: CrossAxisAlignment.start,
+                   children: [
+                     Container(
+                       width: double.infinity,
+                       padding: const EdgeInsets.all(12),
+                       decoration: BoxDecoration(
+                         color: Colors.yellow[50],
+                         border: Border.all(color: Colors.yellow[700]!),
+                         borderRadius: BorderRadius.circular(8),
+                       ),
+                       child: Row(
+                         children: const [
+                           Icon(Icons.location_off, color: Colors.orange),
+                           SizedBox(width: 8),
+                           Expanded(child: Text('Volunteer location currently unavailable.')),
+                         ],
+                       ),
+                     ),
+                     const SizedBox(height: 8),
+                     Row(
+                       children: [
+                         ElevatedButton.icon(
+                           icon: const Icon(Icons.location_searching),
+                           label: const Text('Request Location'),
+                           onPressed: () async {
+                             // Write a one-off location request to Firestore so the volunteer client can respond.
+                             try {
+                               await FirebaseFirestore.instance.collection('location_requests').add({
+                                 'donationId': donation.id,
+                                 'volunteerId': donation.assignedVolunteerId,
+                                 'requestedAt': Timestamp.now(),
+                                 'requestedBy': Provider.of<AuthProvider>(context, listen: false).user?.uid ?? 'unknown',
+                               });
+
+                               if (context.mounted) {
+                                 ScaffoldMessenger.of(context).showSnackBar(
+                                   const SnackBar(content: Text('Location request sent to volunteer')),
+                                 );
+                               }
+                             } catch (e) {
+                               if (context.mounted) {
+                                 ScaffoldMessenger.of(context).showSnackBar(
+                                   SnackBar(content: Text('Error sending request: $e')),
+                                 );
+                               }
+                             }
+                           },
+                         ),
+                         const SizedBox(width: 8),
+                         OutlinedButton.icon(
+                           icon: const Icon(Icons.refresh),
+                           label: const Text('Refresh'),
+                           onPressed: () async {
+                             // Simple manual refresh: refetch the user_locations doc once
+                             try {
+                               final doc = await FirebaseFirestore.instance.collection('user_locations').doc(donation.assignedVolunteerId).get();
+                               if (!doc.exists) {
+                                 if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No recent location found for volunteer')));
+                               } else {
+                                 if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Latest volunteer location fetched')));
+                               }
+                             } catch (e) {
+                               if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+                             }
+                           },
+                         ),
+                       ],
+                     ),
+                   ],
+                 );
               }
               
               final data = snapshot.data!;
