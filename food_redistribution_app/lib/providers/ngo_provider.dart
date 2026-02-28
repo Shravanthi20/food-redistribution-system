@@ -98,7 +98,7 @@ class NGOProvider extends ChangeNotifier {
     try {
       final available = await _donationService.getAvailableDonations();
       final matched = await _donationService.getDonationsMatchedToNGO(ngoId);
-      
+
       // Combine them so that the UI can find matched donations using getDonationById
       _availableDonations = [...available, ...matched];
     } catch (e) {
