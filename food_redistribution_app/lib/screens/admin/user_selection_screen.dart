@@ -10,11 +10,11 @@ class UserSelectionScreen extends StatefulWidget {
   final LatLng? origin; // [NEW]
 
   const UserSelectionScreen({
-    Key? key,
+    super.key,
     required this.role,
     required this.title,
     this.origin,
-  }) : super(key: key);
+  });
 
   @override
   State<UserSelectionScreen> createState() => _UserSelectionScreenState();
@@ -127,10 +127,10 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
             ),
           ),
           if (widget.origin != null)
-             Padding(
-               padding: const EdgeInsets.symmetric(horizontal: 16),
+             const Padding(
+               padding: EdgeInsets.symmetric(horizontal: 16),
                child: Row(
-                 children: const [
+                 children: [
                    Icon(Icons.sort, size: 16, color: Colors.blue),
                    SizedBox(width: 4),
                    Text('Sorted by proximity', style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold)),

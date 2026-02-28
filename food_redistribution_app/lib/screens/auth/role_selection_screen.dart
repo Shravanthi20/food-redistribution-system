@@ -5,7 +5,7 @@ import '../../widgets/glass_widgets.dart';
 import '../../widgets/gradient_scaffold.dart';
 
 class RoleSelectionScreen extends StatelessWidget {
-  const RoleSelectionScreen({Key? key}) : super(key: key);
+  const RoleSelectionScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +31,7 @@ class RoleSelectionScreen extends StatelessWidget {
               
               // Header
               ShaderMask(
-                shaderCallback: (bounds) => LinearGradient(
+                shaderCallback: (bounds) => const LinearGradient(
                   colors: [AppTheme.accentTeal, AppTheme.accentCyan],
                 ).createShader(bounds),
                 child: const Text(
@@ -118,7 +118,7 @@ class RoleSelectionScreen extends StatelessWidget {
                       Navigator.pushReplacementNamed(context, AppRouter.login);
                     },
                     child: ShaderMask(
-                      shaderCallback: (bounds) => LinearGradient(
+                      shaderCallback: (bounds) => const LinearGradient(
                         colors: [AppTheme.accentTeal, AppTheme.accentCyan],
                       ).createShader(bounds),
                       child: const Text(

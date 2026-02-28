@@ -183,7 +183,7 @@ class TrackingTestScenarios {
     return {
       'volunteerId': 'scenario_volunteer_offline',
       'taskId': 'scenario_task_offline',
-      'offlineDuration': Duration(minutes: 15),
+      'offlineDuration': const Duration(minutes: 15),
       'updatesWhileOffline': 6,
       'syncTimeTakenSeconds': 3,
       'expectedSyncedUpdates': 6,

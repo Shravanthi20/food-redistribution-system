@@ -56,12 +56,12 @@ class ProtectedRoute extends StatefulWidget {
   final String? routeName;
 
   const ProtectedRoute({
-    Key? key,
+    super.key,
     required this.child,
     required this.allowedRoles,
     this.unauthorizedWidget,
     this.routeName,
-  }) : super(key: key);
+  });
 
   @override
   State<ProtectedRoute> createState() => _ProtectedRouteState();
@@ -145,10 +145,10 @@ class UnauthorizedWidget extends StatelessWidget {
   final List<UserRole>? requiredRoles;
 
   const UnauthorizedWidget({
-    Key? key,
+    super.key,
     this.currentUser,
     this.requiredRoles,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -234,11 +234,11 @@ class RoleBasedWidget extends StatelessWidget {
   final Widget? fallback;
 
   const RoleBasedWidget({
-    Key? key,
+    super.key,
     required this.allowedRoles,
     required this.child,
     this.fallback,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

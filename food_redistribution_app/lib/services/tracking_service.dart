@@ -33,6 +33,23 @@ class TrackingService {
     String? notes,
   }) async {
     try {
+      // verify legal transition before writing and support idempotency
+      final doc = await _firestore.collection(Collections.donations).doc(donationId).get();
+      DonationStatus? currentEnum;
+      if (doc.exists) {
+        final current = doc.data()?['status'] as String?;
+        if (current != null) {
+          currentEnum = DonationStatus.values.firstWhere((e) => e.name == current,
+              orElse: () => DonationStatus.listed);
+          // idempotent: if status already equal, no-op
+          if (currentEnum == status) {
+            return;
+          }
+          if (!_isAllowedTransition(currentEnum, status)) {
+            throw Exception('Illegal status transition: $currentEnum -> $status');
+          }
+        }
+      }
       final batch = _firestore.batch();
 
       // Update donation status
@@ -61,6 +78,20 @@ class TrackingService {
       print('Error updating donation status: $e');
       rethrow;
     }
+  }
+
+  bool _isAllowedTransition(DonationStatus from, DonationStatus to) {
+    // defined permitted state graph
+    const Map<DonationStatus, List<DonationStatus>> allowed = {
+      DonationStatus.listed: [DonationStatus.matched, DonationStatus.cancelled, DonationStatus.expired],
+      DonationStatus.matched: [DonationStatus.pickedUp, DonationStatus.cancelled],
+      DonationStatus.pickedUp: [DonationStatus.inTransit, DonationStatus.cancelled],
+      DonationStatus.inTransit: [DonationStatus.delivered, DonationStatus.cancelled],
+      DonationStatus.delivered: [],
+      DonationStatus.cancelled: [],
+      DonationStatus.expired: [],
+    };
+    return allowed[from]?.contains(to) ?? false;
   }
 
   // Get donation tracking history

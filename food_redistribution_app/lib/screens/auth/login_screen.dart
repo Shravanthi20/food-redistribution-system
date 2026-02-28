@@ -9,7 +9,7 @@ import '../../widgets/gradient_scaffold.dart';
 import '../../widgets/loading_overlay.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -224,7 +224,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                             ),
                           ),
                           const SizedBox(height: 8),
-                          Text(
+                          const Text(
                             'Sign in to continue your mission',
                             style: TextStyle(
                               fontSize: 16,
@@ -274,7 +274,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                     alignment: Alignment.centerRight,
                                     child: TextButton(
                                       onPressed: _navigateToForgotPassword,
-                                      child: Text(
+                                      child: const Text(
                                         'Forgot Password?',
                                         style: TextStyle(color: AppTheme.accentTeal),
                                       ),
@@ -296,13 +296,13 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(
+                              const Text(
                                 "Don't have an account? ",
                                 style: TextStyle(color: AppTheme.textSecondary),
                               ),
                               TextButton(
                                 onPressed: () => Navigator.pushNamed(context, AppRouter.roleSelection),
-                                child: Text(
+                                child: const Text(
                                   'Create Account',
                                   style: TextStyle(
                                     color: AppTheme.accentTeal,
@@ -356,7 +356,7 @@ class _ForgotPasswordFormState extends State<_ForgotPasswordForm> {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Reset link sent! Check your email.'),
+            content: const Text('Reset link sent! Check your email.'),
             backgroundColor: AppTheme.successTeal,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -385,7 +385,7 @@ class _ForgotPasswordFormState extends State<_ForgotPasswordForm> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        const Text(
           'Reset Password',
           style: TextStyle(
             fontSize: 22,
@@ -394,7 +394,7 @@ class _ForgotPasswordFormState extends State<_ForgotPasswordForm> {
           ),
         ),
         const SizedBox(height: 8),
-        Text(
+        const Text(
           'Enter your email to receive a password reset link.',
           style: TextStyle(
             color: AppTheme.textSecondary,
@@ -406,7 +406,7 @@ class _ForgotPasswordFormState extends State<_ForgotPasswordForm> {
           child: GlassTextField(
             controller: _emailResetController,
             label: 'Email Address',
-            prefixIcon: Icon(Icons.email_outlined, color: AppTheme.textSecondary),
+            prefixIcon: const Icon(Icons.email_outlined, color: AppTheme.textSecondary),
             keyboardType: TextInputType.emailAddress,
             validator: (v) {
               if (v == null || v.isEmpty) return 'Email is required';

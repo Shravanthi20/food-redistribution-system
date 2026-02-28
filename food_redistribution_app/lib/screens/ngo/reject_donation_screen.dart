@@ -7,7 +7,7 @@ import '../../models/food_donation.dart';
 class RejectDonationScreen extends StatefulWidget {
   final FoodDonation? donation;
 
-  const RejectDonationScreen({Key? key, this.donation}) : super(key: key);
+  const RejectDonationScreen({super.key, this.donation});
 
   @override
   State<RejectDonationScreen> createState() => _RejectDonationScreenState();

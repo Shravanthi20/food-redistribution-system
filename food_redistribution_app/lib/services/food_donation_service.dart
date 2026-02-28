@@ -357,6 +357,10 @@ class FoodDonationService {
       final donation = FoodDonation.fromFirestore(donationDoc);
 
       if (donation.status != DonationStatus.listed) {
+        // idempotent accept: if already matched by same NGO, treat as success
+        if (donation.status == DonationStatus.matched && donation.assignedNGOId == ngoId) {
+          return;
+        }
         throw Exception('Donation is no longer available for review');
       }
 

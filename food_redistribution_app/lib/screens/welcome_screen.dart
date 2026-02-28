@@ -7,7 +7,7 @@ import 'auth/ngo_registration_screen.dart';
 import 'auth/volunteer_registration_screen.dart';
 
 class WelcomeScreen extends StatelessWidget {
-  const WelcomeScreen({Key? key}) : super(key: key);
+  const WelcomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +68,7 @@ class WelcomeScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              Text(
+              const Text(
                 'Reducing waste, feeding communities',
                 style: TextStyle(
                   fontSize: 15,
@@ -77,7 +77,7 @@ class WelcomeScreen extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 48),
-              Text(
+              const Text(
                 'Choose your role',
                 style: TextStyle(
                   fontSize: 16,
@@ -122,13 +122,13 @@ class WelcomeScreen extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
+                  const Text(
                     'Already have an account? ',
                     style: TextStyle(color: AppTheme.textSecondary),
                   ),
                   TextButton(
                     onPressed: () => _navigateToLogin(context),
-                    child: Text(
+                    child: const Text(
                       'Sign In',
                       style: TextStyle(
                         color: AppTheme.accentTeal,
@@ -182,7 +182,7 @@ class WelcomeScreen extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w600,
                     color: AppTheme.textPrimary,
@@ -191,7 +191,7 @@ class WelcomeScreen extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   description,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 13,
                     color: AppTheme.textSecondary,
                   ),
@@ -231,7 +231,7 @@ class WelcomeScreen extends StatelessWidget {
         break;
       default:
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text('Registration for this role is coming soon!'),
             backgroundColor: Colors.orange,
           ),
@@ -253,7 +253,7 @@ class WelcomeScreen extends StatelessWidget {
 class RoleDashboard extends StatelessWidget {
   final String role;
 
-  const RoleDashboard({Key? key, required this.role}) : super(key: key);
+  const RoleDashboard({super.key, required this.role});
 
   @override
   Widget build(BuildContext context) {

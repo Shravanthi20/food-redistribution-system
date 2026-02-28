@@ -6,7 +6,7 @@ void main() {
   group('Welcome Screen Widget Tests', () {
     testWidgets('should display app title and subtitle', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: WelcomeScreen(),
         ),
       );
@@ -20,7 +20,7 @@ void main() {
 
     testWidgets('should display all role selection cards', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: WelcomeScreen(),
         ),
       );
@@ -33,7 +33,7 @@ void main() {
 
     testWidgets('should display role descriptions', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: WelcomeScreen(),
         ),
       );
@@ -46,7 +46,7 @@ void main() {
 
     testWidgets('should handle role card taps', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: WelcomeScreen(),
         ),
       );
@@ -62,7 +62,7 @@ void main() {
 
     testWidgets('should display impact statistics', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: WelcomeScreen(),
         ),
       );
@@ -76,7 +76,7 @@ void main() {
 
     testWidgets('should have proper accessibility labels', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: WelcomeScreen(),
         ),
       );
@@ -89,7 +89,7 @@ void main() {
 
     testWidgets('should display feature highlights', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: WelcomeScreen(),
         ),
       );
@@ -107,7 +107,7 @@ void main() {
       tester.binding.window.devicePixelRatioTestValue = 1.0;
       
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: WelcomeScreen(),
         ),
       );
@@ -129,7 +129,7 @@ void main() {
 
     testWidgets('should display app logo', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: WelcomeScreen(),
         ),
       );
@@ -140,7 +140,7 @@ void main() {
 
     testWidgets('should have proper color scheme', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: WelcomeScreen(),
         ),
       );
@@ -156,7 +156,7 @@ void main() {
 
     testWidgets('should handle scroll behavior', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: WelcomeScreen(),
         ),
       );
@@ -175,7 +175,7 @@ void main() {
 
     testWidgets('should display call-to-action buttons', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: WelcomeScreen(),
         ),
       );
@@ -190,7 +190,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData.dark(),
-          home: WelcomeScreen(),
+          home: const WelcomeScreen(),
         ),
       );
 
@@ -200,7 +200,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData.light(),
-          home: WelcomeScreen(),
+          home: const WelcomeScreen(),
         ),
       );
 
@@ -209,7 +209,7 @@ void main() {
 
     testWidgets('should display loading state correctly', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: WelcomeScreen(),
         ),
       );
@@ -221,7 +221,7 @@ void main() {
     testWidgets('should handle error states gracefully', (WidgetTester tester) async {
       // This would test error handling if implemented
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: WelcomeScreen(),
         ),
       );
@@ -233,7 +233,7 @@ void main() {
 
     testWidgets('should support keyboard navigation', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: WelcomeScreen(),
         ),
       );
@@ -248,7 +248,7 @@ void main() {
 
     testWidgets('should display testimonials section', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: WelcomeScreen(),
         ),
       );
@@ -260,7 +260,7 @@ void main() {
     group('Role Card Interactions', () {
       testWidgets('should highlight role card on hover', (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
+          const MaterialApp(
             home: WelcomeScreen(),
           ),
         );
@@ -284,7 +284,7 @@ void main() {
 
       testWidgets('should show role-specific information on selection', (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
+          const MaterialApp(
             home: WelcomeScreen(),
           ),
         );
@@ -304,7 +304,7 @@ void main() {
         tester.binding.window.devicePixelRatioTestValue = 2.0;
 
         await tester.pumpWidget(
-          MaterialApp(
+          const MaterialApp(
             home: WelcomeScreen(),
           ),
         );
@@ -321,7 +321,7 @@ void main() {
         tester.binding.window.devicePixelRatioTestValue = 1.0;
 
         await tester.pumpWidget(
-          MaterialApp(
+          const MaterialApp(
             home: WelcomeScreen(),
           ),
         );

@@ -5,7 +5,7 @@ import '../../providers/auth_provider.dart';
 import '../../models/query.dart';
 
 class QueriesScreen extends StatefulWidget {
-  const QueriesScreen({Key? key}) : super(key: key);
+  const QueriesScreen({super.key});
 
   @override
   State<QueriesScreen> createState() => _QueriesScreenState();
@@ -32,7 +32,7 @@ class _QueriesScreenState extends State<QueriesScreen> {
                     children: [
                       Expanded(
                         child: DropdownButtonFormField<QueryStatus>(
-                          value: _selectedStatus,
+                          initialValue: _selectedStatus,
                           decoration: const InputDecoration(
                             labelText: 'Status',
                             border: OutlineInputBorder(),
@@ -55,7 +55,7 @@ class _QueriesScreenState extends State<QueriesScreen> {
                       
                       Expanded(
                         child: DropdownButtonFormField<QueryType>(
-                          value: _selectedType,
+                          initialValue: _selectedType,
                           decoration: const InputDecoration(
                             labelText: 'Type',
                             border: OutlineInputBorder(),

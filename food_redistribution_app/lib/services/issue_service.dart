@@ -41,7 +41,7 @@ class IssueService {
         .get();
     
     return query.docs
-        .map((doc) => {'id': doc.id, ...doc.data() as Map<String, dynamic>})
+        .map((doc) => {'id': doc.id, ...doc.data()})
         .toList();
   }
 

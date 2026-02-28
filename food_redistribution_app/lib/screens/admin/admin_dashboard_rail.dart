@@ -6,16 +6,16 @@ class AdminDashboardRail extends StatelessWidget {
   final Function(int) onDestinationSelected;
 
   const AdminDashboardRail({
-    Key? key,
+    super.key,
     required this.selectedIndex,
     required this.onDestinationSelected,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [

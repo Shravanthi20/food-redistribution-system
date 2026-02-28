@@ -233,7 +233,7 @@ class NotificationDispatchService {
         bodyTemplate: 'System will be under maintenance from {{startTime}} to {{endTime}}. Please plan accordingly.',
         channels: [NotificationChannel.push, NotificationChannel.email],
         priority: NotificationPriority.high,
-        delay: Duration(hours: 24), // Send 24 hours in advance
+        delay: const Duration(hours: 24), // Send 24 hours in advance
       ),
       
       'performance_report': NotificationTemplate(
@@ -264,7 +264,7 @@ class NotificationDispatchService {
         bodyTemplate: 'You have a {{taskType}} scheduled for {{scheduledTime}}. Location: {{location}}',
         channels: [NotificationChannel.push],
         priority: NotificationPriority.normal,
-        delay: Duration(minutes: 30), // Send 30 minutes before
+        delay: const Duration(minutes: 30), // Send 30 minutes before
       ),
     });
   }
@@ -291,7 +291,7 @@ class NotificationDispatchService {
         targetUserTypes: ['volunteer'],
         channels: [NotificationChannel.email],
         priority: NotificationPriority.low,
-        throttleInterval: Duration(days: 7),
+        throttleInterval: const Duration(days: 7),
       ),
       
       'system_alerts': NotificationRule(
@@ -312,7 +312,7 @@ class NotificationDispatchService {
         targetUserTypes: ['ngo', 'donor'],
         channels: [NotificationChannel.push],
         priority: NotificationPriority.high,
-        throttleInterval: Duration(minutes: 30),
+        throttleInterval: const Duration(minutes: 30),
       ),
     });
   }
@@ -729,7 +729,7 @@ class NotificationDispatchService {
     _dailyCounter[key] = (_dailyCounter[key] ?? [])..add(DateTime.now());
     
     // Clean old entries (keep only last 24 hours)
-    final yesterday = DateTime.now().subtract(Duration(hours: 24));
+    final yesterday = DateTime.now().subtract(const Duration(hours: 24));
     _dailyCounter[key] = _dailyCounter[key]!
         .where((date) => date.isAfter(yesterday))
         .toList();
@@ -737,7 +737,7 @@ class NotificationDispatchService {
   
   Future<Map<String, dynamic>> _getUserNotificationPreferences(String userId) async {
     final doc = await _firestoreService.get('user_preferences', userId);
-    return doc?.data() as Map<String, dynamic>? ?? {
+    return doc.data() as Map<String, dynamic>? ?? {
       'push': true,
       'email': true,
       'sms': false,
@@ -803,7 +803,7 @@ class NotificationDispatchService {
     DateTime? startDate,
     DateTime? endDate,
   }) async {
-    final start = startDate ?? DateTime.now().subtract(Duration(days: 7));
+    final start = startDate ?? DateTime.now().subtract(const Duration(days: 7));
     final end = endDate ?? DateTime.now();
     
     final records = await _firestoreService.query(

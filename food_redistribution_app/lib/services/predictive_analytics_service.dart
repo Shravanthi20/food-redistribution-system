@@ -116,7 +116,7 @@ class PredictiveAnalyticsService {
       int deliveredCount = 0;
       
       for (final doc in snapshot.docs) {
-        final data = doc.data()! as Map<String, dynamic>;
+        final data = doc.data();
         final foodTypes = data['foodTypes'] as List<dynamic>? ?? [];
         final quantity = data['quantity'] as int? ?? 0;
         final status = data['status'] as String?;
@@ -206,7 +206,7 @@ class PredictiveAnalyticsService {
       final regionData = <String, RegionStats>{};
       
       for (final doc in donationsSnapshot.docs) {
-        final data = doc.data()! as Map<String, dynamic>;
+        final data = doc.data();
         final address = data['pickupAddress'] as String? ?? '';
         final status = data['status'] as String?;
         
@@ -225,7 +225,7 @@ class PredictiveAnalyticsService {
       
       // Count volunteers by region
       for (final doc in volunteersSnapshot.docs) {
-        final data = doc.data()! as Map<String, dynamic>;
+        final data = doc.data();
         final city = data['city'] as String? ?? 'Unknown';
         
         regionData.putIfAbsent(city, () => RegionStats());
@@ -307,7 +307,7 @@ class PredictiveAnalyticsService {
       int count = 0;
       
       for (final doc in snapshot.docs) {
-        final data = doc.data()! as Map<String, dynamic>;
+        final data = doc.data();
         final createdAt = (data['createdAt'] as Timestamp?)?.toDate();
         final deliveredAt = (data['deliveredAt'] as Timestamp?)?.toDate();
         

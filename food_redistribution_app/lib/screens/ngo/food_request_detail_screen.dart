@@ -7,7 +7,7 @@ import '../../services/matching_service.dart';
 class FoodRequestDetailScreen extends StatefulWidget {
   final String requestId;
 
-  const FoodRequestDetailScreen({Key? key, required this.requestId}) : super(key: key);
+  const FoodRequestDetailScreen({super.key, required this.requestId});
 
   @override
   State<FoodRequestDetailScreen> createState() => _FoodRequestDetailScreenState();
@@ -236,7 +236,7 @@ class _FoodRequestDetailScreenState extends State<FoodRequestDetailScreen> {
           children: [
             Row(
               children: [
-                Icon(Icons.check_circle, color: Colors.green),
+                const Icon(Icons.check_circle, color: Colors.green),
                 const SizedBox(width: 8),
                 Text(
                   'Matched Donation',

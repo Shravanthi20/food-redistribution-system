@@ -7,7 +7,6 @@ import '../services/issue_service.dart';
 import '../services/audit_service.dart';
 import '../services/security_service.dart';
 import '../services/food_donation_service.dart';
-import '../models/user.dart';
 import '../models/food_donation.dart';
 
 class AdminDashboardProvider extends ChangeNotifier {

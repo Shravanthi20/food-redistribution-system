@@ -8,7 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 class VerifyUserScreen extends StatefulWidget {
   final Map<String, dynamic> verificationData;
 
-  const VerifyUserScreen({Key? key, required this.verificationData}) : super(key: key);
+  const VerifyUserScreen({super.key, required this.verificationData});
 
   @override
   State<VerifyUserScreen> createState() => _VerifyUserScreenState();
@@ -165,7 +165,7 @@ class _VerifyUserScreenState extends State<VerifyUserScreen> {
                   onTap: isUrl ? () => _launchUrl(doc['information']) : null,
                 ),
               );
-            }).toList(),
+            }),
             
             const SizedBox(height: 32),
             

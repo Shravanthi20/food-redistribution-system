@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../config/firestore_schema.dart';
 import '../config/firebase_schema.dart';
 
 /// Firestore Database Service for centralized Firestore operations

@@ -148,15 +148,13 @@ class AppTheme {
         secondary: accentCyan,
         tertiary: accentTealLight,
         surface: primaryNavyLight,
-        background: primaryNavy,
         error: errorCoral,
         onPrimary: primaryNavy,
         onSecondary: primaryNavy,
         onTertiary: primaryNavy,
         onSurface: textPrimary,
-        onBackground: textPrimary,
         onError: textPrimary,
-        surfaceVariant: primaryNavyMedium,
+        surfaceContainerHighest: primaryNavyMedium,
         outline: surfaceGlassBorder,
       ),
       textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme).copyWith(
@@ -291,11 +289,11 @@ class AppTheme {
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: surfaceGlassBorder),
+          borderSide: const BorderSide(color: surfaceGlassBorder),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: surfaceGlassBorder),
+          borderSide: const BorderSide(color: surfaceGlassBorder),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
@@ -325,7 +323,7 @@ class AppTheme {
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: BorderSide(color: surfaceGlassBorder),
+          side: const BorderSide(color: surfaceGlassBorder),
         ),
         margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
       ),
@@ -336,7 +334,7 @@ class AppTheme {
           color: textSecondary,
           fontSize: 12,
         ),
-        side: BorderSide(color: surfaceGlassBorder),
+        side: const BorderSide(color: surfaceGlassBorder),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
@@ -353,8 +351,8 @@ class AppTheme {
         backgroundColor: surfaceGlassDark,
         indicatorColor: accentTeal.withOpacity(0.2),
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-        iconTheme: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) {
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
             return const IconThemeData(color: accentTeal, size: 24);
           }
           return const IconThemeData(color: textMuted, size: 24);
@@ -384,7 +382,7 @@ class AppTheme {
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
       ),
-      dividerTheme: DividerThemeData(
+      dividerTheme: const DividerThemeData(
         color: surfaceGlassBorder,
         thickness: 1,
       ),
@@ -403,35 +401,35 @@ class AppTheme {
         overlayColor: accentTeal.withOpacity(0.2),
       ),
       switchTheme: SwitchThemeData(
-        thumbColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) {
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
             return accentTeal;
           }
           return textMuted;
         }),
-        trackColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) {
+        trackColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
             return accentTeal.withOpacity(0.5);
           }
           return surfaceGlassDark;
         }),
       ),
       checkboxTheme: CheckboxThemeData(
-        fillColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) {
+        fillColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
             return accentTeal;
           }
           return Colors.transparent;
         }),
-        checkColor: MaterialStateProperty.all(primaryNavy),
+        checkColor: WidgetStateProperty.all(primaryNavy),
         side: const BorderSide(color: textSecondary, width: 1.5),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(4),
         ),
       ),
       radioTheme: RadioThemeData(
-        fillColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) {
+        fillColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
             return accentTeal;
           }
           return textSecondary;

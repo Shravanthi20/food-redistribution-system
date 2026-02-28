@@ -9,12 +9,12 @@ class LiveTrackingMap extends StatefulWidget {
   final DonationStatus status;
 
   const LiveTrackingMap({
-    Key? key,
+    super.key,
     required this.pickupLocation,
     required this.dropoffLocation,
     this.volunteerLocation,
     required this.status,
-  }) : super(key: key);
+  });
 
   @override
   State<LiveTrackingMap> createState() => _LiveTrackingMapState();

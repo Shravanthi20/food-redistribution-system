@@ -138,8 +138,9 @@ class AnalyticsService {
       for (var doc in donations.docs) {
         final address = (doc.data()['pickupAddress'] as String? ?? 'Unknown').toLowerCase();
         String region = 'Other';
-        if (address.contains('downtown')) region = 'Downtown';
-        else if (address.contains('uptown')) region = 'Uptown';
+        if (address.contains('downtown')) {
+          region = 'Downtown';
+        } else if (address.contains('uptown')) region = 'Uptown';
         else if (address.contains('north')) region = 'North Side';
         else if (address.contains('south')) region = 'South Side';
         

@@ -5,7 +5,7 @@ import '../../services/food_donation_service.dart'; // [NEW]
 import '../../utils/app_router.dart';
 
 class AdminIssuesScreen extends StatefulWidget {
-  const AdminIssuesScreen({Key? key}) : super(key: key);
+  const AdminIssuesScreen({super.key});
 
   @override
   State<AdminIssuesScreen> createState() => _AdminIssuesScreenState();

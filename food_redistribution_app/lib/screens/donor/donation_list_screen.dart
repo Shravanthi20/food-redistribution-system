@@ -6,7 +6,7 @@ import '../../models/food_donation.dart';
 import 'donation_detail_screen.dart';
 
 class DonationListScreen extends StatefulWidget {
-  const DonationListScreen({Key? key}) : super(key: key);
+  const DonationListScreen({super.key});
 
   @override
   State<DonationListScreen> createState() => _DonationListScreenState();
@@ -58,7 +58,7 @@ class _DonationListScreenState extends State<DonationListScreen> {
                   value: status,
                   child: Text(_getStatusDisplayName(status)),
                 );
-              }).toList(),
+              }),
             ],
           ),
         ],

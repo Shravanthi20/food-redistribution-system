@@ -4,9 +4,12 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../config/firebase_schema.dart';
 
 class NotificationService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseFirestore _firestore;
   final FirebaseMessaging _messaging = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin _localNotifications = FlutterLocalNotificationsPlugin();
+
+  NotificationService({FirebaseFirestore? firestore})
+      : _firestore = firestore ?? FirebaseFirestore.instance;
 
   // Initialize notifications
   Future<void> initialize() async {

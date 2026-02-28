@@ -5,7 +5,7 @@ import '../../services/user_service.dart';
 import '../../models/volunteer_profile.dart'; // [NEW]
 
 class VolunteerProfileScreen extends StatefulWidget {
-  const VolunteerProfileScreen({Key? key}) : super(key: key);
+  const VolunteerProfileScreen({super.key});
 
   @override
   State<VolunteerProfileScreen> createState() => _VolunteerProfileScreenState();

@@ -7,7 +7,7 @@ import '../../models/food_request.dart';
 class UpdateDemandScreen extends StatefulWidget {
   final FoodRequest? foodRequest;
 
-  const UpdateDemandScreen({Key? key, this.foodRequest}) : super(key: key);
+  const UpdateDemandScreen({super.key, this.foodRequest});
 
   @override
   State<UpdateDemandScreen> createState() => _UpdateDemandScreenState();
@@ -222,7 +222,7 @@ class _UpdateDemandScreenState extends State<UpdateDemandScreen> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: DropdownButtonFormField<String>(
-                      value: _selectedUnit,
+                      initialValue: _selectedUnit,
                       decoration: const InputDecoration(
                         labelText: 'Unit',
                         border: OutlineInputBorder(),
@@ -243,7 +243,7 @@ class _UpdateDemandScreenState extends State<UpdateDemandScreen> {
               const SizedBox(height: 16),
               
               DropdownButtonFormField<RequestUrgency>(
-                value: _selectedUrgency,
+                initialValue: _selectedUrgency,
                 decoration: const InputDecoration(
                   labelText: 'Urgency Level',
                   border: OutlineInputBorder(),

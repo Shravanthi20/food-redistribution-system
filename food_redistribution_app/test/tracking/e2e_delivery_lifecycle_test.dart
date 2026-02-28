@@ -1,6 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'test_mocks.dart';
 import 'package:food_redistribution_app/models/tracking/location_tracking_model.dart';
 import 'package:food_redistribution_app/models/enums.dart';
 import 'package:food_redistribution_app/providers/tracking_provider.dart';

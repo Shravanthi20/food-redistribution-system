@@ -15,7 +15,7 @@ class CustomTextField extends StatelessWidget {
   final bool useGlassStyle;
 
   const CustomTextField({
-    Key? key,
+    super.key,
     required this.controller,
     required this.label,
     this.hintText,
@@ -27,7 +27,7 @@ class CustomTextField extends StatelessWidget {
     this.maxLines = 1,
     this.enabled = true,
     this.useGlassStyle = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

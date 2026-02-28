@@ -12,7 +12,7 @@ import '../../utils/app_theme.dart';
 import '../../widgets/glass_widgets.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
-  const AdminDashboardScreen({Key? key}) : super(key: key);
+  const AdminDashboardScreen({super.key});
 
   @override
   State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
@@ -209,7 +209,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   children: [
                     const Text('Top Matches:', style: TextStyle(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
-                    ...matches.map((match) => _buildMatchDetail(match)).toList(),
+                    ...matches.map((match) => _buildMatchDetail(match)),
                   ],
                 ),
               ),

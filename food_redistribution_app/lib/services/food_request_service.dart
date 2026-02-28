@@ -329,7 +329,7 @@ class FoodRequestService {
       if (donation.quantity < (request.requiredQuantity * 0.3)) return false;
       
       // Check distance (should be within 50km)
-      final distance = await _locationService.calculateDistance(
+      final distance = _locationService.calculateDistance(
         donation.pickupLocation['latitude']?.toDouble() ?? 0.0,
         donation.pickupLocation['longitude']?.toDouble() ?? 0.0,
         request.deliveryLocation['latitude']?.toDouble() ?? 0.0,

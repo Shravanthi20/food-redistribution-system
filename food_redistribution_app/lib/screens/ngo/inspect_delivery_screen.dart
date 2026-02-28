@@ -7,7 +7,7 @@ import '../../models/food_donation.dart';
 class InspectDeliveryScreen extends StatefulWidget {
   final FoodDonation donation;
 
-  const InspectDeliveryScreen({Key? key, required this.donation}) : super(key: key);
+  const InspectDeliveryScreen({super.key, required this.donation});
 
   @override
   State<InspectDeliveryScreen> createState() => _InspectDeliveryScreenState();

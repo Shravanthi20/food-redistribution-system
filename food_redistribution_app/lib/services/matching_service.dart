@@ -124,7 +124,7 @@ class FoodDonationMatchingService {
   }) async {
     try {
       // Calculate distance score
-      final distance = await _locationService.calculateDistance(
+      final distance = _locationService.calculateDistance(
         donation.pickupLocation['latitude']?.toDouble() ?? 0.0,
         donation.pickupLocation['longitude']?.toDouble() ?? 0.0,
         ngo.location['latitude']?.toDouble() ?? 0.0,
@@ -344,7 +344,6 @@ class FoodDonationMatchingService {
   /// Get donation details by ID
   Future<FoodDonation?> _getDonation(String donationId) async {
     final doc = await _firestoreService.get('food_donations', donationId);
-    if (doc == null) return null;
     return FoodDonation.fromFirestore(doc);
   }
   
@@ -381,7 +380,7 @@ class FoodDonationMatchingService {
           final ngoLng = ngo.location['longitude']!.toDouble();
           
           // Calculate distance
-          final distance = await _locationService.calculateDistance(
+          final distance = _locationService.calculateDistance(
             donationLat, donationLng, ngoLat, ngoLng,
           );
           
@@ -714,8 +713,40 @@ class EnhancedMatchingService {
   /// Execute bidirectional match (donation <-> request)
   Future<void> _executeBidirectionalMatch(String donationId, String requestId) async {
     try {
+      // Validate current donation state to ensure allowed transition and idempotency
+      final donationDoc = await FirebaseFirestore.instance.collection(Collections.donations).doc(donationId).get();
+      if (!donationDoc.exists) return;
+      final currentStatus = donationDoc.data()?['status'] as String?;
+      if (currentStatus != null) {
+        final currentEnum = DonationStatus.values.firstWhere((e) => e.name == currentStatus,
+            orElse: () => DonationStatus.listed);
+        // If already matched, consider this idempotent and skip updates
+        if (currentEnum == DonationStatus.matched) {
+          await _auditService.logEvent(
+            eventType: AuditEventType.dataAccess,
+            userId: 'system',
+            riskLevel: AuditRiskLevel.low,
+            additionalData: {
+              'event': 'bidirectional_match_skipped',
+              'description': 'Donation already matched: $donationId',
+            },
+          );
+          return;
+        }
+        // Validate allowed transition
+        final allowed = {
+          DonationStatus.listed: [DonationStatus.matched, DonationStatus.cancelled, DonationStatus.expired],
+          DonationStatus.matched: [DonationStatus.pickedUp, DonationStatus.cancelled],
+          DonationStatus.pickedUp: [DonationStatus.inTransit, DonationStatus.cancelled],
+          DonationStatus.inTransit: [DonationStatus.delivered, DonationStatus.cancelled],
+        };
+        if (!(allowed[currentEnum]?.contains(DonationStatus.matched) ?? false)) {
+          throw Exception('Illegal status transition: $currentEnum -> matched');
+        }
+      }
+
       final batch = FirebaseFirestore.instance.batch();
-      
+
       // Update donation
       batch.update(
         FirebaseFirestore.instance.collection(Collections.donations).doc(donationId),
@@ -727,7 +758,7 @@ class EnhancedMatchingService {
           'metadata.matchedAt': Timestamp.now(),
         },
       );
-      
+
       // Update request
       batch.update(
         FirebaseFirestore.instance.collection(Collections.requests).doc(requestId),
@@ -739,7 +770,7 @@ class EnhancedMatchingService {
           'metadata.matchedAt': Timestamp.now(),
         },
       );
-      
+
       await batch.commit();
       
       // Log the match
@@ -829,7 +860,7 @@ class EnhancedMatchingService {
       
       // Distance score (20%)
       try {
-        final distance = await _locationService.calculateDistance(
+        final distance = _locationService.calculateDistance(
           donation.pickupLocation['latitude']?.toDouble() ?? 0.0,
           donation.pickupLocation['longitude']?.toDouble() ?? 0.0,
           request.deliveryLocation['latitude']?.toDouble() ?? 0.0,
@@ -983,13 +1014,11 @@ class EnhancedMatchingService {
   /// Helper methods for the enhanced matching
   Future<FoodRequest?> _getRequest(String requestId) async {
     final doc = await _firestoreService.get('food_requests', requestId);
-    if (doc == null) return null;
     return FoodRequest.fromMap(doc.data()! as Map<String, dynamic>);
   }
 
   Future<FoodDonation?> _getDonation(String donationId) async {
     final doc = await _firestoreService.get('food_donations', donationId);
-    if (doc == null) return null;
     return FoodDonation.fromFirestore(doc);
   }
 
@@ -1010,7 +1039,7 @@ class EnhancedMatchingService {
       final donation = FoodDonation.fromFirestore(doc);
       
       // Check if donation is within range
-      final distance = await _locationService.calculateDistance(
+      final distance = _locationService.calculateDistance(
         requestLocation['latitude']?.toDouble() ?? 0.0,
         requestLocation['longitude']?.toDouble() ?? 0.0,
         donation.pickupLocation['latitude']?.toDouble() ?? 0.0,
@@ -1032,7 +1061,7 @@ class EnhancedMatchingService {
   }) async {
     try {
       // Calculate distance score
-      final distance = await _locationService.calculateDistance(
+      final distance = _locationService.calculateDistance(
         request.deliveryLocation['latitude']?.toDouble() ?? 0.0,
         request.deliveryLocation['longitude']?.toDouble() ?? 0.0,
         donation.pickupLocation['latitude']?.toDouble() ?? 0.0,

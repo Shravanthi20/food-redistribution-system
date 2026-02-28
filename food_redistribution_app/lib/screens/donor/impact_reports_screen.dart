@@ -5,7 +5,7 @@ import '../../providers/auth_provider.dart';
 import '../../models/food_donation.dart';
 
 class ImpactReportsScreen extends StatefulWidget {
-  const ImpactReportsScreen({Key? key}) : super(key: key);
+  const ImpactReportsScreen({super.key});
 
   @override
   State<ImpactReportsScreen> createState() => _ImpactReportsScreenState();
@@ -396,7 +396,7 @@ class _ImpactReportsScreenState extends State<ImpactReportsScreen> {
           return Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
+              SizedBox(
                 width: 60,
                 child: Column(
                   children: [

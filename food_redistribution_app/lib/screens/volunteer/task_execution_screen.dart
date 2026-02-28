@@ -8,7 +8,7 @@ import '../../providers/auth_provider.dart';
 class TaskExecutionScreen extends StatefulWidget {
   final String donationId;
 
-  const TaskExecutionScreen({Key? key, required this.donationId}) : super(key: key);
+  const TaskExecutionScreen({super.key, required this.donationId});
 
   @override
   State<TaskExecutionScreen> createState() => _TaskExecutionScreenState();

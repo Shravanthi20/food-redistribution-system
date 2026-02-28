@@ -6,7 +6,7 @@ import '../../services/issue_service.dart';
 class IssueReportingScreen extends StatefulWidget {
   final String donationId;
 
-  const IssueReportingScreen({Key? key, required this.donationId}) : super(key: key);
+  const IssueReportingScreen({super.key, required this.donationId});
 
   @override
   State<IssueReportingScreen> createState() => _IssueReportingScreenState();
@@ -73,7 +73,7 @@ class _IssueReportingScreenState extends State<IssueReportingScreen> {
               const SizedBox(height: 24),
               
               DropdownButtonFormField<String>(
-                value: _selectedTarget,
+                initialValue: _selectedTarget,
                 decoration: const InputDecoration(
                   labelText: 'Who is this issue related to?',
                   border: OutlineInputBorder(),

@@ -5,7 +5,7 @@ import '../../models/tracking/location_tracking_model.dart';
 
 /// Admin Real-Time Tracking Management Screen
 class AdminRealTimeTrackingScreen extends StatefulWidget {
-  const AdminRealTimeTrackingScreen({Key? key}) : super(key: key);
+  const AdminRealTimeTrackingScreen({super.key});
 
   @override
   State<AdminRealTimeTrackingScreen> createState() => _AdminRealTimeTrackingScreenState();

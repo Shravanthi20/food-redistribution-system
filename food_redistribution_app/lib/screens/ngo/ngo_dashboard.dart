@@ -9,7 +9,7 @@ import 'available_donations_screen.dart';
 import 'queries_screen.dart';
 
 class NGODashboard extends StatefulWidget {
-  const NGODashboard({Key? key}) : super(key: key);
+  const NGODashboard({super.key});
 
   @override
   State<NGODashboard> createState() => _NGODashboardState();
@@ -238,7 +238,7 @@ class _NGODashboardState extends State<NGODashboard> with TickerProviderStateMix
   }
 
   Widget _buildAvailableDonationsTab(NGOProvider ngoProvider, AuthProvider authProvider) {
-    return AvailableDonationsScreen();
+    return const AvailableDonationsScreen();
   }
 
   Widget _buildQueriesTab(NGOProvider ngoProvider, AuthProvider authProvider) {

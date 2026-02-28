@@ -10,13 +10,13 @@ class OTPVerificationScreen extends StatefulWidget {
   final Function(String verificationId, int? resendToken)? onResendOTP;
 
   const OTPVerificationScreen({
-    Key? key,
+    super.key,
     required this.phoneNumber,
     required this.verificationId,
     this.resendToken,
     required this.onVerificationComplete,
     this.onResendOTP,
-  }) : super(key: key);
+  });
 
   @override
   State<OTPVerificationScreen> createState() => _OTPVerificationScreenState();

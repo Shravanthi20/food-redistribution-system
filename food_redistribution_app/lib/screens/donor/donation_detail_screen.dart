@@ -15,7 +15,7 @@ import '../../services/location_service.dart'; // Import LocationService
 class DonationDetailScreen extends StatelessWidget {
   final FoodDonation initialDonation; // Renamed from donation to initialDonation
 
-  const DonationDetailScreen({Key? key, required this.initialDonation}) : super(key: key);
+  const DonationDetailScreen({super.key, required this.initialDonation});
 
   @override
   Widget build(BuildContext context) {
@@ -254,7 +254,7 @@ class DonationDetailScreen extends StatelessWidget {
 
   Widget _buildLiveTracking(BuildContext context, FoodDonation donation) {
     // NOTE: In a real app, you would inject the LocationService properly.
-    final LocationService _locationService = LocationService(); 
+    final LocationService locationService = LocationService(); 
     
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -267,21 +267,21 @@ class DonationDetailScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row( // Header
+          const Row( // Header
              children: [
                Icon(Icons.location_searching, color: AppTheme.infoCyan),
-               const SizedBox(width: 8),
+               SizedBox(width: 8),
                Text(
                  'Live Volunteer Location', 
                  style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.infoCyan)
                ),
-               const Spacer(),
+               Spacer(),
                // Blink indicator could go here
              ],
           ),
           const SizedBox(height: 12),
           StreamBuilder<Map<String, dynamic>>(
-            stream: _locationService.getUserLocationStream(donation.assignedVolunteerId!),
+            stream: locationService.getUserLocationStream(donation.assignedVolunteerId!),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Text('Locating volunteer...');

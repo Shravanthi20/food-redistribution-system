@@ -8,7 +8,7 @@ import '../../widgets/gradient_scaffold.dart';
 import '../../widgets/glass_widgets.dart';
 
 class DocumentSubmissionScreen extends StatefulWidget {
-  const DocumentSubmissionScreen({Key? key}) : super(key: key);
+  const DocumentSubmissionScreen({super.key});
 
   @override
   State<DocumentSubmissionScreen> createState() => _DocumentSubmissionScreenState();
@@ -123,22 +123,22 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
 
   @override
   void dispose() {
-    _documentControllers.values.forEach((controller) {
+    for (var controller in _documentControllers.values) {
       controller.dispose();
-    });
+    }
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     if (_userRole == null) {
-      return GradientScaffold(
+      return const GradientScaffold(
         body: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               CircularProgressIndicator(color: AppTheme.accentTeal, strokeWidth: 3),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               Text('Loading...', style: TextStyle(color: AppTheme.textSecondary)),
             ],
           ),
@@ -178,7 +178,7 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
                         color: AppTheme.accentTeal.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(14),
                       ),
-                      child: Icon(
+                      child: const Icon(
                         Icons.verified_user_rounded,
                         color: AppTheme.accentTeal,
                         size: 28,
@@ -189,7 +189,7 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          const Text(
                             'Account Verification',
                             style: TextStyle(
                               fontSize: 18,
@@ -200,7 +200,7 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
                           const SizedBox(height: 4),
                           Text(
                             'Verify your ${_userRole!.name.toUpperCase()} account',
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: AppTheme.accentTeal,
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
@@ -227,14 +227,14 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
                         color: AppTheme.infoCyan.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: Icon(
+                      child: const Icon(
                         Icons.info_outline_rounded,
                         color: AppTheme.infoCyan,
                         size: 20,
                       ),
                     ),
                     const SizedBox(width: 14),
-                    Expanded(
+                    const Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -246,7 +246,7 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
                               fontSize: 14,
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          SizedBox(height: 4),
                           Text(
                             'Provide document details (numbers, references) rather than uploading files. All information is encrypted.',
                             style: TextStyle(
@@ -271,7 +271,7 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
                     width: 4,
                     height: 24,
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
+                      gradient: const LinearGradient(
                         colors: [AppTheme.accentTeal, AppTheme.accentCyan],
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
@@ -280,7 +280,7 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Text(
+                  const Text(
                     'Required Documents',
                     style: TextStyle(
                       fontSize: 18,
@@ -291,8 +291,8 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
                 ],
               ),
               const SizedBox(height: 8),
-              Padding(
-                padding: const EdgeInsets.only(left: 16),
+              const Padding(
+                padding: EdgeInsets.only(left: 16),
                 child: Text(
                   'Fill out the information for each required document:',
                   style: TextStyle(
@@ -305,7 +305,7 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
               const SizedBox(height: 20),
               
               ...documents.asMap().entries.map((entry) => 
-                _buildDocumentCard(entry.value, entry.key + 1)).toList(),
+                _buildDocumentCard(entry.value, entry.key + 1)),
               
               const SizedBox(height: 24),
               
@@ -322,14 +322,14 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
                             color: AppTheme.textTertiary.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: Icon(
+                          child: const Icon(
                             Icons.note_add_rounded,
                             color: AppTheme.textSecondary,
                             size: 20,
                           ),
                         ),
                         const SizedBox(width: 12),
-                        Text(
+                        const Text(
                           'Additional Information',
                           style: TextStyle(
                             fontSize: 16,
@@ -344,7 +344,7 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
                             color: AppTheme.textTertiary.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: Text(
+                          child: const Text(
                             'Optional',
                             style: TextStyle(
                               fontSize: 11,
@@ -357,23 +357,23 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
                     const SizedBox(height: 16),
                     TextFormField(
                       maxLines: 3,
-                      style: TextStyle(color: AppTheme.textPrimary),
+                      style: const TextStyle(color: AppTheme.textPrimary),
                       decoration: InputDecoration(
                         hintText: 'Any additional information that might help with verification...',
-                        hintStyle: TextStyle(color: AppTheme.textTertiary),
+                        hintStyle: const TextStyle(color: AppTheme.textTertiary),
                         filled: true,
                         fillColor: AppTheme.surfaceGlass,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: AppTheme.surfaceGlassBorder),
+                          borderSide: const BorderSide(color: AppTheme.surfaceGlassBorder),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: AppTheme.surfaceGlassBorder),
+                          borderSide: const BorderSide(color: AppTheme.surfaceGlassBorder),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: AppTheme.accentTeal, width: 1.5),
+                          borderSide: const BorderSide(color: AppTheme.accentTeal, width: 1.5),
                         ),
                       ),
                       onSaved: (value) {
@@ -406,8 +406,8 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
                 width: double.infinity,
                 child: TextButton.icon(
                   onPressed: _isSubmitting ? null : () => Navigator.pop(context),
-                  icon: Icon(Icons.schedule_rounded, color: AppTheme.textSecondary),
-                  label: Text(
+                  icon: const Icon(Icons.schedule_rounded, color: AppTheme.textSecondary),
+                  label: const Text(
                     'Submit Later',
                     style: TextStyle(
                       color: AppTheme.textSecondary,
@@ -447,7 +447,7 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
                   width: 28,
                   height: 28,
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
+                    gradient: const LinearGradient(
                       colors: [AppTheme.accentTeal, AppTheme.accentCyan],
                     ),
                     shape: BoxShape.circle,
@@ -474,7 +474,7 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
                 Expanded(
                   child: Text(
                     type,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
                       color: AppTheme.textPrimary,
@@ -502,7 +502,7 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
               padding: const EdgeInsets.only(left: 40),
               child: Text(
                 description,
-                style: TextStyle(
+                style: const TextStyle(
                   color: AppTheme.textSecondary,
                   fontSize: 13,
                   height: 1.3,
@@ -512,33 +512,33 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
             const SizedBox(height: 16),
             TextFormField(
               controller: controller,
-              style: TextStyle(color: AppTheme.textPrimary),
+              style: const TextStyle(color: AppTheme.textPrimary),
               decoration: InputDecoration(
                 hintText: hint,
-                hintStyle: TextStyle(color: AppTheme.textTertiary, fontSize: 13),
+                hintStyle: const TextStyle(color: AppTheme.textTertiary, fontSize: 13),
                 filled: true,
                 fillColor: AppTheme.surfaceGlass,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: AppTheme.surfaceGlassBorder),
+                  borderSide: const BorderSide(color: AppTheme.surfaceGlassBorder),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: AppTheme.surfaceGlassBorder),
+                  borderSide: const BorderSide(color: AppTheme.surfaceGlassBorder),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: AppTheme.accentTeal, width: 1.5),
+                  borderSide: const BorderSide(color: AppTheme.accentTeal, width: 1.5),
                 ),
                 errorBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: AppTheme.errorRed),
+                  borderSide: const BorderSide(color: AppTheme.errorRed),
                 ),
                 focusedErrorBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: AppTheme.errorRed, width: 1.5),
+                  borderSide: const BorderSide(color: AppTheme.errorRed, width: 1.5),
                 ),
-                prefixIcon: Icon(Icons.description_outlined, 
+                prefixIcon: const Icon(Icons.description_outlined, 
                     size: 20, color: AppTheme.textTertiary),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               ),

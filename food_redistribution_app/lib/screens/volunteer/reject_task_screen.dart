@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class RejectTaskScreen extends StatefulWidget {
-  const RejectTaskScreen({Key? key}) : super(key: key);
+  const RejectTaskScreen({super.key});
 
   @override
   State<RejectTaskScreen> createState() => _RejectTaskScreenState();

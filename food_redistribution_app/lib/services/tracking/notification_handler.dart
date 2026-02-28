@@ -1,4 +1,5 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
+import '../notification_service.dart';
 
 // Send push notifications to volunteers and NGOs
 class NotificationHandler {
@@ -202,7 +203,21 @@ class NotificationHandler {
         'body': 'Delivery delayed by $delayMinutes minutes (Severity: $severity)',
       };
 
-      print('Delay alert notification payload: $payload');
+      // Persist notification for stakeholders (donor, NGO, volunteer)
+      final notificationService = NotificationService();
+      await notificationService.sendToStakeholders(
+        taskId: taskId,
+        title: payload['title'] as String,
+        body: payload['body'] as String,
+        data: {
+          'type': payload['type'],
+          'delayMinutes': delayMinutes,
+          'severity': severity,
+          'taskId': taskId,
+        },
+      );
+
+      print('Delay alert notification payload sent: $payload');
       return true;
     } catch (e) {
       print('Error sending delay alert: $e');

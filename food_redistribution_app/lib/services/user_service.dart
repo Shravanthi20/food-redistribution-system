@@ -490,8 +490,9 @@ class UserService {
         final status = data['status'] as String?;
         final createdAt = data['createdAt'];
 
-        if (role == 'donor') donors++;
-        else if (role == 'ngo') ngos++;
+        if (role == 'donor') {
+          donors++;
+        } else if (role == 'ngo') ngos++;
         else if (role == 'volunteer') volunteers++;
 
         if (status == UserStatus.verified.name) verified++;

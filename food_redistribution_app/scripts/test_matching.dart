@@ -19,7 +19,7 @@ void main() async {
     'foodTypes': ['cooked', 'packaged'],
     'location': {'latitude': 40.7128, 'longitude': -74.0060},
     'isUrgent': true,
-    'expiresAt': DateTime.now().add(Duration(hours: 4)).toIso8601String(),
+    'expiresAt': DateTime.now().add(const Duration(hours: 4)).toIso8601String(),
   };
 
   final testNGOs = [

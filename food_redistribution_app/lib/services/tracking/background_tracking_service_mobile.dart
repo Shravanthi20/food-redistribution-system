@@ -1,10 +1,38 @@
-// Conditional export: mobile implementation when not running on web, stub on web.
-export 'background_tracking_service_mobile.dart'
-    if (dart.library.html) 'background_tracking_service_web.dart';
+import 'dart:async';
+import 'package:background_geolocation/background_geolocation.dart';
+import 'package:workmanager/workmanager.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
+import '../../models/tracking/location_tracking_model.dart';
+import '../../models/enums.dart';
 
-// Re-export exposes the BackgroundTrackingService class.
+// Handles background location tracking on Android & iOS
+class BackgroundTrackingService {
+  static const String backgroundLocationTaskId = 'background_location_tracking';
+  static const String geofenceTaskId = 'geofence_monitoring';
+  
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  bool _isInitialized = false;
 
-// The actual implementation lives in the exported file.
+  Future<void> initialize() async {
+    if (_isInitialized) return;
+
+    try {
+      // Initialize workmanager for periodic tasks
+      await Workmanager().initialize(
+        callbackDispatcher,
+        isInDebugMode: kDebugMode,
+      );
+
+      // Configure background_geolocation
+      await _configureBackgroundGeolocation();
+      
+      _isInitialized = true;
+      debugPrint('BackgroundTrackingService initialized');
+    } catch (e) {
+      debugPrint('Error initializing BackgroundTrackingService: $e');
+    }
+  }
 
   /// Start background location tracking for a volunteer
   Future<bool> startBackgroundTracking({

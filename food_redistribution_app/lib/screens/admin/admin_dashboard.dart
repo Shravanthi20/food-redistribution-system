@@ -7,7 +7,7 @@ import '../../utils/app_router.dart'; // [NEW]
 import '../../services/verification_service.dart'; // For VerificationStatus enum
 
 class AdminDashboard extends StatefulWidget {
-  const AdminDashboard({Key? key}) : super(key: key);
+  const AdminDashboard({super.key});
 
   @override
   State<AdminDashboard> createState() => _AdminDashboardState();
@@ -195,7 +195,7 @@ class _AdminDashboardState extends State<AdminDashboard> with SingleTickerProvid
                         title: Text(doc['type']),
                         subtitle: Text(doc['information']),
                       )
-                    ).toList(),
+                    ),
                     const SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,

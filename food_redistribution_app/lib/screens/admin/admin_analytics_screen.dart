@@ -5,7 +5,7 @@ import '../../services/tracking/analytics_aggregation_service.dart';
 
 /// Admin Analytics & Predictions Screen
 class AdminAnalyticsScreen extends StatefulWidget {
-  const AdminAnalyticsScreen({Key? key}) : super(key: key);
+  const AdminAnalyticsScreen({super.key});
 
   @override
   State<AdminAnalyticsScreen> createState() => _AdminAnalyticsScreenState();
@@ -310,7 +310,7 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
                           data['predictedDailyDonations'].toString(),
                         ),
                         _buildMetricRow(
-                          'Total (${_selectedMetricDays} days)',
+                          'Total ($_selectedMetricDays days)',
                           data['predictedTotalDonations'].toString(),
                         ),
                         _buildMetricRow(

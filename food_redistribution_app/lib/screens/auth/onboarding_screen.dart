@@ -11,7 +11,7 @@ import '../../utils/app_router.dart';
 class OnboardingScreen extends StatefulWidget {
   final dynamic userRole;
 
-  const OnboardingScreen({Key? key, this.userRole}) : super(key: key);
+  const OnboardingScreen({super.key, this.userRole});
 
   @override
   State<OnboardingScreen> createState() => _OnboardingScreenState();

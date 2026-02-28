@@ -223,7 +223,7 @@ class AuditService {
       
       // Filter by risk level if specified (Firestore doesn't support enum ordering)
       if (minRiskLevel != null) {
-        final riskLevels = AuditRiskLevel.values;
+        const riskLevels = AuditRiskLevel.values;
         final minIndex = riskLevels.indexOf(minRiskLevel);
         
         logs = logs.where((log) {

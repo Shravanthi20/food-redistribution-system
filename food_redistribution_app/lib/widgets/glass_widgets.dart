@@ -16,7 +16,7 @@ class GlassContainer extends StatelessWidget {
   final VoidCallback? onTap;
 
   const GlassContainer({
-    Key? key,
+    super.key,
     required this.child,
     this.width,
     this.height,
@@ -27,7 +27,7 @@ class GlassContainer extends StatelessWidget {
     this.showBorder = true,
     this.tintColor,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -82,13 +82,13 @@ class GlassCard extends StatelessWidget {
   final bool isAccent;
 
   const GlassCard({
-    Key? key,
+    super.key,
     required this.child,
     this.padding,
     this.margin,
     this.onTap,
     this.isAccent = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -113,7 +113,7 @@ class GradientButton extends StatelessWidget {
   final bool outlined;
 
   const GradientButton({
-    Key? key,
+    super.key,
     required this.text,
     this.onPressed,
     this.isLoading = false,
@@ -121,7 +121,7 @@ class GradientButton extends StatelessWidget {
     this.icon,
     this.gradientColors,
     this.outlined = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -236,7 +236,7 @@ class GlassTextField extends StatelessWidget {
   final ValueChanged<String>? onChanged;
 
   const GlassTextField({
-    Key? key,
+    super.key,
     required this.controller,
     this.label,
     this.hintText,
@@ -248,7 +248,7 @@ class GlassTextField extends StatelessWidget {
     this.maxLines = 1,
     this.enabled = true,
     this.onChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -258,7 +258,7 @@ class GlassTextField extends StatelessWidget {
         if (label != null) ...[
           Text(
             label!,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
               color: AppTheme.textSecondary,
@@ -291,11 +291,11 @@ class GlassTextField extends StatelessWidget {
                 fillColor: AppTheme.surfaceGlassDark,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(color: AppTheme.surfaceGlassBorder),
+                  borderSide: const BorderSide(color: AppTheme.surfaceGlassBorder),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(color: AppTheme.surfaceGlassBorder),
+                  borderSide: const BorderSide(color: AppTheme.surfaceGlassBorder),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
@@ -323,13 +323,13 @@ class GlassIconButton extends StatelessWidget {
   final bool isAccent;
 
   const GlassIconButton({
-    Key? key,
+    super.key,
     required this.icon,
     this.onPressed,
     this.size = 48,
     this.iconColor,
     this.isAccent = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -378,13 +378,13 @@ class GlassChip extends StatelessWidget {
   final Color? selectedColor;
 
   const GlassChip({
-    Key? key,
+    super.key,
     required this.label,
     this.icon,
     this.isSelected = false,
     this.onTap,
     this.selectedColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -439,14 +439,14 @@ class GlassStatCard extends StatelessWidget {
   final VoidCallback? onTap;
 
   const GlassStatCard({
-    Key? key,
+    super.key,
     required this.title,
     required this.value,
     required this.icon,
     this.accentColor,
     this.subtitle,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -469,7 +469,7 @@ class GlassStatCard extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             value,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.w700,
               color: AppTheme.textPrimary,
@@ -479,7 +479,7 @@ class GlassStatCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             title,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
               color: AppTheme.textSecondary,
               fontWeight: FontWeight.w400,
@@ -516,11 +516,11 @@ class GlassNavigationBar extends StatelessWidget {
   final List<GlassNavigationItem> items;
 
   const GlassNavigationBar({
-    Key? key,
+    super.key,
     required this.currentIndex,
     required this.onTap,
     required this.items,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -531,7 +531,7 @@ class GlassNavigationBar extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
           decoration: BoxDecoration(
             color: AppTheme.primaryNavy.withOpacity(0.8),
-            border: Border(
+            border: const Border(
               top: BorderSide(
                 color: AppTheme.surfaceGlassBorder,
                 width: 1,
@@ -612,14 +612,14 @@ class GlassListTile extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
 
   const GlassListTile({
-    Key? key,
+    super.key,
     required this.title,
     this.subtitle,
     this.leading,
     this.trailing,
     this.onTap,
     this.padding,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -650,7 +650,7 @@ class GlassListTile extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     subtitle!,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: AppTheme.textSecondary,
                       fontSize: 13,
                     ),
@@ -672,10 +672,10 @@ class GlassBadge extends StatelessWidget {
   final Color? color;
 
   const GlassBadge({
-    Key? key,
+    super.key,
     required this.text,
     this.color,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -711,12 +711,12 @@ class GlassProgressBar extends StatelessWidget {
   final Color? backgroundColor;
 
   const GlassProgressBar({
-    Key? key,
+    super.key,
     required this.value,
     this.height = 8,
     this.color,
     this.backgroundColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

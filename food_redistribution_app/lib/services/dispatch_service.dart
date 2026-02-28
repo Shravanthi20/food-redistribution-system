@@ -133,7 +133,7 @@ class VolunteerDispatchService {
       deliveryAddress: deliveryAddress,
       pickupLocation: pickupLocation,
       deliveryLocation: deliveryLocation,
-      scheduledTime: scheduledTime ?? DateTime.now().add(Duration(hours: 1)),
+      scheduledTime: scheduledTime ?? DateTime.now().add(const Duration(hours: 1)),
       priority: calculatedPriority,
       specialInstructions: specialInstructions,
       requiredSkills: requiredSkills,
@@ -167,6 +167,12 @@ class VolunteerDispatchService {
     Map<String, dynamic>? assignmentMetadata,
   }) async {
     try {
+      // Idempotency: if already assigned to same volunteer, no-op
+      final task = await _getTask(taskId);
+      if (task != null && task['assignedVolunteerId'] == volunteerId) {
+        return true;
+      }
+
       // Update task with volunteer assignment
       await _firestoreService.update('delivery_tasks', taskId, {
         'assignedVolunteerId': volunteerId,
@@ -441,7 +447,7 @@ class VolunteerDispatchService {
     
     final totalDistance = distance * 2; // Round trip
     final travelTime = (totalDistance / baseSpeed) * 60; // minutes
-    final loadingTime = 15; // minutes for pickup/delivery
+    const loadingTime = 15; // minutes for pickup/delivery
     
     return travelTime + loadingTime;
   }
@@ -471,19 +477,17 @@ class VolunteerDispatchService {
   /// Helper functions for data retrieval
   Future<FoodDonation?> _getDonation(String donationId) async {
     final doc = await _firestoreService.get('food_donations', donationId);
-    if (doc == null) return null;
     return FoodDonation.fromMap(doc.data()! as Map<String, dynamic>);
   }
   
   Future<VolunteerProfile?> _getVolunteer(String volunteerId) async {
     final doc = await _firestoreService.get('volunteer_profiles', volunteerId);
-    if (doc == null) return null;
     return VolunteerProfile.fromMap(doc.data()! as Map<String, dynamic>);
   }
   
   Future<Map<String, dynamic>?> _getTask(String taskId) async {
     final doc = await _firestoreService.get('delivery_tasks', taskId);
-    return doc?.data() as Map<String, dynamic>?;
+    return doc.data() as Map<String, dynamic>?;
   }
   
   DispatchPriority _calculatePriority(FoodDonation donation) {

@@ -5,7 +5,7 @@ import '../../widgets/loading_overlay.dart';
 import '../../utils/app_router.dart';
 
 class EmailVerificationScreen extends StatefulWidget {
-  const EmailVerificationScreen({Key? key}) : super(key: key);
+  const EmailVerificationScreen({super.key});
 
   @override
   State<EmailVerificationScreen> createState() => _EmailVerificationScreenState();
@@ -23,7 +23,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
   Future<void> _checkEmailVerification() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     
-    if (await authProvider.isEmailVerified) {
+    if (authProvider.isEmailVerified) {
       Navigator.pushReplacementNamed(context, AppRouter.splash);
     }
   }
@@ -53,7 +53,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
     setState(() => _isCheckingVerification = true);
     
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    if (await authProvider.isEmailVerified) {
+    if (authProvider.isEmailVerified) {
       Navigator.pushReplacementNamed(context, AppRouter.splash);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
