@@ -38,6 +38,9 @@ class AuthProvider extends ChangeNotifier {
       
       if (user != null) {
         try {
+          // force token refresh so Firestore rules see the authenticated user
+          await user.getIdToken(true);
+          await Future.delayed(const Duration(milliseconds: 200));
           _appUser = await _authService.getCurrentAppUser();
         } catch (e) {
           print('Error getting app user: $e');
@@ -100,6 +103,9 @@ class AuthProvider extends ChangeNotifier {
       }
       return false;
     } catch (e) {
+      // Debug print for raw exception
+      // ignore: avoid_print
+      print('Raw Donor Registration exception: $e');
       _errorMessage = _getErrorMessage(e);
       return false;
     } finally {
@@ -129,6 +135,9 @@ class AuthProvider extends ChangeNotifier {
       }
       return false;
     } catch (e) {
+      // Debug print for raw exception
+      // ignore: avoid_print
+      print('Raw NGO Registration exception: $e');
       _errorMessage = _getErrorMessage(e);
       return false;
     } finally {
@@ -158,6 +167,9 @@ class AuthProvider extends ChangeNotifier {
       }
       return false;
     } catch (e) {
+      // Debug print for raw exception
+      // ignore: avoid_print
+      print('Raw Volunteer Registration exception: $e');
       _errorMessage = _getErrorMessage(e);
       return false;
     } finally {
@@ -228,7 +240,7 @@ class AuthProvider extends ChangeNotifier {
     } catch (e) {
       _errorMessage = e.toString();
       notifyListeners();
-      throw e;
+      rethrow;
     } finally {
       _setLoading(false);
     }

@@ -11,7 +11,7 @@ import '../../widgets/gradient_scaffold.dart';
 import '../../widgets/glass_widgets.dart';
 
 class NGORegistrationScreen extends StatefulWidget {
-  const NGORegistrationScreen({Key? key}) : super(key: key);
+  const NGORegistrationScreen({super.key});
 
   @override
   State<NGORegistrationScreen> createState() => _NGORegistrationScreenState();
@@ -35,8 +35,8 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
   final _contactPhoneController = TextEditingController();
 
   NGOType _selectedNGOType = NGOType.foodBank;
-  List<String> _selectedServingPopulation = [];
-  List<String> _selectedFoodTypes = [];
+  final List<String> _selectedServingPopulation = [];
+  final List<String> _selectedFoodTypes = [];
   bool _refrigerationAvailable = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
@@ -142,6 +142,9 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
     if (success && mounted) {
       Navigator.pushReplacementNamed(context, AppRouter.documentSubmission);
     } else if (mounted && authProvider.errorMessage != null) {
+      // Debug print for error message
+      // ignore: avoid_print
+      print('NGO Registration error: \\${authProvider.errorMessage}');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(authProvider.errorMessage!),
@@ -173,7 +176,7 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
                   children: [
                     // Header
                     ShaderMask(
-                      shaderCallback: (bounds) => LinearGradient(
+                      shaderCallback: (bounds) => const LinearGradient(
                         colors: [AppTheme.accentTeal, AppTheme.accentCyan],
                       ).createShader(bounds),
                       child: const Text(
@@ -191,9 +194,9 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
                     const SizedBox(height: 32),
 
                     // Account Information
-                    Text(
+                    const Text(
                       'Account Information',
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                     const SizedBox(height: 16),
 
@@ -266,9 +269,9 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
                     const SizedBox(height: 32),
 
                     // Organization Information
-                    Text(
+                    const Text(
                       'Organization Information',
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                     const SizedBox(height: 16),
 
@@ -286,7 +289,7 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
                         ),
                         const SizedBox(height: 8),
                         DropdownButtonFormField<NGOType>(
-                          value: _selectedNGOType,
+                          initialValue: _selectedNGOType,
                           dropdownColor: AppTheme.primaryNavyLight,
                           style: const TextStyle(color: Colors.white),
                           decoration: InputDecoration(
@@ -411,9 +414,9 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
                     const SizedBox(height: 32),
 
                     // Contact Information
-                    Text(
+                    const Text(
                       'Contact Information',
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                     const SizedBox(height: 16),
 
@@ -456,9 +459,9 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
                     const SizedBox(height: 32),
 
                     // Capacity Information
-                    Text(
+                    const Text(
                       'Capacity Information',
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                     const SizedBox(height: 16),
 
@@ -518,9 +521,9 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
                     const SizedBox(height: 32),
 
                     // Serving Population
-                    Text(
+                    const Text(
                       'Serving Population',
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                     const SizedBox(height: 16),
                     
@@ -550,9 +553,9 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
                     const SizedBox(height: 32),
 
                     // Preferred Food Types
-                    Text(
+                    const Text(
                       'Preferred Food Types',
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                     const SizedBox(height: 16),
                     
@@ -602,7 +605,7 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
                             Navigator.pushReplacementNamed(context, AppRouter.login);
                           },
                           child: ShaderMask(
-                            shaderCallback: (bounds) => LinearGradient(
+                            shaderCallback: (bounds) => const LinearGradient(
                               colors: [AppTheme.accentTeal, AppTheme.accentCyan],
                             ).createShader(bounds),
                             child: const Text(

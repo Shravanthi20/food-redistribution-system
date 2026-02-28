@@ -8,7 +8,7 @@ import '../../widgets/loading_overlay.dart';
 import '../../utils/app_router.dart';
 
 class VolunteerRegistrationScreen extends StatefulWidget {
-  const VolunteerRegistrationScreen({Key? key}) : super(key: key);
+  const VolunteerRegistrationScreen({super.key});
 
   @override
   State<VolunteerRegistrationScreen> createState() => _VolunteerRegistrationScreenState();
@@ -35,9 +35,9 @@ class _VolunteerRegistrationScreenState extends State<VolunteerRegistrationScree
   bool _hasVehicle = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
-  List<String> _selectedAvailabilityHours = [];
-  List<String> _selectedWorkingDays = [];
-  List<String> _selectedPreferredTasks = [];
+  final List<String> _selectedAvailabilityHours = [];
+  final List<String> _selectedWorkingDays = [];
+  final List<String> _selectedPreferredTasks = [];
 
   final List<String> _availabilityHoursOptions = [
     'Morning (6AM-12PM)',
@@ -156,6 +156,9 @@ class _VolunteerRegistrationScreenState extends State<VolunteerRegistrationScree
     if (success && mounted) {
       Navigator.pushReplacementNamed(context, AppRouter.emailVerification);
     } else if (mounted && authProvider.errorMessage != null) {
+      // Debug print for error message
+      // ignore: avoid_print
+      print('Volunteer Registration error: \\${authProvider.errorMessage}');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(authProvider.errorMessage!),

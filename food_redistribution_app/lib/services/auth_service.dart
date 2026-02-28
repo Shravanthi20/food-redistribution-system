@@ -34,12 +34,28 @@ class AuthService {
   Future<AppUser?> getCurrentAppUser() async {
     final user = currentUser;
     if (user == null) return null;
-    
+
     try {
+      // make sure Firestore is using an up-to-date token
+      await user.getIdToken(true);
+      // small pause to let the token propagate to Firestore headers
+      await Future.delayed(const Duration(milliseconds: 200));
+
       final doc = await _firestore.collection(Collections.users).doc(user.uid).get();
       if (!doc.exists) return null;
       return AppUser.fromFirestore(doc);
     } catch (e) {
+      // if we hit a permission error immediately after login, retry once
+      if (e is FirebaseException && e.code == 'permission-denied') {
+        await Future.delayed(const Duration(milliseconds: 200));
+        try {
+          final doc = await _firestore.collection(Collections.users).doc(user.uid).get();
+          if (!doc.exists) return null;
+          return AppUser.fromFirestore(doc);
+        } catch (_) {
+          // fall through to logging below
+        }
+      }
       print('Error getting current app user: $e');
       return null;
     }
@@ -52,11 +68,24 @@ class AuthService {
     required DonorProfile donorProfile,
   }) async {
     try {
+      // If email already has sign-in methods, surface a clear error early
+      final methods = await _auth.fetchSignInMethodsForEmail(email);
+      if (methods.isNotEmpty) {
+        throw FirebaseAuthException(
+          code: 'email-already-in-use',
+          message: 'The email address is already in use by another account.',
+        );
+      }
       // Create Firebase Auth user
       final credential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
+
+      // ensure the token is available before writing to Firestore
+      if (credential.user != null) {
+        await credential.user!.getIdToken(true);
+      }
 
       if (credential.user != null) {
         // Create AppUser document with embedded profile
@@ -108,11 +137,24 @@ class AuthService {
     required NGOProfile ngoProfile,
   }) async {
     try {
+      // Early check - avoid attempt if email already exists
+      final methods = await _auth.fetchSignInMethodsForEmail(email);
+      if (methods.isNotEmpty) {
+        throw FirebaseAuthException(
+          code: 'email-already-in-use',
+          message: 'The email address is already in use by another account.',
+        );
+      }
       // Create Firebase Auth user
       final credential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
+
+      // ensure Firestore has the token before writing collections
+      if (credential.user != null) {
+        await credential.user!.getIdToken(true);
+      }
 
       if (credential.user != null) {
         // Generate organization ID
@@ -268,6 +310,14 @@ class AuthService {
     required VolunteerProfile volunteerProfile,
   }) async {
     try {
+      // Avoid duplicate account creation - check existing sign-in methods
+      final methods = await _auth.fetchSignInMethodsForEmail(email);
+      if (methods.isNotEmpty) {
+        throw FirebaseAuthException(
+          code: 'email-already-in-use',
+          message: 'The email address is already in use by another account.',
+        );
+      }
       // Create Firebase Auth user
       final credential = await _auth.createUserWithEmailAndPassword(
         email: email,
@@ -275,6 +325,14 @@ class AuthService {
       );
 
       if (credential.user != null) {
+        // ensure token is available before any writes
+        await credential.user!.getIdToken(true);
+      }
+
+      if (credential.user != null) {
+        // make sure Firestore has the updated auth token before writing
+        await credential.user!.getIdToken(true);
+
         // Create AppUser document with embedded profile
         // Volunteers are now active immediately, no verification required
         final appUser = AppUser(
@@ -333,13 +391,27 @@ class AuthService {
         password: password,
       );
 
+      // ensure Firestore sees the authenticated user before doing any writes
+      if (credential.user != null) {
+        await credential.user!.getIdToken(true);
+        await Future.delayed(const Duration(milliseconds: 200));
+      }
+
       // Log login action
       if (credential.user != null) {
-        await _logAction('login', credential.user!.uid);
+        try {
+          await _logAction('login', credential.user!.uid);
+        } catch (e) {
+          print('Non-fatal error logging login: $e');
+        }
         
         // Auto-set admin role for whitelisted emails
         if (_adminEmails.contains(email.toLowerCase())) {
-          await _ensureAdminRole(credential.user!.uid, email);
+          try {
+            await _ensureAdminRole(credential.user!.uid, email);
+          } catch (e) {
+            print('Non-fatal error ensuring admin role: $e');
+          }
         }
       }
 
@@ -477,7 +549,16 @@ class AuthService {
       ...?additionalData,
     };
 
-    await _firestore.collection(Collections.audit).add(logData);
+    try {
+      await _firestore.collection(Collections.audit).add(logData);
+    } catch (e) {
+      // transient permission errors sometimes occur immediately after login
+      if (e is FirebaseException && e.code == 'permission-denied') {
+        print('Ignored permission-denied when writing audit log: $e');
+        return;
+      }
+      rethrow;
+    }
   }
 
   // ============================================================
