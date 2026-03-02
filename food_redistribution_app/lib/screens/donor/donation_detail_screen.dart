@@ -77,8 +77,8 @@ class DonationDetailScreen extends StatelessWidget {
                       // Status Header
                       Container(
                         padding: const EdgeInsets.all(20),
-                        color:
-                          _getStatusColor(donation.status).withAlpha((0.1 * 255).round()),
+                        color: _getStatusColor(donation.status)
+                            .withAlpha((0.1 * 255).round()),
                         child: Column(
                           children: [
                             Icon(
@@ -90,12 +90,12 @@ class DonationDetailScreen extends StatelessWidget {
                             Text(
                               _getStatusDisplayName(donation.status),
                               style: Theme.of(context)
-                                  .textTheme
-                                  .headlineSmall
-                                  ?.copyWith(
-                                    color: _getStatusColor(donation.status),
-                                    fontWeight: FontWeight.bold,
-                                  ) ??
+                                      .textTheme
+                                      .headlineSmall
+                                      ?.copyWith(
+                                        color: _getStatusColor(donation.status),
+                                        fontWeight: FontWeight.bold,
+                                      ) ??
                                   const TextStyle(),
                             ),
                             const SizedBox(height: 12),
@@ -417,7 +417,8 @@ class DonationDetailScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppTheme.infoCyan.withAlpha((0.1 * 255).round()),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.infoCyan.withAlpha((0.3 * 255).round())),
+        border:
+            Border.all(color: AppTheme.infoCyan.withAlpha((0.3 * 255).round())),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -585,8 +586,8 @@ class DonationDetailScreen extends StatelessWidget {
           Text(
             title,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ) ??
+                      fontWeight: FontWeight.bold,
+                    ) ??
                 const TextStyle(),
           ),
           const SizedBox(height: 16),

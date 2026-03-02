@@ -24,7 +24,8 @@ class LiveTrackingPanel extends StatelessWidget {
             Container(
               height: 140,
               color: Colors.grey.shade200,
-              child: const Center(child: Text('Map / Live location placeholder')),
+              child:
+                  const Center(child: Text('Map / Live location placeholder')),
             ),
             const SizedBox(height: 8),
             RealTimeStatusWidget(deliveryId: deliveryId, engine: engine),
