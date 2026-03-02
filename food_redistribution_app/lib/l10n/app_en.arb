@@ -1,0 +1,804 @@
+{
+  "@@locale": "en",
+
+  "appName": "Food Redistribution Platform",
+  "@appName": { "description": "Application name" },
+
+  "appTagline": "Reducing food waste, feeding communities",
+  "@appTagline": { "description": "App tagline shown on welcome screen" },
+
+  "comingSoon": "Coming Soon",
+  "@comingSoon": { "description": "Coming soon label" },
+
+  "operational": "Operational",
+  "@operational": { "description": "Operational status" },
+
+  "save": "Save",
+  "@save": { "description": "Generic save action" },
+
+  "cancel": "Cancel",
+  "@cancel": { "description": "Generic cancel action" },
+
+  "submit": "Submit",
+  "@submit": { "description": "Generic submit action" },
+
+  "delete": "Delete",
+  "@delete": { "description": "Generic delete action" },
+
+  "edit": "Edit",
+  "@edit": { "description": "Generic edit action" },
+
+  "back": "Back",
+  "@back": { "description": "Navigate back" },
+
+  "next": "Next",
+  "@next": { "description": "Navigate next" },
+
+  "done": "Done",
+  "@done": { "description": "Done action" },
+
+  "ok": "OK",
+  "@ok": { "description": "Acknowledge" },
+
+  "confirm": "Confirm",
+  "@confirm": { "description": "Confirm action" },
+
+  "loading": "Loading…",
+  "@loading": { "description": "Loading indicator text" },
+
+  "error": "Error",
+  "@error": { "description": "Generic error label" },
+
+  "success": "Success",
+  "@success": { "description": "Generic success label" },
+
+  "retry": "Retry",
+  "@retry": { "description": "Retry action" },
+
+  "close": "Close",
+  "@close": { "description": "Close dialog or screen" },
+
+  "search": "Search",
+  "@search": { "description": "Search action" },
+
+  "filter": "Filter",
+  "@filter": { "description": "Filter action" },
+
+  "all": "All",
+  "@all": { "description": "Show all items" },
+
+  "yes": "Yes",
+  "@yes": { "description": "Affirmative response" },
+
+  "no": "No",
+  "@no": { "description": "Negative response" },
+
+  "view": "View",
+  "@view": { "description": "View action" },
+
+  "refresh": "Refresh",
+  "@refresh": { "description": "Refresh action" },
+
+  "noDataAvailable": "No data available",
+  "@noDataAvailable": { "description": "Shown when no data to display" },
+
+  "seeAll": "See All",
+  "@seeAll": { "description": "See all items" },
+
+  "viewAll": "View All",
+  "@viewAll": { "description": "View all items" },
+
+  "required": "Required",
+  "@required": { "description": "Field is required" },
+
+  "optional": "Optional",
+  "@optional": { "description": "Field is optional" },
+
+  "total": "Total",
+  "@total": { "description": "Total label" },
+
+  "active": "Active",
+  "@active": { "description": "Active status" },
+
+  "unknown": "Unknown",
+  "@unknown": { "description": "Unknown status" },
+
+  "details": "Details",
+  "@details": { "description": "Details label" },
+
+  "description": "Description",
+  "@description": { "description": "Description label" },
+
+  "title": "Title",
+  "@title": { "description": "Title label" },
+
+  "type": "Type",
+  "@type": { "description": "Type label" },
+
+  "urgent": "URGENT",
+  "@urgent": { "description": "Urgent flag" },
+
+  "processing": "Processing…",
+  "@processing": { "description": "Processing indicator" },
+
+  "submitting": "Submitting…",
+  "@submitting": { "description": "Submitting indicator" },
+
+  "updating": "Updating…",
+  "@updating": { "description": "Updating indicator" },
+
+  "creating": "Creating…",
+  "@creating": { "description": "Creating indicator" },
+
+  "sending": "Sending…",
+  "@sending": { "description": "Sending indicator" },
+
+  "rejecting": "Rejecting…",
+  "@rejecting": { "description": "Rejecting indicator" },
+
+  "justNow": "Just now",
+  "@justNow": { "description": "Time: just now" },
+
+  "never": "Never",
+  "@never": { "description": "Time: never" },
+
+  "accepted": "Accepted",
+  "@accepted": { "description": "Status: accepted" },
+
+  "approved": "Approved",
+  "@approved": { "description": "Status: approved" },
+
+  "rejected": "Rejected",
+  "@rejected": { "description": "Status: rejected" },
+
+  "signIn": "Sign In",
+  "@signIn": { "description": "Sign in button" },
+
+  "signOut": "Sign Out",
+  "@signOut": { "description": "Sign out button" },
+
+  "signUp": "Sign Up",
+  "@signUp": { "description": "Sign up button" },
+
+  "register": "Register",
+  "@register": { "description": "Register action" },
+
+  "email": "Email",
+  "@email": { "description": "Email label" },
+
+  "password": "Password",
+  "@password": { "description": "Password label" },
+
+  "confirmPassword": "Confirm Password",
+  "@confirmPassword": { "description": "Confirm password label" },
+
+  "forgotPassword": "Forgot Password?",
+  "@forgotPassword": { "description": "Forgot password link" },
+
+  "resetPassword": "Reset Password",
+  "@resetPassword": { "description": "Reset password action" },
+
+  "changePassword": "Change Password",
+  "@changePassword": { "description": "Change password action" },
+
+  "loginTitle": "Welcome Back",
+  "@loginTitle": { "description": "Title on the login screen" },
+
+  "loginSubtitle": "Sign in to continue making a difference",
+  "@loginSubtitle": { "description": "Subtitle on login screen" },
+
+  "alreadyHaveAccount": "Already have an account? Sign in",
+  "@alreadyHaveAccount": { "description": "Shown to existing users on register screen" },
+
+  "dontHaveAccount": "Don't have an account? Sign up",
+  "@dontHaveAccount": { "description": "Shown to new users on login screen" },
+
+  "emailVerificationTitle": "Verify Your Email",
+  "@emailVerificationTitle": { "description": "Email verification screen title" },
+
+  "emailVerificationBody": "A verification link has been sent to {email}. Please check your inbox.",
+  "@emailVerificationBody": {
+    "description": "Email verification instruction",
+    "placeholders": { "email": { "type": "String" } }
+  },
+
+  "resendVerification": "Resend Verification Email",
+  "@resendVerification": { "description": "Resend verification email button" },
+
+  "otpTitle": "Enter OTP",
+  "@otpTitle": { "description": "OTP screen title" },
+
+  "otpSubtitle": "Enter the 6-digit code sent to {phone}",
+  "@otpSubtitle": {
+    "description": "OTP subtitle",
+    "placeholders": { "phone": { "type": "String" } }
+  },
+
+  "emailRequired": "Email is required",
+  "@emailRequired": { "description": "Validation: email required" },
+
+  "passwordRequired": "Password is required",
+  "@passwordRequired": { "description": "Validation: password required" },
+
+  "invalidEmail": "Please enter a valid email address",
+  "@invalidEmail": { "description": "Validation: invalid email" },
+
+  "passwordTooShort": "Password must be at least 8 characters",
+  "@passwordTooShort": { "description": "Validation: password too short" },
+
+  "passwordsMustMatch": "Passwords do not match",
+  "@passwordsMustMatch": { "description": "Validation: passwords must match" },
+
+  "fieldRequired": "This field is required",
+  "@fieldRequired": { "description": "Validation: field required" },
+
+  "invalidInput": "Invalid input",
+  "@invalidInput": { "description": "Validation: invalid input" },
+
+  "roleDonor": "Donor",
+  "@roleDonor": { "description": "Donor role label" },
+
+  "roleNgo": "NGO",
+  "@roleNgo": { "description": "NGO role label" },
+
+  "roleVolunteer": "Volunteer",
+  "@roleVolunteer": { "description": "Volunteer role label" },
+
+  "roleAdmin": "Admin",
+  "@roleAdmin": { "description": "Admin role label" },
+
+  "selectRole": "Select Your Role",
+  "@selectRole": { "description": "Role selection screen title" },
+
+  "donorRoleDescription": "Share your surplus food with those in need",
+  "@donorRoleDescription": { "description": "Description of the donor role" },
+
+  "ngoRoleDescription": "Connect with donors and distribute food to beneficiaries",
+  "@ngoRoleDescription": { "description": "Description of the NGO role" },
+
+  "volunteerRoleDescription": "Help with food pickup and delivery logistics",
+  "@volunteerRoleDescription": { "description": "Description of the volunteer role" },
+
+  "dashboard": "Dashboard",
+  "@dashboard": { "description": "Dashboard navigation label" },
+
+  "profile": "Profile",
+  "@profile": { "description": "Profile navigation label" },
+
+  "notifications": "Notifications",
+  "@notifications": { "description": "Notifications navigation label" },
+
+  "settings": "Settings",
+  "@settings": { "description": "Settings navigation label" },
+
+  "logout": "Logout",
+  "@logout": { "description": "Logout action" },
+
+  "donorDashboard": "Donor Dashboard",
+  "@donorDashboard": { "description": "Donor dashboard title" },
+
+  "ngoDashboard": "NGO Dashboard",
+  "@ngoDashboard": { "description": "NGO dashboard title" },
+
+  "volunteerDashboard": "Volunteer Dashboard",
+  "@volunteerDashboard": { "description": "Volunteer dashboard title" },
+
+  "adminDashboard": "Admin Dashboard",
+  "@adminDashboard": { "description": "Admin dashboard title" },
+
+  "createDonation": "Create Donation",
+  "@createDonation": { "description": "Create donation action/title" },
+
+  "myDonations": "My Donations",
+  "@myDonations": { "description": "List of my donations" },
+
+  "donationDetails": "Donation Details",
+  "@donationDetails": { "description": "Donation details screen title" },
+
+  "donationTitle": "Donation Title",
+  "@donationTitle": { "description": "Label for donation title field" },
+
+  "donationDescription": "Description",
+  "@donationDescription": { "description": "Label for donation description field" },
+
+  "quantity": "Quantity",
+  "@quantity": { "description": "Label for quantity field" },
+
+  "unit": "Unit",
+  "@unit": { "description": "Label for unit field (e.g. servings, kg)" },
+
+  "foodType": "Food Type",
+  "@foodType": { "description": "Label for food type field" },
+
+  "preparedAt": "Prepared At",
+  "@preparedAt": { "description": "Date/time food was prepared" },
+
+  "expiresAt": "Expires At",
+  "@expiresAt": { "description": "Date/time food expires — safety-critical" },
+
+  "availableFrom": "Available From",
+  "@availableFrom": { "description": "When food is available for pickup" },
+
+  "availableUntil": "Available Until",
+  "@availableUntil": { "description": "When food availability ends" },
+
+  "pickupAddress": "Pickup Address",
+  "@pickupAddress": { "description": "Label for pickup address field" },
+
+  "contactPhone": "Contact Phone",
+  "@contactPhone": { "description": "Label for contact phone field" },
+
+  "estimatedMeals": "Estimated Meals",
+  "@estimatedMeals": { "description": "Number of estimated meals" },
+
+  "estimatedPeople": "Estimated People",
+  "@estimatedPeople": { "description": "Estimated number of people served" },
+
+  "allergens": "Allergens",
+  "@allergens": { "description": "Allergen information — safety-critical" },
+
+  "handlingInstructions": "Handling Instructions",
+  "@handlingInstructions": { "description": "Food handling instructions — safety-critical" },
+
+  "storageInstructions": "Storage Instructions",
+  "@storageInstructions": { "description": "Food storage instructions — safety-critical" },
+
+  "requiresRefrigeration": "Requires Refrigeration",
+  "@requiresRefrigeration": { "description": "Flag: food requires refrigeration — safety-critical" },
+
+  "isVegetarian": "Vegetarian",
+  "@isVegetarian": { "description": "Flag: food is vegetarian" },
+
+  "isVegan": "Vegan",
+  "@isVegan": { "description": "Flag: food is vegan" },
+
+  "isHalal": "Halal",
+  "@isHalal": { "description": "Flag: food is halal certified" },
+
+  "isUrgent": "Urgent",
+  "@isUrgent": { "description": "Flag: donation is urgent" },
+
+  "foodSafetyLevel": "Food Safety Level",
+  "@foodSafetyLevel": { "description": "Safety classification of food — SAFETY-CRITICAL" },
+
+  "safetyHigh": "High — Freshly prepared, safe for all",
+  "@safetyHigh": { "description": "High food safety level — SAFETY-CRITICAL" },
+
+  "safetyMedium": "Medium — Prepared earlier, handle with care",
+  "@safetyMedium": { "description": "Medium food safety level — SAFETY-CRITICAL" },
+
+  "safetyLow": "Low — Near expiry, consume promptly",
+  "@safetyLow": { "description": "Low food safety level — SAFETY-CRITICAL" },
+
+  "safetyCritical": "Critical — Immediate action required",
+  "@safetyCritical": { "description": "Critical food safety level — SAFETY-CRITICAL" },
+
+  "expiryWarning": "Warning: This item expires in {hours} hour(s)",
+  "@expiryWarning": {
+    "description": "Expiry warning — SAFETY-CRITICAL",
+    "placeholders": { "hours": { "type": "int" } }
+  },
+
+  "foodExpired": "EXPIRED — Do not distribute",
+  "@foodExpired": { "description": "Food has expired — SAFETY-CRITICAL" },
+
+  "allergenWarning": "Allergen Alert: Contains {allergens}",
+  "@allergenWarning": {
+    "description": "Allergen alert — SAFETY-CRITICAL",
+    "placeholders": { "allergens": { "type": "String" } }
+  },
+
+  "refrigerationRequired": "⚠ Refrigeration Required — Keep below 4°C",
+  "@refrigerationRequired": { "description": "Refrigeration required warning — SAFETY-CRITICAL" },
+
+  "foodSafetyWarning": "Food Safety Warning",
+  "@foodSafetyWarning": { "description": "General food safety warning header — SAFETY-CRITICAL" },
+
+  "doNotConsume": "DO NOT CONSUME — Food safety concern",
+  "@doNotConsume": { "description": "Strong warning not to consume — SAFETY-CRITICAL" },
+
+  "checkBeforeEating": "Please inspect food condition before distribution",
+  "@checkBeforeEating": { "description": "Inspection reminder — SAFETY-CRITICAL" },
+
+  "temperatureBreached": "Temperature safety threshold breached",
+  "@temperatureBreached": { "description": "Temperature breach warning — SAFETY-CRITICAL" },
+
+  "crossContaminationRisk": "Risk of cross-contamination detected",
+  "@crossContaminationRisk": { "description": "Cross-contamination warning — SAFETY-CRITICAL" },
+
+  "donationStatus": "Status",
+  "@donationStatus": { "description": "Donation status label" },
+
+  "statusPending": "Pending",
+  "@statusPending": { "description": "Status: pending" },
+
+  "statusApproved": "Approved",
+  "@statusApproved": { "description": "Status: approved" },
+
+  "statusPickedUp": "Picked Up",
+  "@statusPickedUp": { "description": "Status: picked up" },
+
+  "statusDelivered": "Delivered",
+  "@statusDelivered": { "description": "Status: delivered" },
+
+  "statusExpired": "Expired",
+  "@statusExpired": { "description": "Status: expired" },
+
+  "statusCancelled": "Cancelled",
+  "@statusCancelled": { "description": "Status: cancelled" },
+
+  "statusActive": "Active",
+  "@statusActive": { "description": "Status: active" },
+
+  "statusInactive": "Inactive",
+  "@statusInactive": { "description": "Status: inactive" },
+
+  "statusVerified": "Verified",
+  "@statusVerified": { "description": "Status: verified" },
+
+  "statusRejected": "Rejected",
+  "@statusRejected": { "description": "Status: rejected" },
+
+  "statusMatched": "Matched",
+  "@statusMatched": { "description": "Status: matched to a recipient" },
+
+  "statusInTransit": "In Transit",
+  "@statusInTransit": { "description": "Status: in transit" },
+
+  "availableDonations": "Available Donations",
+  "@availableDonations": { "description": "NGO screen: available donations title" },
+
+  "createRequest": "Create Request",
+  "@createRequest": { "description": "Create food request action" },
+
+  "foodRequest": "Food Request",
+  "@foodRequest": { "description": "Food request label" },
+
+  "myRequests": "My Requests",
+  "@myRequests": { "description": "List of my food requests" },
+
+  "requestTitle": "Request Title",
+  "@requestTitle": { "description": "Label for request title field" },
+
+  "requestDescription": "Request Description",
+  "@requestDescription": { "description": "Label for request description field" },
+
+  "quantityNeeded": "Quantity Needed",
+  "@quantityNeeded": { "description": "Label for quantity needed field" },
+
+  "urgencyLevel": "Urgency Level",
+  "@urgencyLevel": { "description": "Label for urgency level" },
+
+  "urgencyLow": "Low",
+  "@urgencyLow": { "description": "Urgency: low" },
+
+  "urgencyMedium": "Medium",
+  "@urgencyMedium": { "description": "Urgency: medium" },
+
+  "urgencyHigh": "High",
+  "@urgencyHigh": { "description": "Urgency: high" },
+
+  "urgencyCritical": "Critical",
+  "@urgencyCritical": { "description": "Urgency: critical" },
+
+  "beneficiariesCount": "Number of Beneficiaries",
+  "@beneficiariesCount": { "description": "Label for beneficiaries count" },
+
+  "acceptDonation": "Accept Donation",
+  "@acceptDonation": { "description": "Accept donation action" },
+
+  "rejectDonation": "Reject Donation",
+  "@rejectDonation": { "description": "Reject donation action" },
+
+  "pendingRequests": "Pending Requests",
+  "@pendingRequests": { "description": "List of pending requests" },
+
+  "ngoName": "Organization Name",
+  "@ngoName": { "description": "NGO/org name label" },
+
+  "rejectReason": "Reason for Rejection",
+  "@rejectReason": { "description": "Label for rejection reason" },
+
+  "clarifyRequest": "Clarify Request",
+  "@clarifyRequest": { "description": "Action to request clarification" },
+
+  "inspectDelivery": "Inspect Delivery",
+  "@inspectDelivery": { "description": "Inspect delivery action" },
+
+  "myTasks": "My Tasks",
+  "@myTasks": { "description": "Volunteer: list of my tasks" },
+
+  "acceptTask": "Accept Task",
+  "@acceptTask": { "description": "Accept a volunteer task" },
+
+  "rejectTask": "Decline Task",
+  "@rejectTask": { "description": "Decline a volunteer task" },
+
+  "taskComplete": "Mark as Complete",
+  "@taskComplete": { "description": "Mark task as complete action" },
+
+  "pickupLocation": "Pickup Location",
+  "@pickupLocation": { "description": "Pickup location label" },
+
+  "deliveryLocation": "Delivery Location",
+  "@deliveryLocation": { "description": "Delivery location label" },
+
+  "estimatedDistance": "Estimated Distance",
+  "@estimatedDistance": { "description": "Estimated distance label" },
+
+  "assignedTask": "Assigned Task",
+  "@assignedTask": { "description": "Assigned task label" },
+
+  "taskStatus": "Task Status",
+  "@taskStatus": { "description": "Task status label" },
+
+  "deliveryCoordination": "Delivery Coordination",
+  "@deliveryCoordination": { "description": "Delivery coordination screen title" },
+
+  "reportIssue": "Report Issue",
+  "@reportIssue": { "description": "Report issue action" },
+
+  "issueTitle": "Issue Title",
+  "@issueTitle": { "description": "Label for issue title field" },
+
+  "issueDescription": "Issue Description",
+  "@issueDescription": { "description": "Label for issue description field" },
+
+  "userManagement": "User Management",
+  "@userManagement": { "description": "Admin: user management title" },
+
+  "verifyUser": "Verify User",
+  "@verifyUser": { "description": "Admin: verify user action" },
+
+  "pendingVerification": "Pending Verification",
+  "@pendingVerification": { "description": "Users pending verification" },
+
+  "systemStatus": "System Status",
+  "@systemStatus": { "description": "Admin: system status title" },
+
+  "analytics": "Analytics",
+  "@analytics": { "description": "Analytics screen title" },
+
+  "auditLog": "Audit Log",
+  "@auditLog": { "description": "Audit log label" },
+
+  "reportsTitle": "Reports",
+  "@reportsTitle": { "description": "Reports screen title" },
+
+  "impactReports": "Impact Reports",
+  "@impactReports": { "description": "Donor impact reports title" },
+
+  "totalDonations": "Total Donations",
+  "@totalDonations": { "description": "Stat: total donations" },
+
+  "totalDeliveries": "Total Deliveries",
+  "@totalDeliveries": { "description": "Stat: total deliveries" },
+
+  "mealsProvided": "Meals Provided",
+  "@mealsProvided": { "description": "Stat: meals provided" },
+
+  "wasteReduced": "Waste Reduced",
+  "@wasteReduced": { "description": "Stat: waste reduced" },
+
+  "activeUsers": "Active Users",
+  "@activeUsers": { "description": "Stat: active users" },
+
+  "language": "Language",
+  "@language": { "description": "Language setting label" },
+
+  "languageEnglish": "English",
+  "@languageEnglish": { "description": "English language option" },
+
+  "languageHindi": "हिन्दी (Hindi)",
+  "@languageHindi": { "description": "Hindi language option" },
+
+  "languageTamil": "தமிழ் (Tamil)",
+  "@languageTamil": { "description": "Tamil language option" },
+
+  "changeLanguage": "Change Language",
+  "@changeLanguage": { "description": "Change language action" },
+
+  "preferredLanguage": "Preferred Language",
+  "@preferredLanguage": { "description": "Preferred language setting" },
+
+  "settingsTitle": "Settings",
+  "@settingsTitle": { "description": "Settings screen title" },
+
+  "darkMode": "Dark Mode",
+  "@darkMode": { "description": "Dark mode toggle label" },
+
+  "lightMode": "Light Mode",
+  "@lightMode": { "description": "Light mode toggle label" },
+
+  "themeSettings": "Theme",
+  "@themeSettings": { "description": "Theme settings section" },
+
+  "appearanceSettings": "Appearance",
+  "@appearanceSettings": { "description": "Appearance settings section" },
+
+  "networkError": "Network error. Please check your connection.",
+  "@networkError": { "description": "Error: network connectivity" },
+
+  "serverError": "Server error. Please try again later.",
+  "@serverError": { "description": "Error: server error" },
+
+  "unknownError": "An unexpected error occurred. Please try again.",
+  "@unknownError": { "description": "Error: unknown" },
+
+  "sessionExpired": "Your session has expired. Please sign in again.",
+  "@sessionExpired": { "description": "Error: session expired" },
+
+  "permissionDenied": "You do not have permission to perform this action.",
+  "@permissionDenied": { "description": "Error: permission denied" },
+
+  "locationPermissionRequired": "Location permission is required for this feature.",
+  "@locationPermissionRequired": { "description": "Error: location permission required" },
+
+  "cameraPermissionRequired": "Camera permission is required to upload photos.",
+  "@cameraPermissionRequired": { "description": "Error: camera permission required" },
+
+  "documentUpload": "Upload Document",
+  "@documentUpload": { "description": "Upload document action" },
+
+  "documentVerification": "Document Verification",
+  "@documentVerification": { "description": "Document verification screen title" },
+
+  "verificationPending": "Verification Pending",
+  "@verificationPending": { "description": "Verification pending status message" },
+
+  "verificationApproved": "Verification Approved",
+  "@verificationApproved": { "description": "Verification approved message" },
+
+  "verificationRejected": "Verification Rejected",
+  "@verificationRejected": { "description": "Verification rejected message" },
+
+  "onboardingTitle1": "Reduce Food Waste",
+  "@onboardingTitle1": { "description": "Onboarding slide 1 title" },
+
+  "onboardingBody1": "Connect surplus food with communities that need it most.",
+  "@onboardingBody1": { "description": "Onboarding slide 1 body" },
+
+  "onboardingTitle2": "Real-Time Coordination",
+  "@onboardingTitle2": { "description": "Onboarding slide 2 title" },
+
+  "onboardingBody2": "Track donations and deliveries in real time.",
+  "@onboardingBody2": { "description": "Onboarding slide 2 body" },
+
+  "onboardingTitle3": "Make an Impact",
+  "@onboardingTitle3": { "description": "Onboarding slide 3 title" },
+
+  "onboardingBody3": "Every donation feeds a family and saves the planet.",
+  "@onboardingBody3": { "description": "Onboarding slide 3 body" },
+
+  "getStarted": "Get Started",
+  "@getStarted": { "description": "Get started button" },
+
+  "skip": "Skip",
+  "@skip": { "description": "Skip onboarding button" },
+
+  "name": "Name",
+  "@name": { "description": "Name label" },
+
+  "fullName": "Full Name",
+  "@fullName": { "description": "Full name label" },
+
+  "phoneNumber": "Phone Number",
+  "@phoneNumber": { "description": "Phone number label" },
+
+  "address": "Address",
+  "@address": { "description": "Address label" },
+
+  "city": "City",
+  "@city": { "description": "City label" },
+
+  "state": "State",
+  "@state": { "description": "State/province label" },
+
+  "pincode": "PIN Code",
+  "@pincode": { "description": "Postal/PIN code label" },
+
+  "latitude": "Latitude",
+  "@latitude": { "description": "Latitude label" },
+
+  "longitude": "Longitude",
+  "@longitude": { "description": "Longitude label" },
+
+  "useCurrentLocation": "Use Current Location",
+  "@useCurrentLocation": { "description": "Use GPS location button" },
+
+  "organizationType": "Organization Type",
+  "@organizationType": { "description": "Type of organization" },
+
+  "registrationNumber": "Registration Number",
+  "@registrationNumber": { "description": "NGO/organization registration number" },
+
+  "website": "Website",
+  "@website": { "description": "Website URL label" },
+
+  "socialMedia": "Social Media",
+  "@socialMedia": { "description": "Social media label" },
+
+  "category": "Category",
+  "@category": { "description": "Category label" },
+
+  "tags": "Tags",
+  "@tags": { "description": "Tags label" },
+
+  "notes": "Notes",
+  "@notes": { "description": "Notes label" },
+
+  "date": "Date",
+  "@date": { "description": "Date label" },
+
+  "time": "Time",
+  "@time": { "description": "Time label" },
+
+  "dateTime": "Date & Time",
+  "@dateTime": { "description": "Date and time label" },
+
+  "selectDate": "Select Date",
+  "@selectDate": { "description": "Select date action" },
+
+  "selectTime": "Select Time",
+  "@selectTime": { "description": "Select time action" },
+
+  "realTimeTracking": "Real-Time Tracking",
+  "@realTimeTracking": { "description": "Real-time tracking screen title" },
+
+  "liveLocation": "Live Location",
+  "@liveLocation": { "description": "Live location label" },
+
+  "trackDelivery": "Track Delivery",
+  "@trackDelivery": { "description": "Track delivery action" },
+
+  "dispatchOrder": "Dispatch Order",
+  "@dispatchOrder": { "description": "Dispatch order action" },
+
+  "logisticsManagement": "Logistics Management",
+  "@logisticsManagement": { "description": "Logistics management screen title" },
+
+  "matchingAlgorithm": "Matching",
+  "@matchingAlgorithm": { "description": "Matching algorithm label" },
+
+  "matchScore": "Match Score",
+  "@matchScore": { "description": "Match score label" },
+
+  "distance": "Distance",
+  "@distance": { "description": "Distance label" },
+
+  "estimatedArrival": "Estimated Arrival",
+  "@estimatedArrival": { "description": "Estimated arrival time" },
+
+  "confirmLogout": "Are you sure you want to sign out?",
+  "@confirmLogout": { "description": "Logout confirmation dialog body" },
+
+  "confirmDelete": "Are you sure you want to delete this? This action cannot be undone.",
+  "@confirmDelete": { "description": "Delete confirmation dialog body" },
+
+  "savedSuccessfully": "Saved successfully",
+  "@savedSuccessfully": { "description": "Save success message" },
+
+  "deletedSuccessfully": "Deleted successfully",
+  "@deletedSuccessfully": { "description": "Delete success message" },
+
+  "submittedSuccessfully": "Submitted successfully",
+  "@submittedSuccessfully": { "description": "Submit success message" },
+
+  "donationCreatedSuccess": "Donation created successfully",
+  "@donationCreatedSuccess": { "description": "Donation created success message" },
+
+  "requestCreatedSuccess": "Request created successfully",
+  "@requestCreatedSuccess": { "description": "Request created success message" },
+
+  "userVerifiedSuccess": "User verified successfully",
+  "@userVerifiedSuccess": { "description": "User verified success message" },
+
+  "loginSuccessful": "Signed in successfully",
+  "@loginSuccessful": { "description": "Login success message" },
+
+  "logoutSuccessful": "Signed out successfully",
+  "@logoutSuccessful": { "description": "Logout success message" },
+
+  "registrationSuccessful": "Account created successfully",
+  "@registrationSuccessful": { "description": "Registration success message" }
+}
