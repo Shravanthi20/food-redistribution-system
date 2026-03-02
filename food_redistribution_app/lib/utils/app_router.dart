@@ -29,6 +29,7 @@ import '../screens/ngo/update_demand_screen.dart';
 // Dashboards
 
 import '../screens/volunteer/volunteer_dashboard.dart';
+import '../real_time_tracking/demo/delivery_demo_screen.dart';
 import '../screens/admin/admin_dashboard_screen.dart';
 import '../screens/admin/admin_issues_screen.dart';
 import '../screens/admin/verify_user_screen.dart';
@@ -89,6 +90,7 @@ class AppRouter {
   static const String issueReporting = '/issue-reporting'; // [NEW]
   static const String verifyUser = '/admin/verify-user';
   static const String volunteerProfile = '/volunteer-profile';
+  static const String deliveryDemo = '/delivery-demo';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -215,6 +217,9 @@ class AppRouter {
 
       case adminDashboard:
         return MaterialPageRoute(builder: (_) => const AdminDashboardScreen());
+
+      case deliveryDemo:
+        return MaterialPageRoute(builder: (_) => const DeliveryDemoScreen());
 
       case adminIssues:
         return MaterialPageRoute(builder: (_) => const AdminIssuesScreen());
