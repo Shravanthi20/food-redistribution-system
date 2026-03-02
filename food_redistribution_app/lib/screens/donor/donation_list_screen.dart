@@ -4,6 +4,7 @@ import '../../providers/donation_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../models/food_donation.dart';
 import 'donation_detail_screen.dart';
+import '../../real_time_tracking/widgets/donation_status_badge.dart';
 
 class DonationListScreen extends StatefulWidget {
   const DonationListScreen({super.key});
@@ -179,6 +180,8 @@ class _DonationListScreenState extends State<DonationListScreen> {
                       ),
                     ),
                   ),
+                  const SizedBox(width: 8),
+                  DonationStatusBadge(deliveryId: donation.id?.toString() ?? donation.title, role: 'donor'),
                 ],
               ),
               const SizedBox(height: 8),

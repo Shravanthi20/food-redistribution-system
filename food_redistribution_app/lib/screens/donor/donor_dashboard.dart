@@ -9,6 +9,8 @@ import '../../widgets/gradient_scaffold.dart';
 import '../../widgets/glass_widgets.dart';
 import 'create_donation_screen.dart';
 import 'donation_list_screen.dart';
+import '../../real_time_tracking/widgets/delivery_status_panel.dart';
+import '../../real_time_tracking/widgets/donation_status_badge.dart';
 
 class DonorDashboard extends StatefulWidget {
   const DonorDashboard({super.key});
@@ -391,33 +393,51 @@ class _DonorDashboardState extends State<DonorDashboard> {
                       ),
                       const SizedBox(height: 12),
                       ...myDonations.take(3).map((donation) {
-                        return GlassListTile(
-                          title: donation.title,
-                          subtitle:
-                              '${donation.quantity} ${donation.unit} • ${_getStatusDisplayName(donation.status)}',
-                          leading: Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: _getStatusColor(donation.status)
-                                  .withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(12),
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            GlassListTile(
+                              title: donation.title,
+                              subtitle:
+                                  '${donation.quantity} ${donation.unit} • ${_getStatusDisplayName(donation.status)}',
+                              leading: Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: _getStatusColor(donation.status)
+                                      .withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Icon(
+                                  Icons.restaurant_rounded,
+                                  color: _getStatusColor(donation.status),
+                                  size: 22,
+                                ),
+                              ),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  DonationStatusBadge(deliveryId: donation.id?.toString() ?? donation.title, role: 'donor'),
+                                  const SizedBox(width: 8),
+                                  const Icon(
+                                    Icons.arrow_forward_ios_rounded,
+                                    size: 16,
+                                    color: AppTheme.textMuted,
+                                  ),
+                                ],
+                              ),
+                              onTap: () => Navigator.pushNamed(
+                                context,
+                                AppRouter.donationDetail,
+                                arguments: donation,
+                              ),
                             ),
-                            child: Icon(
-                              Icons.restaurant_rounded,
-                              color: _getStatusColor(donation.status),
-                              size: 22,
+                            // Real-time tracking panel (minimal insertion)
+                            DeliveryStatusPanel(
+                              role: 'donor',
+                              deliveryId: donation.id?.toString() ?? donation.title,
                             ),
-                          ),
-                          trailing: const Icon(
-                            Icons.arrow_forward_ios_rounded,
-                            size: 16,
-                            color: AppTheme.textMuted,
-                          ),
-                          onTap: () => Navigator.pushNamed(
-                            context,
-                            AppRouter.donationDetail,
-                            arguments: donation,
-                          ),
+                            const SizedBox(height: 8),
+                          ],
                         );
                       }),
                     ],
