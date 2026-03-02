@@ -1,0 +1,27 @@
+# Android - STRONG ignore to prevent pull conflicts.
+# Only source (kotlin/, res/), build.gradle*, settings.gradle*, AndroidManifest
+# and gradle-wrapper.properties are tracked. Everything below is ignored.
+
+gradle-wrapper.jar
+.gradle/
+captures/
+local.properties
+.cxx/
+.externalNativeBuild/
+**/app/build/
+**/build/
+
+# Generated
+GeneratedPluginRegistrant.java
+**/GeneratedPluginRegistrant.*
+
+# Keystores - never commit
+key.properties
+*.keystore
+*.jks
+
+# Build outputs
+*.apk
+*.aab
+*.ap_
+*.dex

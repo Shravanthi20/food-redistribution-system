@@ -1,0 +1,268 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ============================================================
+    // HELPER FUNCTIONS
+    // ============================================================
+    
+    function isAuth() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuth() && request.auth.uid == userId;
+    }
+    
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    
+    function getUserRole() {
+      let userData = getUserData();
+      return userData != null ? userData.role : null;
+    }
+    
+    function hasRole(role) {
+      return isAuth() && getUserRole() == role;
+    }
+    
+    function isAdmin() {
+      return hasRole('admin');
+    }
+    
+    function isDonor() {
+      return hasRole('donor');
+    }
+    
+    function isNGO() {
+      return hasRole('ngo');
+    }
+    
+    function isVolunteer() {
+      return hasRole('volunteer');
+    }
+    
+    function isVerified() {
+      return isAuth() && getUserData().status in ['verified', 'active'];
+    }
+
+    // ============================================================
+    // USERS COLLECTION
+    // Unified user profiles with role-specific embedded data
+    // ============================================================
+    match /users/{userId} {
+      allow read: if isAuth();
+      allow create: if isAuth() && request.auth.uid == userId;
+      allow update: if isOwner(userId) || isAdmin();
+      allow delete: if isAdmin();
+      
+      // FCM tokens subcollection
+      match /tokens/{tokenId} {
+        allow read, write: if isOwner(userId);
+      }
+      
+      // User settings
+      match /settings/{settingId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+
+    // ============================================================
+    // ORGANIZATIONS COLLECTION
+    // NGO/Organization profiles
+    // ============================================================
+    match /organizations/{orgId} {
+      allow read: if isAuth();
+      allow create: if isAuth() && isNGO();
+      allow update: if isAuth() && (resource.data.ownerId == request.auth.uid || isAdmin());
+      allow delete: if isAdmin();
+      
+      // Branches subcollection
+      match /branches/{branchId} {
+        allow read: if isAuth();
+        allow write: if isAuth() && (
+          get(/databases/$(database)/documents/organizations/$(orgId)).data.ownerId == request.auth.uid || 
+          isAdmin()
+        );
+      }
+    }
+
+    // ============================================================
+    // DONATIONS COLLECTION
+    // Food donations
+    // ============================================================
+    match /donations/{donationId} {
+      allow read: if isAuth();
+      // Allow create if authenticated and donorId matches (role check optional for flexibility)
+      allow create: if isAuth() && request.resource.data.donorId == request.auth.uid;
+      allow update: if isAuth() && (
+        resource.data.donorId == request.auth.uid ||
+        resource.data.ngoId == request.auth.uid ||
+        resource.data.volunteerId == request.auth.uid ||
+        isAdmin()
+      );
+      allow delete: if isAuth() && (resource.data.donorId == request.auth.uid || isAdmin());
+      
+      // Status history
+      match /history/{historyId} {
+        allow read: if isAuth();
+        allow create: if isAuth();
+      }
+      
+      // Messages/clarifications
+      match /messages/{messageId} {
+        allow read: if isAuth();
+        allow create: if isAuth();
+      }
+    }
+
+    // ============================================================
+    // DELIVERIES COLLECTION
+    // Active delivery tasks
+    // ============================================================
+    match /deliveries/{deliveryId} {
+      allow read: if isAuth() && (
+        resource.data.donorId == request.auth.uid ||
+        resource.data.ngoId == request.auth.uid ||
+        resource.data.volunteerId == request.auth.uid ||
+        isAdmin()
+      );
+      allow create: if isAuth() && (isNGO() || isAdmin());
+      allow update: if isAuth() && (
+        resource.data.volunteerId == request.auth.uid ||
+        resource.data.ngoId == request.auth.uid ||
+        isAdmin()
+      );
+      
+      // Checkpoints subcollection
+      match /checkpoints/{checkpointId} {
+        allow read: if isAuth();
+        allow create: if isAuth() && isVolunteer();
+      }
+    }
+
+    // ============================================================
+    // REQUESTS COLLECTION
+    // NGO food requests
+    // ============================================================
+    match /requests/{requestId} {
+      allow read: if isAuth();
+      allow create: if isAuth() && isNGO();
+      allow update: if isAuth() && (resource.data.ngoId == request.auth.uid || isAdmin());
+      allow delete: if isAuth() && (resource.data.ngoId == request.auth.uid || isAdmin());
+    }
+
+    // ============================================================
+    // ASSIGNMENTS COLLECTION
+    // Matching assignments
+    // ============================================================
+    match /assignments/{assignmentId} {
+      allow read: if isAuth() && (resource.data.assigneeId == request.auth.uid || isAdmin());
+      allow create: if isAdmin();
+      allow update: if isAuth() && (resource.data.assigneeId == request.auth.uid || isAdmin());
+    }
+
+    // ============================================================
+    // TRACKING COLLECTION
+    // Real-time location tracking
+    // ============================================================
+    match /tracking/{volunteerId} {
+      allow read: if isAuth();
+      allow write: if isOwner(volunteerId);
+      
+      match /locations/{locationId} {
+        allow read: if isAuth();
+        allow create: if isOwner(volunteerId);
+      }
+    }
+
+    // ============================================================
+    // NOTIFICATIONS COLLECTION
+    // User notifications (flat collection pattern)
+    // ============================================================
+    match /notifications/{notificationId} {
+      allow read: if isAuth() && (resource.data.donorId == request.auth.uid || resource.data.ngoId == request.auth.uid || resource.data.volunteerId == request.auth.uid || isAdmin());
+      allow create: if isAuth();
+      allow update: if isAuth() && (resource.data.donorId == request.auth.uid || resource.data.ngoId == request.auth.uid || resource.data.volunteerId == request.auth.uid || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    // ============================================================
+    // VERIFICATIONS COLLECTION
+    // Document verifications
+    // ============================================================
+    match /verifications/{verificationId} {
+      allow read: if isAuth() && (resource == null || resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isAuth();
+      allow update: if isAdmin();
+    }
+
+    // ============================================================
+    // AUDIT COLLECTION
+    // Audit logs
+    // ============================================================
+    match /audit_logs/{logId} {
+      allow create: if isAuth();
+      allow read: if isAdmin();
+    }
+    match /audit/{logId} {
+      allow create: if isAuth();
+      allow read: if isAdmin();
+    }
+    
+    match /security/{eventId} {
+      allow create: if true;
+      allow read: if isAdmin();
+    }
+
+    // ============================================================
+    // ANALYTICS COLLECTION
+    // ============================================================
+    match /analytics/{docId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+      
+      match /daily/{date} {
+        allow read: if isAdmin();
+        allow write: if isAdmin();
+      }
+    }
+
+    // ============================================================
+    // SYSTEM COLLECTION
+    // ============================================================
+    match /system/{docId} {
+      allow read: if isAuth();
+      allow write: if isAdmin();
+    }
+    
+    // ============================================================
+    // MATCHING SESSIONS
+    // ============================================================
+    match /matching/{sessionId} {
+      allow read: if isAdmin();
+      allow create: if isAuth();
+      
+      match /results/{resultId} {
+        allow read: if isAdmin();
+        allow create: if isAuth();
+      }
+    }
+
+    // ============================================================
+    // ADMIN TASKS
+    // ============================================================
+    match /admin_tasks/{taskId} {
+      allow read, write: if isAdmin();
+      allow create: if isAuth();
+    }
+
+    // ============================================================
+    // CATCH-ALL: Admin access
+    // ============================================================
+    match /{document=**} {
+      allow read, write: if isAdmin();
+    }
+  }
+}
