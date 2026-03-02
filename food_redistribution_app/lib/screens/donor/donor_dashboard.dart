@@ -416,7 +416,7 @@ class _DonorDashboardState extends State<DonorDashboard> {
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                    DonationStatusBadge(
+                                  DonationStatusBadge(
                                       deliveryId: donation.id.toString(),
                                       role: 'donor'),
                                   const SizedBox(width: 8),

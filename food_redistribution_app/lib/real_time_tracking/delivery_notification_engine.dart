@@ -26,34 +26,34 @@ class DeliveryNotificationEngine {
     // Notify Donor
     if (to == DeliveryStatus.accepted) {
       _emit(deliveryId, 'Donation accepted', 'Your donation has been accepted',
-        NotificationTarget.donor);
+          NotificationTarget.donor);
     }
 
     if (to == DeliveryStatus.assigned) {
       _emit(deliveryId, 'Volunteer assigned', 'A volunteer has been assigned',
-        NotificationTarget.donor);
+          NotificationTarget.donor);
       _emit(deliveryId, 'Assignment created', 'You have been assigned a pickup',
-        NotificationTarget.volunteer);
+          NotificationTarget.volunteer);
       _emit(deliveryId, 'Volunteer assigned', 'Volunteer assigned to pickup',
-        NotificationTarget.ngo);
+          NotificationTarget.ngo);
     }
 
     if (to == DeliveryStatus.pickedUp) {
       _emit(deliveryId, 'Pickup started', 'Pickup has started',
-        NotificationTarget.donor);
+          NotificationTarget.donor);
       _emit(deliveryId, 'Pickup started', 'Volunteer has started pickup',
-        NotificationTarget.ngo);
+          NotificationTarget.ngo);
       _emit(deliveryId, 'Pickup started', 'Pickup has started',
-        NotificationTarget.volunteer);
+          NotificationTarget.volunteer);
     }
 
     if (to == DeliveryStatus.delivered) {
       _emit(deliveryId, 'Delivery completed', 'Delivery has been completed',
-        NotificationTarget.donor);
+          NotificationTarget.donor);
       _emit(deliveryId, 'Delivery completed', 'Delivery completed',
-        NotificationTarget.ngo);
+          NotificationTarget.ngo);
       _emit(deliveryId, 'Delivery completed', 'Assignment completed',
-        NotificationTarget.volunteer);
+          NotificationTarget.volunteer);
     }
   }
 

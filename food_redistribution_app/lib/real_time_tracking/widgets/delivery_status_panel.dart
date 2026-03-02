@@ -144,7 +144,8 @@ class _DeliveryStatusPanelState extends State<DeliveryStatusPanel> {
         return const Text('Role: Donor',
             style: TextStyle(fontWeight: FontWeight.w600));
       case 'ngo':
-        return const Text('Role: NGO', style: TextStyle(fontWeight: FontWeight.w600));
+        return const Text('Role: NGO',
+            style: TextStyle(fontWeight: FontWeight.w600));
       case 'volunteer':
         return const Text('Role: Volunteer',
             style: TextStyle(fontWeight: FontWeight.w600));
@@ -161,7 +162,7 @@ class _DeliveryStatusPanelState extends State<DeliveryStatusPanel> {
     }
 
     if (widget.role.toLowerCase() == 'ngo') {
-        final visible = _currentStatus == DeliveryStatus.assigned ||
+      final visible = _currentStatus == DeliveryStatus.assigned ||
           _currentStatus == DeliveryStatus.pickedUp ||
           _currentStatus == DeliveryStatus.delivered;
       return Text(visible ? 'NGO: Assigned/Active' : 'NGO: Not assigned',
@@ -169,7 +170,7 @@ class _DeliveryStatusPanelState extends State<DeliveryStatusPanel> {
     }
 
     if (widget.role.toLowerCase() == 'volunteer') {
-        final highlight = _currentStatus == DeliveryStatus.assigned ||
+      final highlight = _currentStatus == DeliveryStatus.assigned ||
           _currentStatus == DeliveryStatus.pickedUp;
       return Text(
           highlight

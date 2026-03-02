@@ -580,9 +580,11 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
             ),
           const SizedBox(height: 12),
           // Real-time status panel for volunteers
-            DonationStatusBadge(deliveryId: task.id.toString(), role: 'volunteer'),
+          DonationStatusBadge(
+              deliveryId: task.id.toString(), role: 'volunteer'),
           const SizedBox(height: 8),
-            DeliveryStatusPanel(role: 'volunteer', deliveryId: task.id.toString()),
+          DeliveryStatusPanel(
+              role: 'volunteer', deliveryId: task.id.toString()),
         ],
       ),
     );

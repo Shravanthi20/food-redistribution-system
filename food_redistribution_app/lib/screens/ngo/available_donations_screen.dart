@@ -192,7 +192,8 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
             // Compact status badge for NGO list
             Row(
               children: [
-                DonationStatusBadge(deliveryId: donation.id.toString(), role: 'ngo'),
+                DonationStatusBadge(
+                    deliveryId: donation.id.toString(), role: 'ngo'),
               ],
             ),
             const SizedBox(height: 8),
@@ -216,7 +217,7 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
               children: [
                 Container(
                   padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
+                  decoration: BoxDecoration(
                     color: Colors.blue.withAlpha((0.1 * 255).round()),
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -239,7 +240,7 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
                 const SizedBox(width: 12),
                 Container(
                   padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
+                  decoration: BoxDecoration(
                     color: isUrgent
                         ? Colors.red.withAlpha((0.1 * 255).round())
                         : Colors.green.withAlpha((0.1 * 255).round()),
@@ -274,11 +275,12 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
               spacing: 6,
               runSpacing: 6,
               children: donation.foodTypes
-            .map((type) => Chip(
-              label: Text(type.name),
-              backgroundColor: Colors.grey.withAlpha((0.1 * 255).round()),
-              labelStyle: const TextStyle(fontSize: 12),
-                ))
+                  .map((type) => Chip(
+                        label: Text(type.name),
+                        backgroundColor:
+                            Colors.grey.withAlpha((0.1 * 255).round()),
+                        labelStyle: const TextStyle(fontSize: 12),
+                      ))
                   .toList(),
             ),
 
@@ -334,7 +336,8 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
             ),
             const SizedBox(height: 12),
             // Real-time status panel for NGO view (minimal insertion)
-            DonationStatusBadge(deliveryId: donation.id.toString(), role: 'ngo'),
+            DonationStatusBadge(
+                deliveryId: donation.id.toString(), role: 'ngo'),
             const SizedBox(height: 8),
             DeliveryStatusPanel(
               role: 'ngo',
