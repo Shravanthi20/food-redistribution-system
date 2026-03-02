@@ -12,7 +12,8 @@ class UpdateResult {
   final String message;
   final DeliveryStatus? updatedStatus;
 
-  UpdateResult({required this.success, required this.message, this.updatedStatus});
+  UpdateResult(
+      {required this.success, required this.message, this.updatedStatus});
 }
 
 class StatusLifecycleEngine {
@@ -23,20 +24,32 @@ class StatusLifecycleEngine {
   final DeliveryNotificationEngine notifier;
   final DelayDetectionService delayDetector;
 
-  final StreamController<MapEntry<String, DeliveryStatus>> _statusController = StreamController.broadcast();
+  final StreamController<MapEntry<String, DeliveryStatus>> _statusController =
+      StreamController.broadcast();
 
-  StatusLifecycleEngine._internal(this.logService, this.notifier, this.delayDetector) {
+  StatusLifecycleEngine._internal(
+      this.logService, this.notifier, this.delayDetector) {
     // offlineQueue will be injected by factory after creation
   }
 
-  factory StatusLifecycleEngine(LifecycleLogService logService, DeliveryNotificationEngine notifier, DelayDetectionService delayDetector) {
-    final engine = StatusLifecycleEngine._create(logService, notifier, delayDetector);
+  factory StatusLifecycleEngine(
+      LifecycleLogService logService,
+      DeliveryNotificationEngine notifier,
+      DelayDetectionService delayDetector) {
+    final engine =
+        StatusLifecycleEngine._create(logService, notifier, delayDetector);
     return engine;
   }
 
-  static StatusLifecycleEngine _create(LifecycleLogService logService, DeliveryNotificationEngine notifier, DelayDetectionService delayDetector) {
-    final engine = StatusLifecycleEngine._internal(logService, notifier, delayDetector);
-    final queue = OfflineSyncQueue(applyUpdate: (id, status) => engine._applyUpdate(id, status), logService: logService);
+  static StatusLifecycleEngine _create(
+      LifecycleLogService logService,
+      DeliveryNotificationEngine notifier,
+      DelayDetectionService delayDetector) {
+    final engine =
+        StatusLifecycleEngine._internal(logService, notifier, delayDetector);
+    final queue = OfflineSyncQueue(
+        applyUpdate: (id, status) => engine._applyUpdate(id, status),
+        logService: logService);
     engine._setOfflineQueue(queue);
     return engine;
   }
@@ -59,14 +72,17 @@ class StatusLifecycleEngine {
   }
 
   /// Stream of updates (deliveryId, status)
-  Stream<MapEntry<String, DeliveryStatus>> get statusStream => _statusController.stream;
+  Stream<MapEntry<String, DeliveryStatus>> get statusStream =>
+      _statusController.stream;
 
   DeliveryStatus? getStatus(String deliveryId) => _current[deliveryId];
 
   /// Public method required by the task
-  Future<UpdateResult> updateDeliveryStatus(String deliveryId, DeliveryStatus newStatus) async {
+  Future<UpdateResult> updateDeliveryStatus(
+      String deliveryId, DeliveryStatus newStatus) async {
     final current = _current[deliveryId];
-    if (current != null && !StatusTransitionValidator.isValidTransition(current, newStatus)) {
+    if (current != null &&
+        !StatusTransitionValidator.isValidTransition(current, newStatus)) {
       final msg = 'Invalid transition from $current to $newStatus';
       logService.add(deliveryId, current.toString(), newStatus.toString(), msg);
       return UpdateResult(success: false, message: msg, updatedStatus: current);
@@ -74,22 +90,33 @@ class StatusLifecycleEngine {
 
     // Idempotency: if same status, return success
     if (current == newStatus) {
-      return UpdateResult(success: true, message: 'No-op (idempotent)', updatedStatus: newStatus);
+      return UpdateResult(
+          success: true,
+          message: 'No-op (idempotent)',
+          updatedStatus: newStatus);
     }
 
     // If offline, enqueue and report
     if (!offlineQueue.isOnline) {
       offlineQueue.enqueue(deliveryId, newStatus);
-      return UpdateResult(success: true, message: 'Queued for sync (offline)', updatedStatus: current);
+      return UpdateResult(
+          success: true,
+          message: 'Queued for sync (offline)',
+          updatedStatus: current);
     }
 
     try {
-      await RetryHandler.runWithRetry(() => _applyUpdate(deliveryId, newStatus));
-      return UpdateResult(success: true, message: 'Updated', updatedStatus: newStatus);
+      await RetryHandler.runWithRetry(
+          () => _applyUpdate(deliveryId, newStatus));
+      return UpdateResult(
+          success: true, message: 'Updated', updatedStatus: newStatus);
     } catch (e) {
       // enqueue for later sync
       offlineQueue.enqueue(deliveryId, newStatus);
-      return UpdateResult(success: false, message: 'Failed to update, queued: $e', updatedStatus: current);
+      return UpdateResult(
+          success: false,
+          message: 'Failed to update, queued: $e',
+          updatedStatus: current);
     }
   }
 
@@ -100,7 +127,8 @@ class StatusLifecycleEngine {
 
     _current[deliveryId] = newStatus;
     _statusController.add(MapEntry(deliveryId, newStatus));
-    logService.add(deliveryId, previous?.toString() ?? 'UNKNOWN', newStatus.toString(), 'Status applied');
+    logService.add(deliveryId, previous?.toString() ?? 'UNKNOWN',
+        newStatus.toString(), 'Status applied');
 
     // Notify via notification engine
     notifier.handleStatusChange(deliveryId, previous, newStatus);

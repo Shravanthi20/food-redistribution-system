@@ -1,4 +1,4 @@
-enum NotificationTarget { Donor, NGO, Volunteer }
+enum NotificationTarget { donor, ngo, volunteer }
 
 class NotificationEvent {
   final String deliveryId;
@@ -6,7 +6,11 @@ class NotificationEvent {
   final String body;
   final NotificationTarget target;
 
-  NotificationEvent({required this.deliveryId, required this.title, required this.body, required this.target});
+  NotificationEvent(
+      {required this.deliveryId,
+      required this.title,
+      required this.body,
+      required this.target});
 }
 
 class NotificationEventRouter {
@@ -16,6 +20,7 @@ class NotificationEventRouter {
     // In production, the app can subscribe to events via DeliveryNotificationEngine.
     // Keep this method minimal and replaceable by consumer.
     // ignore: avoid_print
-    print('[NotificationRouter] -> ${event.target}: ${event.title} (${event.deliveryId}) - ${event.body}');
+    print(
+        '[NotificationRouter] -> ${event.target}: ${event.title} (${event.deliveryId}) - ${event.body}');
   }
 }

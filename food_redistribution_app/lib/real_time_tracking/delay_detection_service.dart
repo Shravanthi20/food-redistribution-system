@@ -7,7 +7,8 @@ class DelayAlert {
   final String message;
   final DateTime timestamp;
 
-  DelayAlert({required this.deliveryId, required this.message}) : timestamp = DateTime.now();
+  DelayAlert({required this.deliveryId, required this.message})
+      : timestamp = DateTime.now();
 }
 
 class DelayDetectionService {
@@ -19,26 +20,28 @@ class DelayDetectionService {
 
   final StreamController<DelayAlert> _alerts = StreamController.broadcast();
 
-  DelayDetectionService({Duration? pickupThreshold, Duration? deliveryThreshold})
-      : pickupThreshold = pickupThreshold ?? Duration(minutes: 20),
-        deliveryThreshold = deliveryThreshold ?? Duration(hours: 1);
+  DelayDetectionService(
+      {Duration? pickupThreshold, Duration? deliveryThreshold})
+      : pickupThreshold = pickupThreshold ?? const Duration(minutes: 20),
+        deliveryThreshold = deliveryThreshold ?? const Duration(hours: 1);
 
   Stream<DelayAlert> get alerts => _alerts.stream;
 
-  void onStatusChanged(String deliveryId, DeliveryStatus? from, DeliveryStatus to) {
-    if (to == DeliveryStatus.Assigned) {
+  void onStatusChanged(
+      String deliveryId, DeliveryStatus? from, DeliveryStatus to) {
+    if (to == DeliveryStatus.assigned) {
       _assignedAt[deliveryId] = DateTime.now();
       // schedule check
       Future.delayed(pickupThreshold, () => _checkPickupDelay(deliveryId));
     }
 
-    if (to == DeliveryStatus.PickedUp) {
+    if (to == DeliveryStatus.pickedUp) {
       _pickedAt[deliveryId] = DateTime.now();
       // schedule delivery check
       Future.delayed(deliveryThreshold, () => _checkDeliveryDelay(deliveryId));
     }
 
-    if (to == DeliveryStatus.Delivered) {
+    if (to == DeliveryStatus.delivered) {
       _assignedAt.remove(deliveryId);
       _pickedAt.remove(deliveryId);
     }
@@ -49,7 +52,9 @@ class DelayDetectionService {
     if (assigned == null) return;
     final elapsed = DateTime.now().difference(assigned);
     if (elapsed >= pickupThreshold) {
-      _alerts.add(DelayAlert(deliveryId: deliveryId, message: 'Pickup delayed by ${elapsed.inMinutes} minutes'));
+      _alerts.add(DelayAlert(
+          deliveryId: deliveryId,
+          message: 'Pickup delayed by ${elapsed.inMinutes} minutes'));
     }
   }
 
@@ -58,7 +63,9 @@ class DelayDetectionService {
     if (picked == null) return;
     final elapsed = DateTime.now().difference(picked);
     if (elapsed >= deliveryThreshold) {
-      _alerts.add(DelayAlert(deliveryId: deliveryId, message: 'Delivery delayed by ${elapsed.inMinutes} minutes'));
+      _alerts.add(DelayAlert(
+          deliveryId: deliveryId,
+          message: 'Delivery delayed by ${elapsed.inMinutes} minutes'));
     }
   }
 

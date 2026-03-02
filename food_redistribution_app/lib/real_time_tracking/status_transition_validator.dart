@@ -1,18 +1,18 @@
 enum DeliveryStatus {
-  Listed,
-  Accepted,
-  Assigned,
-  PickedUp,
-  Delivered,
+  listed,
+  accepted,
+  assigned,
+  pickedUp,
+  delivered,
 }
 
 class StatusTransitionValidator {
   static const Map<DeliveryStatus, List<DeliveryStatus>> _allowed = {
-    DeliveryStatus.Listed: [DeliveryStatus.Accepted],
-    DeliveryStatus.Accepted: [DeliveryStatus.Assigned],
-    DeliveryStatus.Assigned: [DeliveryStatus.PickedUp],
-    DeliveryStatus.PickedUp: [DeliveryStatus.Delivered],
-    DeliveryStatus.Delivered: [],
+    DeliveryStatus.listed: [DeliveryStatus.accepted],
+    DeliveryStatus.accepted: [DeliveryStatus.assigned],
+    DeliveryStatus.assigned: [DeliveryStatus.pickedUp],
+    DeliveryStatus.pickedUp: [DeliveryStatus.delivered],
+    DeliveryStatus.delivered: [],
   };
 
   static bool isValidTransition(DeliveryStatus from, DeliveryStatus to) {

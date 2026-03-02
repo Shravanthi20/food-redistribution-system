@@ -4,7 +4,7 @@ import '../status_lifecycle_engine.dart';
 class SyncStatusIndicator extends StatelessWidget {
   final StatusLifecycleEngine engine;
 
-  const SyncStatusIndicator({Key? key, required this.engine}) : super(key: key);
+  const SyncStatusIndicator({super.key, required this.engine});
 
   @override
   Widget build(BuildContext context) {
@@ -14,18 +14,21 @@ class SyncStatusIndicator extends StatelessWidget {
     return Row(
       children: [
         if (!isOnline) ...[
-          Icon(Icons.cloud_off, color: Colors.orange),
-          SizedBox(width: 6),
-          Text('Offline', style: TextStyle(color: Colors.orange)),
+          const Icon(Icons.cloud_off, color: Colors.orange),
+          const SizedBox(width: 6),
+          const Text('Offline', style: TextStyle(color: Colors.orange)),
         ] else if (hasPending) ...[
-          SizedBox(width: 2),
-          SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)),
-          SizedBox(width: 6),
-          Text('Syncing', style: TextStyle(color: Colors.blue)),
+          const SizedBox(width: 2),
+          const SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(strokeWidth: 2)),
+          const SizedBox(width: 6),
+          const Text('Syncing', style: TextStyle(color: Colors.blue)),
         ] else ...[
-          Icon(Icons.cloud_done, color: Colors.green),
-          SizedBox(width: 6),
-          Text('Synced', style: TextStyle(color: Colors.green)),
+          const Icon(Icons.cloud_done, color: Colors.green),
+          const SizedBox(width: 6),
+          const Text('Synced', style: TextStyle(color: Colors.green)),
         ]
       ],
     );

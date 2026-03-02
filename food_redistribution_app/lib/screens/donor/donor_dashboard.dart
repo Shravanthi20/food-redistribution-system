@@ -416,7 +416,9 @@ class _DonorDashboardState extends State<DonorDashboard> {
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  DonationStatusBadge(deliveryId: donation.id?.toString() ?? donation.title, role: 'donor'),
+                                    DonationStatusBadge(
+                                      deliveryId: donation.id.toString(),
+                                      role: 'donor'),
                                   const SizedBox(width: 8),
                                   const Icon(
                                     Icons.arrow_forward_ios_rounded,
@@ -434,7 +436,7 @@ class _DonorDashboardState extends State<DonorDashboard> {
                             // Real-time tracking panel (minimal insertion)
                             DeliveryStatusPanel(
                               role: 'donor',
-                              deliveryId: donation.id?.toString() ?? donation.title,
+                              deliveryId: donation.id.toString(),
                             ),
                             const SizedBox(height: 8),
                           ],

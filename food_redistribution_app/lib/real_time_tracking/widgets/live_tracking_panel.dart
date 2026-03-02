@@ -6,7 +6,8 @@ class LiveTrackingPanel extends StatelessWidget {
   final String deliveryId;
   final StatusLifecycleEngine engine;
 
-  const LiveTrackingPanel({Key? key, required this.deliveryId, required this.engine}) : super(key: key);
+  const LiveTrackingPanel(
+      {super.key, required this.deliveryId, required this.engine});
 
   @override
   Widget build(BuildContext context) {
@@ -16,15 +17,16 @@ class LiveTrackingPanel extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Live Tracking', style: Theme.of(context).textTheme.titleMedium),
-            SizedBox(height: 8),
+            Text('Live Tracking',
+                style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
             // Placeholder map area - plug-and-play
             Container(
               height: 140,
               color: Colors.grey.shade200,
-              child: Center(child: Text('Map / Live location placeholder')),
+              child: const Center(child: Text('Map / Live location placeholder')),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             RealTimeStatusWidget(deliveryId: deliveryId, engine: engine),
           ],
         ),
