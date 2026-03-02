@@ -6,7 +6,8 @@ class RealTimeStatusWidget extends StatelessWidget {
   final String deliveryId;
   final StatusLifecycleEngine engine;
 
-  const RealTimeStatusWidget({Key? key, required this.deliveryId, required this.engine}) : super(key: key);
+  const RealTimeStatusWidget(
+      {super.key, required this.deliveryId, required this.engine});
 
   @override
   Widget build(BuildContext context) {
@@ -20,8 +21,8 @@ class RealTimeStatusWidget extends StatelessWidget {
 
         return Row(
           children: [
-            Icon(Icons.location_on),
-            SizedBox(width: 8),
+            const Icon(Icons.location_on),
+            const SizedBox(width: 8),
             Text('Status: ${status?.toString().split('.').last ?? 'Unknown'}'),
           ],
         );

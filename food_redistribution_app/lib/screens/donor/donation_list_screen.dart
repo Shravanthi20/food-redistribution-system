@@ -95,14 +95,16 @@ class _DonationListScreenState extends State<DonationListScreen> {
                         : 'No ${_getStatusDisplayName(_filterStatus!).toLowerCase()} donations',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           color: Colors.grey[600],
-                        ),
+                        ) ??
+                        const TextStyle(),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Create your first donation to get started',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Colors.grey[500],
-                        ),
+                        ) ??
+                        const TextStyle(),
                   ),
                 ],
               ),
@@ -160,7 +162,8 @@ class _DonationListScreenState extends State<DonationListScreen> {
                       donation.title,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
-                          ),
+                          ) ??
+                          const TextStyle(),
                     ),
                   ),
                   Container(
@@ -181,7 +184,7 @@ class _DonationListScreenState extends State<DonationListScreen> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  DonationStatusBadge(deliveryId: donation.id?.toString() ?? donation.title, role: 'donor'),
+                    DonationStatusBadge(deliveryId: donation.id.toString(), role: 'donor'),
                 ],
               ),
               const SizedBox(height: 8),

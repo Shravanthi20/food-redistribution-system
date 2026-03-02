@@ -25,17 +25,19 @@ class DeliveryStatusPanel extends StatefulWidget {
   final Object deliveryId;
   final DeliveryStatus? status;
 
-  const DeliveryStatusPanel({Key? key, required this.role, required this.deliveryId, this.status}) : super(key: key);
+  const DeliveryStatusPanel(
+      {super.key, required this.role, required this.deliveryId, this.status});
 
   @override
-  _DeliveryStatusPanelState createState() => _DeliveryStatusPanelState();
+  State<DeliveryStatusPanel> createState() => _DeliveryStatusPanelState();
 }
 
 // Module-level shared singletons so the panel works without editing existing app files.
 final LifecycleLogService _sharedLogService = LifecycleLogService();
 final DelayDetectionService _sharedDelayDetector = DelayDetectionService();
 final DeliveryNotificationEngine _sharedNotifier = DeliveryNotificationEngine();
-final StatusLifecycleEngine _sharedEngine = StatusLifecycleEngine(_sharedLogService, _sharedNotifier, _sharedDelayDetector);
+final StatusLifecycleEngine _sharedEngine = StatusLifecycleEngine(
+    _sharedLogService, _sharedNotifier, _sharedDelayDetector);
 
 /// Public accessor for the shared `StatusLifecycleEngine` used by the panel widgets.
 StatusLifecycleEngine get sharedStatusLifecycleEngine => _sharedEngine;
@@ -81,7 +83,7 @@ class _DeliveryStatusPanelState extends State<DeliveryStatusPanel> {
           _lastNotification = '${ev.title}: ${ev.body}';
         });
         // ephemeral clear after a short delay
-        Future.delayed(Duration(seconds: 6), () {
+        Future.delayed(const Duration(seconds: 6), () {
           if (mounted) setState(() => _lastNotification = null);
         });
       }
@@ -100,23 +102,23 @@ class _DeliveryStatusPanelState extends State<DeliveryStatusPanel> {
     IconData icon;
     Color color = Colors.black87;
     switch (_currentStatus) {
-      case DeliveryStatus.Listed:
+      case DeliveryStatus.listed:
         icon = Icons.list;
         color = Colors.grey.shade700;
         break;
-      case DeliveryStatus.Accepted:
+      case DeliveryStatus.accepted:
         icon = Icons.check_circle_outline;
         color = Colors.blue;
         break;
-      case DeliveryStatus.Assigned:
+      case DeliveryStatus.assigned:
         icon = Icons.person_add;
         color = Colors.orange;
         break;
-      case DeliveryStatus.PickedUp:
+      case DeliveryStatus.pickedUp:
         icon = Icons.local_shipping;
         color = Colors.teal;
         break;
-      case DeliveryStatus.Delivered:
+      case DeliveryStatus.delivered:
         icon = Icons.home;
         color = Colors.green;
         break;
@@ -127,9 +129,11 @@ class _DeliveryStatusPanelState extends State<DeliveryStatusPanel> {
     return Row(
       children: [
         Icon(icon, color: color),
-        SizedBox(width: 8),
-        Expanded(child: Text('Status: $label', style: TextStyle(fontSize: 16, color: color))),
-        SizedBox(width: 8),
+        const SizedBox(width: 8),
+        Expanded(
+            child: Text('Status: $label',
+                style: TextStyle(fontSize: 16, color: color))),
+        const SizedBox(width: 8),
       ],
     );
   }
@@ -137,39 +141,50 @@ class _DeliveryStatusPanelState extends State<DeliveryStatusPanel> {
   Widget _buildRoleHint() {
     switch (widget.role.toLowerCase()) {
       case 'donor':
-        return Text('Role: Donor', style: TextStyle(fontWeight: FontWeight.w600));
+        return const Text('Role: Donor',
+            style: TextStyle(fontWeight: FontWeight.w600));
       case 'ngo':
-        return Text('Role: NGO', style: TextStyle(fontWeight: FontWeight.w600));
+        return const Text('Role: NGO', style: TextStyle(fontWeight: FontWeight.w600));
       case 'volunteer':
-        return Text('Role: Volunteer', style: TextStyle(fontWeight: FontWeight.w600));
+        return const Text('Role: Volunteer',
+            style: TextStyle(fontWeight: FontWeight.w600));
       default:
-        return SizedBox.shrink();
+        return const SizedBox.shrink();
     }
   }
 
   Widget _buildRoleSpecific() {
     // Simple role-specific highlights — consumers can extend using engine APIs
     if (widget.role.toLowerCase() == 'donor') {
-      return Text('You will be notified of changes.', style: TextStyle(color: Colors.black54));
+      return const Text('You will be notified of changes.',
+          style: TextStyle(color: Colors.black54));
     }
 
     if (widget.role.toLowerCase() == 'ngo') {
-      final visible = _currentStatus == DeliveryStatus.Assigned || _currentStatus == DeliveryStatus.PickedUp || _currentStatus == DeliveryStatus.Delivered;
-      return Text(visible ? 'NGO: Assigned/Active' : 'NGO: Not assigned', style: TextStyle(color: Colors.black54));
+        final visible = _currentStatus == DeliveryStatus.assigned ||
+          _currentStatus == DeliveryStatus.pickedUp ||
+          _currentStatus == DeliveryStatus.delivered;
+      return Text(visible ? 'NGO: Assigned/Active' : 'NGO: Not assigned',
+          style: const TextStyle(color: Colors.black54));
     }
 
     if (widget.role.toLowerCase() == 'volunteer') {
-      final highlight = _currentStatus == DeliveryStatus.Assigned || _currentStatus == DeliveryStatus.PickedUp;
-      return Text(highlight ? 'Volunteer: You have an assignment' : 'Volunteer: No assignment', style: TextStyle(color: Colors.black54));
+        final highlight = _currentStatus == DeliveryStatus.assigned ||
+          _currentStatus == DeliveryStatus.pickedUp;
+      return Text(
+          highlight
+              ? 'Volunteer: You have an assignment'
+              : 'Volunteer: No assignment',
+          style: const TextStyle(color: Colors.black54));
     }
 
-    return SizedBox.shrink();
+    return const SizedBox.shrink();
   }
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: EdgeInsets.all(8),
+      margin: const EdgeInsets.all(8),
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Column(
@@ -184,26 +199,45 @@ class _DeliveryStatusPanelState extends State<DeliveryStatusPanel> {
               ],
             ),
 
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
 
             _buildStatusRow(),
 
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
 
             _buildRoleSpecific(),
 
             if (_lastNotification != null) ...[
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               Container(
-                padding: EdgeInsets.all(8),
+                padding: const EdgeInsets.all(8),
                 color: Colors.blue.shade50,
-                child: Row(children: [Icon(Icons.notifications, size: 16), SizedBox(width: 8), Expanded(child: Text(_lastNotification!))]),
+                child: Row(children: [
+                  const Icon(Icons.notifications, size: 16),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text(_lastNotification!))
+                ]),
               ),
             ],
 
             // Delay alert area
-            SizedBox(height: 8),
-            DelayAlertWidget(deliveryId: _deliveryIdStr, detector: _sharedDelayDetector),
+            const SizedBox(height: 8),
+            // Inline summary for the most recent alert (if any)
+            if (_currentDelayAlert != null) ...[
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text('Delay: ${_currentDelayAlert!.message}',
+                    style: const TextStyle(color: Colors.red)),
+              ),
+              const SizedBox(height: 8),
+            ],
+
+            DelayAlertWidget(
+                deliveryId: _deliveryIdStr, detector: _sharedDelayDetector),
           ],
         ),
       ),

@@ -8,19 +8,19 @@ class DonationStatusBadge extends StatelessWidget {
   final Object deliveryId;
   final String? role; // optional role-aware visuals
 
-  const DonationStatusBadge({Key? key, required this.deliveryId, this.role}) : super(key: key);
+  const DonationStatusBadge({super.key, required this.deliveryId, this.role});
 
   Color _statusColor(DeliveryStatus? status) {
     switch (status) {
-      case DeliveryStatus.Listed:
+      case DeliveryStatus.listed:
         return Colors.grey;
-      case DeliveryStatus.Accepted:
+      case DeliveryStatus.accepted:
         return Colors.blue;
-      case DeliveryStatus.Assigned:
+      case DeliveryStatus.assigned:
         return Colors.orange;
-      case DeliveryStatus.PickedUp:
+      case DeliveryStatus.pickedUp:
         return Colors.teal;
-      case DeliveryStatus.Delivered:
+      case DeliveryStatus.delivered:
         return Colors.green;
       default:
         return Colors.black45;
@@ -29,15 +29,15 @@ class DonationStatusBadge extends StatelessWidget {
 
   IconData _statusIcon(DeliveryStatus? status) {
     switch (status) {
-      case DeliveryStatus.Listed:
+      case DeliveryStatus.listed:
         return Icons.list;
-      case DeliveryStatus.Accepted:
+      case DeliveryStatus.accepted:
         return Icons.check;
-      case DeliveryStatus.Assigned:
+      case DeliveryStatus.assigned:
         return Icons.person_add;
-      case DeliveryStatus.PickedUp:
+      case DeliveryStatus.pickedUp:
         return Icons.local_shipping;
-      case DeliveryStatus.Delivered:
+      case DeliveryStatus.delivered:
         return Icons.home;
       default:
         return Icons.help_outline;
@@ -66,10 +66,12 @@ class DonationStatusBadge extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Chip(
-              backgroundColor: color.withOpacity(0.12),
+              backgroundColor: color.withAlpha((0.12 * 255).round()),
               avatar: Icon(icon, size: 16, color: color),
               label: Text(
-                status == null ? 'Not listed' : status.toString().split('.').last,
+                status == null
+                    ? 'Not listed'
+                    : status.toString().split('.').last,
                 style: TextStyle(color: color, fontSize: 12),
               ),
             ),

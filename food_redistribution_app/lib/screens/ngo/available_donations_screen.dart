@@ -10,7 +10,8 @@ class AvailableDonationsScreen extends StatefulWidget {
   const AvailableDonationsScreen({super.key});
 
   @override
-  State<AvailableDonationsScreen> createState() => _AvailableDonationsScreenState();
+  State<AvailableDonationsScreen> createState() =>
+      _AvailableDonationsScreenState();
 }
 
 class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
@@ -22,8 +23,9 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
   Widget build(BuildContext context) {
     return Consumer<NGOProvider>(
       builder: (context, ngoProvider, child) {
-        final filteredDonations = _filterDonations(ngoProvider.availableDonations);
-        
+        final filteredDonations =
+            _filterDonations(ngoProvider.availableDonations);
+
         return Column(
           children: [
             // Search and filter bar
@@ -49,9 +51,9 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
                     ),
                     onChanged: (value) => setState(() => _searchQuery = value),
                   ),
-                  
+
                   const SizedBox(height: 12),
-                  
+
                   // Food type filter
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
@@ -66,22 +68,23 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
                         ),
                         const SizedBox(width: 8),
                         ...FoodType.values.map((type) => Padding(
-                          padding: const EdgeInsets.only(right: 8.0),
-                          child: FilterChip(
-                            label: Text(type.name),
-                            selected: _selectedFoodType == type,
-                            onSelected: (selected) {
-                              setState(() => _selectedFoodType = selected ? type : null);
-                            },
-                          ),
-                        )),
+                              padding: const EdgeInsets.only(right: 8.0),
+                              child: FilterChip(
+                                label: Text(type.name),
+                                selected: _selectedFoodType == type,
+                                onSelected: (selected) {
+                                  setState(() => _selectedFoodType =
+                                      selected ? type : null);
+                                },
+                              ),
+                            )),
                       ],
                     ),
                   ),
                 ],
               ),
             ),
-            
+
             // Donations list
             Expanded(
               child: filteredDonations.isEmpty
@@ -89,7 +92,8 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.local_shipping, size: 64, color: Colors.grey),
+                          Icon(Icons.local_shipping,
+                              size: 64, color: Colors.grey),
                           SizedBox(height: 16),
                           Text('No available donations found'),
                           SizedBox(height: 8),
@@ -99,13 +103,15 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
                     )
                   : RefreshIndicator(
                       onRefresh: () => ngoProvider.refreshData(
-                        Provider.of<AuthProvider>(context, listen: false).firebaseUser!.uid
-                      ),
+                          Provider.of<AuthProvider>(context, listen: false)
+                              .firebaseUser!
+                              .uid),
                       child: ListView.builder(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
                         itemCount: filteredDonations.length,
                         itemBuilder: (context, index) {
-                          return _buildDonationCard(filteredDonations[index], ngoProvider);
+                          return _buildDonationCard(
+                              filteredDonations[index], ngoProvider);
                         },
                       ),
                     ),
@@ -126,14 +132,14 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
           return false;
         }
       }
-      
+
       // Filter by food type
       if (_selectedFoodType != null) {
         if (!donation.foodTypes.contains(_selectedFoodType!)) {
           return false;
         }
       }
-      
+
       // Only show available donations
       return donation.status == DonationStatus.listed;
     }).toList();
@@ -142,7 +148,7 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
   Widget _buildDonationCard(FoodDonation donation, NGOProvider ngoProvider) {
     final timeUntilExpiry = donation.expiresAt.difference(DateTime.now());
     final isUrgent = timeUntilExpiry.inHours <= 12;
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: Padding(
@@ -164,9 +170,10 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
                 ),
                 if (isUrgent)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.1),
+                      color: Colors.red.withAlpha((0.1 * 255).round()),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Text(
@@ -180,19 +187,19 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
                   ),
               ],
             ),
-            
+
             const SizedBox(height: 12),
             // Compact status badge for NGO list
             Row(
               children: [
-                DonationStatusBadge(deliveryId: donation.id?.toString() ?? donation.title, role: 'ngo'),
+                DonationStatusBadge(deliveryId: donation.id.toString(), role: 'ngo'),
               ],
             ),
             const SizedBox(height: 8),
             // Real-time status panel for NGO view (minimal insertion)
             DeliveryStatusPanel(
               role: 'ngo',
-              deliveryId: donation.id?.toString() ?? donation.title,
+              deliveryId: donation.id.toString(),
             ),
             const SizedBox(height: 8),
             Text(
@@ -201,22 +208,23 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
               overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
-            
+
             const SizedBox(height: 12),
-            
+
             // Quantity and expiry
             Row(
               children: [
                 Container(
                   padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
+                    decoration: BoxDecoration(
+                    color: Colors.blue.withAlpha((0.1 * 255).round()),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.restaurant, size: 16, color: Colors.blue),
+                      const Icon(Icons.restaurant,
+                          size: 16, color: Colors.blue),
                       const SizedBox(width: 4),
                       Text(
                         '${donation.quantity} ${donation.unit}',
@@ -228,13 +236,13 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
                     ],
                   ),
                 ),
-                
                 const SizedBox(width: 12),
-                
                 Container(
                   padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: isUrgent ? Colors.red.withOpacity(0.1) : Colors.green.withOpacity(0.1),
+                    decoration: BoxDecoration(
+                    color: isUrgent
+                        ? Colors.red.withAlpha((0.1 * 255).round())
+                        : Colors.green.withAlpha((0.1 * 255).round()),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -258,28 +266,30 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 12),
-            
+
             // Food types
             Wrap(
               spacing: 6,
               runSpacing: 6,
-              children: donation.foodTypes.map((type) => Chip(
-                label: Text(type.name),
-                backgroundColor: Colors.grey.withOpacity(0.1),
-                labelStyle: const TextStyle(fontSize: 12),
-              )).toList(),
+              children: donation.foodTypes
+            .map((type) => Chip(
+              label: Text(type.name),
+              backgroundColor: Colors.grey.withAlpha((0.1 * 255).round()),
+              labelStyle: const TextStyle(fontSize: 12),
+                ))
+                  .toList(),
             ),
-            
+
             const SizedBox(height: 12),
-            
+
             // Dietary info
             Wrap(
               spacing: 6,
               runSpacing: 6,
               children: [
-                if (donation.isVegetarian) 
+                if (donation.isVegetarian)
                   const Chip(
                     label: Text('Vegetarian'),
                     backgroundColor: Colors.green,
@@ -299,9 +309,9 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
                   ),
               ],
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Action buttons
             Row(
               children: [
@@ -312,9 +322,7 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
                     label: const Text('View Details'),
                   ),
                 ),
-                
                 const SizedBox(width: 12),
-                
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: () => _requestDonation(donation, ngoProvider),
@@ -326,11 +334,11 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
             ),
             const SizedBox(height: 12),
             // Real-time status panel for NGO view (minimal insertion)
-            DonationStatusBadge(deliveryId: donation.id?.toString() ?? donation.title, role: 'ngo'),
+            DonationStatusBadge(deliveryId: donation.id.toString(), role: 'ngo'),
             const SizedBox(height: 8),
             DeliveryStatusPanel(
               role: 'ngo',
-              deliveryId: donation.id?.toString() ?? donation.title,
+              deliveryId: donation.id.toString(),
             ),
           ],
         ),
@@ -377,49 +385,55 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 Text(
                   donation.title,
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 Text(
                   'Description',
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 8),
                 Text(donation.description),
-                
+
                 const SizedBox(height: 16),
-                
-                _buildDetailRow('Quantity', '${donation.quantity} ${donation.unit}'),
-                _buildDetailRow('Created', donation.createdAt.toString().substring(0, 16)),
-                _buildDetailRow('Expires', donation.expiresAt.toString().substring(0, 16)),
+
+                _buildDetailRow(
+                    'Quantity', '${donation.quantity} ${donation.unit}'),
+                _buildDetailRow(
+                    'Created', donation.createdAt.toString().substring(0, 16)),
+                _buildDetailRow(
+                    'Expires', donation.expiresAt.toString().substring(0, 16)),
                 _buildDetailRow('Pickup Address', donation.pickupAddress),
                 _buildDetailRow('Contact', donation.donorContactPhone),
-                
+
                 const SizedBox(height: 16),
-                
+
                 Text(
                   'Food Safety',
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 8),
-                _buildDetailRow('Safety Level', donation.safetyLevel.toString()),
-                _buildDetailRow('Requires Refrigeration', donation.requiresRefrigeration ? 'Yes' : 'No'),
-                
+                _buildDetailRow(
+                    'Safety Level', donation.safetyLevel.toString()),
+                _buildDetailRow('Requires Refrigeration',
+                    donation.requiresRefrigeration ? 'Yes' : 'No'),
+
                 const SizedBox(height: 24),
-                
+
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
                     onPressed: () {
                       Navigator.pop(context);
-                      _requestDonation(donation, Provider.of<NGOProvider>(context, listen: false));
+                      _requestDonation(donation,
+                          Provider.of<NGOProvider>(context, listen: false));
                     },
                     icon: const Icon(Icons.add),
                     label: const Text('Request This Donation'),
