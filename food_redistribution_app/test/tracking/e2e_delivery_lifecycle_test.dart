@@ -1,6 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'test_mocks.dart';
 import 'package:food_redistribution_app/models/tracking/location_tracking_model.dart';
 import 'package:food_redistribution_app/models/enums.dart';
 import 'package:food_redistribution_app/providers/tracking_provider.dart';
@@ -27,7 +25,9 @@ void main() {
       await offlineService.clearSyncedUpdates();
     });
 
-    test('Complete flow: donation created → volunteer assigned → pickup → delivery', () async {
+    test(
+        'Complete flow: donation created → volunteer assigned → pickup → delivery',
+        () async {
       const donationId = 'donation_test_001';
       const volunteerId = 'volunteer_test_001';
       const ngoId = 'ngo_test_001';
@@ -92,7 +92,8 @@ void main() {
       await trackingProvider.stopTracking(volunteerId);
       expect(trackingProvider.isTracking, false);
 
-      final volunteerStats = await analyticsService.getVolunteerDeliveryStats(volunteerId);
+      final volunteerStats =
+          await analyticsService.getVolunteerDeliveryStats(volunteerId);
       expect(volunteerStats, isNotNull);
     });
 

@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:fl_chart/fl_chart.dart';
 import '../../services/tracking/analytics_aggregation_service.dart';
 
 /// Admin Analytics & Predictions Screen
 class AdminAnalyticsScreen extends StatefulWidget {
-  const AdminAnalyticsScreen({Key? key}) : super(key: key);
+  const AdminAnalyticsScreen({super.key});
 
   @override
   State<AdminAnalyticsScreen> createState() => _AdminAnalyticsScreenState();
 }
 
 class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
-  final AnalyticsAggregationService _analyticsService = AnalyticsAggregationService();
-  
+  final AnalyticsAggregationService _analyticsService =
+      AnalyticsAggregationService();
+
   String _selectedRegion = 'all';
   int _selectedMetricDays = 7;
   List<String> _regions = [];
@@ -26,9 +26,8 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
 
   Future<void> _loadRegions() async {
     try {
-      final snapshot = await FirebaseFirestore.instance
-          .collection('delivery_tasks')
-          .get();
+      final snapshot =
+          await FirebaseFirestore.instance.collection('delivery_tasks').get();
 
       final regions = <String>{'all'};
       for (var doc in snapshot.docs) {
@@ -105,7 +104,8 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
 
             // Duration Analytics
             FutureBuilder<Map<String, dynamic>>(
-              future: _analyticsService.getPickupDurationHistory(days: _selectedMetricDays),
+              future: _analyticsService.getPickupDurationHistory(
+                  days: _selectedMetricDays),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const SizedBox(
@@ -193,9 +193,11 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
                         _buildMetricRow(
                           'Performance Index',
                           '${data['performanceIndex']}%',
-                          color: double.parse(data['performanceIndex'] as String) > 80
-                              ? Colors.green
-                              : Colors.orange,
+                          color:
+                              double.parse(data['performanceIndex'] as String) >
+                                      80
+                                  ? Colors.green
+                                  : Colors.orange,
                         ),
                       ],
                     ),
@@ -214,7 +216,8 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
 
             // Volunteer Demand Prediction
             FutureBuilder<Map<String, dynamic>>(
-              future: _analyticsService.predictVolunteerDemandAdvanced(daysAhead: _selectedMetricDays),
+              future: _analyticsService.predictVolunteerDemandAdvanced(
+                  daysAhead: _selectedMetricDays),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const SizedBox(
@@ -258,13 +261,15 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: Colors.red.withOpacity(0.1),
+                              color: Colors.red.withValues(alpha: 0.1),
                               border: Border.all(color: Colors.red),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
                               '⚠️ SHORTFALL: $shortfall volunteers needed - Action: ${data['recommendAction']?.toString().replaceAll('_', ' ')}',
-                              style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.bold),
                             ),
                           ),
                         ],
@@ -278,7 +283,8 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
 
             // Surplus Risk Prediction
             FutureBuilder<Map<String, dynamic>>(
-              future: _analyticsService.predictSurplusRisk(daysAhead: _selectedMetricDays),
+              future: _analyticsService.predictSurplusRisk(
+                  daysAhead: _selectedMetricDays),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const SizedBox(
@@ -310,7 +316,7 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
                           data['predictedDailyDonations'].toString(),
                         ),
                         _buildMetricRow(
-                          'Total (${_selectedMetricDays} days)',
+                          'Total ($_selectedMetricDays days)',
                           data['predictedTotalDonations'].toString(),
                         ),
                         _buildMetricRow(
@@ -342,7 +348,8 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
             // Supply-Demand Gap Analysis
             if (_selectedRegion != 'all')
               FutureBuilder<Map<String, dynamic>>(
-                future: _analyticsService.getRegionalSupplyDemandGap(_selectedRegion),
+                future: _analyticsService
+                    .getRegionalSupplyDemandGap(_selectedRegion),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const SizedBox(
@@ -374,10 +381,10 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
                               Chip(
                                 label: Text(status.toUpperCase()),
                                 backgroundColor: status == 'critical'
-                                    ? Colors.red.withOpacity(0.2)
+                                    ? Colors.red.withValues(alpha: 0.2)
                                     : status == 'warning'
-                                        ? Colors.orange.withOpacity(0.2)
-                                        : Colors.green.withOpacity(0.2),
+                                        ? Colors.orange.withValues(alpha: 0.2)
+                                        : Colors.green.withValues(alpha: 0.2),
                               ),
                             ],
                           ),
@@ -393,9 +400,11 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
                           _buildMetricRow(
                             'Gap (%)',
                             data['gapPercentage'].toString(),
-                            color: double.parse(data['gapPercentage'] as String) > 20
-                                ? Colors.red
-                                : Colors.orange,
+                            color:
+                                double.parse(data['gapPercentage'] as String) >
+                                        20
+                                    ? Colors.red
+                                    : Colors.orange,
                           ),
                         ],
                       ),

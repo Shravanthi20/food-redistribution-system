@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import '../../models/tracking/location_tracking_model.dart';
 
 /// Admin Real-Time Tracking Management Screen
 class AdminRealTimeTrackingScreen extends StatefulWidget {
-  const AdminRealTimeTrackingScreen({Key? key}) : super(key: key);
+  const AdminRealTimeTrackingScreen({super.key});
 
   @override
-  State<AdminRealTimeTrackingScreen> createState() => _AdminRealTimeTrackingScreenState();
+  State<AdminRealTimeTrackingScreen> createState() =>
+      _AdminRealTimeTrackingScreenState();
 }
 
-class _AdminRealTimeTrackingScreenState extends State<AdminRealTimeTrackingScreen> {
+class _AdminRealTimeTrackingScreenState
+    extends State<AdminRealTimeTrackingScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   String _filterStatus = 'all'; // all, active, delayed, completed
+  // ignore: unused_field
   String _searchQuery = '';
 
   @override
@@ -118,19 +119,22 @@ class _AdminRealTimeTrackingScreenState extends State<AdminRealTimeTrackingScree
     );
   }
 
-  Query<Object?> _buildQuery() {
-    var query = _firestore.collection('delivery_tasks').orderBy('updatedAt', descending: true);
+  Stream<QuerySnapshot> _buildQuery() {
+    var query = _firestore
+        .collection('delivery_tasks')
+        .orderBy('updatedAt', descending: true);
 
     // Apply status filter
     if (_filterStatus == 'active') {
-      query = query.where('status', whereIn: ['assigned', 'picked_up', 'in_transit']);
+      query = query
+          .where('status', whereIn: ['assigned', 'picked_up', 'in_transit']);
     } else if (_filterStatus == 'delayed') {
       query = query.where('isDelayed', isEqualTo: true);
     } else if (_filterStatus == 'completed') {
       query = query.where('status', isEqualTo: 'delivered');
     }
 
-    return query.limit(100);
+    return query.limit(100).snapshots();
   }
 
   Widget _buildTrackingCard(Map<String, dynamic> data, String taskId) {
@@ -155,20 +159,23 @@ class _AdminRealTimeTrackingScreenState extends State<AdminRealTimeTrackingScree
                     children: [
                       Text(
                         'Task: $taskId',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16),
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
                         'Volunteer: $volunteerId',
-                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                        style:
+                            const TextStyle(fontSize: 12, color: Colors.grey),
                       ),
                     ],
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: _getStatusColor(status).withOpacity(0.2),
+                    color: _getStatusColor(status).withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(4),
                     border: Border.all(color: _getStatusColor(status)),
                   ),
@@ -205,7 +212,7 @@ class _AdminRealTimeTrackingScreenState extends State<AdminRealTimeTrackingScree
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.1),
+                  color: Colors.red.withValues(alpha: 0.1),
                   border: Border.all(color: Colors.red),
                   borderRadius: BorderRadius.circular(4),
                 ),
@@ -334,7 +341,8 @@ class _AdminRealTimeTrackingScreenState extends State<AdminRealTimeTrackingScree
                   children: [
                     const Text(
                       'Task Details',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     IconButton(
                       icon: const Icon(Icons.close),
@@ -346,16 +354,21 @@ class _AdminRealTimeTrackingScreenState extends State<AdminRealTimeTrackingScree
                 const SizedBox(height: 12),
                 _buildDetailRow('Task ID', taskId),
                 _buildDetailRow('Volunteer', data['volunteerId'] ?? 'N/A'),
-                _buildDetailRow('Status', (data['status'] as String? ?? 'unknown').toUpperCase()),
+                _buildDetailRow('Status',
+                    (data['status'] as String? ?? 'unknown').toUpperCase()),
                 _buildDetailRow('NGO', data['ngoId'] ?? 'N/A'),
                 _buildDetailRow('Food Type', data['foodType'] ?? 'N/A'),
-                _buildDetailRow('Quantity', data['quantity']?.toString() ?? 'N/A'),
+                _buildDetailRow(
+                    'Quantity', data['quantity']?.toString() ?? 'N/A'),
                 if (data['assignedAt'] != null)
-                  _buildDetailRow('Assigned', _formatDateTime(data['assignedAt'])),
+                  _buildDetailRow(
+                      'Assigned', _formatDateTime(data['assignedAt'])),
                 if (data['pickedUpAt'] != null)
-                  _buildDetailRow('Picked Up', _formatDateTime(data['pickedUpAt'])),
+                  _buildDetailRow(
+                      'Picked Up', _formatDateTime(data['pickedUpAt'])),
                 if (data['deliveredAt'] != null)
-                  _buildDetailRow('Delivered', _formatDateTime(data['deliveredAt'])),
+                  _buildDetailRow(
+                      'Delivered', _formatDateTime(data['deliveredAt'])),
               ],
             ),
           ),

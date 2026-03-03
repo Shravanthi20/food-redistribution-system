@@ -1,5 +1,4 @@
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart'; // [NEW]
@@ -35,7 +34,7 @@ class AuthProvider extends ChangeNotifier {
   void _initializeAuth() {
     _authService.authStateChanges.listen((User? user) async {
       _firebaseUser = user;
-      
+
       if (user != null) {
         try {
           _appUser = await _authService.getCurrentAppUser();
@@ -46,7 +45,7 @@ class AuthProvider extends ChangeNotifier {
       } else {
         _appUser = null;
       }
-      
+
       _isLoading = false;
       notifyListeners();
     });
@@ -183,27 +182,28 @@ class AuthProvider extends ChangeNotifier {
   }
 
   // Submit Verification Document (For NGO onboarding flow)
-  Future<void> uploadVerificationDocument(String userId, PlatformFile file) async {
+  Future<void> uploadVerificationDocument(
+      String userId, PlatformFile file) async {
     _setLoading(true);
     try {
       // 1. Upload file to Storage
       // Ideally use a storage service, but calling directly for brevity as per previous implementation patterns here
       // Assuming 'verification_docs' folder exists or is automatically created
-      // NOTE: Since I don't have the Storage instance exposed here clearly, I'll rely on a putative StorageService or similar logic. 
-      // Actually, I will check if Storage is initialized. 
+      // NOTE: Since I don't have the Storage instance exposed here clearly, I'll rely on a putative StorageService or similar logic.
+      // Actually, I will check if Storage is initialized.
       // Re-using the logic from registerNGO but isolated.
-      
+
       final ref = FirebaseStorage.instance
           .ref()
           .child('verification_docs')
           .child('$userId.${file.extension}');
-          
+
       if (kIsWeb) {
         await ref.putData(file.bytes!);
       } else {
         await ref.putFile(File(file.path!));
       }
-      
+
       final url = await ref.getDownloadURL();
 
       // 2. Update User Verification Status (Legacy field support)
@@ -211,7 +211,7 @@ class AuthProvider extends ChangeNotifier {
         'verificationDocUrl': url,
         'updatedAt': FieldValue.serverTimestamp(),
       });
-      
+
       // 3. Create official verification submission via VerificationService
       if (_appUser != null) {
         await _verificationService.submitFileVerification(
@@ -221,21 +221,19 @@ class AuthProvider extends ChangeNotifier {
           documentType: 'NGO Registration/Food License',
         );
       }
-      
+
       // Update local user model
       await _fetchUser(userId);
-
     } catch (e) {
       _errorMessage = e.toString();
       notifyListeners();
-      throw e;
+      rethrow;
     } finally {
       _setLoading(false);
     }
   }
 
   Future<void> signOut() async {
-
     try {
       _isLoading = true;
       notifyListeners();
@@ -321,7 +319,8 @@ class AuthProvider extends ChangeNotifier {
   Future<Map<String, dynamic>?> checkVerificationStatus() async {
     try {
       if (_firebaseUser?.uid == null) return null;
-      return await _verificationService.checkVerificationStatus(_firebaseUser!.uid);
+      return await _verificationService
+          .checkVerificationStatus(_firebaseUser!.uid);
     } catch (e) {
       print('Error checking verification status: $e');
       return null;
@@ -332,13 +331,12 @@ class AuthProvider extends ChangeNotifier {
   Future<bool> checkAndUpdateVerificationStatus() async {
     try {
       if (_firebaseUser?.uid == null || _appUser == null) return false;
-      
+
       final verificationStatus = await checkVerificationStatus();
       if (verificationStatus == null) return false;
 
-      if (verificationStatus['status'] == 'approved' && 
+      if (verificationStatus['status'] == 'approved' &&
           _appUser!.onboardingState != OnboardingState.verified) {
-        
         // Update user state to verified
         await _firestore.collection('users').doc(_firebaseUser!.uid).update({
           'onboardingState': OnboardingState.verified.name,
@@ -349,10 +347,10 @@ class AuthProvider extends ChangeNotifier {
         // Refresh user data
         _appUser = await _authService.getCurrentAppUser();
         notifyListeners();
-        
+
         return true; // Status changed to verified
       }
-      
+
       return false;
     } catch (e) {
       print('Error checking and updating verification status: $e');

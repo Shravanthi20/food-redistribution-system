@@ -9,11 +9,11 @@ class DonorClarificationReplyScreen extends StatefulWidget {
   final String donationTitle;
 
   const DonorClarificationReplyScreen({
-    Key? key,
+    super.key,
     required this.donationId,
     required this.donorId,
     required this.donationTitle,
-  }) : super(key: key);
+  });
 
   @override
   State<DonorClarificationReplyScreen> createState() =>
@@ -128,8 +128,8 @@ class _DonorClarificationReplyScreenState
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: c.isResolved
-              ? const Color(0xFF4CAF50).withOpacity(0.4)
-              : Colors.orange.withOpacity(0.5),
+              ? const Color(0xFF4CAF50).withValues(alpha: 0.4)
+              : Colors.orange.withValues(alpha: 0.5),
           width: 1.5,
         ),
       ),
@@ -148,8 +148,8 @@ class _DonorClarificationReplyScreenState
                             ? const Color(0xFF4CAF50)
                             : Colors.orange)),
                 backgroundColor: c.isResolved
-                    ? const Color(0xFF4CAF50).withOpacity(0.1)
-                    : Colors.orange.withOpacity(0.1),
+                    ? const Color(0xFF4CAF50).withValues(alpha: 0.1)
+                    : Colors.orange.withValues(alpha: 0.1),
                 side: BorderSide.none,
                 visualDensity: VisualDensity.compact,
               ),
@@ -165,7 +165,7 @@ class _DonorClarificationReplyScreenState
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: Colors.orange.withOpacity(0.08),
+              color: Colors.orange.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Row(
@@ -199,7 +199,7 @@ class _DonorClarificationReplyScreenState
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: const Color(0xFF4CAF50).withOpacity(0.08),
+                color: const Color(0xFF4CAF50).withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Row(

@@ -11,12 +11,12 @@ class HygieneChecklistScreen extends StatefulWidget {
   final String donationTitle;
 
   const HygieneChecklistScreen({
-    Key? key,
+    super.key,
     required this.donationId,
     required this.ngoId,
     required this.donorId,
     required this.donationTitle,
-  }) : super(key: key);
+  });
 
   @override
   State<HygieneChecklistScreen> createState() => _HygieneChecklistScreenState();
@@ -208,7 +208,7 @@ class _HygieneChecklistScreenState extends State<HygieneChecklistScreen> {
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: item.isChecked
-                  ? const Color(0xFF4CAF50).withOpacity(0.5)
+                  ? const Color(0xFF4CAF50).withValues(alpha: 0.5)
                   : const Color(0xFF2D3748),
             ),
           ),

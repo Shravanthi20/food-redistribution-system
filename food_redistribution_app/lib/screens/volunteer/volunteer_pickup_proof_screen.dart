@@ -12,13 +12,13 @@ class VolunteerPickupProofScreen extends StatefulWidget {
   final String donationTitle;
 
   const VolunteerPickupProofScreen({
-    Key? key,
+    super.key,
     required this.donationId,
     required this.volunteerId,
     required this.ngoId,
     required this.donorId,
     required this.donationTitle,
-  }) : super(key: key);
+  });
 
   @override
   State<VolunteerPickupProofScreen> createState() =>
@@ -151,9 +151,9 @@ class _VolunteerPickupProofScreenState
   Widget _buildMandatoryBanner() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      color: const Color(0xFF4CAF50).withOpacity(0.12),
-      child: Row(
-        children: const [
+      color: const Color(0xFF4CAF50).withValues(alpha: 0.12),
+      child: const Row(
+        children: [
           Icon(Icons.camera_alt, color: Color(0xFF4CAF50), size: 18),
           SizedBox(width: 10),
           Expanded(
@@ -192,7 +192,7 @@ class _VolunteerPickupProofScreenState
                     Image.file(_capturedImage!, fit: BoxFit.cover),
                     if (_uploadComplete)
                       Container(
-                        color: const Color(0xFF4CAF50).withOpacity(0.5),
+                        color: const Color(0xFF4CAF50).withValues(alpha: 0.5),
                         child: const Center(
                           child: Icon(Icons.check_circle,
                               color: Colors.white, size: 60),
@@ -217,9 +217,9 @@ class _VolunteerPickupProofScreenState
                   ],
                 ),
               )
-            : Column(
+            : const Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
+                children: [
                   Icon(Icons.add_a_photo_outlined,
                       color: Color(0xFF4CAF50), size: 48),
                   SizedBox(height: 10),
@@ -271,7 +271,7 @@ class _VolunteerPickupProofScreenState
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
             color:
-                isSelected ? color.withOpacity(0.15) : const Color(0xFF1A2535),
+                isSelected ? color.withValues(alpha: 0.15) : const Color(0xFF1A2535),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
                 color: isSelected ? color : const Color(0xFF2D3748),

@@ -6,7 +6,8 @@ import '../config/firebase_schema.dart';
 class NotificationService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseMessaging _messaging = FirebaseMessaging.instance;
-  final FlutterLocalNotificationsPlugin _localNotifications = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _localNotifications =
+      FlutterLocalNotificationsPlugin();
 
   // Initialize notifications
   Future<void> initialize() async {
@@ -18,13 +19,14 @@ class NotificationService {
     );
 
     // Initialize local notifications
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
     const iosSettings = DarwinInitializationSettings();
     const initSettings = InitializationSettings(
       android: androidSettings,
       iOS: iosSettings,
     );
-    
+
     await _localNotifications.initialize(initSettings);
 
     // Handle background messages
@@ -61,7 +63,12 @@ class NotificationService {
     required String body,
     Map<String, dynamic>? data,
   }) async {
-    await sendNotification(userId: userId, title: title, message: body, type: 'dispatch_update', data: data);
+    await sendNotification(
+        userId: userId,
+        title: title,
+        message: body,
+        type: 'dispatch_update',
+        data: data);
   }
 
   Future<void> sendToDonor({
@@ -72,7 +79,12 @@ class NotificationService {
   }) async {
     // Note: In a real app, we'd look up the donorId from the donationId
     // For now, we'll assume the donorId is passed as donationId OR we'd need to fetch it
-    await sendNotification(userId: donationId, title: title, message: body, type: 'donation_update', data: data);
+    await sendNotification(
+        userId: donationId,
+        title: title,
+        message: body,
+        type: 'donation_update',
+        data: data);
   }
 
   // Send notification to multiple stakeholders (Donor, NGO, potentially Admin)
@@ -84,7 +96,8 @@ class NotificationService {
   }) async {
     try {
       // Fetch task to get donor and NGO IDs
-      final taskDoc = await _firestore.collection(Collections.deliveries).doc(taskId).get();
+      final taskDoc =
+          await _firestore.collection(Collections.deliveries).doc(taskId).get();
       if (!taskDoc.exists) return;
 
       final taskData = taskDoc.data()!;
@@ -100,7 +113,8 @@ class NotificationService {
       }
       // Usually doesn't notify the volunteer about their own actions but could be useful
       if (volunteerId != null && (data?['notifyVolunteer'] == true)) {
-        await sendToUser(userId: volunteerId, title: title, body: body, data: data);
+        await sendToUser(
+            userId: volunteerId, title: title, body: body, data: data);
       }
     } catch (e) {
       print('Error sending notifications to stakeholders: $e');
@@ -125,19 +139,18 @@ class NotificationService {
         .where('userId', isEqualTo: userId)
         .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => {'id': doc.id, ...doc.data()})
-            .toList());
+        .map((snapshot) =>
+            snapshot.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList());
   }
 
   // Save FCM Token to User Profile
   Future<void> saveTokenToUser(String userId) async {
     try {
-      String?token = await _messaging.getToken();
+      String? token = await _messaging.getToken();
       if (token != null) {
         await _saveToken(userId, token);
       }
-      
+
       // Listen for token refreshes
       _messaging.onTokenRefresh.listen((newToken) {
         _saveToken(userId, newToken);
@@ -154,10 +167,10 @@ class NotificationService {
         .collection(Subcollections.tokens)
         .doc(token)
         .set({
-          'token': token,
-          'createdAt': FieldValue.serverTimestamp(),
-          'platform': 'flutter',
-        });
+      'token': token,
+      'createdAt': FieldValue.serverTimestamp(),
+      'platform': 'flutter',
+    });
   }
 
   // Mark notification as read

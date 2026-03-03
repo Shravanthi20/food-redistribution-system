@@ -10,19 +10,9 @@ enum QueryType {
   other
 }
 
-enum QueryStatus {
-  open,
-  inReview,
-  resolved,
-  closed
-}
+enum QueryStatus { open, inReview, resolved, closed }
 
-enum QueryPriority {
-  low,
-  medium,
-  high,
-  urgent
-}
+enum QueryPriority { low, medium, high, urgent }
 
 class Query {
   final String id;
@@ -69,7 +59,7 @@ class Query {
 
   factory Query.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
-    
+
     return Query(
       id: doc.id,
       raiserUserId: data['raiserUserId'] ?? '',
@@ -94,16 +84,17 @@ class Query {
       assignedAdminId: data['assignedAdminId'],
       attachmentUrls: List<String>.from(data['attachmentUrls'] ?? []),
       createdAt: (data['createdAt'] as Timestamp).toDate(),
-      updatedAt: data['updatedAt'] != null 
-          ? (data['updatedAt'] as Timestamp).toDate() 
+      updatedAt: data['updatedAt'] != null
+          ? (data['updatedAt'] as Timestamp).toDate()
           : null,
-      resolvedAt: data['resolvedAt'] != null 
-          ? (data['resolvedAt'] as Timestamp).toDate() 
+      resolvedAt: data['resolvedAt'] != null
+          ? (data['resolvedAt'] as Timestamp).toDate()
           : null,
       resolution: data['resolution'],
       updates: (data['updates'] as List<dynamic>?)
-          ?.map((e) => QueryUpdate.fromMap(e))
-          .toList() ?? [],
+              ?.map((e) => QueryUpdate.fromMap(e))
+              .toList() ??
+          [],
       metadata: data['metadata'] ?? {},
     );
   }
@@ -197,7 +188,7 @@ class QueryUpdate {
       updatedBy: data['updatedBy'] ?? '',
       updateType: data['updateType'] ?? '',
       content: data['content'] ?? '',
-      timestamp: data['timestamp'] is Timestamp 
+      timestamp: data['timestamp'] is Timestamp
           ? (data['timestamp'] as Timestamp).toDate()
           : DateTime.parse(data['timestamp']),
       changes: data['changes'] ?? {},

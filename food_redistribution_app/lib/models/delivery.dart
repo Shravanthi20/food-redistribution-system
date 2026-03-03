@@ -12,34 +12,34 @@ class Delivery {
   final String ngoId;
   final String? volunteerId;
   final DeliveryStatus status;
-  
+
   // Locations
   final Location pickupLocation;
   final Location dropoffLocation;
-  
+
   // Timing
   final DateTime? scheduledPickup;
   final DateTime? actualPickup;
   final DateTime? scheduledDelivery;
   final DateTime? actualDelivery;
-  
+
   // Task details
   final String? notes;
   final int? estimatedDurationMinutes;
   final double? distanceKm;
   final String? vehicleRequired;
-  
+
   // Ratings and feedback
   final double? donorRating;
   final double? ngoRating;
   final double? volunteerRating;
   final String? donorFeedback;
   final String? ngoFeedback;
-  
+
   // Hygiene verification
   final Map<String, dynamic>? hygieneChecklist;
   final bool hygieneVerified;
-  
+
   final DateTime createdAt;
   final DateTime? updatedAt;
 
@@ -121,10 +121,15 @@ class Delivery {
       Fields.status: status.name,
       Fields.pickupLocation: pickupLocation.toJson(),
       'dropoffLocation': dropoffLocation.toJson(),
-      'scheduledPickup': scheduledPickup != null ? Timestamp.fromDate(scheduledPickup!) : null,
-      'actualPickup': actualPickup != null ? Timestamp.fromDate(actualPickup!) : null,
-      'scheduledDelivery': scheduledDelivery != null ? Timestamp.fromDate(scheduledDelivery!) : null,
-      'actualDelivery': actualDelivery != null ? Timestamp.fromDate(actualDelivery!) : null,
+      'scheduledPickup':
+          scheduledPickup != null ? Timestamp.fromDate(scheduledPickup!) : null,
+      'actualPickup':
+          actualPickup != null ? Timestamp.fromDate(actualPickup!) : null,
+      'scheduledDelivery': scheduledDelivery != null
+          ? Timestamp.fromDate(scheduledDelivery!)
+          : null,
+      'actualDelivery':
+          actualDelivery != null ? Timestamp.fromDate(actualDelivery!) : null,
       'notes': notes,
       'estimatedDurationMinutes': estimatedDurationMinutes,
       'distanceKm': distanceKm,
@@ -137,7 +142,8 @@ class Delivery {
       'hygieneChecklist': hygieneChecklist,
       'hygieneVerified': hygieneVerified,
       Fields.createdAt: Timestamp.fromDate(createdAt),
-      Fields.updatedAt: updatedAt != null ? Timestamp.fromDate(updatedAt!) : null,
+      Fields.updatedAt:
+          updatedAt != null ? Timestamp.fromDate(updatedAt!) : null,
     };
   }
 
@@ -180,7 +186,8 @@ class Delivery {
       scheduledDelivery: scheduledDelivery ?? this.scheduledDelivery,
       actualDelivery: actualDelivery ?? this.actualDelivery,
       notes: notes ?? this.notes,
-      estimatedDurationMinutes: estimatedDurationMinutes ?? this.estimatedDurationMinutes,
+      estimatedDurationMinutes:
+          estimatedDurationMinutes ?? this.estimatedDurationMinutes,
       distanceKm: distanceKm ?? this.distanceKm,
       vehicleRequired: vehicleRequired ?? this.vehicleRequired,
       donorRating: donorRating ?? this.donorRating,
@@ -194,7 +201,7 @@ class Delivery {
       updatedAt: updatedAt ?? DateTime.now(),
     );
   }
-  
+
   // Status helpers
   bool get isPending => status == DeliveryStatus.pending;
   bool get isAssigned => status == DeliveryStatus.assigned;

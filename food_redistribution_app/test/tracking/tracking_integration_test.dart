@@ -26,7 +26,8 @@ void main() {
       const volunteerId = 'volunteer_integration_001';
       const taskId = 'task_integration_001';
 
-      await trackingProvider.startTracking(volunteerId: volunteerId, taskId: taskId);
+      await trackingProvider.startTracking(
+          volunteerId: volunteerId, taskId: taskId);
       trackingProvider.setOnlineStatus(false);
 
       for (int i = 0; i < 3; i++) {
@@ -80,7 +81,8 @@ void main() {
       const task1 = 'task_1';
       const task2 = 'task_2';
 
-      await trackingProvider.startTracking(volunteerId: volunteer1, taskId: task1);
+      await trackingProvider.startTracking(
+          volunteerId: volunteer1, taskId: task1);
 
       final update1 = LocationUpdate(
         id: 'loc_task1',
@@ -142,7 +144,8 @@ void main() {
       const volunteerId = 'volunteer_accuracy_test';
       const taskId = 'task_accuracy_01';
 
-      await trackingProvider.startTracking(volunteerId: volunteerId, taskId: taskId);
+      await trackingProvider.startTracking(
+          volunteerId: volunteerId, taskId: taskId);
 
       final highAccuracy = LocationUpdate(
         id: 'loc_high_acc',
@@ -206,7 +209,8 @@ void main() {
       const volunteerId = 'volunteer_metrics_test';
       const taskId = 'task_metrics_01';
 
-      await trackingProvider.startTracking(volunteerId: volunteerId, taskId: taskId);
+      await trackingProvider.startTracking(
+          volunteerId: volunteerId, taskId: taskId);
 
       final locations = [
         LocationUpdate(

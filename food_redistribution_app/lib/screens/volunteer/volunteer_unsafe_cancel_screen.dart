@@ -9,13 +9,13 @@ class VolunteerUnsafeCancelScreen extends StatefulWidget {
   final String? adminId;
 
   const VolunteerUnsafeCancelScreen({
-    Key? key,
+    super.key,
     required this.donationId,
     required this.volunteerId,
     required this.ngoId,
     required this.donorId,
     this.adminId,
-  }) : super(key: key);
+  });
 
   @override
   State<VolunteerUnsafeCancelScreen> createState() =>
@@ -188,9 +188,9 @@ class _VolunteerUnsafeCancelScreenState
   Widget _buildDangerBanner() {
     return Container(
       padding: const EdgeInsets.all(14),
-      color: Colors.redAccent.withOpacity(0.12),
-      child: Row(
-        children: const [
+      color: Colors.redAccent.withValues(alpha: 0.12),
+      child: const Row(
+        children: [
           Icon(Icons.health_and_safety_outlined,
               color: Colors.redAccent, size: 22),
           SizedBox(width: 10),
@@ -215,7 +215,7 @@ class _VolunteerUnsafeCancelScreenState
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
           color: isSelected
-              ? Colors.redAccent.withOpacity(0.12)
+              ? Colors.redAccent.withValues(alpha: 0.12)
               : const Color(0xFF1A2535),
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
@@ -274,7 +274,7 @@ class _VolunteerUnsafeCancelScreenState
         padding: const EdgeInsets.symmetric(vertical: 3),
         child: Row(
           children: [
-            Icon(icon, color: Colors.redAccent.withOpacity(0.7), size: 16),
+            Icon(icon, color: Colors.redAccent.withValues(alpha: 0.7), size: 16),
             const SizedBox(width: 8),
             Flexible(
                 child: Text(label,

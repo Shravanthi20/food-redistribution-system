@@ -133,7 +133,7 @@ class Geofence {
   final String taskId;
   final String? label;
   final Map<String, dynamic>? metadata;
-  
+
   Geofence({
     required this.id,
     required this.type,
@@ -144,14 +144,12 @@ class Geofence {
     this.label,
     this.metadata,
   });
-  
+
   bool contains(double lat, double lng) {
-    final distance = Geolocator.distanceBetween(
-      latitude, longitude, lat, lng
-    );
+    final distance = Geolocator.distanceBetween(latitude, longitude, lat, lng);
     return distance <= radius;
   }
-  
+
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -164,7 +162,7 @@ class Geofence {
       'metadata': metadata,
     };
   }
-  
+
   factory Geofence.fromMap(Map<String, dynamic> map, {String? id}) {
     return Geofence(
       id: id ?? map['id'] ?? '',
@@ -246,7 +244,8 @@ class TrackingMetrics {
       geofenceEvents: List<String>.from(map['geofenceEvents'] ?? []),
       startTime: (map['startTime'] as Timestamp?)?.toDate() ?? DateTime.now(),
       endTime: (map['endTime'] as Timestamp?)?.toDate(),
-      additionalMetrics: Map<String, dynamic>.from(map['additionalMetrics'] ?? {}),
+      additionalMetrics:
+          Map<String, dynamic>.from(map['additionalMetrics'] ?? {}),
     );
   }
 }

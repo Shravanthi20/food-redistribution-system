@@ -70,8 +70,8 @@ class AnalyticsService {
         'totalDonations': createdQuery.docs.length,
         'completedDonations': completedQuery.docs.length,
         'totalQuantityDonated': totalQuantityDonated,
-        'successRate': createdQuery.docs.isNotEmpty 
-            ? (completedQuery.docs.length / createdQuery.docs.length) * 100 
+        'successRate': createdQuery.docs.isNotEmpty
+            ? (completedQuery.docs.length / createdQuery.docs.length) * 100
             : 0,
       };
     } catch (e) {
@@ -132,17 +132,22 @@ class AnalyticsService {
   // Get Regional Activity (Donations by District/Area approximated from Address)
   Future<Map<String, double>> getRegionalAnalytics() async {
     try {
-      final donations = await _firestore.collection(Collections.donations).get();
+      final donations =
+          await _firestore.collection(Collections.donations).get();
       Map<String, int> counts = {};
-      
+
       for (var doc in donations.docs) {
-        final address = (doc.data()['pickupAddress'] as String? ?? 'Unknown').toLowerCase();
+        final address =
+            (doc.data()['pickupAddress'] as String? ?? 'Unknown').toLowerCase();
         String region = 'Other';
-        if (address.contains('downtown')) region = 'Downtown';
-        else if (address.contains('uptown')) region = 'Uptown';
-        else if (address.contains('north')) region = 'North Side';
+        if (address.contains('downtown')) {
+          region = 'Downtown';
+        } else if (address.contains('uptown'))
+          region = 'Uptown';
+        else if (address.contains('north'))
+          region = 'North Side';
         else if (address.contains('south')) region = 'South Side';
-        
+
         counts[region] = (counts[region] ?? 0) + 1;
       }
 

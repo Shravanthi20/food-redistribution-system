@@ -8,7 +8,7 @@ import '../../providers/auth_provider.dart';
 class TaskExecutionScreen extends StatefulWidget {
   final String donationId;
 
-  const TaskExecutionScreen({Key? key, required this.donationId}) : super(key: key);
+  const TaskExecutionScreen({super.key, required this.donationId});
 
   @override
   State<TaskExecutionScreen> createState() => _TaskExecutionScreenState();
@@ -17,7 +17,7 @@ class TaskExecutionScreen extends StatefulWidget {
 class _TaskExecutionScreenState extends State<TaskExecutionScreen> {
   final FoodDonationService _donationService = FoodDonationService();
   final LocationService _locationService = LocationService();
-  
+
   bool _isLoading = false;
 
   @override
@@ -25,7 +25,8 @@ class _TaskExecutionScreenState extends State<TaskExecutionScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF7F9FC),
       appBar: AppBar(
-        title: const Text("Task Execution", style: TextStyle(color: Colors.black)),
+        title:
+            const Text("Task Execution", style: TextStyle(color: Colors.black)),
         backgroundColor: Colors.white,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
@@ -50,7 +51,8 @@ class _TaskExecutionScreenState extends State<TaskExecutionScreen> {
     );
   }
 
-  Widget _buildContent(BuildContext context, FoodDonation donation, DonationStatus status) {
+  Widget _buildContent(
+      BuildContext context, FoodDonation donation, DonationStatus status) {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -58,57 +60,52 @@ class _TaskExecutionScreenState extends State<TaskExecutionScreen> {
         children: [
           _statusCard(status),
           const SizedBox(height: 20),
-          
-          const Text("Pickup & Drop Details", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+
+          const Text("Pickup & Drop Details",
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           const SizedBox(height: 10),
-          
+
           _infoRow(Icons.store, "Pickup", donation.pickupAddress),
           // In a real app, Drop address would be from the assigned NGO
-          _infoRow(Icons.location_on, "Drop", "Assigned NGO Location"), 
-          _infoRow(Icons.restaurant, "Food", "${donation.quantity} ${donation.unit} of ${donation.foodTypes.join(', ')}"),
-          _infoRow(Icons.timer, "Deadline", "Expires: ${_formatDate(donation.expiresAt)}"),
+          _infoRow(Icons.location_on, "Drop", "Assigned NGO Location"),
+          _infoRow(Icons.restaurant, "Food",
+              "${donation.quantity} ${donation.unit} of ${donation.foodTypes.join(', ')}"),
+          _infoRow(Icons.timer, "Deadline",
+              "Expires: ${_formatDate(donation.expiresAt)}"),
 
           const SizedBox(height: 25),
 
           if (_isLoading)
-             const Center(child: CircularProgressIndicator())
+            const Center(child: CircularProgressIndicator())
           else ...[
-             // ACTION BUTTONS
-             if (status == DonationStatus.matched)
-               _buildActionButton(
-                 "Confirm Pickup", 
-                 Colors.green, 
-                 () => _updateStatus(DonationStatus.pickedUp)
-               ),
-             
-             if (status == DonationStatus.pickedUp)
-               _buildActionButton(
-                 "Mark En-route", 
-                 Colors.orange, 
-                 () async {
-                   // Start Tracking
-                   final userId = Provider.of<AuthProvider>(context, listen: false).user!.uid;
-                   await _locationService.startLocationTracking(userId);
-                   await _updateStatus(DonationStatus.inTransit);
-                 }
-               ),
-            
-             if (status == DonationStatus.inTransit)
-               _buildActionButton(
-                 "Confirm Delivery", 
-                 Colors.blue, 
-                 () async {
-                   final userId = Provider.of<AuthProvider>(context, listen: false).user!.uid;
-                   await _locationService.stopLocationTracking(userId);
-                   await _updateStatus(DonationStatus.delivered);
-                   if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Delivery Confirmed! Tracking Stopped.")),
-                      );
-                      Navigator.pop(context);
-                   }
-                 }
-               ),
+            // ACTION BUTTONS
+            if (status == DonationStatus.matched)
+              _buildActionButton("Confirm Pickup", Colors.green,
+                  () => _updateStatus(DonationStatus.pickedUp)),
+
+            if (status == DonationStatus.pickedUp)
+              _buildActionButton("Mark En-route", Colors.orange, () async {
+                // Start Tracking
+                final userId =
+                    Provider.of<AuthProvider>(context, listen: false).user!.uid;
+                await _locationService.startLocationTracking(userId);
+                await _updateStatus(DonationStatus.inTransit);
+              }),
+
+            if (status == DonationStatus.inTransit)
+              _buildActionButton("Confirm Delivery", Colors.blue, () async {
+                final userId =
+                    Provider.of<AuthProvider>(context, listen: false).user!.uid;
+                await _locationService.stopLocationTracking(userId);
+                await _updateStatus(DonationStatus.delivered);
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text("Delivery Confirmed! Tracking Stopped.")),
+                  );
+                  Navigator.pop(context);
+                }
+              }),
           ]
         ],
       ),
@@ -119,11 +116,10 @@ class _TaskExecutionScreenState extends State<TaskExecutionScreen> {
     setState(() => _isLoading = true);
     try {
       await _donationService.updateDonationStatus(
-        donationId: widget.donationId, 
-        status: newStatus
-      );
+          donationId: widget.donationId, status: newStatus);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e")));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text("Error: $e")));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -136,7 +132,8 @@ class _TaskExecutionScreenState extends State<TaskExecutionScreen> {
         style: ElevatedButton.styleFrom(
           backgroundColor: color,
           padding: const EdgeInsets.symmetric(vertical: 14),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         ),
         onPressed: onPressed,
         child: Text(label),
@@ -148,11 +145,18 @@ class _TaskExecutionScreenState extends State<TaskExecutionScreen> {
     Color color = Colors.grey;
     String statusText = status.name;
 
-    switch(status) {
-      case DonationStatus.pickedUp: color = Colors.green; break;
-      case DonationStatus.inTransit: color = Colors.orange; break;
-      case DonationStatus.delivered: color = Colors.blue; break;
-      default: break;
+    switch (status) {
+      case DonationStatus.pickedUp:
+        color = Colors.green;
+        break;
+      case DonationStatus.inTransit:
+        color = Colors.orange;
+        break;
+      case DonationStatus.delivered:
+        color = Colors.blue;
+        break;
+      default:
+        break;
     }
 
     return Container(
@@ -168,7 +172,8 @@ class _TaskExecutionScreenState extends State<TaskExecutionScreen> {
           const SizedBox(width: 10),
           Text(
             "Current Status: $statusText",
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: color),
+            style: TextStyle(
+                fontWeight: FontWeight.bold, fontSize: 15, color: color),
           ),
         ],
       ),
@@ -183,14 +188,14 @@ class _TaskExecutionScreenState extends State<TaskExecutionScreen> {
           Icon(icon, size: 18, color: Colors.green),
           const SizedBox(width: 8),
           Text("$title: ", style: const TextStyle(fontWeight: FontWeight.bold)),
-          Expanded(child: Text(value, style: const TextStyle(color: Colors.grey))),
+          Expanded(
+              child: Text(value, style: const TextStyle(color: Colors.grey))),
         ],
       ),
     );
   }
-  
+
   String _formatDate(DateTime dt) {
     return "${dt.hour}:${dt.minute}";
   }
 }
-

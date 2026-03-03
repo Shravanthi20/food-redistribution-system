@@ -24,15 +24,15 @@ class NGOProvider extends ChangeNotifier {
 
   bool _isLoading = false;
   String? _errorMessage;
-  
+
   // Food requests data
   List<FoodRequest> _myRequests = [];
   List<FoodDonation> _availableDonations = [];
   List<RequestDonationMatchingResult> _potentialMatches = [];
-  
+
   // Dashboard statistics
   Map<String, dynamic> _dashboardStats = {};
-  
+
   // Queries/disputes
   List<query_model.Query> _myQueries = [];
 
@@ -46,16 +46,16 @@ class NGOProvider extends ChangeNotifier {
   List<query_model.Query> get myQueries => _myQueries;
 
   // Filtered getters
-  List<FoodRequest> get pendingRequests => 
+  List<FoodRequest> get pendingRequests =>
       _myRequests.where((r) => r.status == RequestStatus.pending).toList();
-  
-  List<FoodRequest> get matchedRequests => 
+
+  List<FoodRequest> get matchedRequests =>
       _myRequests.where((r) => r.status == RequestStatus.matched).toList();
-  
-  List<FoodRequest> get fulfilledRequests => 
+
+  List<FoodRequest> get fulfilledRequests =>
       _myRequests.where((r) => r.status == RequestStatus.fulfilled).toList();
 
-  List<FoodRequest> get criticalRequests => 
+  List<FoodRequest> get criticalRequests =>
       _myRequests.where((r) => r.urgency == RequestUrgency.critical).toList();
 
   // Load all NGO data
@@ -71,7 +71,7 @@ class NGOProvider extends ChangeNotifier {
         _loadAvailableDonations(),
         _loadMyQueries(ngoId),
       ]);
-      
+
       // Then calculate dashboard stats (depends on _myRequests being loaded)
       await _loadDashboardStats(ngoId);
     } catch (e) {
@@ -110,7 +110,8 @@ class NGOProvider extends ChangeNotifier {
         'matchedRequests': matchedRequests.length,
         'fulfilledRequests': fulfilledRequests.length,
         'criticalRequests': criticalRequests.length,
-        'totalBeneficiaries': _myRequests.fold<int>(0, (sum, r) => sum + r.expectedBeneficiaries),
+        'totalBeneficiaries':
+            _myRequests.fold<int>(0, (sum, r) => sum + r.expectedBeneficiaries),
       };
     } catch (e) {
       throw Exception('Failed to load dashboard stats: $e');
@@ -174,7 +175,7 @@ class NGOProvider extends ChangeNotifier {
       // Reload requests
       await _loadMyRequests(ngoId);
       await _loadDashboardStats(ngoId);
-      
+
       return requestId;
     } catch (e) {
       _errorMessage = e.toString();
@@ -197,11 +198,11 @@ class NGOProvider extends ChangeNotifier {
       notifyListeners();
 
       await _requestService.updateFoodRequest(requestId, updates);
-      
+
       // Reload requests
       await _loadMyRequests(ngoId);
       await _loadDashboardStats(ngoId);
-      
+
       return true;
     } catch (e) {
       _errorMessage = e.toString();
@@ -224,11 +225,11 @@ class NGOProvider extends ChangeNotifier {
       notifyListeners();
 
       await _requestService.cancelFoodRequest(requestId, ngoId, reason);
-      
+
       // Reload requests
       await _loadMyRequests(ngoId);
       await _loadDashboardStats(ngoId);
-      
+
       return true;
     } catch (e) {
       _errorMessage = e.toString();
@@ -270,11 +271,11 @@ class NGOProvider extends ChangeNotifier {
       notifyListeners();
 
       await _requestService.matchRequestWithDonation(requestId, donationId);
-      
+
       // Reload requests
       await _loadMyRequests(ngoId);
       await _loadDashboardStats(ngoId);
-      
+
       return true;
     } catch (e) {
       _errorMessage = e.toString();
@@ -315,7 +316,7 @@ class NGOProvider extends ChangeNotifier {
 
       // Reload queries
       await _loadMyQueries(ngoId);
-      
+
       return queryId;
     } catch (e) {
       _errorMessage = e.toString();
@@ -363,10 +364,11 @@ class NGOProvider extends ChangeNotifier {
   // Get urgent requests (needed within 24 hours)
   List<FoodRequest> get urgentRequests {
     final now = DateTime.now();
-    return _myRequests.where((r) => 
-      r.status == RequestStatus.pending &&
-      r.neededBy.difference(now).inHours <= 24
-    ).toList();
+    return _myRequests
+        .where((r) =>
+            r.status == RequestStatus.pending &&
+            r.neededBy.difference(now).inHours <= 24)
+        .toList();
   }
 
   // Add update to query
@@ -374,17 +376,17 @@ class NGOProvider extends ChangeNotifier {
     try {
       _isLoading = true;
       notifyListeners();
-      
+
       // Get the current query to access its raiser user ID
       final query = _myQueries.firstWhere((q) => q.id == queryId);
-      
+
       await _queryService.addQueryUpdate(
-        queryId, 
+        queryId,
         query.raiserUserId, // updatedBy
         'message', // updateType
         message, // content
       );
-      
+
       // Reload queries to get the updated data
       await _loadMyQueries(query.raiserUserId);
     } catch (e) {

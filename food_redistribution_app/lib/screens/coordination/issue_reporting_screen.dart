@@ -6,7 +6,7 @@ import '../../services/issue_service.dart';
 class IssueReportingScreen extends StatefulWidget {
   final String donationId;
 
-  const IssueReportingScreen({Key? key, required this.donationId}) : super(key: key);
+  const IssueReportingScreen({super.key, required this.donationId});
 
   @override
   State<IssueReportingScreen> createState() => _IssueReportingScreenState();
@@ -15,12 +15,18 @@ class IssueReportingScreen extends StatefulWidget {
 class _IssueReportingScreenState extends State<IssueReportingScreen> {
   final _formKey = GlobalKey<FormState>();
   final _reasonController = TextEditingController();
-  final IssueService _issueService = IssueService(); // Direct instantiation for simplicity
-  
+  final IssueService _issueService =
+      IssueService(); // Direct instantiation for simplicity
+
   String _selectedTarget = 'Volunteer'; // Default
   bool _isSubmitting = false;
 
-  final List<String> _targetOptions = ['Volunteer', 'NGO', 'Donor', 'System/App'];
+  final List<String> _targetOptions = [
+    'Volunteer',
+    'NGO',
+    'Donor',
+    'System/App'
+  ];
 
   Future<void> _submitIssue() async {
     if (!_formKey.currentState!.validate()) return;
@@ -29,7 +35,7 @@ class _IssueReportingScreenState extends State<IssueReportingScreen> {
 
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      
+
       await _issueService.reportIssue(
         donationId: widget.donationId,
         reporterId: authProvider.user!.uid,
@@ -71,9 +77,8 @@ class _IssueReportingScreenState extends State<IssueReportingScreen> {
                 style: TextStyle(fontSize: 16, color: Colors.grey),
               ),
               const SizedBox(height: 24),
-              
               DropdownButtonFormField<String>(
-                value: _selectedTarget,
+                initialValue: _selectedTarget,
                 decoration: const InputDecoration(
                   labelText: 'Who is this issue related to?',
                   border: OutlineInputBorder(),
@@ -86,31 +91,32 @@ class _IssueReportingScreenState extends State<IssueReportingScreen> {
                 },
               ),
               const SizedBox(height: 16),
-              
               TextFormField(
                 controller: _reasonController,
                 maxLines: 5,
                 decoration: const InputDecoration(
                   labelText: 'Describe the issue',
                   border: OutlineInputBorder(),
-                  hintText: 'e.g., Volunteer is not moving, NGO refused pickup...',
+                  hintText:
+                      'e.g., Volunteer is not moving, NGO refused pickup...',
                 ),
                 validator: (value) {
-                  if (value == null || value.isEmpty) return 'Please provide a reason';
+                  if (value == null || value.isEmpty) {
+                    return 'Please provide a reason';
+                  }
                   return null;
                 },
               ),
               const SizedBox(height: 32),
-              
               ElevatedButton(
                 onPressed: _isSubmitting ? null : _submitIssue,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                child: _isSubmitting 
-                  ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text('Submit Report'),
+                child: _isSubmitting
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text('Submit Report'),
               ),
             ],
           ),

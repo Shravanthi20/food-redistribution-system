@@ -7,7 +7,7 @@ import '../../models/food_request.dart';
 class UpdateDemandScreen extends StatefulWidget {
   final FoodRequest? foodRequest;
 
-  const UpdateDemandScreen({Key? key, this.foodRequest}) : super(key: key);
+  const UpdateDemandScreen({super.key, this.foodRequest});
 
   @override
   State<UpdateDemandScreen> createState() => _UpdateDemandScreenState();
@@ -15,13 +15,13 @@ class UpdateDemandScreen extends StatefulWidget {
 
 class _UpdateDemandScreenState extends State<UpdateDemandScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  
+
   // Controllers
   late TextEditingController _titleController;
   late TextEditingController _descriptionController;
   late TextEditingController _quantityController;
   late TextEditingController _beneficiariesController;
-  
+
   // Selection states
   late List<FoodCategory> _selectedFoodTypes;
   late RequestUrgency _selectedUrgency;
@@ -30,16 +30,38 @@ class _UpdateDemandScreenState extends State<UpdateDemandScreen> {
   late List<String> _selectedServingPopulation;
   late bool _requiresRefrigeration;
   late List<String> _selectedDietaryRestrictions;
-  
+
   bool _isSubmitting = false;
-  
+
   // Options
-  final List<String> _units = ['kg', 'servings', 'packets', 'boxes', 'bags', 'liters', 'pieces'];
+  final List<String> _units = [
+    'kg',
+    'servings',
+    'packets',
+    'boxes',
+    'bags',
+    'liters',
+    'pieces'
+  ];
   final List<String> _servingPopulations = [
-    'Children', 'Elderly', 'Families', 'Homeless', 'Students', 'Workers', 'Refugees', 'All ages'
+    'Children',
+    'Elderly',
+    'Families',
+    'Homeless',
+    'Students',
+    'Workers',
+    'Refugees',
+    'All ages'
   ];
   final List<String> _dietaryRestrictions = [
-    'Vegetarian', 'Vegan', 'Halal', 'Kosher', 'Gluten-free', 'Dairy-free', 'Nut-free', 'No restrictions'
+    'Vegetarian',
+    'Vegan',
+    'Halal',
+    'Kosher',
+    'Gluten-free',
+    'Dairy-free',
+    'Nut-free',
+    'No restrictions'
   ];
 
   @override
@@ -53,9 +75,11 @@ class _UpdateDemandScreenState extends State<UpdateDemandScreen> {
       final request = widget.foodRequest!;
       _titleController = TextEditingController(text: request.title);
       _descriptionController = TextEditingController(text: request.description);
-      _quantityController = TextEditingController(text: request.requiredQuantity.toString());
-      _beneficiariesController = TextEditingController(text: request.expectedBeneficiaries.toString());
-      
+      _quantityController =
+          TextEditingController(text: request.requiredQuantity.toString());
+      _beneficiariesController =
+          TextEditingController(text: request.expectedBeneficiaries.toString());
+
       _selectedFoodTypes = List.from(request.requiredFoodTypes);
       _selectedUrgency = request.urgency;
       _selectedUnit = request.unit;
@@ -68,7 +92,7 @@ class _UpdateDemandScreenState extends State<UpdateDemandScreen> {
       _descriptionController = TextEditingController();
       _quantityController = TextEditingController();
       _beneficiariesController = TextEditingController();
-      
+
       _selectedFoodTypes = [];
       _selectedUrgency = RequestUrgency.medium;
       _selectedUnit = 'kg';
@@ -91,7 +115,7 @@ class _UpdateDemandScreenState extends State<UpdateDemandScreen> {
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.foodRequest != null;
-    
+
     return Scaffold(
       appBar: AppBar(
         title: Text(isEditing ? 'Update Food Request' : 'Create Food Request'),
@@ -150,11 +174,11 @@ class _UpdateDemandScreenState extends State<UpdateDemandScreen> {
                 ),
                 const SizedBox(height: 24),
               ],
-              
+
               // Basic Information
               _buildSectionTitle('Basic Information'),
               const SizedBox(height: 16),
-              
+
               TextFormField(
                 controller: _titleController,
                 decoration: const InputDecoration(
@@ -170,15 +194,16 @@ class _UpdateDemandScreenState extends State<UpdateDemandScreen> {
                   return null;
                 },
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               TextFormField(
                 controller: _descriptionController,
                 maxLines: 3,
                 decoration: const InputDecoration(
                   labelText: 'Description',
-                  hintText: 'Describe your food requirements and the people you serve...',
+                  hintText:
+                      'Describe your food requirements and the people you serve...',
                   border: OutlineInputBorder(),
                   alignLabelWithHint: true,
                 ),
@@ -189,13 +214,13 @@ class _UpdateDemandScreenState extends State<UpdateDemandScreen> {
                   return null;
                 },
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Quantity and Urgency
               _buildSectionTitle('Quantity &amp; Urgency'),
               const SizedBox(height: 16),
-              
+
               Row(
                 children: [
                   Expanded(
@@ -212,7 +237,8 @@ class _UpdateDemandScreenState extends State<UpdateDemandScreen> {
                         if (value == null || value.trim().isEmpty) {
                           return 'Required';
                         }
-                        if (int.tryParse(value) == null || int.parse(value) <= 0) {
+                        if (int.tryParse(value) == null ||
+                            int.parse(value) <= 0) {
                           return 'Invalid quantity';
                         }
                         return null;
@@ -222,7 +248,7 @@ class _UpdateDemandScreenState extends State<UpdateDemandScreen> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: DropdownButtonFormField<String>(
-                      value: _selectedUnit,
+                      initialValue: _selectedUnit,
                       decoration: const InputDecoration(
                         labelText: 'Unit',
                         border: OutlineInputBorder(),
@@ -239,11 +265,11 @@ class _UpdateDemandScreenState extends State<UpdateDemandScreen> {
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               DropdownButtonFormField<RequestUrgency>(
-                value: _selectedUrgency,
+                initialValue: _selectedUrgency,
                 decoration: const InputDecoration(
                   labelText: 'Urgency Level',
                   border: OutlineInputBorder(),
@@ -274,9 +300,9 @@ class _UpdateDemandScreenState extends State<UpdateDemandScreen> {
                   });
                 },
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Needed By Date
               InkWell(
                 onTap: _selectNeededByDate,
@@ -291,9 +317,9 @@ class _UpdateDemandScreenState extends State<UpdateDemandScreen> {
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               TextFormField(
                 controller: _beneficiariesController,
                 keyboardType: TextInputType.number,
@@ -313,18 +339,18 @@ class _UpdateDemandScreenState extends State<UpdateDemandScreen> {
                   return null;
                 },
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Food Types
               _buildSectionTitle('Food Requirements'),
               const SizedBox(height: 16),
-              
+
               Text(
                 'Food Types Needed:',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               const SizedBox(height: 8),
               Wrap(
@@ -348,18 +374,19 @@ class _UpdateDemandScreenState extends State<UpdateDemandScreen> {
                   );
                 }).toList(),
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Serving Population
               _buildSectionTitle('Serving Population'),
               const SizedBox(height: 16),
-              
+
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
                 children: _servingPopulations.map((population) {
-                  final isSelected = _selectedServingPopulation.contains(population);
+                  final isSelected =
+                      _selectedServingPopulation.contains(population);
                   return FilterChip(
                     label: Text(population),
                     selected: isSelected,
@@ -376,13 +403,13 @@ class _UpdateDemandScreenState extends State<UpdateDemandScreen> {
                   );
                 }).toList(),
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Special Requirements
               _buildSectionTitle('Special Requirements'),
               const SizedBox(height: 16),
-              
+
               CheckboxListTile(
                 title: const Text('Requires Refrigeration'),
                 subtitle: const Text('Cold storage needed'),
@@ -394,21 +421,22 @@ class _UpdateDemandScreenState extends State<UpdateDemandScreen> {
                 },
                 controlAffinity: ListTileControlAffinity.leading,
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               Text(
                 'Dietary Restrictions:',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
                 children: _dietaryRestrictions.map((restriction) {
-                  final isSelected = _selectedDietaryRestrictions.contains(restriction);
+                  final isSelected =
+                      _selectedDietaryRestrictions.contains(restriction);
                   return FilterChip(
                     label: Text(restriction),
                     selected: isSelected,
@@ -425,9 +453,9 @@ class _UpdateDemandScreenState extends State<UpdateDemandScreen> {
                   );
                 }).toList(),
               ),
-              
+
               const SizedBox(height: 32),
-              
+
               // Submit Button
               SizedBox(
                 width: double.infinity,
@@ -459,7 +487,8 @@ class _UpdateDemandScreenState extends State<UpdateDemandScreen> {
                         )
                       : Text(
                           isEditing ? 'Update Request' : 'Create Request',
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                 ),
               ),
@@ -474,9 +503,9 @@ class _UpdateDemandScreenState extends State<UpdateDemandScreen> {
     return Text(
       title,
       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-        fontWeight: FontWeight.bold,
-        color: Colors.orange.shade700,
-      ),
+            fontWeight: FontWeight.bold,
+            color: Colors.orange.shade700,
+          ),
     );
   }
 
@@ -507,7 +536,8 @@ class _UpdateDemandScreenState extends State<UpdateDemandScreen> {
   }
 
   String _getFoodCategoryText(FoodCategory category) {
-    return category.name.replaceFirst(category.name[0], category.name[0].toUpperCase());
+    return category.name
+        .replaceFirst(category.name[0], category.name[0].toUpperCase());
   }
 
   Future<void> _selectNeededByDate() async {
@@ -528,14 +558,14 @@ class _UpdateDemandScreenState extends State<UpdateDemandScreen> {
     if (!_formKey.currentState!.validate()) {
       return Future.value();
     }
-    
+
     if (_selectedFoodTypes.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please select at least one food type')),
       );
       return Future.value();
     }
-    
+
     if (_selectedServingPopulation.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please select serving population')),
@@ -548,11 +578,11 @@ class _UpdateDemandScreenState extends State<UpdateDemandScreen> {
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final ngoProvider = Provider.of<NGOProvider>(context, listen: false);
-      
+
       final updates = {
         'title': _titleController.text.trim(),
         'description': _descriptionController.text.trim(),
-          'requiredFoodTypes': _selectedFoodTypes.map((e) => e.name).toList(),
+        'requiredFoodTypes': _selectedFoodTypes.map((e) => e.name).toList(),
         'requiredQuantity': int.parse(_quantityController.text),
         'unit': _selectedUnit,
         'urgency': _selectedUrgency.name,
@@ -588,7 +618,8 @@ class _UpdateDemandScreenState extends State<UpdateDemandScreen> {
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Error: ${ngoProvider.errorMessage ?? 'Unknown error'}'),
+              content:
+                  Text('Error: ${ngoProvider.errorMessage ?? 'Unknown error'}'),
               backgroundColor: Colors.red,
             ),
           );
@@ -605,7 +636,7 @@ class _UpdateDemandScreenState extends State<UpdateDemandScreen> {
       }
     } finally {
       if (mounted) {
-          setState(() => _isSubmitting = false);
+        setState(() => _isSubmitting = false);
       }
     }
   }
@@ -616,11 +647,12 @@ class _UpdateDemandScreenState extends State<UpdateDemandScreen> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Cancel Request'),
-          content: const Text('Are you sure you want to cancel this food request? This action cannot be undone.'),
+          content: const Text(
+              'Are you sure you want to cancel this food request? This action cannot be undone.'),
           actions: [
             TextButton(
               child: const Text('Keep Request'),
-                onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.pop(context),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
@@ -638,19 +670,19 @@ class _UpdateDemandScreenState extends State<UpdateDemandScreen> {
 
   Future<void> _deleteRequest() async {
     if (widget.foodRequest == null) return;
-    
+
     setState(() => _isSubmitting = true);
-    
+
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final ngoProvider = Provider.of<NGOProvider>(context, listen: false);
-      
+
       final success = await ngoProvider.cancelFoodRequest(
         widget.foodRequest!.id,
         authProvider.firebaseUser!.uid,
         'Cancelled by user',
       );
-      
+
       if (mounted) {
         if (success) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -663,7 +695,8 @@ class _UpdateDemandScreenState extends State<UpdateDemandScreen> {
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Error: ${ngoProvider.errorMessage ?? 'Failed to cancel request'}'),
+              content: Text(
+                  'Error: ${ngoProvider.errorMessage ?? 'Failed to cancel request'}'),
               backgroundColor: Colors.red,
             ),
           );

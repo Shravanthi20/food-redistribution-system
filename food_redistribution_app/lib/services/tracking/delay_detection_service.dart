@@ -29,10 +29,8 @@ class DelayDetectionService {
   }) async {
     try {
       // Get task document
-      final taskDoc = await _firestore
-          .collection('delivery_tasks')
-          .doc(taskId)
-          .get();
+      final taskDoc =
+          await _firestore.collection('delivery_tasks').doc(taskId).get();
 
       if (!taskDoc.exists) return;
 
@@ -103,9 +101,9 @@ class DelayDetectionService {
       }
 
       // Check delivery delay
-      if ((status == 'pickedUp' || status == 'inTransit') && pickedUpAt != null) {
-        final deliveryDeadline =
-            pickedUpAt.add(Duration(minutes: deliverySLA));
+      if ((status == 'pickedUp' || status == 'inTransit') &&
+          pickedUpAt != null) {
+        final deliveryDeadline = pickedUpAt.add(Duration(minutes: deliverySLA));
         if (DateTime.now().isAfter(deliveryDeadline)) {
           _handleDeliveryDelay(
             taskId: taskId,
@@ -228,10 +226,10 @@ class DelayDetectionService {
         estimatedDelay: alert.estimatedDelay,
       );
 
-      await _firestore
-          .collection('delay_alerts')
-          .doc(alertId)
-          .update({'resolvedAt': FieldValue.serverTimestamp(), 'resolutionAction': resolution});
+      await _firestore.collection('delay_alerts').doc(alertId).update({
+        'resolvedAt': FieldValue.serverTimestamp(),
+        'resolutionAction': resolution
+      });
 
       _activeAlerts[alertId] = resolvedAlert;
     } catch (e) {
