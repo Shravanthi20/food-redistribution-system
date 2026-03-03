@@ -40,7 +40,7 @@ void main() {
 
     test('should validate email format', () {
       expect(testUser.isValidEmail(), isTrue);
-      
+
       final invalidUser = testUser.copyWith(email: 'invalid-email');
       expect(invalidUser.isValidEmail(), isFalse);
     });
@@ -88,7 +88,7 @@ void main() {
 
     test('should convert to and from JSON', () {
       final json = testUser.toJson();
-      
+
       expect(json['id'], equals('test-user-123'));
       expect(json['email'], equals('test@example.com'));
       expect(json['role'], equals('donor'));
@@ -117,9 +117,10 @@ void main() {
     test('should provide full name and display name', () {
       expect(testUser.fullName, equals('Test User'));
       expect(testUser.displayName, equals('Test User'));
-      
+
       final noNameUser = testUser.copyWith(firstName: '', lastName: '');
-      expect(noNameUser.displayName, equals('test@example.com')); // Falls back to email
+      expect(noNameUser.displayName,
+          equals('test@example.com')); // Falls back to email
     });
   });
 

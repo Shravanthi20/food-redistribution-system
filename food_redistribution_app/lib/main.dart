@@ -11,6 +11,7 @@ import 'providers/donation_provider.dart';
 import 'providers/ngo_provider.dart';
 import 'utils/app_theme.dart';
 import 'utils/app_router.dart';
+//import 'screens/donor/donor_dashboard.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,7 +22,7 @@ void main() async {
 }
 
 class FoodRedistributionApp extends StatelessWidget {
-  const FoodRedistributionApp({Key? key}) : super(key: key);
+  const FoodRedistributionApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +43,7 @@ class FoodRedistributionApp extends StatelessWidget {
             darkTheme: AppTheme.darkTheme,
             themeMode: themeProvider.themeMode,
             onGenerateRoute: AppRouter.generateRoute,
-            home: const WelcomeScreen(),
+            home: const WelcomeScreen(), // ✅ DIRECT OPEN
             debugShowCheckedModeBanner: false,
           );
         },

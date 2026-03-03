@@ -9,7 +9,8 @@ import '../services/tracking/analytics_aggregation_service.dart';
 // Keep track of all deliveries happening right now
 class TrackingProvider extends ChangeNotifier {
   late final DelayDetectionService _delayDetectionService;
-  final AnalyticsAggregationService _analyticsService = AnalyticsAggregationService();
+  final AnalyticsAggregationService _analyticsService =
+      AnalyticsAggregationService();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   TrackingProvider() {
@@ -85,15 +86,12 @@ class TrackingProvider extends ChangeNotifier {
     String? notes,
   }) async {
     try {
-      await _firestore
-          .collection('donations')
-          .doc(donationId)
-          .update({
-            'status': newStatus,
-            'updatedAt': FieldValue.serverTimestamp(),
-            'updatedBy': userId,
-            if (notes != null) 'notes': notes,
-          });
+      await _firestore.collection('donations').doc(donationId).update({
+        'status': newStatus,
+        'updatedAt': FieldValue.serverTimestamp(),
+        'updatedBy': userId,
+        if (notes != null) 'notes': notes,
+      });
 
       _trackingState = _trackingState.copyWith(
         currentStatus: newStatus,

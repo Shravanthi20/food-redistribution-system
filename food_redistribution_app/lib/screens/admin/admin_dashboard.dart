@@ -7,13 +7,14 @@ import '../../utils/app_router.dart'; // [NEW]
 import '../../services/verification_service.dart'; // For VerificationStatus enum
 
 class AdminDashboard extends StatefulWidget {
-  const AdminDashboard({Key? key}) : super(key: key);
+  const AdminDashboard({super.key});
 
   @override
   State<AdminDashboard> createState() => _AdminDashboardState();
 }
 
-class _AdminDashboardState extends State<AdminDashboard> with SingleTickerProviderStateMixin {
+class _AdminDashboardState extends State<AdminDashboard>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
@@ -22,7 +23,8 @@ class _AdminDashboardState extends State<AdminDashboard> with SingleTickerProvid
     _tabController = TabController(length: 3, vsync: this);
     // Load data when screen opens
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<AdminDashboardProvider>(context, listen: false).loadDashboardData();
+      Provider.of<AdminDashboardProvider>(context, listen: false)
+          .loadDashboardData();
     });
   }
 
@@ -46,9 +48,11 @@ class _AdminDashboardState extends State<AdminDashboard> with SingleTickerProvid
             onPressed: () => provider.loadDashboardData(),
           ),
           IconButton(
-            icon: const Icon(Icons.report_problem, color: Colors.amber), // Warning color
+            icon: const Icon(Icons.report_problem,
+                color: Colors.amber), // Warning color
             tooltip: 'Manage Issues',
-            onPressed: () => Navigator.pushNamed(context, AppRouter.adminIssues),
+            onPressed: () =>
+                Navigator.pushNamed(context, AppRouter.adminIssues),
           ),
           IconButton(
             icon: const Icon(Icons.logout),
@@ -90,7 +94,8 @@ class _AdminDashboardState extends State<AdminDashboard> with SingleTickerProvid
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('System Analytics', style: Theme.of(context).textTheme.headlineSmall),
+          Text('System Analytics',
+              style: Theme.of(context).textTheme.headlineSmall),
           const SizedBox(height: 16),
           GridView.count(
             crossAxisCount: 2,
@@ -127,7 +132,8 @@ class _AdminDashboardState extends State<AdminDashboard> with SingleTickerProvid
             ],
           ),
           const SizedBox(height: 24),
-          Text('Activity & Health', style: Theme.of(context).textTheme.headlineSmall),
+          Text('Activity & Health',
+              style: Theme.of(context).textTheme.headlineSmall),
           const Card(
             child: ListTile(
               leading: Icon(Icons.check_circle, color: Colors.green),
@@ -141,7 +147,8 @@ class _AdminDashboardState extends State<AdminDashboard> with SingleTickerProvid
     );
   }
 
-  Widget _buildMetricCard(String title, String value, IconData icon, Color color) {
+  Widget _buildMetricCard(
+      String title, String value, IconData icon, Color color) {
     return Card(
       elevation: 4,
       child: Padding(
@@ -151,8 +158,12 @@ class _AdminDashboardState extends State<AdminDashboard> with SingleTickerProvid
           children: [
             Icon(icon, size: 32, color: color),
             const SizedBox(height: 8),
-            Text(value, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-            Text(title, style: const TextStyle(color: Colors.grey), textAlign: TextAlign.center),
+            Text(value,
+                style:
+                    const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            Text(title,
+                style: const TextStyle(color: Colors.grey),
+                textAlign: TextAlign.center),
           ],
         ),
       ),
@@ -178,37 +189,42 @@ class _AdminDashboardState extends State<AdminDashboard> with SingleTickerProvid
 
         return Card(
           child: ExpansionTile(
-            leading: CircleAvatar(child: Text((user['email'] ?? 'U')[0].toUpperCase())),
+            leading: CircleAvatar(
+                child: Text((user['email'] ?? 'U')[0].toUpperCase())),
             title: Text(user['email'] ?? 'Unknown User'),
-            subtitle: Text('Role: ${submission['userRole']} • ${submission['submittedAt'] != null ? DateFormat('MMM d').format((submission['submittedAt'] as dynamic).toDate()) : ''}'),
+            subtitle: Text(
+                'Role: ${submission['userRole']} • ${submission['submittedAt'] != null ? DateFormat('MMM d').format((submission['submittedAt'] as dynamic).toDate()) : ''}'),
             children: [
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Submitted Documents:', style: TextStyle(fontWeight: FontWeight.bold)),
-                    ...(submission['documentInfo'] as List<dynamic>? ?? []).map((doc) => 
-                      ListTile(
-                        dense: true,
-                        leading: const Icon(Icons.file_present),
-                        title: Text(doc['type']),
-                        subtitle: Text(doc['information']),
-                      )
-                    ).toList(),
+                    const Text('Submitted Documents:',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    ...(submission['documentInfo'] as List<dynamic>? ?? [])
+                        .map((doc) => ListTile(
+                              dense: true,
+                              leading: const Icon(Icons.file_present),
+                              title: Text(doc['type']),
+                              subtitle: Text(doc['information']),
+                            ))
+                        ,
                     const SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         OutlinedButton(
                           onPressed: () => _showRejectDialog(context, subId),
-                          style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
+                          style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.red),
                           child: const Text('Reject'),
                         ),
                         const SizedBox(width: 8),
                         ElevatedButton(
                           onPressed: () => _approveSubmission(subId),
-                          style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green),
                           child: const Text('Approve'),
                         ),
                       ],
@@ -224,14 +240,18 @@ class _AdminDashboardState extends State<AdminDashboard> with SingleTickerProvid
   }
 
   Future<void> _approveSubmission(String submissionId) async {
-      // In a real app we would get the current admin ID properly
-      final adminId = Provider.of<AuthProvider>(context, listen: false).firebaseUser?.uid ?? 'admin';
-      await Provider.of<AdminDashboardProvider>(context, listen: false)
-          .reviewVerification(submissionId, adminId, VerificationStatus.approved, null);
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Approved!')));
-      }
+    // In a real app we would get the current admin ID properly
+    final adminId =
+        Provider.of<AuthProvider>(context, listen: false).firebaseUser?.uid ??
+            'admin';
+    await Provider.of<AdminDashboardProvider>(context, listen: false)
+        .reviewVerification(
+            submissionId, adminId, VerificationStatus.approved, null);
+
+    if (mounted) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Approved!')));
+    }
   }
 
   void _showRejectDialog(BuildContext context, String submissionId) {
@@ -245,12 +265,17 @@ class _AdminDashboardState extends State<AdminDashboard> with SingleTickerProvid
           decoration: const InputDecoration(labelText: 'Reason for rejection'),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
           TextButton(
             onPressed: () async {
-              final adminId = Provider.of<AuthProvider>(context, listen: false).firebaseUser?.uid ?? 'admin';
+              final adminId = Provider.of<AuthProvider>(context, listen: false)
+                      .firebaseUser
+                      ?.uid ??
+                  'admin';
               await Provider.of<AdminDashboardProvider>(context, listen: false)
-                  .reviewVerification(submissionId, adminId, VerificationStatus.rejected, noteController.text);
+                  .reviewVerification(submissionId, adminId,
+                      VerificationStatus.rejected, noteController.text);
               Navigator.pop(ctx);
             },
             child: const Text('Reject', style: TextStyle(color: Colors.red)),
@@ -275,7 +300,8 @@ class _AdminDashboardState extends State<AdminDashboard> with SingleTickerProvid
             ),
             onSubmitted: (value) {
               // Implementation would hook into provider to search users
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Search not implemented in this demo')));
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  content: Text('Search not implemented in this demo')));
             },
           ),
           const SizedBox(height: 20),

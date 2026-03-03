@@ -43,7 +43,7 @@ class TrackingServicesInitializer {
   }
 
   /// Start background tracking for a volunteer
-  /// 
+  ///
   /// This should be called when volunteer accepts a delivery task
   static Future<bool> startVolunteerTracking({
     required String volunteerId,
@@ -54,10 +54,12 @@ class TrackingServicesInitializer {
     required double deliveryLng,
   }) async {
     try {
-      debugPrint('▶️ Starting tracking for volunteer: $volunteerId, task: $taskId');
+      debugPrint(
+          '▶️ Starting tracking for volunteer: $volunteerId, task: $taskId');
 
       // 1. Start background GPS tracking
-      final trackingStarted = await _backgroundTrackingService.startBackgroundTracking(
+      final trackingStarted =
+          await _backgroundTrackingService.startBackgroundTracking(
         volunteerId: volunteerId,
         taskId: taskId,
         updateIntervalSeconds: 30, // Update every 30 seconds
@@ -95,7 +97,7 @@ class TrackingServicesInitializer {
   }
 
   /// Stop background tracking for a volunteer
-  /// 
+  ///
   /// This should be called when delivery is completed or cancelled
   static Future<bool> stopVolunteerTracking({
     required String volunteerId,
@@ -139,26 +141,26 @@ class TrackingServicesInitializer {
 }
 
 /// Example usage in main.dart:
-/// 
+///
 /// ```dart
 /// void main() async {
 ///   WidgetsFlutterBinding.ensureInitialized();
-///   
+///
 ///   // Initialize Firebase
 ///   await Firebase.initializeApp();
-///   
+///
 ///   // Initialize tracking services
 ///   final realTimeTrackingService = RealTimeTrackingService(...);
 ///   await TrackingServicesInitializer.initialize(
 ///     realTimeTrackingService: realTimeTrackingService,
 ///   );
-///   
+///
 ///   runApp(const MyApp());
 /// }
 /// ```
-/// 
+///
 /// Example usage when starting a delivery:
-/// 
+///
 /// ```dart
 /// onVolunteerAcceptsTask() {
 ///   await TrackingServicesInitializer.startVolunteerTracking(

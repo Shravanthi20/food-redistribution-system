@@ -9,12 +9,12 @@ class NgoClarifyRequestScreen extends StatefulWidget {
   final String donationTitle;
 
   const NgoClarifyRequestScreen({
-    Key? key,
+    super.key,
     required this.donationId,
     required this.ngoId,
     required this.donorId,
     required this.donationTitle,
-  }) : super(key: key);
+  });
 
   @override
   State<NgoClarifyRequestScreen> createState() =>
@@ -159,9 +159,9 @@ class _NgoClarifyRequestScreenState extends State<NgoClarifyRequestScreen> {
   Widget _buildInfoBanner() {
     return Container(
       padding: const EdgeInsets.all(14),
-      color: Colors.orange.withOpacity(0.12),
-      child: Row(
-        children: const [
+      color: Colors.orange.withValues(alpha: 0.12),
+      child: const Row(
+        children: [
           Icon(Icons.info_outline, color: Colors.orange, size: 20),
           SizedBox(width: 10),
           Expanded(
@@ -207,8 +207,8 @@ class _NgoClarifyRequestScreenState extends State<NgoClarifyRequestScreen> {
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
           color: c.isResolved
-              ? const Color(0xFF4CAF50).withOpacity(0.4)
-              : Colors.orange.withOpacity(0.4),
+              ? const Color(0xFF4CAF50).withValues(alpha: 0.4)
+              : Colors.orange.withValues(alpha: 0.4),
         ),
       ),
       child: Column(
@@ -244,8 +244,8 @@ class _NgoClarifyRequestScreenState extends State<NgoClarifyRequestScreen> {
             label: Text(c.isResolved ? 'Resolved' : 'Awaiting Reply',
                 style: const TextStyle(fontSize: 10)),
             backgroundColor: c.isResolved
-                ? const Color(0xFF4CAF50).withOpacity(0.2)
-                : Colors.orange.withOpacity(0.2),
+                ? const Color(0xFF4CAF50).withValues(alpha: 0.2)
+                : Colors.orange.withValues(alpha: 0.2),
             side: BorderSide.none,
             visualDensity: VisualDensity.compact,
             labelStyle: TextStyle(

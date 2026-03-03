@@ -7,7 +7,8 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('Food Redistribution App Integration Tests', () {
-    testWidgets('should complete user onboarding flow', (WidgetTester tester) async {
+    testWidgets('should complete user onboarding flow',
+        (WidgetTester tester) async {
       app.main();
       await tester.pumpAndSettle();
 
@@ -19,10 +20,12 @@ void main() {
       await tester.pumpAndSettle();
 
       // Should navigate to donor dashboard or registration
-      expect(find.textContaining('donor').or(find.textContaining('Donor')), findsAtLeastNWidgets(1));
+      expect(find.textContaining('donor').or(find.textContaining('Donor')),
+          findsAtLeastNWidgets(1));
     });
 
-    testWidgets('should handle navigation between screens', (WidgetTester tester) async {
+    testWidgets('should handle navigation between screens',
+        (WidgetTester tester) async {
       app.main();
       await tester.pumpAndSettle();
 
@@ -34,7 +37,8 @@ void main() {
       await tester.pumpAndSettle();
 
       // Should show NGO-related content
-      expect(find.textContaining('NGO').or(find.textContaining('Organization')), findsAtLeastNWidgets(1));
+      expect(find.textContaining('NGO').or(find.textContaining('Organization')),
+          findsAtLeastNWidgets(1));
 
       // Navigate back if possible
       final backButton = find.byIcon(Icons.arrow_back);
@@ -45,7 +49,8 @@ void main() {
       }
     });
 
-    testWidgets('should handle volunteer registration flow', (WidgetTester tester) async {
+    testWidgets('should handle volunteer registration flow',
+        (WidgetTester tester) async {
       app.main();
       await tester.pumpAndSettle();
 
@@ -54,11 +59,13 @@ void main() {
       await tester.pumpAndSettle();
 
       // Should navigate to volunteer-specific screen
-      expect(find.textContaining('volunteer').or(find.textContaining('Volunteer')), 
-             findsAtLeastNWidgets(1));
+      expect(
+          find.textContaining('volunteer').or(find.textContaining('Volunteer')),
+          findsAtLeastNWidgets(1));
     });
 
-    testWidgets('should handle scroll behavior in welcome screen', (WidgetTester tester) async {
+    testWidgets('should handle scroll behavior in welcome screen',
+        (WidgetTester tester) async {
       app.main();
       await tester.pumpAndSettle();
 
@@ -80,7 +87,8 @@ void main() {
       expect(find.text('Food Redistribution Platform'), findsOneWidget);
     });
 
-    testWidgets('should handle app state preservation', (WidgetTester tester) async {
+    testWidgets('should handle app state preservation',
+        (WidgetTester tester) async {
       app.main();
       await tester.pumpAndSettle();
 
@@ -112,7 +120,8 @@ void main() {
       expect(find.text('Food Redistribution Platform'), findsOneWidget);
     });
 
-    testWidgets('should handle different screen orientations', (WidgetTester tester) async {
+    testWidgets('should handle different screen orientations',
+        (WidgetTester tester) async {
       app.main();
       await tester.pumpAndSettle();
 
@@ -120,24 +129,26 @@ void main() {
       expect(find.text('Food Redistribution Platform'), findsOneWidget);
 
       // Simulate landscape orientation
-      tester.binding.window.physicalSizeTestValue = const Size(800, 400);
+      tester.view.physicalSizeTestValue = const Size(800, 400);
       await tester.pumpAndSettle();
 
       // App should adapt to landscape
       expect(find.text('Food Redistribution Platform'), findsOneWidget);
 
       // Reset orientation
-      tester.binding.window.clearPhysicalSizeTestValue();
+      tester.view.resetPhysicalSize();
       await tester.pumpAndSettle();
     });
 
-    testWidgets('should handle accessibility features', (WidgetTester tester) async {
+    testWidgets('should handle accessibility features',
+        (WidgetTester tester) async {
       app.main();
       await tester.pumpAndSettle();
 
       // Test semantic labels
       expect(find.bySemanticsLabel('Select Food Donor role'), findsOneWidget);
-      expect(find.bySemanticsLabel('Select NGO Organization role'), findsOneWidget);
+      expect(find.bySemanticsLabel('Select NGO Organization role'),
+          findsOneWidget);
       expect(find.bySemanticsLabel('Select Volunteer role'), findsOneWidget);
 
       // Test focus management
@@ -148,7 +159,8 @@ void main() {
       expect(find.byType(MaterialApp), findsOneWidget);
     });
 
-    testWidgets('should handle network error states', (WidgetTester tester) async {
+    testWidgets('should handle network error states',
+        (WidgetTester tester) async {
       app.main();
       await tester.pumpAndSettle();
 
@@ -163,7 +175,8 @@ void main() {
       expect(find.byType(MaterialApp), findsOneWidget);
     });
 
-    testWidgets('should maintain performance with animations', (WidgetTester tester) async {
+    testWidgets('should maintain performance with animations',
+        (WidgetTester tester) async {
       app.main();
       await tester.pumpAndSettle();
 
@@ -198,8 +211,9 @@ void main() {
       await tester.pumpAndSettle();
 
       // Should handle role switching correctly
-      expect(find.textContaining('volunteer').or(find.textContaining('Volunteer')), 
-             findsAtLeastNWidgets(1));
+      expect(
+          find.textContaining('volunteer').or(find.textContaining('Volunteer')),
+          findsAtLeastNWidgets(1));
     });
 
     testWidgets('should validate app theming', (WidgetTester tester) async {
@@ -214,7 +228,8 @@ void main() {
       expect(find.text('Food Redistribution Platform'), findsOneWidget);
     });
 
-    testWidgets('should handle deep linking scenarios', (WidgetTester tester) async {
+    testWidgets('should handle deep linking scenarios',
+        (WidgetTester tester) async {
       app.main();
       await tester.pumpAndSettle();
 
@@ -230,7 +245,8 @@ void main() {
     });
 
     group('Error Handling Tests', () {
-      testWidgets('should handle widget build errors gracefully', (WidgetTester tester) async {
+      testWidgets('should handle widget build errors gracefully',
+          (WidgetTester tester) async {
         app.main();
         await tester.pumpAndSettle();
 
@@ -239,7 +255,8 @@ void main() {
         expect(tester.takeException(), isNull);
       });
 
-      testWidgets('should display error boundaries when needed', (WidgetTester tester) async {
+      testWidgets('should display error boundaries when needed',
+          (WidgetTester tester) async {
         app.main();
         await tester.pumpAndSettle();
 
@@ -250,20 +267,22 @@ void main() {
     });
 
     group('Performance Tests', () {
-      testWidgets('should load within acceptable time', (WidgetTester tester) async {
+      testWidgets('should load within acceptable time',
+          (WidgetTester tester) async {
         final stopwatch = Stopwatch()..start();
-        
+
         app.main();
         await tester.pumpAndSettle();
-        
+
         stopwatch.stop();
-        
+
         // App should load within 3 seconds
         expect(stopwatch.elapsedMilliseconds, lessThan(3000));
         expect(find.text('Food Redistribution Platform'), findsOneWidget);
       });
 
-      testWidgets('should handle memory efficiently', (WidgetTester tester) async {
+      testWidgets('should handle memory efficiently',
+          (WidgetTester tester) async {
         app.main();
         await tester.pumpAndSettle();
 
@@ -285,7 +304,8 @@ void main() {
     });
 
     group('User Experience Tests', () {
-      testWidgets('should provide smooth animations', (WidgetTester tester) async {
+      testWidgets('should provide smooth animations',
+          (WidgetTester tester) async {
         app.main();
         await tester.pumpAndSettle();
 
@@ -299,7 +319,8 @@ void main() {
         expect(find.byType(MaterialApp), findsOneWidget);
       });
 
-      testWidgets('should maintain UI consistency', (WidgetTester tester) async {
+      testWidgets('should maintain UI consistency',
+          (WidgetTester tester) async {
         app.main();
         await tester.pumpAndSettle();
 

@@ -28,8 +28,7 @@ class NotificationHandler {
       FirebaseMessaging.onBackgroundMessage(_handleBackgroundMessage);
 
       // Handle notification tap when app is terminated
-      final initialMessage =
-          await _firebaseMessaging.getInitialMessage();
+      final initialMessage = await _firebaseMessaging.getInitialMessage();
       if (initialMessage != null) {
         _handleNotificationTap(initialMessage);
       }
@@ -173,7 +172,8 @@ class NotificationHandler {
         'ngoId': ngoId,
         'estimatedArrival': estimatedArrivalMinutes,
         'title': 'Delivery Arriving Soon',
-        'body': 'Volunteer $volunteerName will arrive in approximately $estimatedArrivalMinutes minutes',
+        'body':
+            'Volunteer $volunteerName will arrive in approximately $estimatedArrivalMinutes minutes',
       };
 
       print('Delivery arrival notification payload: $payload');
@@ -199,7 +199,8 @@ class NotificationHandler {
         'delayMinutes': delayMinutes,
         'severity': severity,
         'title': 'Delivery Delayed',
-        'body': 'Delivery delayed by $delayMinutes minutes (Severity: $severity)',
+        'body':
+            'Delivery delayed by $delayMinutes minutes (Severity: $severity)',
       };
 
       print('Delay alert notification payload: $payload');

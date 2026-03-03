@@ -5,7 +5,7 @@ import '../../services/food_donation_service.dart'; // [NEW]
 import '../../utils/app_router.dart';
 
 class AdminIssuesScreen extends StatefulWidget {
-  const AdminIssuesScreen({Key? key}) : super(key: key);
+  const AdminIssuesScreen({super.key});
 
   @override
   State<AdminIssuesScreen> createState() => _AdminIssuesScreenState();
@@ -24,10 +24,13 @@ class _AdminIssuesScreenState extends State<AdminIssuesScreen> {
           title: const Text('Resolve Issue'),
           content: TextField(
             controller: noteController,
-            decoration: const InputDecoration(hintText: 'Resolution notes (optional)'),
+            decoration:
+                const InputDecoration(hintText: 'Resolution notes (optional)'),
           ),
           actions: [
-            TextButton(child: const Text('Cancel'), onPressed: () => Navigator.pop(context)),
+            TextButton(
+                child: const Text('Cancel'),
+                onPressed: () => Navigator.pop(context)),
             ElevatedButton(
               child: const Text('Mark Resolved'),
               onPressed: () async {
@@ -42,28 +45,28 @@ class _AdminIssuesScreenState extends State<AdminIssuesScreen> {
   }
 
   Future<void> _reassign(String donationId) async {
-     try {
-       final donation = await _donationService.getDonation(donationId);
-       if (donation != null && mounted) {
-          Navigator.pushNamed(
-            context, 
-            AppRouter.donationDetail,
-            arguments: donation,
+    try {
+      final donation = await _donationService.getDonation(donationId);
+      if (donation != null && mounted) {
+        Navigator.pushNamed(
+          context,
+          AppRouter.donationDetail,
+          arguments: donation,
+        );
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Donation not found')),
           );
-       } else {
-         if (mounted) {
-           ScaffoldMessenger.of(context).showSnackBar(
-             const SnackBar(content: Text('Donation not found')),
-           );
-         }
-       }
-     } catch (e) {
-       if (mounted) {
-         ScaffoldMessenger.of(context).showSnackBar(
-           SnackBar(content: Text('Error fetching donation: $e')),
-         );
-       }
-     }
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error fetching donation: $e')),
+        );
+      }
+    }
   }
 
   @override
@@ -88,7 +91,7 @@ class _AdminIssuesScreenState extends State<AdminIssuesScreen> {
             itemBuilder: (context, index) {
               final issue = issues[index].data() as Map<String, dynamic>;
               final issueId = issues[index].id;
-              
+
               return Card(
                 margin: const EdgeInsets.all(8),
                 child: Padding(
@@ -96,50 +99,57 @@ class _AdminIssuesScreenState extends State<AdminIssuesScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                       Row(
-                         children: [
-                           Container(
-                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                             decoration: BoxDecoration(
-                               color: Colors.red.shade100,
-                               borderRadius: BorderRadius.circular(4),
-                             ),
-                             child: Text(
-                               'Target: ${issue['targetRole']}',
-                               style: TextStyle(color: Colors.red.shade900, fontWeight: FontWeight.bold),
-                             ),
-                           ),
-                           const Spacer(),
-                           Text(
-                             issue['createdAt'] != null 
-                             ? (issue['createdAt'] as Timestamp).toDate().toString().substring(0, 16)
-                             : 'Just now',
-                             style: const TextStyle(color: Colors.grey, fontSize: 12),
-                           ),
-                         ],
-                       ),
-                       const SizedBox(height: 8),
-                       Text('Reported By: ${issue['reporterRole']}'),
-                       const SizedBox(height: 8),
-                       Text(
-                         issue['reason'] ?? 'No reason provided',
-                         style: const TextStyle(fontSize: 16),
-                       ),
-                       const SizedBox(height: 12),
-                       Row(
-                         mainAxisAlignment: MainAxisAlignment.end,
-                         children: [
-                           OutlinedButton(
-                             onPressed: () => _reassign(issue['donationId']),
-                             child: const Text('View/Reassign'),
-                           ),
-                           const SizedBox(width: 8),
-                           ElevatedButton(
-                             onPressed: () => _resolveIssue(issueId),
-                             child: const Text('Resolve'),
-                           ),
-                         ],
-                       )
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.red.shade100,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              'Target: ${issue['targetRole']}',
+                              style: TextStyle(
+                                  color: Colors.red.shade900,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          const Spacer(),
+                          Text(
+                            issue['createdAt'] != null
+                                ? (issue['createdAt'] as Timestamp)
+                                    .toDate()
+                                    .toString()
+                                    .substring(0, 16)
+                                : 'Just now',
+                            style: const TextStyle(
+                                color: Colors.grey, fontSize: 12),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text('Reported By: ${issue['reporterRole']}'),
+                      const SizedBox(height: 8),
+                      Text(
+                        issue['reason'] ?? 'No reason provided',
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          OutlinedButton(
+                            onPressed: () => _reassign(issue['donationId']),
+                            child: const Text('View/Reassign'),
+                          ),
+                          const SizedBox(width: 8),
+                          ElevatedButton(
+                            onPressed: () => _resolveIssue(issueId),
+                            child: const Text('Resolve'),
+                          ),
+                        ],
+                      )
                     ],
                   ),
                 ),

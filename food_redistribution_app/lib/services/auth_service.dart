@@ -17,26 +17,27 @@ class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
-  
+
   // Whitelisted admin emails - these users are automatically set as admin
   static const List<String> _adminEmails = [
     'sisirreddy11@gmail.com',
     'sisireddy112@gmail.com',
   ];
-  
+
   // Current user stream
   Stream<User?> get authStateChanges => _auth.authStateChanges();
-  
+
   // Get current user
   User? get currentUser => _auth.currentUser;
-  
+
   // Get current app user data
   Future<AppUser?> getCurrentAppUser() async {
     final user = currentUser;
     if (user == null) return null;
-    
+
     try {
-      final doc = await _firestore.collection(Collections.users).doc(user.uid).get();
+      final doc =
+          await _firestore.collection(Collections.users).doc(user.uid).get();
       if (!doc.exists) return null;
       return AppUser.fromFirestore(doc);
     } catch (e) {
@@ -117,7 +118,7 @@ class AuthService {
       if (credential.user != null) {
         // Generate organization ID
         final orgId = _firestore.collection(Collections.organizations).doc().id;
-        
+
         // Create AppUser document with pending status
         final appUser = AppUser(
           uid: credential.user!.uid,
@@ -145,10 +146,7 @@ class AuthService {
             .set(appUser.toFirestore());
 
         // Store NGO organization in new collection
-        await _firestore
-            .collection(Collections.organizations)
-            .doc(orgId)
-            .set({
+        await _firestore.collection(Collections.organizations).doc(orgId).set({
           Fields.ownerId: credential.user!.uid,
           'name': ngoProfile.organizationName,
           'registrationNumber': ngoProfile.registrationNumber,
@@ -194,9 +192,10 @@ class AuthService {
   }
 
   // Upload Verification Certificate
-  Future<String?> uploadVerificationCertificate(String userId, PlatformFile file) async {
+  Future<String?> uploadVerificationCertificate(
+      String userId, PlatformFile file) async {
     try {
-      print('Using Storage Bucket: ${FirebaseStorage.instance.bucket}'); 
+      print('Using Storage Bucket: ${FirebaseStorage.instance.bucket}');
       final ref = FirebaseStorage.instance
           .ref()
           .child('verification_certificates')
@@ -205,7 +204,8 @@ class AuthService {
       Uint8List? dataToUpload;
 
       // Check if image and compress
-      final isImage = ['jpg', 'jpeg', 'png'].contains(file.extension?.toLowerCase());
+      final isImage =
+          ['jpg', 'jpeg', 'png'].contains(file.extension?.toLowerCase());
 
       print('Starting upload for ${file.name} (isImage: $isImage)');
 
@@ -214,29 +214,30 @@ class AuthService {
           print('Attempting compression...');
           // Attempt compression
           if (kIsWeb) {
-             if (file.bytes != null) {
-               dataToUpload = await FlutterImageCompress.compressWithList(
-                 file.bytes!,
-                 minHeight: 1024,
-                 minWidth: 1024,
-                 quality: 70,
-               );
-             }
+            if (file.bytes != null) {
+              dataToUpload = await FlutterImageCompress.compressWithList(
+                file.bytes!,
+                minHeight: 1024,
+                minWidth: 1024,
+                quality: 70,
+              );
+            }
           } else if (file.path != null) {
             // Native
-             final result = await FlutterImageCompress.compressWithFile(
-               file.path!,
-               minHeight: 1024,
-               minWidth: 1024,
-               quality: 70,
-             );
-             if (result != null) {
-                dataToUpload = result; // Use bytes for upload
-             }
+            final result = await FlutterImageCompress.compressWithFile(
+              file.path!,
+              minHeight: 1024,
+              minWidth: 1024,
+              quality: 70,
+            );
+            if (result != null) {
+              dataToUpload = result; // Use bytes for upload
+            }
           }
-           print('Compression done.');
+          print('Compression done.');
         } catch (e) {
-          print('Compression failed or not supported, falling back to original file: $e');
+          print(
+              'Compression failed or not supported, falling back to original file: $e');
           // Fallback handled below (dataToUpload remains null)
         }
       }
@@ -282,7 +283,8 @@ class AuthService {
           email: email,
           role: UserRole.volunteer,
           status: UserStatus.active, // Set to active immediately
-          onboardingState: OnboardingState.verified, // Set to verified immediately
+          onboardingState:
+              OnboardingState.verified, // Set to verified immediately
           createdAt: DateTime.now(),
           profile: UserProfile(
             firstName: volunteerProfile.firstName,
@@ -336,7 +338,7 @@ class AuthService {
       // Log login action
       if (credential.user != null) {
         await _logAction('login', credential.user!.uid);
-        
+
         // Auto-set admin role for whitelisted emails
         if (_adminEmails.contains(email.toLowerCase())) {
           await _ensureAdminRole(credential.user!.uid, email);
@@ -349,13 +351,13 @@ class AuthService {
       rethrow;
     }
   }
-  
+
   // Ensure admin role for whitelisted users
   Future<void> _ensureAdminRole(String uid, String email) async {
     try {
       final docRef = _firestore.collection(Collections.users).doc(uid);
       final doc = await docRef.get();
-      
+
       if (doc.exists) {
         final data = doc.data() as Map<String, dynamic>;
         if (data['role'] != 'admin') {
@@ -389,7 +391,7 @@ class AuthService {
   Future<void> sendPasswordResetEmail(String email) async {
     try {
       await _auth.sendPasswordResetEmail(email: email);
-      
+
       // Log recovery action (best effort)
       try {
         await _logAction('password_reset_request', null, additionalData: {
@@ -410,7 +412,7 @@ class AuthService {
   Future<void> signOut() async {
     try {
       final userId = currentUser?.uid;
-      
+
       // Log logout action BEFORE signing out (so we still have permissions)
       if (userId != null) {
         await _logAction('logout', userId);
@@ -425,13 +427,14 @@ class AuthService {
   }
 
   // Update onboarding state
-  Future<void> updateOnboardingState(String userId, OnboardingState state) async {
+  Future<void> updateOnboardingState(
+      String userId, OnboardingState state) async {
     try {
       await _firestore.collection(Collections.users).doc(userId).update({
         'onboardingState': state.name,
         Fields.updatedAt: Timestamp.now(),
       });
-      
+
       await _logAction('onboarding_state_update', userId, additionalData: {
         'newState': state.name,
       });
@@ -468,7 +471,8 @@ class AuthService {
     });
   }
 
-  Future<void> _logAction(String action, String? userId, {Map<String, dynamic>? additionalData}) async {
+  Future<void> _logAction(String action, String? userId,
+      {Map<String, dynamic>? additionalData}) async {
     final logData = {
       'action': action,
       Fields.userId: userId,
@@ -483,7 +487,7 @@ class AuthService {
   // ============================================================
   // PHONE OTP AUTHENTICATION (for Volunteers)
   // ============================================================
-  
+
   String? _verificationId;
   int? _resendToken;
 
@@ -501,12 +505,10 @@ class AuthService {
         phoneNumber: phoneNumber,
         timeout: const Duration(seconds: 60),
         forceResendingToken: forceResendToken ?? _resendToken,
-        
         verificationCompleted: (PhoneAuthCredential credential) async {
           // Auto-verification on some devices (Android)
           onAutoVerified(credential);
         },
-        
         verificationFailed: (FirebaseAuthException e) {
           String errorMessage = 'Verification failed';
           if (e.code == 'invalid-phone-number') {
@@ -518,18 +520,16 @@ class AuthService {
           }
           onError(errorMessage);
         },
-        
         codeSent: (String verificationId, int? resendToken) {
           _verificationId = verificationId;
           _resendToken = resendToken;
           onCodeSent(verificationId, resendToken);
-          
+
           // Log OTP sent
           _logAction('otp_sent', null, additionalData: {
             'phoneNumber': phoneNumber,
           });
         },
-        
         codeAutoRetrievalTimeout: (String verificationId) {
           _verificationId = verificationId;
         },
@@ -550,13 +550,13 @@ class AuthService {
         verificationId: verificationId,
         smsCode: otp,
       );
-      
+
       final userCredential = await _auth.signInWithCredential(credential);
-      
+
       if (userCredential.user != null) {
         await _logAction('phone_login', userCredential.user!.uid);
       }
-      
+
       return userCredential;
     } on FirebaseAuthException catch (e) {
       print('Error verifying OTP: ${e.code} - ${e.message}');
@@ -565,14 +565,15 @@ class AuthService {
   }
 
   /// Sign in with phone credential (for auto-verification)
-  Future<UserCredential?> signInWithPhoneCredential(PhoneAuthCredential credential) async {
+  Future<UserCredential?> signInWithPhoneCredential(
+      PhoneAuthCredential credential) async {
     try {
       final userCredential = await _auth.signInWithCredential(credential);
-      
+
       if (userCredential.user != null) {
         await _logAction('phone_auto_login', userCredential.user!.uid);
       }
-      
+
       return userCredential;
     } catch (e) {
       print('Error signing in with phone credential: $e');
@@ -596,7 +597,7 @@ class AuthService {
 
       if (credential?.user != null) {
         final user = credential!.user!;
-        
+
         // Create AppUser document with embedded profile
         final appUser = AppUser(
           uid: user.uid,
