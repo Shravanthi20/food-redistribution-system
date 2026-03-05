@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/analytics_service.dart';
@@ -81,7 +82,7 @@ class AdminDashboardProvider extends ChangeNotifier {
       ]);
     } catch (e) {
       _errorMessage = 'Failed to load dashboard data: $e';
-      print(_errorMessage);
+      debugPrint(_errorMessage);
     } finally {
       _isLoading = false;
       notifyListeners();

@@ -66,16 +66,16 @@ class _FoodRequestDetailScreenState extends State<FoodRequestDetailScreen> {
                   children: [
                     Chip(
                       label: Text(request.status.name.toUpperCase()),
-                      backgroundColor:
-                          _getStatusColor(request.status).withValues(alpha: 0.1),
+                      backgroundColor: _getStatusColor(request.status)
+                          .withValues(alpha: 0.1),
                       labelStyle:
                           TextStyle(color: _getStatusColor(request.status)),
                     ),
                     const SizedBox(width: 8),
                     Chip(
                       label: Text(request.urgency.name.toUpperCase()),
-                      backgroundColor:
-                          _getUrgencyColor(request.urgency).withValues(alpha: 0.1),
+                      backgroundColor: _getUrgencyColor(request.urgency)
+                          .withValues(alpha: 0.1),
                       labelStyle:
                           TextStyle(color: _getUrgencyColor(request.urgency)),
                     ),
@@ -433,7 +433,7 @@ class _FoodRequestDetailScreenState extends State<FoodRequestDetailScreen> {
               );
 
               if (success) {
-                if (mounted) {
+                if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                         content: Text('Request cancelled successfully')),
@@ -441,7 +441,7 @@ class _FoodRequestDetailScreenState extends State<FoodRequestDetailScreen> {
                   Navigator.pop(context);
                 }
               } else {
-                if (mounted) {
+                if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                         content: Text(ngoProvider.errorMessage ??
@@ -481,14 +481,14 @@ class _FoodRequestDetailScreenState extends State<FoodRequestDetailScreen> {
               );
 
               if (success) {
-                if (mounted) {
+                if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                         content: Text('Match accepted successfully!')),
                   );
                 }
               } else {
-                if (mounted) {
+                if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                         content: Text(ngoProvider.errorMessage ??

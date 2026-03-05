@@ -130,7 +130,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           type: BottomNavigationBarType.fixed,
                           backgroundColor: Colors.transparent,
                           selectedItemColor: AppTheme.accentTeal,
-                          unselectedItemColor: Colors.white.withValues(alpha: 0.5),
+                          unselectedItemColor:
+                              Colors.white.withValues(alpha: 0.5),
                           selectedLabelStyle: const TextStyle(fontSize: 10),
                           unselectedLabelStyle: const TextStyle(fontSize: 10),
                           items: const [
@@ -243,9 +244,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     const Text('Top Matches:',
                         style: TextStyle(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
-                    ...matches
-                        .map((match) => _buildMatchDetail(match))
-                        ,
+                    ...matches.map((match) => _buildMatchDetail(match)),
                   ],
                 ),
               ),
@@ -541,13 +540,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           color: Colors.white.withValues(alpha: 0.6)),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide:
-                            BorderSide(color: Colors.white.withValues(alpha: 0.3)),
+                        borderSide: BorderSide(
+                            color: Colors.white.withValues(alpha: 0.3)),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide:
-                            BorderSide(color: Colors.white.withValues(alpha: 0.3)),
+                        borderSide: BorderSide(
+                            color: Colors.white.withValues(alpha: 0.3)),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -577,12 +576,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.people_outline,
-                            size: 64, color: Colors.white.withValues(alpha: 0.3)),
+                            size: 64,
+                            color: Colors.white.withValues(alpha: 0.3)),
                         const SizedBox(height: 16),
                         Text(
                           'Search for users to manage roles and restrictions',
-                          style:
-                              TextStyle(color: Colors.white.withValues(alpha: 0.6)),
+                          style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.6)),
                         ),
                       ],
                     ),
@@ -653,8 +653,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('Pickup: ${donation.pickupAddress}',
-                          style:
-                              TextStyle(color: Colors.white.withValues(alpha: 0.8))),
+                          style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.8))),
                       const SizedBox(height: 16),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -820,7 +820,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   fontWeight: FontWeight.bold,
                   color: Colors.white)),
           const SizedBox(height: 4),
-          Text(title, style: TextStyle(color: Colors.white.withValues(alpha: 0.6))),
+          Text(title,
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.6))),
         ],
       ),
     );
@@ -882,7 +883,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             children: [
               Text(_formatDate(log['timestamp']),
                   style: TextStyle(
-                      fontSize: 11, color: Colors.white.withValues(alpha: 0.5))),
+                      fontSize: 11,
+                      color: Colors.white.withValues(alpha: 0.5))),
               if (showDetails)
                 Text(log['riskLevel'] ?? 'low',
                     style: TextStyle(
@@ -974,7 +976,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             ),
           ),
           PopupMenuButton<String>(
-            icon: Icon(Icons.more_vert, color: Colors.white.withValues(alpha: 0.6)),
+            icon: Icon(Icons.more_vert,
+                color: Colors.white.withValues(alpha: 0.6)),
             color: AppTheme.primaryNavyLight,
             onSelected: (val) {
               if (val == 'suspend') _handleSuspendUser(user['id']);
@@ -983,17 +986,20 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               PopupMenuItem(
                 value: 'suspend',
                 child: Text('Suspend (7 Days)',
-                    style: TextStyle(color: Colors.white.withValues(alpha: 0.9))),
+                    style:
+                        TextStyle(color: Colors.white.withValues(alpha: 0.9))),
               ),
               PopupMenuItem(
                 value: 'restrict',
                 child: Text('Restrict Role',
-                    style: TextStyle(color: Colors.white.withValues(alpha: 0.9))),
+                    style:
+                        TextStyle(color: Colors.white.withValues(alpha: 0.9))),
               ),
               PopupMenuItem(
                 value: 'history',
                 child: Text('Audit History',
-                    style: TextStyle(color: Colors.white.withValues(alpha: 0.9))),
+                    style:
+                        TextStyle(color: Colors.white.withValues(alpha: 0.9))),
               ),
             ],
           ),
@@ -1038,8 +1044,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
 
     if (confirm == true) {
+      if (!context.mounted) return;
       await context.read<AuthProvider>().signOut();
-      if (mounted) {
+      if (context.mounted) {
         Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
       }
     }
@@ -1061,9 +1068,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               'Approved from System Dashboard',
             );
 
-    if (mounted && success) {
+    if (context.mounted && success) {
       _showSnackbar('Verification Successful');
-    } else if (mounted) {
+    } else if (context.mounted) {
       _showSnackbar(
           'Review failed: ${context.read<AdminDashboardProvider>().errorMessage}');
     }
@@ -1072,6 +1079,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   Future<void> _handleSuspendUser(String userId) async {
     final adminId = context.read<AuthProvider>().appUser?.uid;
     if (adminId == null) return;
+    final provider = context.read<AdminDashboardProvider>();
 
     final confirm = await showDialog<bool>(
       context: context,
@@ -1091,13 +1099,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
 
     if (confirm == true) {
-      final success = await context.read<AdminDashboardProvider>().suspendUser(
-            userId,
-            adminId,
-            'Flagged for policy violation',
-            DateTime.now().add(const Duration(days: 7)),
-          );
-      if (mounted && success) {
+      final success = await provider.suspendUser(
+        userId,
+        adminId,
+        'Flagged for policy violation',
+        DateTime.now().add(const Duration(days: 7)),
+      );
+      if (context.mounted && success) {
         _showSnackbar('User status updated to SUSPENDED');
       }
     }

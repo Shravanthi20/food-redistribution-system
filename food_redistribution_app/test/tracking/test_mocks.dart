@@ -1,3 +1,4 @@
+// ignore_for_file: subtype_of_sealed_class, must_be_immutable
 import 'package:mockito/mockito.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:food_redistribution_app/services/firestore_service.dart';

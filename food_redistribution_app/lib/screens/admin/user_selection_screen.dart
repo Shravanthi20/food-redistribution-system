@@ -81,7 +81,7 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
         _isLoading = false;
       });
     } catch (e) {
-      print('Error loading users: $e');
+      debugPrint('Error loading users: $e');
       setState(() => _isLoading = false);
     }
   }

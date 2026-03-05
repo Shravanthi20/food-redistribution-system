@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../config/firebase_schema.dart';
 
@@ -18,7 +19,7 @@ class FirestoreService {
       data[Fields.updatedAt] = Timestamp.now();
       await _firestore.collection(collection).doc(docId).set(data);
     } catch (e) {
-      print('Error creating document in $collection: $e');
+      debugPrint('Error creating document in $collection: $e');
       rethrow;
     }
   }
@@ -29,7 +30,7 @@ class FirestoreService {
       data[Fields.updatedAt] = Timestamp.now();
       await _firestore.collection(collection).doc(docId).update(data);
     } catch (e) {
-      print('Error updating document in $collection: $e');
+      debugPrint('Error updating document in $collection: $e');
       rethrow;
     }
   }
@@ -38,7 +39,7 @@ class FirestoreService {
     try {
       return await _firestore.collection(collection).doc(docId).get();
     } catch (e) {
-      print('Error getting document from $collection: $e');
+      debugPrint('Error getting document from $collection: $e');
       rethrow;
     }
   }
@@ -47,7 +48,7 @@ class FirestoreService {
     try {
       await _firestore.collection(collection).doc(docId).delete();
     } catch (e) {
-      print('Error deleting document from $collection: $e');
+      debugPrint('Error deleting document from $collection: $e');
       rethrow;
     }
   }
@@ -76,7 +77,7 @@ class FirestoreService {
 
       return await query.get();
     } catch (e) {
-      print('Error querying collection $collection: $e');
+      debugPrint('Error querying collection $collection: $e');
       rethrow;
     }
   }
@@ -466,7 +467,7 @@ class FirestoreService {
         'generatedAt': Timestamp.now(),
       };
     } catch (e) {
-      print('Error getting user statistics: $e');
+      debugPrint('Error getting user statistics: $e');
       return {};
     }
   }
@@ -486,7 +487,7 @@ class FirestoreService {
         'generatedAt': Timestamp.now(),
       };
     } catch (e) {
-      print('Error getting donation statistics: $e');
+      debugPrint('Error getting donation statistics: $e');
       return {};
     }
   }
@@ -507,11 +508,11 @@ class FirestoreService {
 
       if (expiredSessions.docs.isNotEmpty) {
         await batch.commit();
-        print(
+        debugPrint(
             'Cleaned up ${expiredSessions.docs.length} expired sessions from Firestore');
       }
     } catch (e) {
-      print('Error cleaning up expired sessions: $e');
+      debugPrint('Error cleaning up expired sessions: $e');
     }
   }
 
@@ -530,11 +531,11 @@ class FirestoreService {
           batch.delete(doc.reference);
         }
         await batch.commit();
-        print(
+        debugPrint(
             'Cleaned up ${oldLogs.docs.length} old audit logs from Firestore');
       }
     } catch (e) {
-      print('Error cleaning up old audit logs: $e');
+      debugPrint('Error cleaning up old audit logs: $e');
     }
   }
 }

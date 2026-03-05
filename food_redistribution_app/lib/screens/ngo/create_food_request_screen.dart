@@ -240,8 +240,7 @@ class _CreateFoodRequestScreenState extends State<CreateFoodRequestScreen> {
 
               ListTile(
                 title: const Text('Needed By'),
-                subtitle:
-                    Text(_selectedNeededBy.toString().substring(0, 16)),
+                subtitle: Text(_selectedNeededBy.toString().substring(0, 16)),
                 trailing: const Icon(Icons.calendar_today),
                 onTap: () async {
                   final date = await showDatePicker(
@@ -252,6 +251,7 @@ class _CreateFoodRequestScreenState extends State<CreateFoodRequestScreen> {
                   );
 
                   if (date != null) {
+                    if (!context.mounted) return;
                     final time = await showTimePicker(
                       context: context,
                       initialTime: TimeOfDay.fromDateTime(_selectedNeededBy),

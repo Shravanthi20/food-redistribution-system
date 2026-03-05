@@ -5,18 +5,17 @@ import '../../services/route_optimization_service.dart';
 // import '../../services/matching_service.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../widgets/loading_overlay.dart';
-import '../../models/dispatch.dart';
 import '../../models/matching.dart';
 
 class DeliveryCoordinationScreen extends StatefulWidget {
   const DeliveryCoordinationScreen({super.key});
 
   @override
-  _DeliveryCoordinationScreenState createState() =>
-      _DeliveryCoordinationScreenState();
+  DeliveryCoordinationScreenState createState() =>
+      DeliveryCoordinationScreenState();
 }
 
-class _DeliveryCoordinationScreenState
+class DeliveryCoordinationScreenState
     extends State<DeliveryCoordinationScreen> {
   // ignore: unused_field
   late final VolunteerDispatchService _dispatchService;

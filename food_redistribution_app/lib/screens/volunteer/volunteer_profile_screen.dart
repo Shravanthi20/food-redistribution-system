@@ -58,7 +58,7 @@ class _VolunteerProfileScreenState extends State<VolunteerProfileScreen> {
         });
       }
     } catch (e) {
-      print("Error loading profile: $e");
+      debugPrint("Error loading profile: $e");
     } finally {
       if (mounted) setState(() => _isLoadingProfile = false);
     }

@@ -92,8 +92,8 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
               decoration: BoxDecoration(
                 color: AppTheme.warningAmber.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(10),
-                border:
-                    Border.all(color: AppTheme.warningAmber.withValues(alpha: 0.3)),
+                border: Border.all(
+                    color: AppTheme.warningAmber.withValues(alpha: 0.3)),
               ),
               child: const Row(
                 mainAxisSize: MainAxisSize.min,
@@ -135,7 +135,8 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 10, vertical: 5),
                           decoration: BoxDecoration(
-                            color: AppTheme.warningAmber.withValues(alpha: 0.15),
+                            color:
+                                AppTheme.warningAmber.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: const Text(
@@ -227,9 +228,7 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
               ),
             ),
             const SizedBox(height: 14),
-            ...tasks
-                .map((task) => _taskCard(context, task, isActive: true))
-                ,
+            ...tasks.map((task) => _taskCard(context, task, isActive: true)),
           ],
         );
       },
@@ -354,6 +353,7 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                           final auth =
                               Provider.of<AuthProvider>(context, listen: false);
                           await auth.signOut();
+                          if (!context.mounted) return;
                           Navigator.pushNamedAndRemoveUntil(
                               context, AppRouter.login, (route) => false);
                         },
@@ -514,7 +514,8 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                   style:
                       TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
               const SizedBox(width: 14),
-              const Icon(Icons.schedule_rounded, size: 16, color: AppTheme.textMuted),
+              const Icon(Icons.schedule_rounded,
+                  size: 16, color: AppTheme.textMuted),
               const SizedBox(width: 4),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -562,7 +563,10 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
               text: 'Continue Delivery',
               icon: Icons.local_shipping_rounded,
               width: double.infinity,
-              gradientColors: const [AppTheme.accentCyan, AppTheme.accentCyanSoft],
+              gradientColors: const [
+                AppTheme.accentCyan,
+                AppTheme.accentCyanSoft
+              ],
               onPressed: () {
                 Navigator.pushNamed(
                   context,

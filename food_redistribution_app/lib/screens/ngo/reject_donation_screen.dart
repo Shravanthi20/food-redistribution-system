@@ -160,28 +160,30 @@ class _RejectDonationScreenState extends State<RejectDonationScreen> {
                     const SizedBox(height: 16),
 
                     // Common Reasons
-                    Column(
-                      children: _commonReasons.map((reason) {
-                        return RadioListTile<String>(
-                          title: Text(
-                            reason,
-                            style: const TextStyle(fontSize: 14),
-                          ),
-                          value: reason,
-                          groupValue: _selectedReason,
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedReason = value;
-                              if (value != 'Other (specify below)') {
-                                _reasonController.text = value ?? '';
-                              } else {
-                                _reasonController.clear();
-                              }
-                            });
-                          },
-                          activeColor: Colors.red.shade700,
-                        );
-                      }).toList(),
+                    RadioGroup<String>(
+                      groupValue: _selectedReason,
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedReason = value;
+                          if (value != 'Other (specify below)') {
+                            _reasonController.text = value ?? '';
+                          } else {
+                            _reasonController.clear();
+                          }
+                        });
+                      },
+                      child: Column(
+                        children: _commonReasons.map((reason) {
+                          return RadioListTile<String>(
+                            title: Text(
+                              reason,
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                            value: reason,
+                            activeColor: Colors.red.shade700,
+                          );
+                        }).toList(),
+                      ),
                     ),
 
                     const SizedBox(height: 16),

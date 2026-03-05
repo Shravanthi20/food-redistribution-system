@@ -5,14 +5,13 @@ class LogisticsManagementDashboard extends StatefulWidget {
   const LogisticsManagementDashboard({super.key});
 
   @override
-  _LogisticsManagementDashboardState createState() =>
-      _LogisticsManagementDashboardState();
+  LogisticsManagementDashboardState createState() =>
+      LogisticsManagementDashboardState();
 }
 
-class _LogisticsManagementDashboardState
+class LogisticsManagementDashboardState
     extends State<LogisticsManagementDashboard> {
   String _selectedTimeRange = '24h';
-  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -146,8 +145,8 @@ class _LogisticsManagementDashboardState
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color:
-                      (isPositive ? Colors.green : Colors.red).withValues(alpha: 0.1),
+                  color: (isPositive ? Colors.green : Colors.red)
+                      .withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -443,7 +442,8 @@ class _LogisticsManagementDashboardState
             color: Colors.white,
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
-              BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10)
+              BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05), blurRadius: 10)
             ],
           ),
           child: Column(
@@ -479,8 +479,8 @@ class _LogisticsManagementDashboardState
       child: Row(
         children: [
           Expanded(
-              child:
-                  Text(metric, style: const TextStyle(fontWeight: FontWeight.w500))),
+              child: Text(metric,
+                  style: const TextStyle(fontWeight: FontWeight.w500))),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
@@ -574,7 +574,8 @@ class _LogisticsManagementDashboardState
             color: Colors.white,
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
-              BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10)
+              BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05), blurRadius: 10)
             ],
           ),
           child: Column(
@@ -619,7 +620,8 @@ class _LogisticsManagementDashboardState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
+                Text(title,
+                    style: const TextStyle(fontWeight: FontWeight.w500)),
                 Text(value,
                     style:
                         TextStyle(color: color, fontWeight: FontWeight.bold)),
@@ -633,10 +635,8 @@ class _LogisticsManagementDashboardState
   }
 
   void _refreshData() {
-    setState(() => _isLoading = true);
     // Simulate data refresh
-    Future.delayed(
-        const Duration(seconds: 2), () => setState(() => _isLoading = false));
+    Future.delayed(const Duration(seconds: 2), () {});
   }
 
   void _exportData() {
@@ -645,12 +645,15 @@ class _LogisticsManagementDashboardState
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Export Data'),
-        content: const Text('Export logistics data for the selected time range?'),
+        content:
+            const Text('Export logistics data for the selected time range?'),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel')),
           ElevatedButton(
-              onPressed: () => Navigator.pop(context), child: const Text('Export')),
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Export')),
         ],
       ),
     );

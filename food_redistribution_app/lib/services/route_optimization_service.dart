@@ -102,6 +102,7 @@ class OptimizedRoute {
 
 class RouteOptimizationEngine {
   final FirestoreService _firestoreService;
+  // ignore: unused_field
   final LocationService _locationService;
   final AuditService _auditService;
 

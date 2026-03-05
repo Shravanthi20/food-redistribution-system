@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/user.dart';
 import 'notification_service.dart';
@@ -52,7 +53,7 @@ class VerificationService {
         submittedDocs: submittedDocs,
       );
     } catch (e) {
-      print('Error submitting verification info: $e');
+      debugPrint('Error submitting verification info: $e');
       rethrow;
     }
   }
@@ -83,7 +84,7 @@ class VerificationService {
         submittedDocs: submittedDocs,
       );
     } catch (e) {
-      print('Error submitting file verification: $e');
+      debugPrint('Error submitting file verification: $e');
       rethrow;
     }
   }
@@ -236,7 +237,7 @@ class VerificationService {
         'isLegacy': isLegacy,
       });
     } catch (e) {
-      print('Error reviewing submission: $e');
+      debugPrint('Error reviewing submission: $e');
       rethrow;
     }
   }
@@ -244,7 +245,7 @@ class VerificationService {
   // Get pending verifications for admin
   Future<List<Map<String, dynamic>>> getPendingVerifications() async {
     try {
-      print('Fetching pending verifications...');
+      debugPrint('Fetching pending verifications...');
 
       // Attempt to get from submissions collection
       // TEMPORARY: Removed .orderBy('submittedAt') to avoid indexing requirements until verified
@@ -274,7 +275,7 @@ class VerificationService {
         });
       }
 
-      print('Found ${submissions.length} formal submissions.');
+      debugPrint('Found ${submissions.length} formal submissions.');
 
       // FALLBACK: Look for users with onboardingState == 'documentSubmitted' but no submission record
       // This handles NGOs created before the sync was implemented.
@@ -315,15 +316,15 @@ class VerificationService {
       }
 
       if (fallbackCount > 0) {
-        print(
+        debugPrint(
             'Recovered $fallbackCount legacy verifications from users collection.');
       }
 
       return submissions;
     } catch (e) {
-      print('ERROR in getPendingVerifications: $e');
+      debugPrint('ERROR in getPendingVerifications: $e');
       if (e.toString().contains('index')) {
-        print(
+        debugPrint(
             'CRITICAL: Firestore Composite Index may be missing. Check the link in the error above.');
       }
       return [];
@@ -342,7 +343,7 @@ class VerificationService {
 
       return query.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList();
     } catch (e) {
-      print('Error getting verification history: $e');
+      debugPrint('Error getting verification history: $e');
       return [];
     }
   }
@@ -384,7 +385,7 @@ class VerificationService {
         'generatedAt': Timestamp.now(),
       };
     } catch (e) {
-      print('Error getting verification stats: $e');
+      debugPrint('Error getting verification stats: $e');
       return {};
     }
   }
@@ -423,7 +424,7 @@ class VerificationService {
         );
       }
     } catch (e) {
-      print('Error notifying admins: $e');
+      debugPrint('Error notifying admins: $e');
     }
   }
 
@@ -478,7 +479,7 @@ class VerificationService {
   Future<String> submitDonorVerification(
       String userId, Map<String, dynamic> submissionData) async {
     try {
-      print('Submitting donor verification for user: $userId');
+      debugPrint('Submitting donor verification for user: $userId');
 
       final submissionId =
           _firestore.collection(Collections.verifications).doc().id;
@@ -522,10 +523,10 @@ class VerificationService {
         'documentCount': submittedDocs.length,
       });
 
-      print('Donor verification submitted successfully with ID: $submissionId');
+      debugPrint('Donor verification submitted successfully with ID: $submissionId');
       return submissionId;
     } catch (e) {
-      print('Error submitting donor verification: $e');
+      debugPrint('Error submitting donor verification: $e');
       rethrow;
     }
   }
@@ -545,7 +546,7 @@ class VerificationService {
       }
       return null;
     } catch (e) {
-      print('Error checking verification status: $e');
+      debugPrint('Error checking verification status: $e');
       return null;
     }
   }

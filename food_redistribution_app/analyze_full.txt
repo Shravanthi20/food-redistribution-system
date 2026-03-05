@@ -1,0 +1,357 @@
+﻿Analyzing food_redistribution_app...                            
+
+   info - Don't invoke 'print' in production code - lib\middleware\rbac_middleware.dart:114:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\providers\admin_dashboard_provider.dart:84:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\providers\auth_provider.dart:42:11 - avoid_print
+   info - Don't invoke 'print' in production code - lib\providers\auth_provider.dart:285:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\providers\auth_provider.dart:325:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\providers\auth_provider.dart:356:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\providers\ngo_provider.dart:79:7 - avoid_print
+warning - The value of the field '_delayDetectionService' isn't used - lib\providers\tracking_provider.dart:11:36 - unused_field
+warning - The value of the field '_analyticsService' isn't used - lib\providers\tracking_provider.dart:12:37 - unused_field
+   info - Don't use 'BuildContext's across async gaps - lib\screens\admin\admin_dashboard.dart:279:29 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\screens\admin\admin_dashboard_screen.dart:1041:13 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\screens\admin\admin_dashboard_screen.dart:1043:43 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\screens\admin\admin_dashboard_screen.dart:1068:29 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\screens\admin\admin_dashboard_screen.dart:1094:29 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\screens\admin\admin_issues_screen.dart:38:44 - use_build_context_synchronously
+   info - Don't invoke 'print' in production code - lib\screens\admin\user_selection_screen.dart:84:7 - avoid_print
+   info - Don't use 'BuildContext's across async gaps - lib\screens\auth\email_verification_screen.dart:37:28 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\screens\auth\email_verification_screen.dart:44:28 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\screens\auth\email_verification_screen.dart:132:54 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\screens\auth\onboarding_screen.dart:291:54 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\screens\auth\onboarding_screen.dart:305:36 - use_build_context_synchronously
+   info - 'RawKeyEvent' is deprecated and shouldn't be used. Use KeyEvent instead. This feature was deprecated after v3.18.0-2.0.pre - lib\screens\auth\otp_verification_screen.dart:84:33 - deprecated_member_use
+   info - 'RawKeyDownEvent' is deprecated and shouldn't be used. Use KeyDownEvent instead. This feature was deprecated after v3.18.0-2.0.pre - lib\screens\auth\otp_verification_screen.dart:85:18 - deprecated_member_use
+   info - 'RawKeyboardListener' is deprecated and shouldn't be used. Use KeyboardListener instead. This feature was deprecated after v3.18.0-2.0.pre - lib\screens\auth\otp_verification_screen.dart:227:28 - deprecated_member_use
+   info - The import of '../../models/dispatch.dart' is unnecessary because all of the used elements are also provided by the import of '../../services/dispatch_service.dart' - lib\screens\coordination\delivery_coordination_screen.dart:8:8 - unnecessary_import
+   info - Invalid use of a private type in a public API - lib\screens\coordination\delivery_coordination_screen.dart:15:3 - library_private_types_in_public_api
+   info - Don't use 'BuildContext's across async gaps - lib\screens\donor\create_donation_screen.dart:538:13 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\screens\donor\donation_list_screen.dart:294:54 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\screens\donor\donation_list_screen.dart:296:41 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\screens\donor\donor_dashboard.dart:101:47 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\screens\donor\donor_dashboard.dart:103:48 - use_build_context_synchronously
+   info - Invalid use of a private type in a public API - lib\screens\logistics\logistics_management_dashboard.dart:8:3 - library_private_types_in_public_api
+warning - The value of the field '_isLoading' isn't used - lib\screens\logistics\logistics_management_dashboard.dart:15:8 - unused_field
+   info - Don't use 'BuildContext's across async gaps - lib\screens\ngo\create_food_request_screen.dart:256:23 - use_build_context_synchronously
+   info - Don't invoke 'print' in production code - lib\screens\ngo\document_submission_screen.dart:637:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\screens\ngo\document_submission_screen.dart:645:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\screens\ngo\document_submission_screen.dart:661:7 - avoid_print
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\screens\ngo\food_request_detail_screen.dart:437:40 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\screens\ngo\food_request_detail_screen.dart:441:33 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\screens\ngo\food_request_detail_screen.dart:445:40 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\screens\ngo\food_request_detail_screen.dart:485:40 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\screens\ngo\food_request_detail_screen.dart:492:40 - use_build_context_synchronously
+   info - 'groupValue' is deprecated and shouldn't be used. Use a RadioGroup ancestor to manage group value instead. This feature was deprecated after v3.32.0-0.0.pre - lib\screens\ngo\inspect_delivery_screen.dart:221:25 - deprecated_member_use
+   info - 'onChanged' is deprecated and shouldn't be used. Use RadioGroup to handle value change instead. This feature was deprecated after v3.32.0-0.0.pre - lib\screens\ngo\inspect_delivery_screen.dart:222:25 - deprecated_member_use
+   info - 'groupValue' is deprecated and shouldn't be used. Use a RadioGroup ancestor to manage group value instead. This feature was deprecated after v3.32.0-0.0.pre - lib\screens\ngo\inspect_delivery_screen.dart:239:25 - deprecated_member_use
+   info - 'onChanged' is deprecated and shouldn't be used. Use RadioGroup to handle value change instead. This feature was deprecated after v3.32.0-0.0.pre - lib\screens\ngo\inspect_delivery_screen.dart:240:25 - deprecated_member_use
+   info - 'groupValue' is deprecated and shouldn't be used. Use a RadioGroup ancestor to manage group value instead. This feature was deprecated after v3.32.0-0.0.pre - lib\screens\ngo\reject_donation_screen.dart:171:27 - deprecated_member_use
+   info - 'onChanged' is deprecated and shouldn't be used. Use RadioGroup to handle value change instead. This feature was deprecated after v3.32.0-0.0.pre - lib\screens\ngo\reject_donation_screen.dart:172:27 - deprecated_member_use
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\screens\volunteer\task_execution_screen.dart:102:40 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\screens\volunteer\task_execution_screen.dart:106:33 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\screens\volunteer\task_execution_screen.dart:121:28 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\screens\volunteer\volunteer_dashboard.dart:358:31 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\screens\volunteer\volunteer_pickup_proof_screen.dart:50:28 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\screens\volunteer\volunteer_pickup_proof_screen.dart:81:28 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\screens\volunteer\volunteer_pickup_proof_screen.dart:89:28 - use_build_context_synchronously
+   info - Don't invoke 'print' in production code - lib\screens\volunteer\volunteer_profile_screen.dart:61:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\analytics_service.dart:22:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\analytics_service.dart:45:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\analytics_service.dart:78:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\analytics_service.dart:107:7 - avoid_print
+   info - Statements in an if should be enclosed in a block - lib\services\analytics_service.dart:146:11 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\services\analytics_service.dart:148:11 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\services\analytics_service.dart:149:45 - curly_braces_in_flow_control_structures
+   info - Don't invoke 'print' in production code - lib\services\analytics_service.dart:159:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\analytics_service.dart:189:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\audit_service.dart:56:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\audit_service.dart:244:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\audit_service.dart:294:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\audit_service.dart:315:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\audit_service.dart:384:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\audit_service.dart:387:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\auth_service.dart:44:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\auth_service.dart:99:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\auth_service.dart:188:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\auth_service.dart:198:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\auth_service.dart:210:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\auth_service.dart:214:11 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\auth_service.dart:237:11 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\auth_service.dart:239:11 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\auth_service.dart:245:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\auth_service.dart:251:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\auth_service.dart:254:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\auth_service.dart:257:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\auth_service.dart:260:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\auth_service.dart:321:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\auth_service.dart:350:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\auth_service.dart:370:11 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\auth_service.dart:382:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\auth_service.dart:385:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\auth_service.dart:402:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\auth_service.dart:406:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\auth_service.dart:424:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\auth_service.dart:442:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\auth_service.dart:458:7 - avoid_print
+warning - The declaration '_addToReviewQueue' isn't referenced - lib\services\auth_service.dart:465:16 - unused_element
+   info - Don't invoke 'print' in production code - lib\services\auth_service.dart:538:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\auth_service.dart:562:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\auth_service.dart:579:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\auth_service.dart:638:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\auth_service.dart:654:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\connectivity_service.dart:21:7 - avoid_print
+  error - The argument type 'Map<String, dynamic>' can't be assigned to the parameter type 'String'.  - lib\services\dispatch_service.dart:147:54 - argument_type_not_assignable
+  error - 3 positional arguments expected by 'create', but 2 found - lib\services\dispatch_service.dart:147:66 - not_enough_positional_arguments
+  error - The argument type 'List<Map<String, Object>>' can't be assigned to the parameter type 'Map<String, dynamic>?'.  - lib\services\dispatch_service.dart:350:14 - argument_type_not_assignable
+  error - The type 'QuerySnapshot<Object?>' used in the 'for' loop must implement 'Iterable' - lib\services\dispatch_service.dart:359:23 - for_in_of_invalid_type
+  error - The argument type 'Map<String, Object>' can't be assigned to the parameter type 'String'.  - lib\services\dispatch_service.dart:561:58 - argument_type_not_assignable
+  error - 3 positional arguments expected by 'create', but 2 found - lib\services\dispatch_service.dart:561:66 - not_enough_positional_arguments
+   info - Don't invoke 'print' in production code - lib\services\firestore_service.dart:21:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\firestore_service.dart:32:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\firestore_service.dart:41:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\firestore_service.dart:50:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\firestore_service.dart:79:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\firestore_service.dart:469:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\firestore_service.dart:489:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\firestore_service.dart:510:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\firestore_service.dart:514:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\firestore_service.dart:533:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\firestore_service.dart:537:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\food_donation_service.dart:79:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\food_donation_service.dart:96:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\food_donation_service.dart:168:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\food_donation_service.dart:189:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\food_donation_service.dart:240:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\food_donation_service.dart:273:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\food_donation_service.dart:311:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\food_donation_service.dart:348:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\food_donation_service.dart:431:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\food_donation_service.dart:457:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\food_donation_service.dart:504:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\food_donation_service.dart:520:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\food_donation_service.dart:550:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\food_donation_service.dart:566:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\food_donation_service.dart:601:7 - avoid_print
+warning - The left operand can't be null, so the right operand is never executed - lib\services\food_request_service.dart:450:41 - dead_null_aware_expression
+warning - The left operand can't be null, so the right operand is never executed - lib\services\food_request_service.dart:452:36 - dead_null_aware_expression
+warning - The left operand can't be null, so the right operand is never executed - lib\services\food_request_service.dart:456:36 - dead_null_aware_expression
+   info - The parameter name 'sum' matches a visible type name - lib\services\food_request_service.dart:584:36 - avoid_types_as_parameter_names
+   info - Don't invoke 'print' in production code - lib\services\location_service.dart:33:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\location_service.dart:48:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\location_service.dart:70:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\location_service.dart:86:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\location_service.dart:152:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\location_service.dart:171:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\location_service.dart:202:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\location_service.dart:204:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\location_service.dart:212:5 - avoid_print
+warning - The left operand can't be null, so the right operand is never executed - lib\services\matching_service.dart:203:42 - dead_null_aware_expression
+warning - The left operand can't be null, so the right operand is never executed - lib\services\matching_service.dart:963:41 - dead_null_aware_expression
+warning - The left operand can't be null, so the right operand is never executed - lib\services\matching_service.dart:965:36 - dead_null_aware_expression
+warning - The left operand can't be null, so the right operand is never executed - lib\services\matching_service.dart:969:36 - dead_null_aware_expression
+  error - A value of type 'void' can't be returned from the method '_sendOnChannel' because it has a return type of 'Future<bool>' - lib\services\notification_dispatch_service.dart:476:16 - return_of_invalid_type
+warning - This default clause is covered by the previous cases - lib\services\notification_dispatch_service.dart:496:7 - unreachable_switch_default
+  error - The argument type 'List<Map<String, Object>>' can't be assigned to the parameter type 'Map<String, dynamic>?'.  - lib\services\notification_dispatch_service.dart:544:16 - argument_type_not_assignable
+  error - The argument type 'List<Map<String, Object>>' can't be assigned to the parameter type 'Map<String, dynamic>?'.  - lib\services\notification_dispatch_service.dart:842:14 - argument_type_not_assignable
+  error - The type 'QuerySnapshot<Object?>' used in the 'for' loop must implement 'Iterable' - lib\services\notification_dispatch_service.dart:857:23 - for_in_of_invalid_type
+  error - The method '[]' can't be unconditionally invoked because the receiver can be 'null' - lib\services\notification_dispatch_service.dart:863:37 - unchecked_use_of_nullable_value
+  error - The method '[]' can't be unconditionally invoked because the receiver can be 'null' - lib\services\notification_dispatch_service.dart:864:42 - unchecked_use_of_nullable_value
+  error - The method '[]' can't be unconditionally invoked because the receiver can be 'null' - lib\services\notification_dispatch_service.dart:870:31 - unchecked_use_of_nullable_value
+  error - The method '[]' can't be unconditionally invoked because the receiver can be 'null' - lib\services\notification_dispatch_service.dart:871:36 - unchecked_use_of_nullable_value
+   info - Don't invoke 'print' in production code - lib\services\notification_service.dart:55:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\notification_service.dart:120:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\notification_service.dart:159:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\notification_service.dart:184:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\notification_service.dart:191:3 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\predictive_analytics_service.dart:89:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\predictive_analytics_service.dart:181:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\predictive_analytics_service.dart:288:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\predictive_analytics_service.dart:343:7 - avoid_print
+   info - The parameter name 'sum' matches a visible type name - lib\services\query_service.dart:669:59 - avoid_types_as_parameter_names
+warning - The value of the field '_locationService' isn't used - lib\services\route_optimization_service.dart:105:25 - unused_field
+   info - Don't invoke 'print' in production code - lib\services\security_service.dart:39:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\security_service.dart:83:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\security_service.dart:110:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\security_service.dart:139:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\security_service.dart:170:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\security_service.dart:195:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\security_service.dart:216:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\security_service.dart:235:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\security_service.dart:248:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\security_service.dart:262:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\security_service.dart:290:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\security_service.dart:325:7 - avoid_print
+   info - The parameter name 'sum' matches a visible type name - lib\services\tracking\analytics_aggregation_service.dart:32:43 - avoid_types_as_parameter_names
+  error - Undefined name 'GeofenceType' - lib\services\tracking\geofence_background_service.dart:75:15 - undefined_identifier
+  error - Undefined name 'GeofenceType' - lib\services\tracking\geofence_background_service.dart:93:17 - undefined_identifier
+  error - Undefined name 'GeofenceType' - lib\services\tracking\geofence_background_service.dart:134:15 - undefined_identifier
+  error - Undefined name 'GeofenceType' - lib\services\tracking\geofence_background_service.dart:151:17 - undefined_identifier
+  error - Undefined name 'GeofenceType' - lib\services\tracking\geofence_background_service.dart:211:28 - undefined_identifier
+  error - Undefined name 'GeofenceType' - lib\services\tracking\geofence_background_service.dart:214:35 - undefined_identifier
+  error - Undefined name 'GeofenceType' - lib\services\tracking\geofence_background_service.dart:269:28 - undefined_identifier
+  error - Undefined name 'GeofenceType' - lib\services\tracking\geofence_background_service.dart:272:35 - undefined_identifier
+  error - Undefined name 'GeofenceType' - lib\services\tracking\geofence_background_service.dart:311:28 - undefined_identifier
+  error - Undefined name 'GeofenceType' - lib\services\tracking\geofence_background_service.dart:319:35 - undefined_identifier
+  error - Undefined name 'GeofenceType' - lib\services\tracking\geofence_background_service.dart:384:35 - undefined_identifier
+  error - Undefined name 'GeofenceType' - lib\services\tracking\geofence_background_service.dart:387:35 - undefined_identifier
+   info - Don't invoke 'print' in production code - lib\services\tracking\notification_handler.dart:22:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\tracking\notification_handler.dart:39:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\tracking\notification_handler.dart:45:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\tracking\notification_handler.dart:46:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\tracking\notification_handler.dart:47:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\tracking\notification_handler.dart:62:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\tracking\notification_handler.dart:63:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\tracking\notification_handler.dart:64:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\tracking\notification_handler.dart:70:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\tracking\notification_handler.dart:77:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\tracking\notification_handler.dart:81:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\tracking\notification_handler.dart:85:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\tracking\notification_handler.dart:89:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\tracking\notification_handler.dart:102:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\tracking\notification_handler.dart:125:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\tracking\notification_handler.dart:128:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\tracking\notification_handler.dart:150:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\tracking\notification_handler.dart:153:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\tracking\notification_handler.dart:179:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\tracking\notification_handler.dart:182:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\tracking\notification_handler.dart:206:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\tracking\notification_handler.dart:209:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\tracking\notification_handler.dart:233:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\tracking\notification_handler.dart:236:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\tracking\notification_handler.dart:258:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\tracking\notification_handler.dart:261:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\tracking\notification_handler.dart:270:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\tracking\notification_handler.dart:272:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\tracking\notification_handler.dart:280:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\tracking\notification_handler.dart:282:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\tracking\notification_handler.dart:291:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\tracking_service.dart:62:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\tracking_service.dart:79:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\tracking_service.dart:99:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\tracking_service.dart:135:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\tracking_service.dart:167:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\tracking_service.dart:195:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\user_service.dart:34:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\user_service.dart:62:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\user_service.dart:100:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\user_service.dart:116:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\user_service.dart:170:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\user_service.dart:254:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\user_service.dart:289:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\user_service.dart:315:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\user_service.dart:355:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\user_service.dart:398:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\user_service.dart:444:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\user_service.dart:482:7 - avoid_print
+   info - Statements in an if should be enclosed in a block - lib\services\user_service.dart:514:11 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\services\user_service.dart:515:39 - curly_braces_in_flow_control_structures
+   info - Don't invoke 'print' in production code - lib\services\user_service.dart:546:7 - avoid_print
+warning - This default clause is covered by the previous cases - lib\services\user_service.dart:594:7 - unreachable_switch_default
+   info - Don't invoke 'print' in production code - lib\services\verification_service.dart:55:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\verification_service.dart:86:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\verification_service.dart:239:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\verification_service.dart:247:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\verification_service.dart:277:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\verification_service.dart:318:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\verification_service.dart:324:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\verification_service.dart:326:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\verification_service.dart:345:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\verification_service.dart:387:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\verification_service.dart:426:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\verification_service.dart:481:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\verification_service.dart:525:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\verification_service.dart:528:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\verification_service.dart:548:7 - avoid_print
+   info - 'zIndex' is deprecated and shouldn't be used. Use zIndexInt instead. On some platforms zIndex is truncated to an int, which can lead to incorrect/unstable ordering - lib\widgets\live_tracking_map.dart:75:13 - deprecated_member_use
+   info - Don't invoke 'print' in production code - scripts\test_matching.dart:6:3 - avoid_print
+   info - Don't invoke 'print' in production code - scripts\test_matching.dart:7:3 - avoid_print
+   info - Don't invoke 'print' in production code - scripts\test_matching.dart:47:3 - avoid_print
+   info - Don't invoke 'print' in production code - scripts\test_matching.dart:48:3 - avoid_print
+   info - Don't invoke 'print' in production code - scripts\test_matching.dart:49:3 - avoid_print
+   info - Don't invoke 'print' in production code - scripts\test_matching.dart:50:3 - avoid_print
+   info - Don't invoke 'print' in production code - scripts\test_matching.dart:51:3 - avoid_print
+   info - Don't invoke 'print' in production code - scripts\test_matching.dart:53:3 - avoid_print
+   info - Don't invoke 'print' in production code - scripts\test_matching.dart:56:5 - avoid_print
+   info - Don't invoke 'print' in production code - scripts\test_matching.dart:57:5 - avoid_print
+   info - Don't invoke 'print' in production code - scripts\test_matching.dart:58:5 - avoid_print
+   info - Don't invoke 'print' in production code - scripts\test_matching.dart:59:5 - avoid_print
+   info - Don't invoke 'print' in production code - scripts\test_matching.dart:61:3 - avoid_print
+   info - Don't invoke 'print' in production code - scripts\test_matching.dart:64:3 - avoid_print
+   info - Don't invoke 'print' in production code - scripts\test_matching.dart:67:3 - avoid_print
+   info - Don't invoke 'print' in production code - scripts\test_matching.dart:68:3 - avoid_print
+   info - Don't invoke 'print' in production code - scripts\test_matching.dart:72:5 - avoid_print
+   info - Don't invoke 'print' in production code - scripts\test_matching.dart:74:5 - avoid_print
+   info - Don't invoke 'print' in production code - scripts\test_matching.dart:75:5 - avoid_print
+   info - Don't invoke 'print' in production code - scripts\test_matching.dart:76:5 - avoid_print
+   info - Don't invoke 'print' in production code - scripts\test_matching.dart:77:5 - avoid_print
+   info - Don't invoke 'print' in production code - scripts\test_matching.dart:79:5 - avoid_print
+   info - Don't invoke 'print' in production code - scripts\test_matching.dart:82:3 - avoid_print
+   info - Don't invoke 'print' in production code - scripts\test_matching.dart:83:3 - avoid_print
+   info - Don't invoke 'print' in production code - scripts\test_matching.dart:84:3 - avoid_print
+   info - Don't invoke 'print' in production code - scripts\test_matching.dart:85:3 - avoid_print
+   info - Don't invoke 'print' in production code - scripts\test_matching.dart:86:3 - avoid_print
+   info - Don't invoke 'print' in production code - scripts\test_matching.dart:87:3 - avoid_print
+  error - The method 'or' isn't defined for the type 'Finder' - test\integration\app_flow_test.dart:23:43 - undefined_method
+  error - The method 'or' isn't defined for the type 'Finder' - test\integration\app_flow_test.dart:40:41 - undefined_method
+  error - The method 'or' isn't defined for the type 'Finder' - test\integration\app_flow_test.dart:63:44 - undefined_method
+  error - The argument type 'String' can't be assigned to the parameter type 'BasicMessageChannel<String>'.  - test\integration\app_flow_test.dart:100:9 - argument_type_not_assignable
+  error - The argument type 'String' can't be assigned to the parameter type 'BasicMessageChannel<String>'.  - test\integration\app_flow_test.dart:113:9 - argument_type_not_assignable
+  error - The setter 'physicalSizeTestValue' isn't defined for the type 'TestFlutterView' - test\integration\app_flow_test.dart:132:19 - undefined_setter
+  error - Undefined name 'LogicalKeyboardKey' - test\integration\app_flow_test.dart:155:33 - undefined_identifier
+  error - The method 'or' isn't defined for the type 'Finder' - test\integration\app_flow_test.dart:215:44 - undefined_method
+  error - The named parameter 'notificationHandler' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:20:31 - missing_required_argument
+warning - The value of the local variable 'ngoId' isn't used - test\tracking\e2e_delivery_lifecycle_test.dart:33:13 - unused_local_variable
+  error - The named parameter 'taskId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:35:50 - missing_required_argument
+  error - The named parameter 'volunteerId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:35:50 - missing_required_argument
+  error - Too many positional arguments: 0 expected, but 1 found - test\tracking\e2e_delivery_lifecycle_test.dart:35:64 - extra_positional_arguments_could_be_named
+  error - The named parameter 'latitude' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:51:24 - missing_required_argument
+  error - The named parameter 'longitude' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:51:24 - missing_required_argument
+  error - The named parameter 'taskId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:51:24 - missing_required_argument
+  error - The named parameter 'volunteerId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:51:24 - missing_required_argument
+  error - Too many positional arguments: 0 expected, but 1 found - test\tracking\e2e_delivery_lifecycle_test.dart:51:48 - extra_positional_arguments_could_be_named
+  error - Too many positional arguments: 0 expected, but 1 found - test\tracking\e2e_delivery_lifecycle_test.dart:64:46 - extra_positional_arguments
+  error - The named parameter 'userId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:68:30 - missing_required_argument
+  error - The argument type 'String' can't be assigned to the parameter type 'TrackingStatus'.  - test\tracking\e2e_delivery_lifecycle_test.dart:70:20 - argument_type_not_assignable
+  error - The named parameter 'latitude' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:86:24 - missing_required_argument
+  error - The named parameter 'longitude' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:86:24 - missing_required_argument
+  error - The named parameter 'taskId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:86:24 - missing_required_argument
+  error - The named parameter 'volunteerId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:86:24 - missing_required_argument
+  error - Too many positional arguments: 0 expected, but 1 found - test\tracking\e2e_delivery_lifecycle_test.dart:86:48 - extra_positional_arguments_could_be_named
+  error - The named parameter 'userId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:87:30 - missing_required_argument
+  error - The argument type 'String' can't be assigned to the parameter type 'TrackingStatus'.  - test\tracking\e2e_delivery_lifecycle_test.dart:89:20 - argument_type_not_assignable
+  error - The named parameter 'taskId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:104:30 - missing_required_argument
+  error - The named parameter 'volunteerId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:104:30 - missing_required_argument
+  error - Too many positional arguments: 0 expected, but 1 found - test\tracking\e2e_delivery_lifecycle_test.dart:104:44 - extra_positional_arguments_could_be_named
+  error - The named parameter 'deliverySLA' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:105:35 - missing_required_argument
+  error - The named parameter 'pickupSLA' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:105:35 - missing_required_argument
+  error - The named parameter 'taskId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:105:35 - missing_required_argument
+  error - The named parameter 'volunteerId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:105:35 - missing_required_argument
+  error - Too many positional arguments: 0 expected, but 1 found - test\tracking\e2e_delivery_lifecycle_test.dart:105:51 - extra_positional_arguments_could_be_named
+  error - The named parameter 'taskId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:115:30 - missing_required_argument
+  error - The named parameter 'volunteerId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:115:30 - missing_required_argument
+  error - Too many positional arguments: 0 expected, but 1 found - test\tracking\e2e_delivery_lifecycle_test.dart:115:44 - extra_positional_arguments_could_be_named
+  error - Too many positional arguments: 0 expected, but 1 found - test\tracking\e2e_delivery_lifecycle_test.dart:156:46 - extra_positional_arguments
+  error - The named parameter 'taskId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:164:30 - missing_required_argument
+  error - The named parameter 'volunteerId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:164:30 - missing_required_argument
+  error - Too many positional arguments: 0 expected, but 1 found - test\tracking\e2e_delivery_lifecycle_test.dart:164:44 - extra_positional_arguments_could_be_named
+  error - The named parameter 'latitude' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:188:24 - missing_required_argument
+  error - The named parameter 'longitude' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:188:24 - missing_required_argument
+  error - The named parameter 'taskId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:188:24 - missing_required_argument
+  error - The named parameter 'volunteerId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:188:24 - missing_required_argument
+  error - Too many positional arguments: 0 expected, but 1 found - test\tracking\e2e_delivery_lifecycle_test.dart:188:48 - extra_positional_arguments_could_be_named
+  error - The named parameter 'latitude' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:189:24 - missing_required_argument
+  error - The named parameter 'longitude' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:189:24 - missing_required_argument
+  error - The named parameter 'taskId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:189:24 - missing_required_argument
+  error - The named parameter 'volunteerId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:189:24 - missing_required_argument
+  error - Too many positional arguments: 0 expected, but 1 found - test\tracking\e2e_delivery_lifecycle_test.dart:189:48 - extra_positional_arguments_could_be_named
+  error - The named parameter 'taskId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:205:30 - missing_required_argument
+  error - The named parameter 'volunteerId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:205:30 - missing_required_argument
+  error - Too many positional arguments: 0 expected, but 1 found - test\tracking\e2e_delivery_lifecycle_test.dart:205:44 - extra_positional_arguments_could_be_named
+warning - The class 'Query' shouldn't be extended, mixed in, or implemented because it's sealed - test\tracking\test_mocks.dart:20:1 - subtype_of_sealed_class
+warning - This class (or a class that this class inherits from) is marked as '@immutable', but one or more of its instance fields aren't final: Mock._givenName, Mock._givenHashCode, Mock._defaultResponse - test\tracking\test_mocks.dart:20:7 - must_be_immutable
+warning - The class 'DocumentReference' shouldn't be extended, mixed in, or implemented because it's sealed - test\tracking\test_mocks.dart:22:1 - subtype_of_sealed_class
+warning - This class (or a class that this class inherits from) is marked as '@immutable', but one or more of its instance fields aren't final: Mock._givenName, Mock._givenHashCode, Mock._defaultResponse - test\tracking\test_mocks.dart:22:7 - must_be_immutable
+warning - The class 'DocumentSnapshot' shouldn't be extended, mixed in, or implemented because it's sealed - test\tracking\test_mocks.dart:26:1 - subtype_of_sealed_class
+
+353 issues found. (ran in 2.6s)

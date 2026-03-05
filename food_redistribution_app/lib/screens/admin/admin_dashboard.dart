@@ -208,8 +208,7 @@ class _AdminDashboardState extends State<AdminDashboard>
                               leading: const Icon(Icons.file_present),
                               title: Text(doc['type']),
                               subtitle: Text(doc['information']),
-                            ))
-                        ,
+                            )),
                     const SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
@@ -276,6 +275,7 @@ class _AdminDashboardState extends State<AdminDashboard>
               await Provider.of<AdminDashboardProvider>(context, listen: false)
                   .reviewVerification(submissionId, adminId,
                       VerificationStatus.rejected, noteController.text);
+              if (!ctx.mounted) return;
               Navigator.pop(ctx);
             },
             child: const Text('Reject', style: TextStyle(color: Colors.red)),
