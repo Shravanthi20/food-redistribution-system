@@ -200,7 +200,7 @@ class FoodDonationMatchingService {
   /// Calculate capacity compatibility score
   double _calculateCapacityScore(FoodDonation donation, NGOProfile ngo) {
     final donationQuantity = donation.quantity.toDouble();
-    final ngoCapacity = (ngo.capacity ?? 100).toDouble(); // Default capacity
+    final ngoCapacity = ngo.capacity.toDouble(); // Default capacity
 
     // Prevent division by zero
     if (ngoCapacity <= 0) return 0.5;
@@ -960,13 +960,13 @@ class EnhancedMatchingService {
   bool _isDietaryCompatible(String restriction, FoodDonation donation) {
     switch (restriction.toLowerCase()) {
       case 'vegetarian':
-        return donation.isVegetarian ?? false;
+        return donation.isVegetarian;
       case 'vegan':
-        return donation.isVegan ?? false;
+        return donation.isVegan;
       case 'gluten-free':
         return false; // Not supported in current model
       case 'halal':
-        return donation.isHalal ?? false;
+        return donation.isHalal;
       case 'kosher':
         return false; // Not supported in current model
       default:

@@ -33,7 +33,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       await authProvider.resendEmailVerification();
-
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Verification email sent successfully!'),
@@ -41,6 +41,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
         ),
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error: $e'),
@@ -129,6 +130,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                   TextButton(
                     onPressed: () async {
                       await authProvider.signOut();
+                      if (!context.mounted) return;
                       Navigator.pushReplacementNamed(context, AppRouter.login);
                     },
                     child: const Text('Sign Out'),

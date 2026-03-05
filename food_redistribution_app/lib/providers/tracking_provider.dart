@@ -8,7 +8,9 @@ import '../services/tracking/analytics_aggregation_service.dart';
 
 // Keep track of all deliveries happening right now
 class TrackingProvider extends ChangeNotifier {
+  // ignore: unused_field
   late final DelayDetectionService _delayDetectionService;
+  // ignore: unused_field
   final AnalyticsAggregationService _analyticsService =
       AnalyticsAggregationService();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

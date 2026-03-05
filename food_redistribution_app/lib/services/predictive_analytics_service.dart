@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math' as math;
 
@@ -86,7 +87,7 @@ class PredictiveAnalyticsService {
         trend: _calculateTrend(snapshot.docs),
       );
     } catch (e) {
-      print('Error predicting volunteer demand: $e');
+      debugPrint('Error predicting volunteer demand: $e');
       rethrow;
     }
   }
@@ -178,7 +179,7 @@ class PredictiveAnalyticsService {
         growthRate: _calculateGrowthRate(weeklyTrends),
       );
     } catch (e) {
-      print('Error analyzing surplus trends: $e');
+      debugPrint('Error analyzing surplus trends: $e');
       rethrow;
     }
   }
@@ -285,7 +286,7 @@ class PredictiveAnalyticsService {
 
       return indicators;
     } catch (e) {
-      print('Error getting regional risk indicators: $e');
+      debugPrint('Error getting regional risk indicators: $e');
       rethrow;
     }
   }
@@ -340,7 +341,7 @@ class PredictiveAnalyticsService {
         ],
       );
     } catch (e) {
-      print('Error forecasting delivery performance: $e');
+      debugPrint('Error forecasting delivery performance: $e');
       rethrow;
     }
   }

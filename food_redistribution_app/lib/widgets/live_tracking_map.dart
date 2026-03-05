@@ -72,7 +72,7 @@ class _LiveTrackingMapState extends State<LiveTrackingMap> {
             infoWindow: const InfoWindow(title: 'Volunteer'),
             icon: BitmapDescriptor.defaultMarkerWithHue(
                 BitmapDescriptor.hueGreen),
-            zIndex: 2, // Show on top
+            zIndexInt: 2, // Show on top
           ),
         );
       }

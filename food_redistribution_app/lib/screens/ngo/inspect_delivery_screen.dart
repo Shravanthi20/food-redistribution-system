@@ -208,41 +208,41 @@ class _InspectDeliveryScreenState extends State<InspectDeliveryScreen> {
                             ),
                       ),
                       const SizedBox(height: 16),
-                      RadioListTile<bool>(
-                        title: const Text('Accept Delivery'),
-                        subtitle: Text(
-                          'Food meets safety standards and can be distributed',
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 12,
-                          ),
-                        ),
-                        value: true,
+                      RadioGroup<bool>(
                         groupValue: _overallApproval,
                         onChanged: (bool? value) {
                           setState(() {
                             _overallApproval = value;
                           });
                         },
-                        activeColor: Colors.green.shade700,
-                      ),
-                      RadioListTile<bool>(
-                        title: const Text('Reject Delivery'),
-                        subtitle: Text(
-                          'Food does not meet safety standards',
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 12,
-                          ),
+                        child: Column(
+                          children: [
+                            RadioListTile<bool>(
+                              title: const Text('Accept Delivery'),
+                              subtitle: Text(
+                                'Food meets safety standards and can be distributed',
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 12,
+                                ),
+                              ),
+                              value: true,
+                              activeColor: Colors.green.shade700,
+                            ),
+                            RadioListTile<bool>(
+                              title: const Text('Reject Delivery'),
+                              subtitle: Text(
+                                'Food does not meet safety standards',
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 12,
+                                ),
+                              ),
+                              value: false,
+                              activeColor: Colors.red.shade700,
+                            ),
+                          ],
                         ),
-                        value: false,
-                        groupValue: _overallApproval,
-                        onChanged: (bool? value) {
-                          setState(() {
-                            _overallApproval = value;
-                          });
-                        },
-                        activeColor: Colors.red.shade700,
                       ),
                     ],
                   ),

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../models/food_request.dart';
 import '../models/food_donation.dart';
@@ -76,7 +77,7 @@ class NGOProvider extends ChangeNotifier {
       await _loadDashboardStats(ngoId);
     } catch (e) {
       _errorMessage = 'Failed to load NGO data: $e';
-      print('NGO Provider Error: $e');
+      debugPrint('NGO Provider Error: $e');
     } finally {
       _isLoading = false;
       notifyListeners();

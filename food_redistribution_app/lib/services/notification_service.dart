@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -52,7 +53,7 @@ class NotificationService {
         'createdAt': Timestamp.now(),
       });
     } catch (e) {
-      print('Error sending notification: $e');
+      debugPrint('Error sending notification: $e');
     }
   }
 
@@ -117,7 +118,7 @@ class NotificationService {
             userId: volunteerId, title: title, body: body, data: data);
       }
     } catch (e) {
-      print('Error sending notifications to stakeholders: $e');
+      debugPrint('Error sending notifications to stakeholders: $e');
     }
   }
 
@@ -156,7 +157,7 @@ class NotificationService {
         _saveToken(userId, newToken);
       });
     } catch (e) {
-      print('Error saving FCM token: $e');
+      debugPrint('Error saving FCM token: $e');
     }
   }
 
@@ -181,12 +182,12 @@ class NotificationService {
           .doc(notificationId)
           .update({'read': true});
     } catch (e) {
-      print('Error marking notification as read: $e');
+      debugPrint('Error marking notification as read: $e');
     }
   }
 }
 
 // Background message handler
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  print('Background message: ${message.messageId}');
+  debugPrint('Background message: ${message.messageId}');
 }

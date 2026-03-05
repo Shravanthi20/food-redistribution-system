@@ -135,7 +135,8 @@ class VolunteerDispatchService {
       deliveryAddress: deliveryAddress,
       pickupLocation: pickupLocation,
       deliveryLocation: deliveryLocation,
-      scheduledTime: scheduledTime ?? DateTime.now().add(const Duration(hours: 1)),
+      scheduledTime:
+          scheduledTime ?? DateTime.now().add(const Duration(hours: 1)),
       priority: calculatedPriority,
       specialInstructions: specialInstructions,
       requiredSkills: requiredSkills,
@@ -144,7 +145,7 @@ class VolunteerDispatchService {
     );
 
     // Store task in database
-    await _firestoreService.create('delivery_tasks', task.toMap());
+    await _firestoreService.create('delivery_tasks', task.id, task.toMap());
 
     await _auditService.logEvent(
       eventType: AuditEventType.dataModification,
@@ -347,16 +348,16 @@ class VolunteerDispatchService {
     // Get all verified and available volunteers
     final volunteerDocs = await _firestoreService.query(
       'volunteer_profiles',
-      where: [
-        {'field': 'verificationStatus', 'operator': '==', 'value': 'verified'},
-        {'field': 'isActive', 'operator': '==', 'value': true},
-        {'field': 'status', 'operator': '==', 'value': 'available'},
-      ],
+      where: {
+        'verificationStatus': 'verified',
+        'isActive': true,
+        'status': 'available',
+      },
     );
 
     final volunteers = <VolunteerProfile>[];
 
-    for (final doc in volunteerDocs) {
+    for (final doc in volunteerDocs.docs) {
       final volunteer =
           VolunteerProfile.fromMap(doc.data() as Map<String, dynamic>);
 
@@ -558,6 +559,7 @@ class VolunteerDispatchService {
       'timestamp': DateTime.now(),
     };
 
-    await _firestoreService.create('dispatch_analytics', analysis);
+    final docId = '${taskId}_${DateTime.now().millisecondsSinceEpoch}';
+    await _firestoreService.create('dispatch_analytics', docId, analysis);
   }
 }

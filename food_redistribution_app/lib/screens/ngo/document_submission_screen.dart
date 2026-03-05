@@ -310,12 +310,8 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
 
               const SizedBox(height: 20),
 
-              ...documents
-                  .asMap()
-                  .entries
-                  .map(
-                      (entry) => _buildDocumentCard(entry.value, entry.key + 1))
-                  ,
+              ...documents.asMap().entries.map(
+                  (entry) => _buildDocumentCard(entry.value, entry.key + 1)),
 
               const SizedBox(height: 24),
 
@@ -372,18 +368,19 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
                       decoration: InputDecoration(
                         hintText:
                             'Any additional information that might help with verification...',
-                        hintStyle: const TextStyle(color: AppTheme.textTertiary),
+                        hintStyle:
+                            const TextStyle(color: AppTheme.textTertiary),
                         filled: true,
                         fillColor: AppTheme.surfaceGlass,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide:
-                              const BorderSide(color: AppTheme.surfaceGlassBorder),
+                          borderSide: const BorderSide(
+                              color: AppTheme.surfaceGlassBorder),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide:
-                              const BorderSide(color: AppTheme.surfaceGlassBorder),
+                          borderSide: const BorderSide(
+                              color: AppTheme.surfaceGlassBorder),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -539,11 +536,13 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
                 fillColor: AppTheme.surfaceGlass,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppTheme.surfaceGlassBorder),
+                  borderSide:
+                      const BorderSide(color: AppTheme.surfaceGlassBorder),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppTheme.surfaceGlassBorder),
+                  borderSide:
+                      const BorderSide(color: AppTheme.surfaceGlassBorder),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -556,7 +555,8 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
                 ),
                 focusedErrorBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppTheme.errorRed, width: 1.5),
+                  borderSide:
+                      const BorderSide(color: AppTheme.errorRed, width: 1.5),
                 ),
                 prefixIcon: const Icon(Icons.description_outlined,
                     size: 20, color: AppTheme.textTertiary),
@@ -634,7 +634,7 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
         throw Exception('User not authenticated. Please login again.');
       }
 
-      print('Submitting verification with data: $_documentInfo');
+      debugPrint('Submitting verification with data: $_documentInfo');
 
       final submissionId = await _verificationService.submitVerificationInfo(
         userId: authProvider.firebaseUser!.uid,
@@ -642,7 +642,7 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
         documentInfo: Map<String, String>.from(_documentInfo),
       );
 
-      print('Submission successful with ID: $submissionId');
+      debugPrint('Submission successful with ID: $submissionId');
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -658,7 +658,7 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
         Navigator.pushReplacementNamed(context, '/verification-pending');
       }
     } catch (e) {
-      print('Error submitting documents: $e');
+      debugPrint('Error submitting documents: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

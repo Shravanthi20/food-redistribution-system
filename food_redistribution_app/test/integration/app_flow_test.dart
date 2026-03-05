@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:flutter/services.dart';
 import 'package:food_redistribution_app/main.dart' as app;
 
 void main() {
@@ -20,7 +21,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Should navigate to donor dashboard or registration
-      expect(find.textContaining('donor').or(find.textContaining('Donor')),
+      expect(find.textContaining(RegExp(r'donor', caseSensitive: false)),
           findsAtLeastNWidgets(1));
     });
 
@@ -37,7 +38,9 @@ void main() {
       await tester.pumpAndSettle();
 
       // Should show NGO-related content
-      expect(find.textContaining('NGO').or(find.textContaining('Organization')),
+      expect(
+          find.textContaining(
+              RegExp(r'ngo|organization', caseSensitive: false)),
           findsAtLeastNWidgets(1));
 
       // Navigate back if possible
@@ -59,8 +62,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Should navigate to volunteer-specific screen
-      expect(
-          find.textContaining('volunteer').or(find.textContaining('Volunteer')),
+      expect(find.textContaining(RegExp(r'volunteer', caseSensitive: false)),
           findsAtLeastNWidgets(1));
     });
 
@@ -95,26 +97,14 @@ void main() {
       // Initial state
       expect(find.text('Food Redistribution Platform'), findsOneWidget);
 
-      // Simulate app lifecycle changes
-      tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler(
-        'flutter/lifecycle',
-        (dynamic message) async {
-          return 'AppLifecycleState.paused';
-        },
-      );
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
 
       await tester.pumpAndSettle();
 
       // App should still be functional
       expect(find.text('Food Redistribution Platform'), findsOneWidget);
 
-      // Restore lifecycle
-      tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler(
-        'flutter/lifecycle',
-        (dynamic message) async {
-          return 'AppLifecycleState.resumed';
-        },
-      );
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
 
       await tester.pumpAndSettle();
       expect(find.text('Food Redistribution Platform'), findsOneWidget);
@@ -129,7 +119,7 @@ void main() {
       expect(find.text('Food Redistribution Platform'), findsOneWidget);
 
       // Simulate landscape orientation
-      tester.view.physicalSizeTestValue = const Size(800, 400);
+      tester.view.physicalSize = const Size(800, 400);
       await tester.pumpAndSettle();
 
       // App should adapt to landscape
@@ -211,8 +201,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Should handle role switching correctly
-      expect(
-          find.textContaining('volunteer').or(find.textContaining('Volunteer')),
+      expect(find.textContaining(RegExp(r'volunteer', caseSensitive: false)),
           findsAtLeastNWidgets(1));
     });
 

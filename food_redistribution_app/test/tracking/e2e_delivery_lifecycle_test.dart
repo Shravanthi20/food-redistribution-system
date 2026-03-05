@@ -5,6 +5,7 @@ import 'package:food_redistribution_app/providers/tracking_provider.dart';
 import 'package:food_redistribution_app/services/tracking/offline_tracking_service.dart';
 import 'package:food_redistribution_app/services/tracking/delay_detection_service.dart';
 import 'package:food_redistribution_app/services/tracking/analytics_aggregation_service.dart';
+import 'package:food_redistribution_app/services/tracking/notification_handler.dart';
 
 // End-to-end test for donation delivery lifecycle with tracking
 void main() {
@@ -17,7 +18,9 @@ void main() {
     setUp(() {
       trackingProvider = TrackingProvider();
       offlineService = OfflineTrackingService();
-      delayDetectionService = DelayDetectionService();
+      delayDetectionService = DelayDetectionService(
+        notificationHandler: NotificationHandler(),
+      );
       analyticsService = AnalyticsAggregationService();
     });
 
@@ -30,9 +33,10 @@ void main() {
         () async {
       const donationId = 'donation_test_001';
       const volunteerId = 'volunteer_test_001';
-      const ngoId = 'ngo_test_001';
-
-      final startResult = await trackingProvider.startTracking(volunteerId);
+      final startResult = await trackingProvider.startTracking(
+        volunteerId: volunteerId,
+        taskId: donationId,
+      );
       expect(startResult, true);
       expect(trackingProvider.isTracking, true);
 
@@ -48,7 +52,12 @@ void main() {
         metadata: {'event': 'pickup_arrived'},
       );
 
-      trackingProvider.updateVolunteerLocation(pickupLocation);
+      trackingProvider.updateVolunteerLocation(
+        volunteerId: volunteerId,
+        taskId: donationId,
+        latitude: pickupLocation.latitude,
+        longitude: pickupLocation.longitude,
+      );
       expect(trackingProvider.locationHistory.contains(pickupLocation), true);
 
       trackingProvider.setOnlineStatus(false);
@@ -61,15 +70,16 @@ void main() {
       trackingProvider.setOnlineStatus(true);
       expect(trackingProvider.isOnline, true);
 
-      await offlineService.markUpdatesSynced([pickupLocation.id]);
+      await offlineService.markUpdatesSynced();
       final syncedUpdates = await offlineService.getOfflineUpdates();
       expect(syncedUpdates.isEmpty, true);
 
       await trackingProvider.updateDonationStatus(
         donationId: donationId,
-        newStatus: 'picked',
+        newStatus: TrackingStatus.collected,
+        userId: volunteerId,
       );
-      expect(trackingProvider.currentStatus, 'picked');
+      expect(trackingProvider.currentStatus, TrackingStatus.collected);
 
       final deliveryLocation = LocationUpdate(
         id: 'loc_002',
@@ -83,10 +93,16 @@ void main() {
         metadata: {'event': 'delivery_arrived'},
       );
 
-      trackingProvider.updateVolunteerLocation(deliveryLocation);
+      trackingProvider.updateVolunteerLocation(
+        volunteerId: volunteerId,
+        taskId: donationId,
+        latitude: deliveryLocation.latitude,
+        longitude: deliveryLocation.longitude,
+      );
       await trackingProvider.updateDonationStatus(
         donationId: donationId,
-        newStatus: 'delivered',
+        newStatus: TrackingStatus.delivered,
+        userId: volunteerId,
       );
 
       await trackingProvider.stopTracking(volunteerId);
@@ -101,8 +117,16 @@ void main() {
       const taskId = 'task_delay_test';
       const volunteerId = 'volunteer_delay_test';
 
-      await trackingProvider.startTracking(volunteerId);
-      await delayDetectionService.startMonitoring(taskId);
+      await trackingProvider.startTracking(
+        volunteerId: volunteerId,
+        taskId: taskId,
+      );
+      await delayDetectionService.startMonitoring(
+        taskId: taskId,
+        volunteerId: volunteerId,
+        pickupSLA: 30,
+        deliverySLA: 60,
+      );
       await Future.delayed(const Duration(seconds: 1));
       expect(delayDetectionService, isNotNull);
     });
@@ -112,7 +136,10 @@ void main() {
       const pickupLat = 28.6139;
       const pickupLng = 77.2090;
 
-      await trackingProvider.startTracking(volunteerId);
+      await trackingProvider.startTracking(
+        volunteerId: volunteerId,
+        taskId: 'task_001',
+      );
 
       final pickupEvent = GeofenceEvent(
         id: 'geofence_001',
@@ -153,7 +180,7 @@ void main() {
       var pendingCount = await offlineService.getPendingUpdateCount();
       expect(pendingCount, updates.length);
 
-      await offlineService.markUpdatesSynced([updates[0].id, updates[1].id]);
+      await offlineService.markUpdatesSynced();
       pendingCount = await offlineService.getPendingUpdateCount();
       expect(pendingCount, 3);
     });
@@ -161,7 +188,10 @@ void main() {
     test('Location history chronological order', () async {
       const volunteerId = 'volunteer_history_test';
 
-      await trackingProvider.startTracking(volunteerId);
+      await trackingProvider.startTracking(
+        volunteerId: volunteerId,
+        taskId: 'task_001',
+      );
 
       final update1 = LocationUpdate(
         id: 'loc_1',
@@ -185,8 +215,18 @@ void main() {
         status: TrackingStatus.inTransit,
       );
 
-      trackingProvider.updateVolunteerLocation(update1);
-      trackingProvider.updateVolunteerLocation(update2);
+      trackingProvider.updateVolunteerLocation(
+        volunteerId: volunteerId,
+        taskId: 'task_001',
+        latitude: update1.latitude,
+        longitude: update1.longitude,
+      );
+      trackingProvider.updateVolunteerLocation(
+        volunteerId: volunteerId,
+        taskId: 'task_001',
+        latitude: update2.latitude,
+        longitude: update2.longitude,
+      );
 
       final history = trackingProvider.locationHistory;
       expect(history.length, greaterThanOrEqualTo(2));
@@ -202,7 +242,10 @@ void main() {
       trackingProvider.setOnlineStatus(false);
       expect(trackingProvider.isOnline, false);
 
-      await trackingProvider.startTracking(volunteerId);
+      await trackingProvider.startTracking(
+        volunteerId: volunteerId,
+        taskId: 'task_offline',
+      );
       expect(trackingProvider.isTracking, true);
 
       final update = LocationUpdate(

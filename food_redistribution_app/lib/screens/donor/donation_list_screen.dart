@@ -272,6 +272,11 @@ class _DonationListScreenState extends State<DonationListScreen> {
   }
 
   Future<void> _cancelDonation(FoodDonation donation) async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final donationProvider =
+        Provider.of<DonationProvider>(context, listen: false);
+    final userId = authProvider.appUser?.uid;
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -290,34 +295,28 @@ class _DonationListScreenState extends State<DonationListScreen> {
       ),
     );
 
-    if (confirmed == true) {
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final donationProvider =
-          Provider.of<DonationProvider>(context, listen: false);
+    if (confirmed == true && userId != null) {
+      final success = await donationProvider.cancelDonation(
+        donation.id,
+        userId,
+        'Cancelled by donor',
+      );
 
-      final userId = authProvider.appUser?.uid;
-      if (userId != null) {
-        final success = await donationProvider.cancelDonation(
-          donation.id,
-          userId,
-          'Cancelled by donor',
+      if (!mounted) return;
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Donation cancelled successfully'),
+            backgroundColor: Colors.green,
+          ),
         );
-
-        if (success && mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Donation cancelled successfully'),
-              backgroundColor: Colors.green,
-            ),
-          );
-        } else if (mounted && donationProvider.errorMessage != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(donationProvider.errorMessage!),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
+      } else if (donationProvider.errorMessage != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(donationProvider.errorMessage!),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     }
   }

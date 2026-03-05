@@ -111,7 +111,7 @@ class _ProtectedRouteState extends State<ProtectedRoute> {
         currentUser = user;
       });
     } catch (e) {
-      print('Error checking authorization: $e');
+      debugPrint('Error checking authorization: $e');
       setState(() {
         isLoading = false;
         isAuthorized = false;

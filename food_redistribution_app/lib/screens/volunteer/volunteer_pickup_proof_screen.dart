@@ -47,6 +47,7 @@ class _VolunteerPickupProofScreenState
         setState(() => _capturedImage = File(photo.path));
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
             content: Text('Camera error: $e'), backgroundColor: Colors.red),
@@ -74,6 +75,7 @@ class _VolunteerPickupProofScreenState
             ? _notesController.text.trim()
             : null,
       );
+      if (!mounted) return;
       setState(() {
         _isUploading = false;
         _uploadComplete = true;
@@ -85,6 +87,7 @@ class _VolunteerPickupProofScreenState
         ),
       );
     } catch (e) {
+      if (!mounted) return;
       setState(() => _isUploading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -270,8 +273,9 @@ class _VolunteerPickupProofScreenState
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color:
-                isSelected ? color.withValues(alpha: 0.15) : const Color(0xFF1A2535),
+            color: isSelected
+                ? color.withValues(alpha: 0.15)
+                : const Color(0xFF1A2535),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
                 color: isSelected ? color : const Color(0xFF2D3748),

@@ -96,11 +96,13 @@ class _DonorDashboardState extends State<DonorDashboard> {
                 ],
               );
 
-              if (confirmed == true && mounted) {
+              if (confirmed == true && context.mounted) {
                 final authProvider =
                     Provider.of<AuthProvider>(context, listen: false);
                 await authProvider.signOut();
-                Navigator.pushReplacementNamed(context, AppRouter.login);
+                if (context.mounted) {
+                  Navigator.pushReplacementNamed(context, AppRouter.login);
+                }
               }
             },
           ),
@@ -176,13 +178,16 @@ class _DonorDashboardState extends State<DonorDashboard> {
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(
                                     colors: [
-                                      AppTheme.accentTeal.withValues(alpha: 0.2),
-                                      AppTheme.accentCyan.withValues(alpha: 0.1),
+                                      AppTheme.accentTeal
+                                          .withValues(alpha: 0.2),
+                                      AppTheme.accentCyan
+                                          .withValues(alpha: 0.1),
                                     ],
                                   ),
                                   borderRadius: BorderRadius.circular(16),
                                   border: Border.all(
-                                    color: AppTheme.accentTeal.withValues(alpha: 0.3),
+                                    color: AppTheme.accentTeal
+                                        .withValues(alpha: 0.3),
                                   ),
                                 ),
                                 child: const Icon(
@@ -221,10 +226,12 @@ class _DonorDashboardState extends State<DonorDashboard> {
                           Container(
                             padding: const EdgeInsets.all(14),
                             decoration: BoxDecoration(
-                              color: AppTheme.successTeal.withValues(alpha: 0.1),
+                              color:
+                                  AppTheme.successTeal.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: AppTheme.successTeal.withValues(alpha: 0.2),
+                                color:
+                                    AppTheme.successTeal.withValues(alpha: 0.2),
                               ),
                             ),
                             child: const Row(

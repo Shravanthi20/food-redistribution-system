@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -36,7 +37,7 @@ class SecurityService {
 
       return false;
     } catch (e) {
-      print('Error checking account lock: $e');
+      debugPrint('Error checking account lock: $e');
       return false;
     }
   }
@@ -80,7 +81,7 @@ class SecurityService {
         'timestamp': Timestamp.now(),
       });
     } catch (e) {
-      print('Error recording failed login: $e');
+      debugPrint('Error recording failed login: $e');
     }
   }
 
@@ -107,7 +108,7 @@ class SecurityService {
         });
       }
     } catch (e) {
-      print('Error recording successful login: $e');
+      debugPrint('Error recording successful login: $e');
     }
   }
 
@@ -136,7 +137,7 @@ class SecurityService {
           key: 'session_expires',
           value: DateTime.now().add(sessionTimeout).toIso8601String());
     } catch (e) {
-      print('Error creating user session: $e');
+      debugPrint('Error creating user session: $e');
     }
   }
 
@@ -167,7 +168,7 @@ class SecurityService {
       final data = doc.data() as Map<String, dynamic>;
       return data['isActive'] == true;
     } catch (e) {
-      print('Error validating session: $e');
+      debugPrint('Error validating session: $e');
       return false;
     }
   }
@@ -192,7 +193,7 @@ class SecurityService {
       await _secureStorage.delete(key: 'session_id');
       await _secureStorage.delete(key: 'session_expires');
     } catch (e) {
-      print('Error invalidating session: $e');
+      debugPrint('Error invalidating session: $e');
     }
   }
 
@@ -213,7 +214,7 @@ class SecurityService {
 
       await batch.commit();
     } catch (e) {
-      print('Error cleaning up expired sessions: $e');
+      debugPrint('Error cleaning up expired sessions: $e');
     }
   }
 
@@ -232,7 +233,7 @@ class SecurityService {
 
       return query.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList();
     } catch (e) {
-      print('Error getting user active sessions: $e');
+      debugPrint('Error getting user active sessions: $e');
       return [];
     }
   }
@@ -245,7 +246,7 @@ class SecurityService {
         'terminatedAt': Timestamp.now(),
       });
     } catch (e) {
-      print('Error terminating session: $e');
+      debugPrint('Error terminating session: $e');
     }
   }
 
@@ -259,7 +260,7 @@ class SecurityService {
         ...data,
       });
     } catch (e) {
-      print('Error logging security event: $e');
+      debugPrint('Error logging security event: $e');
     }
   }
 
@@ -287,7 +288,7 @@ class SecurityService {
         'timestamp': Timestamp.now(),
       });
     } catch (e) {
-      print('Error unlocking account: $e');
+      debugPrint('Error unlocking account: $e');
       rethrow;
     }
   }
@@ -322,7 +323,7 @@ class SecurityService {
         'generatedAt': Timestamp.now(),
       };
     } catch (e) {
-      print('Error getting security stats: $e');
+      debugPrint('Error getting security stats: $e');
       return {};
     }
   }

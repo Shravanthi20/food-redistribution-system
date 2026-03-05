@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 // Send push notifications to volunteers and NGOs
@@ -19,7 +20,7 @@ class NotificationHandler {
 
       // Get FCM token
       final token = await _firebaseMessaging.getToken();
-      print('FCM Token: $token');
+      debugPrint('FCM Token: $token');
 
       // Handle foreground messages
       FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
@@ -36,15 +37,15 @@ class NotificationHandler {
       // Handle notification tap when app is in background
       FirebaseMessaging.onMessageOpenedApp.listen(_handleNotificationTap);
     } catch (e) {
-      print('Error initializing notifications: $e');
+      debugPrint('Error initializing notifications: $e');
     }
   }
 
   // Show notification while user has app open
   void _handleForegroundMessage(RemoteMessage message) {
-    print('Foreground message: ${message.messageId}');
-    print('Title: ${message.notification?.title}');
-    print('Body: ${message.notification?.body}');
+    debugPrint('Foreground message: ${message.messageId}');
+    debugPrint('Title: ${message.notification?.title}');
+    debugPrint('Body: ${message.notification?.body}');
 
     // Show notification in-app
     final notification = message.notification;
@@ -59,34 +60,34 @@ class NotificationHandler {
 
   // Handle notification when app is closed
   static Future<void> _handleBackgroundMessage(RemoteMessage message) async {
-    print('Background message: ${message.messageId}');
-    print('Title: ${message.notification?.title}');
-    print('Body: ${message.notification?.body}');
+    debugPrint('Background message: ${message.messageId}');
+    debugPrint('Title: ${message.notification?.title}');
+    debugPrint('Body: ${message.notification?.body}');
     // Background message handling
   }
 
   /// Handle notification tap
   void _handleNotificationTap(RemoteMessage message) {
-    print('Notification tapped: ${message.messageId}');
+    debugPrint('Notification tapped: ${message.messageId}');
     // Navigate to appropriate screen based on data
     final data = message.data;
     final notificationType = data['type'] ?? 'general';
 
     switch (notificationType) {
       case 'assignment':
-        print('Navigate to assignment details');
+        debugPrint('Navigate to assignment details');
         // Navigator.pushNamed(context, '/assignment', arguments: data);
         break;
       case 'pickup':
-        print('Navigate to pickup screen');
+        debugPrint('Navigate to pickup screen');
         // Navigator.pushNamed(context, '/pickup', arguments: data);
         break;
       case 'delivery':
-        print('Navigate to delivery screen');
+        debugPrint('Navigate to delivery screen');
         // Navigator.pushNamed(context, '/delivery', arguments: data);
         break;
       case 'delay':
-        print('Navigate to delay notification');
+        debugPrint('Navigate to delay notification');
         // Navigator.pushNamed(context, '/delay', arguments: data);
         break;
     }
@@ -99,7 +100,7 @@ class NotificationHandler {
     required Map<String, dynamic> data,
   }) {
     // This will be called from UI context, so implement using local notifications
-    print('Show in-app notification: $title - $body');
+    debugPrint('Show in-app notification: $title - $body');
   }
 
   /// Send assignment notification to volunteer
@@ -122,10 +123,10 @@ class NotificationHandler {
         'body': 'You have been assigned to pick up: $donationTitle',
       };
 
-      print('Assignment notification payload: $payload');
+      debugPrint('Assignment notification payload: $payload');
       return true;
     } catch (e) {
-      print('Error sending assignment notification: $e');
+      debugPrint('Error sending assignment notification: $e');
       return false;
     }
   }
@@ -147,10 +148,10 @@ class NotificationHandler {
         'body': '$volunteerName is on the way to pick up your donation',
       };
 
-      print('Pickup start notification payload: $payload');
+      debugPrint('Pickup start notification payload: $payload');
       return true;
     } catch (e) {
-      print('Error sending pickup notification: $e');
+      debugPrint('Error sending pickup notification: $e');
       return false;
     }
   }
@@ -176,10 +177,10 @@ class NotificationHandler {
             'Volunteer $volunteerName will arrive in approximately $estimatedArrivalMinutes minutes',
       };
 
-      print('Delivery arrival notification payload: $payload');
+      debugPrint('Delivery arrival notification payload: $payload');
       return true;
     } catch (e) {
-      print('Error sending delivery notification: $e');
+      debugPrint('Error sending delivery notification: $e');
       return false;
     }
   }
@@ -203,10 +204,10 @@ class NotificationHandler {
             'Delivery delayed by $delayMinutes minutes (Severity: $severity)',
       };
 
-      print('Delay alert notification payload: $payload');
+      debugPrint('Delay alert notification payload: $payload');
       return true;
     } catch (e) {
-      print('Error sending delay alert: $e');
+      debugPrint('Error sending delay alert: $e');
       return false;
     }
   }
@@ -230,10 +231,10 @@ class NotificationHandler {
         'body': 'Delivery reassigned to $newVolunteerName. Reason: $reason',
       };
 
-      print('Reassignment notification payload: $payload');
+      debugPrint('Reassignment notification payload: $payload');
       return true;
     } catch (e) {
-      print('Error sending reassignment notification: $e');
+      debugPrint('Error sending reassignment notification: $e');
       return false;
     }
   }
@@ -255,10 +256,10 @@ class NotificationHandler {
         'body': 'Your donation has been successfully delivered to $ngoName',
       };
 
-      print('Completion notification payload: $payload');
+      debugPrint('Completion notification payload: $payload');
       return true;
     } catch (e) {
-      print('Error sending completion notification: $e');
+      debugPrint('Error sending completion notification: $e');
       return false;
     }
   }
@@ -267,9 +268,9 @@ class NotificationHandler {
   Future<void> subscribeToTopic(String topic) async {
     try {
       await _firebaseMessaging.subscribeToTopic(topic);
-      print('Subscribed to topic: $topic');
+      debugPrint('Subscribed to topic: $topic');
     } catch (e) {
-      print('Error subscribing to topic: $e');
+      debugPrint('Error subscribing to topic: $e');
     }
   }
 
@@ -277,9 +278,9 @@ class NotificationHandler {
   Future<void> unsubscribeFromTopic(String topic) async {
     try {
       await _firebaseMessaging.unsubscribeFromTopic(topic);
-      print('Unsubscribed from topic: $topic');
+      debugPrint('Unsubscribed from topic: $topic');
     } catch (e) {
-      print('Error unsubscribing from topic: $e');
+      debugPrint('Error unsubscribing from topic: $e');
     }
   }
 
@@ -288,7 +289,7 @@ class NotificationHandler {
     try {
       return await _firebaseMessaging.getToken();
     } catch (e) {
-      print('Error getting FCM token: $e');
+      debugPrint('Error getting FCM token: $e');
       return null;
     }
   }
