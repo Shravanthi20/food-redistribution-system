@@ -1,5 +1,13 @@
 name: Resolve PR Merge Conflicts
 
+# This workflow merges `master` into the conflicted feature branches for
+# PR #16 (akshitha-hygiene-feature) and PR #17 (feature/accessibility-inclusive-ux).
+#
+# IMPORTANT: This workflow requires one-time approval from a repo maintainer.
+# To approve:  https://github.com/Shravanthi20/food-redistribution-system/actions
+#
+# Alternatively, run scripts/resolve-pr-conflicts.sh locally (requires push access).
+
 on:
   push:
     branches:
@@ -38,10 +46,18 @@ jobs:
         run: |
           # flutter_background_geolocation was added in master but may have been
           # overridden by the ours strategy. Ensure both deps are present.
+          # Uses Python for reliable in-place editing (avoids macOS sed -i differences).
           if ! grep -q "flutter_background_geolocation" food_redistribution_app/pubspec.yaml; then
-            # Insert it after dart_geohash line
-            sed -i 's/  dart_geohash: \^2\.0\.0/  dart_geohash: ^2.0.0\n  flutter_background_geolocation: ^4.13.0/' \
-              food_redistribution_app/pubspec.yaml
+            python3 - food_redistribution_app/pubspec.yaml <<'PYEOF'
+          import sys
+          path = sys.argv[1]
+          with open(path, 'r') as f:
+              content = f.read()
+          old = '  dart_geohash: ^2.0.0'
+          new = '  dart_geohash: ^2.0.0\n  flutter_background_geolocation: ^4.13.0'
+          with open(path, 'w') as f:
+              f.write(content.replace(old, new, 1))
+          PYEOF
             git add food_redistribution_app/pubspec.yaml
             git commit -m "chore: restore flutter_background_geolocation dep from master"
           fi
