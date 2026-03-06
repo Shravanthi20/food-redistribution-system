@@ -33,7 +33,6 @@ void main() {
             (MethodCall methodCall) async {
       return null;
     });
-
   });
 
   group('Food Redistribution App Integration Tests', () {
