@@ -3,12 +3,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:integration_test/integration_test.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:food_redistribution_app/main.dart' as app;
 
 void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  TestWidgetsFlutterBinding.ensureInitialized();
 
   setUpAll(() async {
     const MethodChannel pathChannel =
@@ -36,14 +34,6 @@ void main() {
       return null;
     });
 
-    await Firebase.initializeApp(
-      options: const FirebaseOptions(
-        apiKey: '1',
-        appId: '1',
-        messagingSenderId: '1',
-        projectId: '1',
-      ),
-    );
   });
 
   group('Food Redistribution App Integration Tests', () {
