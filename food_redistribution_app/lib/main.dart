@@ -9,14 +9,13 @@ import 'providers/admin_dashboard_provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/donation_provider.dart';
 import 'providers/ngo_provider.dart';
+import 'providers/accessibility_provider.dart';
 import 'utils/app_theme.dart';
 import 'utils/app_router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const FoodRedistributionApp());
 }
 
@@ -33,17 +32,44 @@ class FoodRedistributionApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => DonationProvider()),
         ChangeNotifierProvider(create: (_) => NGOProvider()),
+        ChangeNotifierProvider(create: (_) => AccessibilityProvider()),
       ],
-      child: Consumer<ThemeProvider>(
-        builder: (context, themeProvider, child) {
+      child: Consumer2<ThemeProvider, AccessibilityProvider>(
+        builder: (context, themeProvider, accessibilityProvider, child) {
+          final isHighContrast = accessibilityProvider.highContrastMode;
+          // Apply high contrast theme modifications if needed
+          final ThemeData lightTheme = isHighContrast
+              ? AppTheme.lightTheme.copyWith(
+                  colorScheme: const ColorScheme.highContrastLight(),
+                )
+              : AppTheme.lightTheme;
+
+          final ThemeData darkTheme = isHighContrast
+              ? AppTheme.darkTheme.copyWith(
+                  colorScheme: const ColorScheme.highContrastDark(),
+                )
+              : AppTheme.darkTheme;
+
           return MaterialApp(
             title: 'Food Redistribution Platform',
-            theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
+            theme: lightTheme,
+            darkTheme: darkTheme,
             themeMode: themeProvider.themeMode,
             onGenerateRoute: AppRouter.generateRoute,
             home: const WelcomeScreen(),
             debugShowCheckedModeBanner: false,
+            builder: (context, child) {
+              final mediaQueryData = MediaQuery.of(context);
+              return MediaQuery(
+                data: mediaQueryData.copyWith(
+                  textScaler: TextScaler.linear(
+                    accessibilityProvider.textScaleFactor,
+                  ),
+                  accessibleNavigation: true,
+                ),
+                child: child!,
+              );
+            },
           );
         },
       ),
