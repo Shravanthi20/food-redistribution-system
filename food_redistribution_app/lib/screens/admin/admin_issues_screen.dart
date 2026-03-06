@@ -35,7 +35,8 @@ class _AdminIssuesScreenState extends State<AdminIssuesScreen> {
               child: const Text('Mark Resolved'),
               onPressed: () async {
                 await _issueService.resolveIssue(issueId, noteController.text);
-                if (context.mounted) Navigator.pop(context);
+                if (!context.mounted) return;
+                Navigator.pop(context);
               },
             ),
           ],

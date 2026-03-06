@@ -1,6 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../config/firebase_schema.dart';
-import 'package:flutter/foundation.dart';
 
 /// Firestore Database Service for centralized Firestore operations
 /// Updated for Firebase Schema v2.0
@@ -54,7 +54,7 @@ class FirestoreService {
   }
 
   Future<QuerySnapshot> query(String collection,
-      {dynamic where,
+      {Map<String, dynamic>? where,
       String? orderBy,
       bool isDescending = false,
       int? limit}) async {
@@ -62,42 +62,9 @@ class FirestoreService {
       Query query = _firestore.collection(collection);
 
       if (where != null) {
-        if (where is Map<String, dynamic>) {
-          where.forEach((field, value) {
-            query = query.where(field, isEqualTo: value);
-          });
-        } else if (where is List) {
-          for (var condition in where) {
-            if (condition is Map<String, dynamic>) {
-              final field = condition['field'];
-              final op = condition['operator'];
-              final value = condition['value'];
-
-              switch (op) {
-                case '==':
-                  query = query.where(field, isEqualTo: value);
-                  break;
-                case '>=':
-                  query = query.where(field, isGreaterThanOrEqualTo: value);
-                  break;
-                case '<=':
-                  query = query.where(field, isLessThanOrEqualTo: value);
-                  break;
-                case '>':
-                  query = query.where(field, isGreaterThan: value);
-                  break;
-                case '<':
-                  query = query.where(field, isLessThan: value);
-                  break;
-                case 'array-contains':
-                  query = query.where(field, arrayContains: value);
-                  break;
-                default:
-                  query = query.where(field, isEqualTo: value);
-              }
-            }
-          }
-        }
+        where.forEach((field, value) {
+          query = query.where(field, isEqualTo: value);
+        });
       }
 
       if (orderBy != null) {

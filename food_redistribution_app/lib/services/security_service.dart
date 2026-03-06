@@ -1,10 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import '../config/firebase_schema.dart';
-import 'package:flutter/foundation.dart';
 
 class SecurityService {
   final FirebaseAuth _auth = FirebaseAuth.instance;

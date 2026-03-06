@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:io';
-
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -41,8 +40,8 @@ class AuthService {
       if (!doc.exists) return null;
       return AppUser.fromFirestore(doc);
     } catch (e) {
-      // Re-throw or handle
-      rethrow;
+      debugPrint('Error getting current app user: $e');
+      return null;
     }
   }
 
@@ -459,8 +458,6 @@ class AuthService {
       rethrow;
     }
   }
-
-  // Private helper methods
 
   Future<void> _logAction(String action, String? userId,
       {Map<String, dynamic>? additionalData}) async {

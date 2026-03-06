@@ -271,6 +271,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
     setState(() => _isLoading = true);
 
+    // Capture provider before any async gaps
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
     try {
       // 1. Upload File
       final url = await _authService.uploadVerificationCertificate(
@@ -288,8 +291,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       );
 
       // 3. Refresh Provider State (Optional, logic usually listens to stream)
-      if (!context.mounted) return;
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
       await authProvider
           .updateOnboardingState(OnboardingState.documentSubmitted);
     } catch (e) {

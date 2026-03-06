@@ -1,0 +1,115 @@
+﻿Analyzing food_redistribution_app...                            
+
+   info - The import of 'package:flutter/foundation.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' - lib\middleware\rbac_middleware.dart:1:8 - unnecessary_import
+warning - The value of the field '_delayDetectionService' isn't used - lib\providers\tracking_provider.dart:11:36 - unused_field
+warning - The value of the field '_analyticsService' isn't used - lib\providers\tracking_provider.dart:12:37 - unused_field
+   info - Don't use 'BuildContext's across async gaps - lib\screens\admin\admin_dashboard.dart:279:29 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\screens\admin\admin_dashboard_screen.dart:1041:13 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\screens\admin\admin_dashboard_screen.dart:1043:43 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\screens\admin\admin_dashboard_screen.dart:1068:29 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\screens\admin\admin_dashboard_screen.dart:1094:29 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\screens\admin\admin_issues_screen.dart:38:44 - use_build_context_synchronously
+   info - The import of 'package:flutter/foundation.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' - lib\screens\admin\user_selection_screen.dart:1:8 - unnecessary_import
+   info - Don't use 'BuildContext's across async gaps - lib\screens\auth\email_verification_screen.dart:37:28 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\screens\auth\email_verification_screen.dart:44:28 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\screens\auth\email_verification_screen.dart:132:54 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\screens\auth\onboarding_screen.dart:291:54 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\screens\auth\onboarding_screen.dart:305:36 - use_build_context_synchronously
+   info - 'RawKeyEvent' is deprecated and shouldn't be used. Use KeyEvent instead. This feature was deprecated after v3.18.0-2.0.pre - lib\screens\auth\otp_verification_screen.dart:84:33 - deprecated_member_use
+   info - 'RawKeyDownEvent' is deprecated and shouldn't be used. Use KeyDownEvent instead. This feature was deprecated after v3.18.0-2.0.pre - lib\screens\auth\otp_verification_screen.dart:85:18 - deprecated_member_use
+   info - 'RawKeyboardListener' is deprecated and shouldn't be used. Use KeyboardListener instead. This feature was deprecated after v3.18.0-2.0.pre - lib\screens\auth\otp_verification_screen.dart:227:28 - deprecated_member_use
+   info - Invalid use of a private type in a public API - lib\screens\coordination\delivery_coordination_screen.dart:14:3 - library_private_types_in_public_api
+   info - Don't use 'BuildContext's across async gaps - lib\screens\donor\create_donation_screen.dart:538:13 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\screens\donor\donation_list_screen.dart:294:54 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\screens\donor\donation_list_screen.dart:296:41 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\screens\donor\donor_dashboard.dart:101:47 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\screens\donor\donor_dashboard.dart:103:48 - use_build_context_synchronously
+   info - Invalid use of a private type in a public API - lib\screens\logistics\logistics_management_dashboard.dart:8:3 - library_private_types_in_public_api
+warning - The value of the field '_isLoading' isn't used - lib\screens\logistics\logistics_management_dashboard.dart:15:8 - unused_field
+   info - Don't use 'BuildContext's across async gaps - lib\screens\ngo\create_food_request_screen.dart:256:23 - use_build_context_synchronously
+   info - The import of 'package:flutter/foundation.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' - lib\screens\ngo\document_submission_screen.dart:1:8 - unnecessary_import
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\screens\ngo\food_request_detail_screen.dart:437:40 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\screens\ngo\food_request_detail_screen.dart:441:33 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\screens\ngo\food_request_detail_screen.dart:445:40 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\screens\ngo\food_request_detail_screen.dart:485:40 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\screens\ngo\food_request_detail_screen.dart:492:40 - use_build_context_synchronously
+   info - 'groupValue' is deprecated and shouldn't be used. Use a RadioGroup ancestor to manage group value instead. This feature was deprecated after v3.32.0-0.0.pre - lib\screens\ngo\inspect_delivery_screen.dart:221:25 - deprecated_member_use
+   info - 'onChanged' is deprecated and shouldn't be used. Use RadioGroup to handle value change instead. This feature was deprecated after v3.32.0-0.0.pre - lib\screens\ngo\inspect_delivery_screen.dart:222:25 - deprecated_member_use
+   info - 'groupValue' is deprecated and shouldn't be used. Use a RadioGroup ancestor to manage group value instead. This feature was deprecated after v3.32.0-0.0.pre - lib\screens\ngo\inspect_delivery_screen.dart:239:25 - deprecated_member_use
+   info - 'onChanged' is deprecated and shouldn't be used. Use RadioGroup to handle value change instead. This feature was deprecated after v3.32.0-0.0.pre - lib\screens\ngo\inspect_delivery_screen.dart:240:25 - deprecated_member_use
+   info - 'groupValue' is deprecated and shouldn't be used. Use a RadioGroup ancestor to manage group value instead. This feature was deprecated after v3.32.0-0.0.pre - lib\screens\ngo\reject_donation_screen.dart:171:27 - deprecated_member_use
+   info - 'onChanged' is deprecated and shouldn't be used. Use RadioGroup to handle value change instead. This feature was deprecated after v3.32.0-0.0.pre - lib\screens\ngo\reject_donation_screen.dart:172:27 - deprecated_member_use
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\screens\volunteer\task_execution_screen.dart:102:40 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\screens\volunteer\task_execution_screen.dart:106:33 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\screens\volunteer\task_execution_screen.dart:121:28 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\screens\volunteer\volunteer_dashboard.dart:358:31 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\screens\volunteer\volunteer_pickup_proof_screen.dart:50:28 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\screens\volunteer\volunteer_pickup_proof_screen.dart:81:28 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\screens\volunteer\volunteer_pickup_proof_screen.dart:89:28 - use_build_context_synchronously
+   info - The import of 'package:flutter/foundation.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' - lib\screens\volunteer\volunteer_profile_screen.dart:1:8 - unnecessary_import
+   info - The import of 'dart:typed_data' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/foundation.dart' - lib\services\auth_service.dart:6:8 - unnecessary_import
+warning - The declaration '_addToReviewQueue' isn't referenced - lib\services\auth_service.dart:465:16 - unused_element
+warning - The value of the field '_locationService' isn't used - lib\services\route_optimization_service.dart:105:25 - unused_field
+   info - 'zIndex' is deprecated and shouldn't be used. Use zIndexInt instead. On some platforms zIndex is truncated to an int, which can lead to incorrect/unstable ordering - lib\widgets\live_tracking_map.dart:75:13 - deprecated_member_use
+  error - The method 'or' isn't defined for the type 'Finder' - test\integration\app_flow_test.dart:23:43 - undefined_method
+  error - The method 'or' isn't defined for the type 'Finder' - test\integration\app_flow_test.dart:40:41 - undefined_method
+  error - The method 'or' isn't defined for the type 'Finder' - test\integration\app_flow_test.dart:63:44 - undefined_method
+  error - The argument type 'String' can't be assigned to the parameter type 'BasicMessageChannel<String>'.  - test\integration\app_flow_test.dart:100:9 - argument_type_not_assignable
+  error - The argument type 'String' can't be assigned to the parameter type 'BasicMessageChannel<String>'.  - test\integration\app_flow_test.dart:113:9 - argument_type_not_assignable
+  error - The setter 'physicalSizeTestValue' isn't defined for the type 'TestFlutterView' - test\integration\app_flow_test.dart:132:19 - undefined_setter
+  error - Undefined name 'LogicalKeyboardKey' - test\integration\app_flow_test.dart:155:33 - undefined_identifier
+  error - The method 'or' isn't defined for the type 'Finder' - test\integration\app_flow_test.dart:215:44 - undefined_method
+  error - The named parameter 'notificationHandler' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:20:31 - missing_required_argument
+warning - The value of the local variable 'ngoId' isn't used - test\tracking\e2e_delivery_lifecycle_test.dart:33:13 - unused_local_variable
+  error - The named parameter 'taskId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:35:50 - missing_required_argument
+  error - The named parameter 'volunteerId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:35:50 - missing_required_argument
+  error - Too many positional arguments: 0 expected, but 1 found - test\tracking\e2e_delivery_lifecycle_test.dart:35:64 - extra_positional_arguments_could_be_named
+  error - The named parameter 'latitude' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:51:24 - missing_required_argument
+  error - The named parameter 'longitude' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:51:24 - missing_required_argument
+  error - The named parameter 'taskId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:51:24 - missing_required_argument
+  error - The named parameter 'volunteerId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:51:24 - missing_required_argument
+  error - Too many positional arguments: 0 expected, but 1 found - test\tracking\e2e_delivery_lifecycle_test.dart:51:48 - extra_positional_arguments_could_be_named
+  error - Too many positional arguments: 0 expected, but 1 found - test\tracking\e2e_delivery_lifecycle_test.dart:64:46 - extra_positional_arguments
+  error - The named parameter 'userId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:68:30 - missing_required_argument
+  error - The argument type 'String' can't be assigned to the parameter type 'TrackingStatus'.  - test\tracking\e2e_delivery_lifecycle_test.dart:70:20 - argument_type_not_assignable
+  error - The named parameter 'latitude' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:86:24 - missing_required_argument
+  error - The named parameter 'longitude' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:86:24 - missing_required_argument
+  error - The named parameter 'taskId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:86:24 - missing_required_argument
+  error - The named parameter 'volunteerId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:86:24 - missing_required_argument
+  error - Too many positional arguments: 0 expected, but 1 found - test\tracking\e2e_delivery_lifecycle_test.dart:86:48 - extra_positional_arguments_could_be_named
+  error - The named parameter 'userId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:87:30 - missing_required_argument
+  error - The argument type 'String' can't be assigned to the parameter type 'TrackingStatus'.  - test\tracking\e2e_delivery_lifecycle_test.dart:89:20 - argument_type_not_assignable
+  error - The named parameter 'taskId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:104:30 - missing_required_argument
+  error - The named parameter 'volunteerId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:104:30 - missing_required_argument
+  error - Too many positional arguments: 0 expected, but 1 found - test\tracking\e2e_delivery_lifecycle_test.dart:104:44 - extra_positional_arguments_could_be_named
+  error - The named parameter 'deliverySLA' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:105:35 - missing_required_argument
+  error - The named parameter 'pickupSLA' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:105:35 - missing_required_argument
+  error - The named parameter 'taskId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:105:35 - missing_required_argument
+  error - The named parameter 'volunteerId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:105:35 - missing_required_argument
+  error - Too many positional arguments: 0 expected, but 1 found - test\tracking\e2e_delivery_lifecycle_test.dart:105:51 - extra_positional_arguments_could_be_named
+  error - The named parameter 'taskId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:115:30 - missing_required_argument
+  error - The named parameter 'volunteerId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:115:30 - missing_required_argument
+  error - Too many positional arguments: 0 expected, but 1 found - test\tracking\e2e_delivery_lifecycle_test.dart:115:44 - extra_positional_arguments_could_be_named
+  error - Too many positional arguments: 0 expected, but 1 found - test\tracking\e2e_delivery_lifecycle_test.dart:156:46 - extra_positional_arguments
+  error - The named parameter 'taskId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:164:30 - missing_required_argument
+  error - The named parameter 'volunteerId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:164:30 - missing_required_argument
+  error - Too many positional arguments: 0 expected, but 1 found - test\tracking\e2e_delivery_lifecycle_test.dart:164:44 - extra_positional_arguments_could_be_named
+  error - The named parameter 'latitude' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:188:24 - missing_required_argument
+  error - The named parameter 'longitude' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:188:24 - missing_required_argument
+  error - The named parameter 'taskId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:188:24 - missing_required_argument
+  error - The named parameter 'volunteerId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:188:24 - missing_required_argument
+  error - Too many positional arguments: 0 expected, but 1 found - test\tracking\e2e_delivery_lifecycle_test.dart:188:48 - extra_positional_arguments_could_be_named
+  error - The named parameter 'latitude' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:189:24 - missing_required_argument
+  error - The named parameter 'longitude' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:189:24 - missing_required_argument
+  error - The named parameter 'taskId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:189:24 - missing_required_argument
+  error - The named parameter 'volunteerId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:189:24 - missing_required_argument
+  error - Too many positional arguments: 0 expected, but 1 found - test\tracking\e2e_delivery_lifecycle_test.dart:189:48 - extra_positional_arguments_could_be_named
+  error - The named parameter 'taskId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:205:30 - missing_required_argument
+  error - The named parameter 'volunteerId' is required, but there's no corresponding argument - test\tracking\e2e_delivery_lifecycle_test.dart:205:30 - missing_required_argument
+  error - Too many positional arguments: 0 expected, but 1 found - test\tracking\e2e_delivery_lifecycle_test.dart:205:44 - extra_positional_arguments_could_be_named
+warning - The class 'Query' shouldn't be extended, mixed in, or implemented because it's sealed - test\tracking\test_mocks.dart:20:1 - subtype_of_sealed_class
+warning - This class (or a class that this class inherits from) is marked as '@immutable', but one or more of its instance fields aren't final: Mock._givenName, Mock._givenHashCode, Mock._defaultResponse - test\tracking\test_mocks.dart:20:7 - must_be_immutable
+warning - The class 'DocumentReference' shouldn't be extended, mixed in, or implemented because it's sealed - test\tracking\test_mocks.dart:22:1 - subtype_of_sealed_class
+warning - This class (or a class that this class inherits from) is marked as '@immutable', but one or more of its instance fields aren't final: Mock._givenName, Mock._givenHashCode, Mock._defaultResponse - test\tracking\test_mocks.dart:22:7 - must_be_immutable
+warning - The class 'DocumentSnapshot' shouldn't be extended, mixed in, or implemented because it's sealed - test\tracking\test_mocks.dart:26:1 - subtype_of_sealed_class
+

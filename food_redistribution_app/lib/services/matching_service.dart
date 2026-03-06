@@ -200,7 +200,7 @@ class FoodDonationMatchingService {
   /// Calculate capacity compatibility score
   double _calculateCapacityScore(FoodDonation donation, NGOProfile ngo) {
     final donationQuantity = donation.quantity.toDouble();
-    final ngoCapacity = (ngo.capacity).toDouble(); // Default capacity
+    final ngoCapacity = ngo.capacity.toDouble(); // Default capacity
 
     // Prevent division by zero
     if (ngoCapacity <= 0) return 0.5;

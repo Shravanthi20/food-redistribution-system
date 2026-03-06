@@ -4,7 +4,6 @@ import '../../providers/donation_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../models/food_donation.dart';
 import 'donation_detail_screen.dart';
-import '../../real_time_tracking/widgets/donation_status_badge.dart';
 
 class DonationListScreen extends StatefulWidget {
   const DonationListScreen({super.key});
@@ -94,17 +93,15 @@ class _DonationListScreenState extends State<DonationListScreen> {
                         ? 'No donations yet'
                         : 'No ${_getStatusDisplayName(_filterStatus!).toLowerCase()} donations',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              color: Colors.grey[600],
-                            ) ??
-                        const TextStyle(),
+                          color: Colors.grey[600],
+                        ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Create your first donation to get started',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Colors.grey[500],
-                            ) ??
-                        const TextStyle(),
+                          color: Colors.grey[500],
+                        ),
                   ),
                 ],
               ),
@@ -161,9 +158,8 @@ class _DonationListScreenState extends State<DonationListScreen> {
                     child: Text(
                       donation.title,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ) ??
-                          const TextStyle(),
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                   ),
                   Container(
@@ -183,9 +179,6 @@ class _DonationListScreenState extends State<DonationListScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  DonationStatusBadge(
-                      deliveryId: donation.id.toString(), role: 'donor'),
                 ],
               ),
               const SizedBox(height: 8),
@@ -279,9 +272,14 @@ class _DonationListScreenState extends State<DonationListScreen> {
   }
 
   Future<void> _cancelDonation(FoodDonation donation) async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final donationProvider =
+        Provider.of<DonationProvider>(context, listen: false);
+    final userId = authProvider.appUser?.uid;
+
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (context) => AlertDialog(
         title: const Text('Cancel Donation'),
         content: const Text('Are you sure you want to cancel this donation?'),
         actions: [
@@ -297,36 +295,28 @@ class _DonationListScreenState extends State<DonationListScreen> {
       ),
     );
 
-    if (confirmed == true) {
+    if (confirmed == true && userId != null) {
+      final success = await donationProvider.cancelDonation(
+        donation.id,
+        userId,
+        'Cancelled by donor',
+      );
+
       if (!mounted) return;
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final donationProvider =
-          Provider.of<DonationProvider>(context, listen: false);
-
-      final userId = authProvider.appUser?.uid;
-      if (userId != null) {
-        final success = await donationProvider.cancelDonation(
-          donation.id,
-          userId,
-          'Cancelled by donor',
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Donation cancelled successfully'),
+            backgroundColor: Colors.green,
+          ),
         );
-
-        if (!mounted) return;
-        if (success) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Donation cancelled successfully'),
-              backgroundColor: Colors.green,
-            ),
-          );
-        } else if (donationProvider.errorMessage != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(donationProvider.errorMessage!),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
+      } else if (donationProvider.errorMessage != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(donationProvider.errorMessage!),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     }
   }

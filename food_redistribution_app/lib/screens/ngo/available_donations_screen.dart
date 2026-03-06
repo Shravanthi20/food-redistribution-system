@@ -3,8 +3,6 @@ import 'package:provider/provider.dart';
 import '../../providers/ngo_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../models/food_donation.dart';
-import '../../real_time_tracking/widgets/delivery_status_panel.dart';
-import '../../real_time_tracking/widgets/donation_status_badge.dart';
 
 class AvailableDonationsScreen extends StatefulWidget {
   const AvailableDonationsScreen({super.key});
@@ -173,7 +171,7 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.red.withAlpha((0.1 * 255).round()),
+                      color: Colors.red.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Text(
@@ -188,26 +186,14 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
               ],
             ),
 
-            const SizedBox(height: 12),
-            // Compact status badge for NGO list
-            Row(
-              children: [
-                DonationStatusBadge(
-                    deliveryId: donation.id.toString(), role: 'ngo'),
-              ],
-            ),
             const SizedBox(height: 8),
-            // Real-time status panel for NGO view (minimal insertion)
-            DeliveryStatusPanel(
-              role: 'ngo',
-              deliveryId: donation.id.toString(),
-            ),
-            const SizedBox(height: 8),
+
+            // Description
             Text(
               donation.description,
+              style: TextStyle(color: Colors.grey[600]),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodyMedium,
             ),
 
             const SizedBox(height: 12),
@@ -218,7 +204,7 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.blue.withAlpha((0.1 * 255).round()),
+                    color: Colors.blue.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -242,8 +228,8 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: isUrgent
-                        ? Colors.red.withAlpha((0.1 * 255).round())
-                        : Colors.green.withAlpha((0.1 * 255).round()),
+                        ? Colors.red.withValues(alpha: 0.1)
+                        : Colors.green.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -277,8 +263,7 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
               children: donation.foodTypes
                   .map((type) => Chip(
                         label: Text(type.name),
-                        backgroundColor:
-                            Colors.grey.withAlpha((0.1 * 255).round()),
+                        backgroundColor: Colors.grey.withValues(alpha: 0.1),
                         labelStyle: const TextStyle(fontSize: 12),
                       ))
                   .toList(),
@@ -333,15 +318,6 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
                   ),
                 ),
               ],
-            ),
-            const SizedBox(height: 12),
-            // Real-time status panel for NGO view (minimal insertion)
-            DonationStatusBadge(
-                deliveryId: donation.id.toString(), role: 'ngo'),
-            const SizedBox(height: 8),
-            DeliveryStatusPanel(
-              role: 'ngo',
-              deliveryId: donation.id.toString(),
             ),
           ],
         ),

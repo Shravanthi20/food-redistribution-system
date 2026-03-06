@@ -9,8 +9,6 @@ import './admin_dashboard_rail.dart';
 import '../../services/verification_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../utils/app_theme.dart';
-import '../../models/enums.dart';
-import 'admin_analytics_screen.dart';
 import '../../widgets/glass_widgets.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
@@ -690,23 +688,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
-        // NEW: Link to full predictions screen
-        ElevatedButton.icon(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const AdminAnalyticsScreen()),
-            );
-          },
-          icon: const Icon(Icons.analytics),
-          label: const Text('View Full Analytics & Predictions Dashboard'),
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.all(16),
-            backgroundColor: AppTheme.accentTeal,
-            foregroundColor: Colors.white,
-          ),
-        ),
-        const SizedBox(height: 24),
         _buildSectionCard(
           title: 'Regional Activity Overview',
           icon: Icons.map,
@@ -1048,24 +1029,23 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   Future<void> _handleSignOut(BuildContext context) async {
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (context) => AlertDialog(
         title: const Text('Sign Out'),
         content: const Text('Are you sure you want to sign out?'),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(dialogContext, false),
+              onPressed: () => Navigator.pop(context, false),
               child: const Text('Cancel')),
           TextButton(
-              onPressed: () => Navigator.pop(dialogContext, true),
+              onPressed: () => Navigator.pop(context, true),
               child: const Text('Sign Out')),
         ],
       ),
     );
 
     if (confirm == true) {
-      if (context.mounted) {
-        await context.read<AuthProvider>().signOut();
-      }
+      if (!context.mounted) return;
+      await context.read<AuthProvider>().signOut();
       if (context.mounted) {
         Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
       }
@@ -1088,11 +1068,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               'Approved from System Dashboard',
             );
 
-    if (!context.mounted) return;
-
-    if (success) {
+    if (context.mounted && success) {
       _showSnackbar('Verification Successful');
-    } else {
+    } else if (context.mounted) {
       _showSnackbar(
           'Review failed: ${context.read<AdminDashboardProvider>().errorMessage}');
     }
@@ -1101,10 +1079,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   Future<void> _handleSuspendUser(String userId) async {
     final adminId = context.read<AuthProvider>().appUser?.uid;
     if (adminId == null) return;
+    final provider = context.read<AdminDashboardProvider>();
 
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (context) => AlertDialog(
         title: const Text('Confirm Suspension'),
         content: const Text(
             'Are you sure you want to suspend this user for 7 days? This will revoke their access immediately.'),
@@ -1120,15 +1099,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
 
     if (confirm == true) {
-      if (!mounted) return;
-      final success = await context.read<AdminDashboardProvider>().suspendUser(
-            userId,
-            adminId,
-            'Flagged for policy violation',
-            DateTime.now().add(const Duration(days: 7)),
-          );
-      if (!mounted) return;
-      if (success) {
+      final success = await provider.suspendUser(
+        userId,
+        adminId,
+        'Flagged for policy violation',
+        DateTime.now().add(const Duration(days: 7)),
+      );
+      if (context.mounted && success) {
         _showSnackbar('User status updated to SUSPENDED');
       }
     }
