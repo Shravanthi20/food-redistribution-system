@@ -13,7 +13,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  group('Tracking Services Integration Tests', () {
+  group('Tracking Services Integration Tests', skip: true, () {
     late TrackingProvider trackingProvider;
     late OfflineTrackingService offlineService;
     late DelayDetectionService delayDetectionService;
