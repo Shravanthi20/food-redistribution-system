@@ -1,0 +1,2798 @@
+From 061a29992e3999eaeedc36faf104003756caba33 Mon Sep 17 00:00:00 2001
+From: Akshitha1208 <lakshmiakshithad@gmail.com>
+Date: Sun, 1 Mar 2026 20:31:17 +0530
+Subject: [PATCH 1/3] Resolved merge conflict and added hygiene enforcement
+ feature
+
+---
+ food_redistribution_app/firebase.json         |  42 +-
+ .../lib/models/hygiene_checklist.dart         | 247 +++++++++++
+ .../lib/providers/hygiene_provider.dart       | 180 ++++++++
+ .../donor_clarification_reply_screen.dart     | 298 +++++++++++++
+ .../screens/ngo/hygiene_checklist_screen.dart | 354 ++++++++++++++++
+ .../ngo/ngo_clarify_request_screen.dart       | 296 +++++++++++++
+ .../ngo/ngo_reject_donation_screen.dart       | 238 +++++++++++
+ .../volunteer_pickup_proof_screen.dart        | 399 ++++++++++++++++++
+ .../volunteer_unsafe_cancel_screen.dart       | 342 +++++++++++++++
+ .../lib/services/hygiene_service.dart         | 310 ++++++++++++++
+ 10 files changed, 2705 insertions(+), 1 deletion(-)
+ create mode 100644 food_redistribution_app/lib/models/hygiene_checklist.dart
+ create mode 100644 food_redistribution_app/lib/providers/hygiene_provider.dart
+ create mode 100644 food_redistribution_app/lib/screens/donor/donor_clarification_reply_screen.dart
+ create mode 100644 food_redistribution_app/lib/screens/ngo/hygiene_checklist_screen.dart
+ create mode 100644 food_redistribution_app/lib/screens/ngo/ngo_clarify_request_screen.dart
+ create mode 100644 food_redistribution_app/lib/screens/ngo/ngo_reject_donation_screen.dart
+ create mode 100644 food_redistribution_app/lib/screens/volunteer/volunteer_pickup_proof_screen.dart
+ create mode 100644 food_redistribution_app/lib/screens/volunteer/volunteer_unsafe_cancel_screen.dart
+ create mode 100644 food_redistribution_app/lib/services/hygiene_service.dart
+
+diff --git a/food_redistribution_app/firebase.json b/food_redistribution_app/firebase.json
+index c63f932..6476805 100644
+--- a/food_redistribution_app/firebase.json
++++ b/food_redistribution_app/firebase.json
+@@ -1 +1,41 @@
+-{"functions":{"source":"functions","ignore":["node_modules",".git","firebase-debug.log","firebase-debug.*.log"]},"firestore":{"rules":"firestore.rules","indexes":"firestore.indexes.json"},"storage":{"rules":"storage.rules"},"flutter":{"platforms":{"android":{"default":{"projectId":"food-redistribution-plat-86785","appId":"1:185924884011:android:b4bfb376fbc84fb8313c6e","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"food-redistribution-plat-86785","configurations":{"android":"1:185924884011:android:b4bfb376fbc84fb8313c6e","ios":"1:185924884011:ios:3d1a4576739990ec313c6e","macos":"1:185924884011:ios:3d1a4576739990ec313c6e","web":"1:185924884011:web:184ea2c162490c34313c6e","windows":"1:185924884011:web:785e7d60ed457faf313c6e"}}}}}}
+\ No newline at end of file
++{
++    "functions": {
++        "source": "functions",
++        "ignore": [
++            "node_modules",
++            ".git",
++            "firebase-debug.log",
++            "firebase-debug.*.log"
++        ]
++    },
++    "firestore": {
++        "rules": "firestore.rules",
++        "indexes": "firestore.indexes.json"
++    },
++    "storage": {
++        "rules": "storage.rules"
++    },
++    "flutter": {
++        "platforms": {
++            "android": {
++                "default": {
++                    "projectId": "food-redistribution-plat-86785",
++                    "appId": "1:185924884011:android:b4bfb376fbc84fb8313c6e",
++                    "fileOutput": "android/app/google-services.json"
++                }
++            },
++            "dart": {
++                "lib/firebase_options.dart": {
++                    "projectId": "food-redistribution-plat-86785",
++                    "configurations": {
++                        "android": "1:185924884011:android:b4bfb376fbc84fb8313c6e",
++                        "ios": "1:185924884011:ios:3d1a4576739990ec313c6e",
++                        "macos": "1:185924884011:ios:3d1a4576739990ec313c6e",
++                        "web": "1:185924884011:web:184ea2c162490c34313c6e",
++                        "windows": "1:185924884011:web:785e7d60ed457faf313c6e"
++                    }
++                }
++            }
++        }
++    }
++}
+\ No newline at end of file
+diff --git a/food_redistribution_app/lib/models/hygiene_checklist.dart b/food_redistribution_app/lib/models/hygiene_checklist.dart
+new file mode 100644
+index 0000000..14276b7
+--- /dev/null
++++ b/food_redistribution_app/lib/models/hygiene_checklist.dart
+@@ -0,0 +1,247 @@
++import 'package:cloud_firestore/cloud_firestore.dart';
++
++/// Represents a single checklist item
++class HygieneChecklistItem {
++  final String id;
++  final String question;
++  final bool isMandatory;
++  bool isChecked;
++
++  HygieneChecklistItem({
++    required this.id,
++    required this.question,
++    this.isMandatory = true,
++    this.isChecked = false,
++  });
++
++  Map<String, dynamic> toMap() => {
++        'id': id,
++        'question': question,
++        'isMandatory': isMandatory,
++        'isChecked': isChecked,
++      };
++
++  factory HygieneChecklistItem.fromMap(Map<String, dynamic> map) =>
++      HygieneChecklistItem(
++        id: map['id'] ?? '',
++        question: map['question'] ?? '',
++        isMandatory: map['isMandatory'] ?? true,
++        isChecked: map['isChecked'] ?? false,
++      );
++}
++
++/// Represents the full hygiene compliance record for a donation
++class HygieneChecklist {
++  final String donationId;
++  final String ngoId;
++  final List<HygieneChecklistItem> items;
++  final bool isComplete;
++  final DateTime? completedAt;
++  final String? notes;
++
++  HygieneChecklist({
++    required this.donationId,
++    required this.ngoId,
++    required this.items,
++    this.isComplete = false,
++    this.completedAt,
++    this.notes,
++  });
++
++  bool get allMandatoryChecked =>
++      items.where((i) => i.isMandatory).every((i) => i.isChecked);
++
++  Map<String, dynamic> toFirestore() => {
++        'donationId': donationId,
++        'ngoId': ngoId,
++        'items': items.map((i) => i.toMap()).toList(),
++        'isComplete': isComplete,
++        'completedAt':
++            completedAt != null ? Timestamp.fromDate(completedAt!) : null,
++        'notes': notes,
++      };
++
++  factory HygieneChecklist.fromFirestore(DocumentSnapshot doc) {
++    final data = doc.data() as Map<String, dynamic>;
++    return HygieneChecklist(
++      donationId: data['donationId'] ?? '',
++      ngoId: data['ngoId'] ?? '',
++      items: (data['items'] as List<dynamic>? ?? [])
++          .map((i) => HygieneChecklistItem.fromMap(i as Map<String, dynamic>))
++          .toList(),
++      isComplete: data['isComplete'] ?? false,
++      completedAt: data['completedAt'] != null
++          ? (data['completedAt'] as Timestamp).toDate()
++          : null,
++      notes: data['notes'],
++    );
++  }
++}
++
++/// Represents a clarification request from NGO to Donor
++class ClarificationRequest {
++  final String id;
++  final String donationId;
++  final String ngoId;
++  final String donorId;
++  final String question;
++  final String? reply;
++  final DateTime createdAt;
++  final DateTime? repliedAt;
++  final bool isResolved;
++
++  ClarificationRequest({
++    required this.id,
++    required this.donationId,
++    required this.ngoId,
++    required this.donorId,
++    required this.question,
++    this.reply,
++    required this.createdAt,
++    this.repliedAt,
++    this.isResolved = false,
++  });
++
++  Map<String, dynamic> toFirestore() => {
++        'donationId': donationId,
++        'ngoId': ngoId,
++        'donorId': donorId,
++        'question': question,
++        'reply': reply,
++        'createdAt': Timestamp.fromDate(createdAt),
++        'repliedAt': repliedAt != null ? Timestamp.fromDate(repliedAt!) : null,
++        'isResolved': isResolved,
++      };
++
++  factory ClarificationRequest.fromFirestore(DocumentSnapshot doc) {
++    final data = doc.data() as Map<String, dynamic>;
++    return ClarificationRequest(
++      id: doc.id,
++      donationId: data['donationId'] ?? '',
++      ngoId: data['ngoId'] ?? '',
++      donorId: data['donorId'] ?? '',
++      question: data['question'] ?? '',
++      reply: data['reply'],
++      createdAt: (data['createdAt'] as Timestamp).toDate(),
++      repliedAt: data['repliedAt'] != null
++          ? (data['repliedAt'] as Timestamp).toDate()
++          : null,
++      isResolved: data['isResolved'] ?? false,
++    );
++  }
++}
++
++/// Represents pickup proof uploaded by volunteer
++class PickupProof {
++  final String donationId;
++  final String volunteerId;
++  final String imageUrl;
++  final String condition; // good / moderate / unsafe
++  final DateTime uploadedAt;
++  final String? notes;
++
++  PickupProof({
++    required this.donationId,
++    required this.volunteerId,
++    required this.imageUrl,
++    required this.condition,
++    required this.uploadedAt,
++    this.notes,
++  });
++
++  Map<String, dynamic> toFirestore() => {
++        'donationId': donationId,
++        'volunteerId': volunteerId,
++        'imageUrl': imageUrl,
++        'condition': condition,
++        'uploadedAt': Timestamp.fromDate(uploadedAt),
++        'notes': notes,
++      };
++
++  factory PickupProof.fromFirestore(DocumentSnapshot doc) {
++    final data = doc.data() as Map<String, dynamic>;
++    return PickupProof(
++      donationId: data['donationId'] ?? '',
++      volunteerId: data['volunteerId'] ?? '',
++      imageUrl: data['imageUrl'] ?? '',
++      condition: data['condition'] ?? 'unknown',
++      uploadedAt: (data['uploadedAt'] as Timestamp).toDate(),
++      notes: data['notes'],
++    );
++  }
++}
++
++/// Represents a pickup cancellation due to unsafe food
++class UnsafePickupCancellation {
++  final String donationId;
++  final String volunteerId;
++  final String reason;
++  final String details;
++  final DateTime cancelledAt;
++  final List<String> notifiedStakeholders;
++
++  UnsafePickupCancellation({
++    required this.donationId,
++    required this.volunteerId,
++    required this.reason,
++    required this.details,
++    required this.cancelledAt,
++    this.notifiedStakeholders = const [],
++  });
++
++  Map<String, dynamic> toFirestore() => {
++        'donationId': donationId,
++        'volunteerId': volunteerId,
++        'reason': reason,
++        'details': details,
++        'cancelledAt': Timestamp.fromDate(cancelledAt),
++        'notifiedStakeholders': notifiedStakeholders,
++      };
++}
++
++/// Default checklist template
++class HygieneChecklistTemplate {
++  static List<HygieneChecklistItem> get defaultItems => [
++        HygieneChecklistItem(
++          id: 'packaging',
++          question: 'Is the food properly packaged and sealed?',
++          isMandatory: true,
++        ),
++        HygieneChecklistItem(
++          id: 'expiry',
++          question: 'Is the food within its expiry date?',
++          isMandatory: true,
++        ),
++        HygieneChecklistItem(
++          id: 'temperature',
++          question: 'Is the food stored at an appropriate temperature?',
++          isMandatory: true,
++        ),
++        HygieneChecklistItem(
++          id: 'odor',
++          question: 'Does the food have a normal, acceptable odor?',
++          isMandatory: true,
++        ),
++        HygieneChecklistItem(
++          id: 'appearance',
++          question:
++              'Does the food look fresh and free from mold/discoloration?',
++          isMandatory: true,
++        ),
++        HygieneChecklistItem(
++          id: 'contamination',
++          question: 'Is there no visible sign of contamination or pests?',
++          isMandatory: true,
++        ),
++        HygieneChecklistItem(
++          id: 'allergen_label',
++          question: 'Are allergen labels/information provided?',
++          isMandatory: false,
++        ),
++        HygieneChecklistItem(
++          id: 'quantity_match',
++          question: 'Does the quantity match what was listed in the donation?',
++          isMandatory: false,
++        ),
++      ];
++}
+diff --git a/food_redistribution_app/lib/providers/hygiene_provider.dart b/food_redistribution_app/lib/providers/hygiene_provider.dart
+new file mode 100644
+index 0000000..095539d
+--- /dev/null
++++ b/food_redistribution_app/lib/providers/hygiene_provider.dart
+@@ -0,0 +1,180 @@
++import 'package:flutter/material.dart';
++import '../models/hygiene_checklist.dart';
++import '../services/hygiene_service.dart';
++
++class HygieneProvider extends ChangeNotifier {
++  final HygieneService _service = HygieneService();
++
++  HygieneChecklist? _currentChecklist;
++  bool _isLoading = false;
++  String? _error;
++
++  HygieneChecklist? get currentChecklist => _currentChecklist;
++  bool get isLoading => _isLoading;
++  String? get error => _error;
++
++  // ─── Checklist ────────────────────────────────────────────────
++
++  void initChecklist(String donationId, String ngoId) {
++    _currentChecklist = HygieneChecklist(
++      donationId: donationId,
++      ngoId: ngoId,
++      items: HygieneChecklistTemplate.defaultItems,
++    );
++    notifyListeners();
++  }
++
++  void toggleItem(int index, bool value) {
++    if (_currentChecklist == null) return;
++    _currentChecklist!.items[index].isChecked = value;
++    notifyListeners();
++  }
++
++  bool get allMandatoryChecked =>
++      _currentChecklist?.allMandatoryChecked ?? false;
++
++  Future<void> loadExistingChecklist(String donationId) async {
++    _isLoading = true;
++    notifyListeners();
++    try {
++      final existing = await _service.getHygieneChecklist(donationId);
++      if (existing != null) {
++        _currentChecklist = existing;
++      }
++    } catch (e) {
++      _error = e.toString();
++    }
++    _isLoading = false;
++    notifyListeners();
++  }
++
++  // ─── Accept ───────────────────────────────────────────────────
++
++  Future<bool> acceptDonation(String donationId, String ngoId,
++      {String? notes}) async {
++    if (_currentChecklist == null) return false;
++    _isLoading = true;
++    notifyListeners();
++    try {
++      final checklist = HygieneChecklist(
++        donationId: donationId,
++        ngoId: ngoId,
++        items: _currentChecklist!.items,
++        isComplete: true,
++        completedAt: DateTime.now(),
++        notes: notes,
++      );
++      await _service.acceptDonation(
++        donationId: donationId,
++        ngoId: ngoId,
++        checklist: checklist,
++      );
++      _isLoading = false;
++      notifyListeners();
++      return true;
++    } catch (e) {
++      _error = e.toString();
++      _isLoading = false;
++      notifyListeners();
++      return false;
++    }
++  }
++
++  // ─── Reject ───────────────────────────────────────────────────
++
++  Future<bool> rejectDonation({
++    required String donationId,
++    required String ngoId,
++    required String reason,
++    String? additionalInfo,
++  }) async {
++    _isLoading = true;
++    notifyListeners();
++    try {
++      await _service.rejectDonation(
++        donationId: donationId,
++        ngoId: ngoId,
++        reason: reason,
++        additionalInfo: additionalInfo,
++      );
++      _isLoading = false;
++      notifyListeners();
++      return true;
++    } catch (e) {
++      _error = e.toString();
++      _isLoading = false;
++      notifyListeners();
++      return false;
++    }
++  }
++
++  // ─── Clarification ────────────────────────────────────────────
++
++  Future<bool> sendClarification({
++    required String donationId,
++    required String ngoId,
++    required String donorId,
++    required String question,
++  }) async {
++    _isLoading = true;
++    notifyListeners();
++    try {
++      await _service.sendClarificationRequest(
++        donationId: donationId,
++        ngoId: ngoId,
++        donorId: donorId,
++        question: question,
++      );
++      _isLoading = false;
++      notifyListeners();
++      return true;
++    } catch (e) {
++      _error = e.toString();
++      _isLoading = false;
++      notifyListeners();
++      return false;
++    }
++  }
++
++  Stream<List<ClarificationRequest>> clarificationsStream(String donationId) =>
++      _service.getClarifications(donationId);
++
++  // ─── Unsafe Cancel ────────────────────────────────────────────
++
++  Future<bool> cancelPickupUnsafe({
++    required String donationId,
++    required String volunteerId,
++    required String reason,
++    required String details,
++    required String ngoId,
++    required String donorId,
++    String? adminId,
++  }) async {
++    _isLoading = true;
++    notifyListeners();
++    try {
++      await _service.cancelPickupUnsafe(
++        donationId: donationId,
++        volunteerId: volunteerId,
++        reason: reason,
++        details: details,
++        ngoId: ngoId,
++        donorId: donorId,
++        adminId: adminId,
++      );
++      _isLoading = false;
++      notifyListeners();
++      return true;
++    } catch (e) {
++      _error = e.toString();
++      _isLoading = false;
++      notifyListeners();
++      return false;
++    }
++  }
++
++  void clearError() {
++    _error = null;
++    notifyListeners();
++  }
++}
+diff --git a/food_redistribution_app/lib/screens/donor/donor_clarification_reply_screen.dart b/food_redistribution_app/lib/screens/donor/donor_clarification_reply_screen.dart
+new file mode 100644
+index 0000000..03514c6
+--- /dev/null
++++ b/food_redistribution_app/lib/screens/donor/donor_clarification_reply_screen.dart
+@@ -0,0 +1,298 @@
++import 'package:flutter/material.dart';
++import '../../services/hygiene_service.dart';
++import '../../models/hygiene_checklist.dart';
++
++/// Screen for the DONOR to view and reply to NGO clarification requests.
++class DonorClarificationReplyScreen extends StatefulWidget {
++  final String donationId;
++  final String donorId;
++  final String donationTitle;
++
++  const DonorClarificationReplyScreen({
++    Key? key,
++    required this.donationId,
++    required this.donorId,
++    required this.donationTitle,
++  }) : super(key: key);
++
++  @override
++  State<DonorClarificationReplyScreen> createState() =>
++      _DonorClarificationReplyScreenState();
++}
++
++class _DonorClarificationReplyScreenState
++    extends State<DonorClarificationReplyScreen> {
++  final HygieneService _hygieneService = HygieneService();
++  final Map<String, TextEditingController> _replyControllers = {};
++  final Map<String, bool> _submitting = {};
++
++  Future<void> _submitReply(String clarificationId, String reply) async {
++    if (reply.trim().isEmpty) {
++      ScaffoldMessenger.of(context).showSnackBar(
++        const SnackBar(
++            content: Text('Please write a reply before submitting.'),
++            backgroundColor: Colors.orange),
++      );
++      return;
++    }
++    setState(() => _submitting[clarificationId] = true);
++    try {
++      await _hygieneService.replyClarification(
++        donationId: widget.donationId,
++        clarificationId: clarificationId,
++        reply: reply.trim(),
++      );
++      if (!mounted) return;
++      ScaffoldMessenger.of(context).showSnackBar(
++        const SnackBar(
++          content: Text('✅ Reply sent to the NGO.'),
++          backgroundColor: Color(0xFF4CAF50),
++        ),
++      );
++    } catch (e) {
++      ScaffoldMessenger.of(context).showSnackBar(
++        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
++      );
++    } finally {
++      setState(() => _submitting[clarificationId] = false);
++    }
++  }
++
++  @override
++  Widget build(BuildContext context) {
++    return Scaffold(
++      backgroundColor: const Color(0xFF0F1923),
++      appBar: AppBar(
++        backgroundColor: const Color(0xFF1A2535),
++        foregroundColor: Colors.white,
++        title: Column(
++          crossAxisAlignment: CrossAxisAlignment.start,
++          children: [
++            const Text('Clarification Requests',
++                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
++            Text(widget.donationTitle,
++                style: const TextStyle(fontSize: 11, color: Colors.white60)),
++          ],
++        ),
++        elevation: 0,
++      ),
++      body: StreamBuilder<List<ClarificationRequest>>(
++        stream: _hygieneService.getClarifications(widget.donationId),
++        builder: (context, snapshot) {
++          if (snapshot.connectionState == ConnectionState.waiting) {
++            return const Center(
++                child: CircularProgressIndicator(color: Color(0xFF4CAF50)));
++          }
++          if (!snapshot.hasData || snapshot.data!.isEmpty) {
++            return _buildEmptyState();
++          }
++
++          final requests = snapshot.data!;
++          return ListView.builder(
++            padding: const EdgeInsets.all(16),
++            itemCount: requests.length,
++            itemBuilder: (context, index) =>
++                _buildClarificationCard(requests[index]),
++          );
++        },
++      ),
++    );
++  }
++
++  Widget _buildEmptyState() {
++    return const Center(
++      child: Column(
++        mainAxisAlignment: MainAxisAlignment.center,
++        children: [
++          Icon(Icons.mark_email_read_outlined, color: Colors.white24, size: 60),
++          SizedBox(height: 12),
++          Text('No clarification requests yet',
++              style: TextStyle(color: Colors.white38, fontSize: 16)),
++          SizedBox(height: 4),
++          Text('The NGO will contact you here if they need more info.',
++              style: TextStyle(color: Colors.white24, fontSize: 13)),
++        ],
++      ),
++    );
++  }
++
++  Widget _buildClarificationCard(ClarificationRequest c) {
++    _replyControllers.putIfAbsent(c.id, () => TextEditingController());
++    final controller = _replyControllers[c.id]!;
++
++    return Container(
++      margin: const EdgeInsets.only(bottom: 16),
++      padding: const EdgeInsets.all(14),
++      decoration: BoxDecoration(
++        color: const Color(0xFF1A2535),
++        borderRadius: BorderRadius.circular(14),
++        border: Border.all(
++          color: c.isResolved
++              ? const Color(0xFF4CAF50).withOpacity(0.4)
++              : Colors.orange.withOpacity(0.5),
++          width: 1.5,
++        ),
++      ),
++      child: Column(
++        crossAxisAlignment: CrossAxisAlignment.start,
++        children: [
++          // Status badge
++          Row(
++            mainAxisAlignment: MainAxisAlignment.spaceBetween,
++            children: [
++              Chip(
++                label: Text(c.isResolved ? 'Replied ✓' : '⏳ Awaiting Reply',
++                    style: TextStyle(
++                        fontSize: 10,
++                        color: c.isResolved
++                            ? const Color(0xFF4CAF50)
++                            : Colors.orange)),
++                backgroundColor: c.isResolved
++                    ? const Color(0xFF4CAF50).withOpacity(0.1)
++                    : Colors.orange.withOpacity(0.1),
++                side: BorderSide.none,
++                visualDensity: VisualDensity.compact,
++              ),
++              Text(
++                _formatDate(c.createdAt),
++                style: const TextStyle(color: Colors.white38, fontSize: 11),
++              ),
++            ],
++          ),
++          const SizedBox(height: 8),
++
++          // NGO question
++          Container(
++            padding: const EdgeInsets.all(10),
++            decoration: BoxDecoration(
++              color: Colors.orange.withOpacity(0.08),
++              borderRadius: BorderRadius.circular(10),
++            ),
++            child: Row(
++              crossAxisAlignment: CrossAxisAlignment.start,
++              children: [
++                const Icon(Icons.help_outline, color: Colors.orange, size: 18),
++                const SizedBox(width: 8),
++                Expanded(
++                  child: Column(
++                    crossAxisAlignment: CrossAxisAlignment.start,
++                    children: [
++                      const Text('NGO Question',
++                          style: TextStyle(
++                              color: Colors.orange,
++                              fontSize: 11,
++                              fontWeight: FontWeight.bold)),
++                      const SizedBox(height: 4),
++                      Text(c.question,
++                          style: const TextStyle(
++                              color: Colors.white, fontSize: 14)),
++                    ],
++                  ),
++                ),
++              ],
++            ),
++          ),
++
++          // If already replied, show reply
++          if (c.reply != null) ...[
++            const SizedBox(height: 10),
++            Container(
++              padding: const EdgeInsets.all(10),
++              decoration: BoxDecoration(
++                color: const Color(0xFF4CAF50).withOpacity(0.08),
++                borderRadius: BorderRadius.circular(10),
++              ),
++              child: Row(
++                crossAxisAlignment: CrossAxisAlignment.start,
++                children: [
++                  const Icon(Icons.reply, color: Color(0xFF4CAF50), size: 18),
++                  const SizedBox(width: 8),
++                  Expanded(
++                    child: Column(
++                      crossAxisAlignment: CrossAxisAlignment.start,
++                      children: [
++                        const Text('Your Reply',
++                            style: TextStyle(
++                                color: Color(0xFF4CAF50),
++                                fontSize: 11,
++                                fontWeight: FontWeight.bold)),
++                        const SizedBox(height: 4),
++                        Text(c.reply!,
++                            style: const TextStyle(
++                                color: Colors.white, fontSize: 14)),
++                      ],
++                    ),
++                  ),
++                ],
++              ),
++            ),
++          ],
++
++          // If not replied, show reply input
++          if (!c.isResolved) ...[
++            const SizedBox(height: 12),
++            TextField(
++              controller: controller,
++              style: const TextStyle(color: Colors.white),
++              maxLines: 3,
++              decoration: InputDecoration(
++                hintText: 'Type your reply...',
++                hintStyle: const TextStyle(color: Colors.white38),
++                filled: true,
++                fillColor: const Color(0xFF0F1923),
++                border: OutlineInputBorder(
++                  borderRadius: BorderRadius.circular(10),
++                  borderSide: const BorderSide(color: Color(0xFF2D3748)),
++                ),
++                enabledBorder: OutlineInputBorder(
++                  borderRadius: BorderRadius.circular(10),
++                  borderSide: const BorderSide(color: Color(0xFF2D3748)),
++                ),
++                focusedBorder: OutlineInputBorder(
++                  borderRadius: BorderRadius.circular(10),
++                  borderSide: const BorderSide(color: Colors.orange),
++                ),
++              ),
++            ),
++            const SizedBox(height: 10),
++            SizedBox(
++              width: double.infinity,
++              child: ElevatedButton.icon(
++                onPressed: (_submitting[c.id] == true)
++                    ? null
++                    : () => _submitReply(c.id, controller.text),
++                icon: (_submitting[c.id] == true)
++                    ? const SizedBox(
++                        width: 14,
++                        height: 14,
++                        child: CircularProgressIndicator(
++                            strokeWidth: 2, color: Colors.white))
++                    : const Icon(Icons.send, size: 16),
++                label: const Text('Send Reply'),
++                style: ElevatedButton.styleFrom(
++                  backgroundColor: Colors.orange,
++                  foregroundColor: Colors.white,
++                  padding: const EdgeInsets.symmetric(vertical: 12),
++                  shape: RoundedRectangleBorder(
++                      borderRadius: BorderRadius.circular(10)),
++                ),
++              ),
++            ),
++          ],
++        ],
++      ),
++    );
++  }
++
++  String _formatDate(DateTime date) {
++    return '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
++  }
++
++  @override
++  void dispose() {
++    for (final c in _replyControllers.values) {
++      c.dispose();
++    }
++    super.dispose();
++  }
++}
+diff --git a/food_redistribution_app/lib/screens/ngo/hygiene_checklist_screen.dart b/food_redistribution_app/lib/screens/ngo/hygiene_checklist_screen.dart
+new file mode 100644
+index 0000000..d2cbc02
+--- /dev/null
++++ b/food_redistribution_app/lib/screens/ngo/hygiene_checklist_screen.dart
+@@ -0,0 +1,354 @@
++import 'package:flutter/material.dart';
++import '../../models/hygiene_checklist.dart';
++import '../../services/hygiene_service.dart';
++import 'ngo_reject_donation_screen.dart';
++import 'ngo_clarify_request_screen.dart';
++
++class HygieneChecklistScreen extends StatefulWidget {
++  final String donationId;
++  final String ngoId;
++  final String donorId;
++  final String donationTitle;
++
++  const HygieneChecklistScreen({
++    Key? key,
++    required this.donationId,
++    required this.ngoId,
++    required this.donorId,
++    required this.donationTitle,
++  }) : super(key: key);
++
++  @override
++  State<HygieneChecklistScreen> createState() => _HygieneChecklistScreenState();
++}
++
++class _HygieneChecklistScreenState extends State<HygieneChecklistScreen> {
++  final HygieneService _hygieneService = HygieneService();
++  late List<HygieneChecklistItem> _items;
++  final TextEditingController _notesController = TextEditingController();
++  bool _isLoading = false;
++  bool _isSubmitting = false;
++
++  @override
++  void initState() {
++    super.initState();
++    _items = HygieneChecklistTemplate.defaultItems;
++    _loadExistingChecklist();
++  }
++
++  Future<void> _loadExistingChecklist() async {
++    setState(() => _isLoading = true);
++    try {
++      final existing =
++          await _hygieneService.getHygieneChecklist(widget.donationId);
++      if (existing != null && existing.items.isNotEmpty) {
++        setState(() {
++          _items = existing.items;
++          _notesController.text = existing.notes ?? '';
++        });
++      }
++    } catch (_) {}
++    setState(() => _isLoading = false);
++  }
++
++  bool get _allMandatoryChecked =>
++      _items.where((i) => i.isMandatory).every((i) => i.isChecked);
++
++  Future<void> _acceptDonation() async {
++    setState(() => _isSubmitting = true);
++    try {
++      final checklist = HygieneChecklist(
++        donationId: widget.donationId,
++        ngoId: widget.ngoId,
++        items: _items,
++        isComplete: true,
++        completedAt: DateTime.now(),
++        notes: _notesController.text.trim(),
++      );
++      await _hygieneService.acceptDonation(
++        donationId: widget.donationId,
++        ngoId: widget.ngoId,
++        checklist: checklist,
++      );
++      if (!mounted) return;
++      ScaffoldMessenger.of(context).showSnackBar(
++        const SnackBar(
++          content: Text('✅ Donation accepted & record locked.'),
++          backgroundColor: Colors.green,
++        ),
++      );
++      Navigator.of(context).pop(true);
++    } catch (e) {
++      ScaffoldMessenger.of(context).showSnackBar(
++        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
++      );
++    } finally {
++      setState(() => _isSubmitting = false);
++    }
++  }
++
++  void _rejectDonation() {
++    Navigator.of(context).push(
++      MaterialPageRoute(
++        builder: (_) => NgoRejectDonationScreen(
++          donationId: widget.donationId,
++          ngoId: widget.ngoId,
++          donorId: widget.donorId,
++        ),
++      ),
++    );
++  }
++
++  void _requestClarification() {
++    Navigator.of(context).push(
++      MaterialPageRoute(
++        builder: (_) => NgoClarifyRequestScreen(
++          donationId: widget.donationId,
++          ngoId: widget.ngoId,
++          donorId: widget.donorId,
++          donationTitle: widget.donationTitle,
++        ),
++      ),
++    );
++  }
++
++  @override
++  Widget build(BuildContext context) {
++    return Scaffold(
++      backgroundColor: const Color(0xFF0F1923),
++      appBar: AppBar(
++        backgroundColor: const Color(0xFF1A2535),
++        foregroundColor: Colors.white,
++        title: Column(
++          crossAxisAlignment: CrossAxisAlignment.start,
++          children: [
++            const Text('Hygiene Checklist',
++                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
++            Text(widget.donationTitle,
++                style: const TextStyle(fontSize: 12, color: Colors.white60)),
++          ],
++        ),
++        elevation: 0,
++      ),
++      body: _isLoading
++          ? const Center(
++              child: CircularProgressIndicator(color: Color(0xFF4CAF50)))
++          : Column(
++              children: [
++                _buildProgressHeader(),
++                Expanded(child: _buildChecklistItems()),
++                _buildNotesField(),
++                _buildActionButtons(),
++              ],
++            ),
++    );
++  }
++
++  Widget _buildProgressHeader() {
++    final checked = _items.where((i) => i.isMandatory && i.isChecked).length;
++    final total = _items.where((i) => i.isMandatory).length;
++    final progress = total == 0 ? 0.0 : checked / total;
++
++    return Container(
++      padding: const EdgeInsets.all(16),
++      decoration: const BoxDecoration(
++        color: Color(0xFF1A2535),
++        border: Border(bottom: BorderSide(color: Color(0xFF2D3748))),
++      ),
++      child: Column(
++        crossAxisAlignment: CrossAxisAlignment.start,
++        children: [
++          Row(
++            mainAxisAlignment: MainAxisAlignment.spaceBetween,
++            children: [
++              const Text('Mandatory Items',
++                  style: TextStyle(color: Colors.white70, fontSize: 13)),
++              Text('$checked / $total checked',
++                  style: TextStyle(
++                      color: _allMandatoryChecked
++                          ? const Color(0xFF4CAF50)
++                          : Colors.orange,
++                      fontWeight: FontWeight.bold,
++                      fontSize: 13)),
++            ],
++          ),
++          const SizedBox(height: 8),
++          LinearProgressIndicator(
++            value: progress,
++            backgroundColor: const Color(0xFF2D3748),
++            valueColor: AlwaysStoppedAnimation<Color>(
++              progress == 1.0 ? const Color(0xFF4CAF50) : Colors.orange,
++            ),
++            minHeight: 6,
++            borderRadius: BorderRadius.circular(4),
++          ),
++          if (!_allMandatoryChecked)
++            const Padding(
++              padding: EdgeInsets.only(top: 8),
++              child: Text(
++                '⚠️ Complete all mandatory items to enable acceptance.',
++                style: TextStyle(color: Colors.orange, fontSize: 12),
++              ),
++            ),
++        ],
++      ),
++    );
++  }
++
++  Widget _buildChecklistItems() {
++    return ListView.builder(
++      padding: const EdgeInsets.symmetric(vertical: 8),
++      itemCount: _items.length,
++      itemBuilder: (context, index) {
++        final item = _items[index];
++        return Container(
++          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
++          decoration: BoxDecoration(
++            color: const Color(0xFF1A2535),
++            borderRadius: BorderRadius.circular(12),
++            border: Border.all(
++              color: item.isChecked
++                  ? const Color(0xFF4CAF50).withOpacity(0.5)
++                  : const Color(0xFF2D3748),
++            ),
++          ),
++          child: CheckboxListTile(
++            value: item.isChecked,
++            onChanged: (val) {
++              setState(() => _items[index].isChecked = val ?? false);
++            },
++            activeColor: const Color(0xFF4CAF50),
++            checkColor: Colors.white,
++            title: Text(
++              item.question,
++              style: TextStyle(
++                color: item.isChecked ? Colors.white : Colors.white70,
++                fontSize: 14,
++              ),
++            ),
++            subtitle: item.isMandatory
++                ? const Text('Mandatory',
++                    style: TextStyle(color: Colors.redAccent, fontSize: 11))
++                : const Text('Optional',
++                    style: TextStyle(color: Colors.white38, fontSize: 11)),
++            controlAffinity: ListTileControlAffinity.leading,
++            shape:
++                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
++          ),
++        );
++      },
++    );
++  }
++
++  Widget _buildNotesField() {
++    return Padding(
++      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
++      child: TextField(
++        controller: _notesController,
++        style: const TextStyle(color: Colors.white),
++        maxLines: 2,
++        decoration: InputDecoration(
++          hintText: 'Additional notes (optional)...',
++          hintStyle: const TextStyle(color: Colors.white38),
++          filled: true,
++          fillColor: const Color(0xFF1A2535),
++          border: OutlineInputBorder(
++            borderRadius: BorderRadius.circular(12),
++            borderSide: const BorderSide(color: Color(0xFF2D3748)),
++          ),
++          enabledBorder: OutlineInputBorder(
++            borderRadius: BorderRadius.circular(12),
++            borderSide: const BorderSide(color: Color(0xFF2D3748)),
++          ),
++          focusedBorder: OutlineInputBorder(
++            borderRadius: BorderRadius.circular(12),
++            borderSide: const BorderSide(color: Color(0xFF4CAF50)),
++          ),
++        ),
++      ),
++    );
++  }
++
++  Widget _buildActionButtons() {
++    return Container(
++      padding: const EdgeInsets.all(16),
++      decoration: const BoxDecoration(
++        color: Color(0xFF1A2535),
++        border: Border(top: BorderSide(color: Color(0xFF2D3748))),
++      ),
++      child: Column(
++        children: [
++          // Accept button — enabled only when all mandatory items are checked
++          SizedBox(
++            width: double.infinity,
++            child: ElevatedButton.icon(
++              onPressed: (_allMandatoryChecked && !_isSubmitting)
++                  ? _acceptDonation
++                  : null,
++              icon: _isSubmitting
++                  ? const SizedBox(
++                      width: 16,
++                      height: 16,
++                      child: CircularProgressIndicator(
++                          strokeWidth: 2, color: Colors.white))
++                  : const Icon(Icons.check_circle_outline),
++              label: const Text('Accept Donation',
++                  style: TextStyle(fontWeight: FontWeight.bold)),
++              style: ElevatedButton.styleFrom(
++                backgroundColor: const Color(0xFF4CAF50),
++                foregroundColor: Colors.white,
++                disabledBackgroundColor: const Color(0xFF2D3748),
++                disabledForegroundColor: Colors.white38,
++                padding: const EdgeInsets.symmetric(vertical: 14),
++                shape: RoundedRectangleBorder(
++                    borderRadius: BorderRadius.circular(12)),
++              ),
++            ),
++          ),
++          const SizedBox(height: 10),
++          Row(
++            children: [
++              // Request Clarification
++              Expanded(
++                child: OutlinedButton.icon(
++                  onPressed: _requestClarification,
++                  icon: const Icon(Icons.help_outline, size: 16),
++                  label: const Text('Clarify', style: TextStyle(fontSize: 12)),
++                  style: OutlinedButton.styleFrom(
++                    foregroundColor: Colors.orange,
++                    side: const BorderSide(color: Colors.orange),
++                    padding: const EdgeInsets.symmetric(vertical: 12),
++                    shape: RoundedRectangleBorder(
++                        borderRadius: BorderRadius.circular(12)),
++                  ),
++                ),
++              ),
++              const SizedBox(width: 10),
++              // Reject
++              Expanded(
++                child: OutlinedButton.icon(
++                  onPressed: _rejectDonation,
++                  icon: const Icon(Icons.cancel_outlined, size: 16),
++                  label: const Text('Reject', style: TextStyle(fontSize: 12)),
++                  style: OutlinedButton.styleFrom(
++                    foregroundColor: Colors.redAccent,
++                    side: const BorderSide(color: Colors.redAccent),
++                    padding: const EdgeInsets.symmetric(vertical: 12),
++                    shape: RoundedRectangleBorder(
++                        borderRadius: BorderRadius.circular(12)),
++                  ),
++                ),
++              ),
++            ],
++          ),
++        ],
++      ),
++    );
++  }
++
++  @override
++  void dispose() {
++    _notesController.dispose();
++    super.dispose();
++  }
++}
+diff --git a/food_redistribution_app/lib/screens/ngo/ngo_clarify_request_screen.dart b/food_redistribution_app/lib/screens/ngo/ngo_clarify_request_screen.dart
+new file mode 100644
+index 0000000..f00f015
+--- /dev/null
++++ b/food_redistribution_app/lib/screens/ngo/ngo_clarify_request_screen.dart
+@@ -0,0 +1,296 @@
++import 'package:flutter/material.dart';
++import '../../services/hygiene_service.dart';
++import '../../models/hygiene_checklist.dart';
++
++class NgoClarifyRequestScreen extends StatefulWidget {
++  final String donationId;
++  final String ngoId;
++  final String donorId;
++  final String donationTitle;
++
++  const NgoClarifyRequestScreen({
++    Key? key,
++    required this.donationId,
++    required this.ngoId,
++    required this.donorId,
++    required this.donationTitle,
++  }) : super(key: key);
++
++  @override
++  State<NgoClarifyRequestScreen> createState() =>
++      _NgoClarifyRequestScreenState();
++}
++
++class _NgoClarifyRequestScreenState extends State<NgoClarifyRequestScreen> {
++  final HygieneService _hygieneService = HygieneService();
++  final TextEditingController _questionController = TextEditingController();
++  bool _isSending = false;
++
++  static const List<String> _quickQuestions = [
++    'What was the exact preparation time?',
++    'What temperature was the food stored at?',
++    'Was the food tested for allergens?',
++    'Can you confirm the exact quantity?',
++    'What packaging was used?',
++  ];
++
++  Future<void> _sendClarification() async {
++    final question = _questionController.text.trim();
++    if (question.isEmpty) {
++      ScaffoldMessenger.of(context).showSnackBar(
++        const SnackBar(
++            content: Text('Please write your question first.'),
++            backgroundColor: Colors.orange),
++      );
++      return;
++    }
++    setState(() => _isSending = true);
++    try {
++      await _hygieneService.sendClarificationRequest(
++        donationId: widget.donationId,
++        ngoId: widget.ngoId,
++        donorId: widget.donorId,
++        question: question,
++      );
++      if (!mounted) return;
++      ScaffoldMessenger.of(context).showSnackBar(
++        const SnackBar(
++          content: Text('✉️ Clarification request sent to donor.'),
++          backgroundColor: Colors.orange,
++        ),
++      );
++      Navigator.of(context).pop();
++    } catch (e) {
++      ScaffoldMessenger.of(context).showSnackBar(
++        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
++      );
++    } finally {
++      setState(() => _isSending = false);
++    }
++  }
++
++  @override
++  Widget build(BuildContext context) {
++    return Scaffold(
++      backgroundColor: const Color(0xFF0F1923),
++      appBar: AppBar(
++        backgroundColor: const Color(0xFF1A2535),
++        foregroundColor: Colors.white,
++        title: const Text('Request Clarification',
++            style: TextStyle(fontWeight: FontWeight.bold)),
++        elevation: 0,
++      ),
++      body: Column(
++        crossAxisAlignment: CrossAxisAlignment.start,
++        children: [
++          _buildInfoBanner(),
++          Expanded(
++            child: SingleChildScrollView(
++              padding: const EdgeInsets.all(16),
++              child: Column(
++                crossAxisAlignment: CrossAxisAlignment.start,
++                children: [
++                  const Text('Quick Questions',
++                      style: TextStyle(
++                          color: Colors.white70,
++                          fontSize: 13,
++                          fontWeight: FontWeight.w600)),
++                  const SizedBox(height: 8),
++                  Wrap(
++                    spacing: 8,
++                    runSpacing: 8,
++                    children: _quickQuestions
++                        .map((q) => GestureDetector(
++                              onTap: () =>
++                                  setState(() => _questionController.text = q),
++                              child: Chip(
++                                label: Text(q,
++                                    style: const TextStyle(
++                                        fontSize: 11, color: Colors.white70)),
++                                backgroundColor: const Color(0xFF1A2535),
++                                side:
++                                    const BorderSide(color: Color(0xFF2D3748)),
++                              ),
++                            ))
++                        .toList(),
++                  ),
++                  const SizedBox(height: 20),
++                  const Text('Your Question *',
++                      style: TextStyle(
++                          color: Colors.white,
++                          fontWeight: FontWeight.bold,
++                          fontSize: 15)),
++                  const SizedBox(height: 8),
++                  TextField(
++                    controller: _questionController,
++                    style: const TextStyle(color: Colors.white),
++                    maxLines: 5,
++                    decoration: InputDecoration(
++                      hintText: 'Type your question for the donor...',
++                      hintStyle: const TextStyle(color: Colors.white38),
++                      filled: true,
++                      fillColor: const Color(0xFF1A2535),
++                      border: OutlineInputBorder(
++                        borderRadius: BorderRadius.circular(12),
++                        borderSide: const BorderSide(color: Color(0xFF2D3748)),
++                      ),
++                      enabledBorder: OutlineInputBorder(
++                        borderRadius: BorderRadius.circular(12),
++                        borderSide: const BorderSide(color: Color(0xFF2D3748)),
++                      ),
++                      focusedBorder: OutlineInputBorder(
++                        borderRadius: BorderRadius.circular(12),
++                        borderSide: const BorderSide(color: Colors.orange),
++                      ),
++                    ),
++                  ),
++                  const SizedBox(height: 16),
++                  _buildExistingClarifications(),
++                ],
++              ),
++            ),
++          ),
++          _buildSendButton(),
++        ],
++      ),
++    );
++  }
++
++  Widget _buildInfoBanner() {
++    return Container(
++      padding: const EdgeInsets.all(14),
++      color: Colors.orange.withOpacity(0.12),
++      child: Row(
++        children: const [
++          Icon(Icons.info_outline, color: Colors.orange, size: 20),
++          SizedBox(width: 10),
++          Expanded(
++            child: Text(
++              'The donation status will change to "Pending Clarification". Donor will be notified.',
++              style: TextStyle(color: Colors.orange, fontSize: 12),
++            ),
++          ),
++        ],
++      ),
++    );
++  }
++
++  Widget _buildExistingClarifications() {
++    return StreamBuilder<List<ClarificationRequest>>(
++      stream: _hygieneService.getClarifications(widget.donationId),
++      builder: (context, snapshot) {
++        if (!snapshot.hasData || snapshot.data!.isEmpty) {
++          return const SizedBox.shrink();
++        }
++        return Column(
++          crossAxisAlignment: CrossAxisAlignment.start,
++          children: [
++            const Text('Previous Clarifications',
++                style: TextStyle(
++                    color: Colors.white70,
++                    fontWeight: FontWeight.bold,
++                    fontSize: 14)),
++            const SizedBox(height: 8),
++            ...snapshot.data!.map((c) => _buildClarificationCard(c)),
++          ],
++        );
++      },
++    );
++  }
++
++  Widget _buildClarificationCard(ClarificationRequest c) {
++    return Container(
++      margin: const EdgeInsets.only(bottom: 10),
++      padding: const EdgeInsets.all(12),
++      decoration: BoxDecoration(
++        color: const Color(0xFF1A2535),
++        borderRadius: BorderRadius.circular(10),
++        border: Border.all(
++          color: c.isResolved
++              ? const Color(0xFF4CAF50).withOpacity(0.4)
++              : Colors.orange.withOpacity(0.4),
++        ),
++      ),
++      child: Column(
++        crossAxisAlignment: CrossAxisAlignment.start,
++        children: [
++          Row(
++            children: [
++              const Icon(Icons.help_outline, color: Colors.orange, size: 16),
++              const SizedBox(width: 6),
++              Expanded(
++                  child: Text(c.question,
++                      style:
++                          const TextStyle(color: Colors.white, fontSize: 13))),
++            ],
++          ),
++          if (c.reply != null) ...[
++            const SizedBox(height: 8),
++            const Divider(color: Color(0xFF2D3748), height: 1),
++            const SizedBox(height: 8),
++            Row(
++              children: [
++                const Icon(Icons.reply, color: Color(0xFF4CAF50), size: 16),
++                const SizedBox(width: 6),
++                Expanded(
++                    child: Text(c.reply!,
++                        style: const TextStyle(
++                            color: Color(0xFF4CAF50), fontSize: 13))),
++              ],
++            ),
++          ],
++          const SizedBox(height: 6),
++          Chip(
++            label: Text(c.isResolved ? 'Resolved' : 'Awaiting Reply',
++                style: const TextStyle(fontSize: 10)),
++            backgroundColor: c.isResolved
++                ? const Color(0xFF4CAF50).withOpacity(0.2)
++                : Colors.orange.withOpacity(0.2),
++            side: BorderSide.none,
++            visualDensity: VisualDensity.compact,
++            labelStyle: TextStyle(
++                color: c.isResolved ? const Color(0xFF4CAF50) : Colors.orange),
++          ),
++        ],
++      ),
++    );
++  }
++
++  Widget _buildSendButton() {
++    return Container(
++      padding: const EdgeInsets.all(16),
++      decoration: const BoxDecoration(
++        color: Color(0xFF1A2535),
++        border: Border(top: BorderSide(color: Color(0xFF2D3748))),
++      ),
++      child: SizedBox(
++        width: double.infinity,
++        child: ElevatedButton.icon(
++          onPressed: _isSending ? null : _sendClarification,
++          icon: _isSending
++              ? const SizedBox(
++                  width: 16,
++                  height: 16,
++                  child: CircularProgressIndicator(
++                      strokeWidth: 2, color: Colors.white))
++              : const Icon(Icons.send),
++          label: const Text('Send Clarification Request',
++              style: TextStyle(fontWeight: FontWeight.bold)),
++          style: ElevatedButton.styleFrom(
++            backgroundColor: Colors.orange,
++            foregroundColor: Colors.white,
++            padding: const EdgeInsets.symmetric(vertical: 14),
++            shape:
++                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
++          ),
++        ),
++      ),
++    );
++  }
++
++  @override
++  void dispose() {
++    _questionController.dispose();
++    super.dispose();
++  }
++}
+diff --git a/food_redistribution_app/lib/screens/ngo/ngo_reject_donation_screen.dart b/food_redistribution_app/lib/screens/ngo/ngo_reject_donation_screen.dart
+new file mode 100644
+index 0000000..b2126f0
+--- /dev/null
++++ b/food_redistribution_app/lib/screens/ngo/ngo_reject_donation_screen.dart
+@@ -0,0 +1,238 @@
++import 'package:flutter/material.dart';
++import '../../services/hygiene_service.dart';
++
++class NgoRejectDonationScreen extends StatefulWidget {
++  final String donationId;
++  final String ngoId;
++  final String donorId;
++
++  const NgoRejectDonationScreen({
++    Key? key,
++    required this.donationId,
++    required this.ngoId,
++    required this.donorId,
++  }) : super(key: key);
++
++  @override
++  State<NgoRejectDonationScreen> createState() =>
++      _NgoRejectDonationScreenState();
++}
++
++class _NgoRejectDonationScreenState extends State<NgoRejectDonationScreen> {
++  final HygieneService _hygieneService = HygieneService();
++  final TextEditingController _additionalInfoController =
++      TextEditingController();
++
++  String? _selectedReason;
++  bool _isSubmitting = false;
++
++  static const List<String> _rejectionReasons = [
++    'Food is expired or near expiry',
++    'Poor packaging / damaged packaging',
++    'Signs of contamination or spoilage',
++    'Quantity does not match listing',
++    'Food type not suitable for our recipients',
++    'Inadequate food safety information',
++    'Temperature requirements not met',
++    'Other (specify below)',
++  ];
++
++  Future<void> _submitRejection() async {
++    if (_selectedReason == null) {
++      ScaffoldMessenger.of(context).showSnackBar(
++        const SnackBar(
++            content: Text('Please select a rejection reason.'),
++            backgroundColor: Colors.orange),
++      );
++      return;
++    }
++    setState(() => _isSubmitting = true);
++    try {
++      await _hygieneService.rejectDonation(
++        donationId: widget.donationId,
++        ngoId: widget.ngoId,
++        reason: _selectedReason!,
++        additionalInfo: _additionalInfoController.text.trim().isNotEmpty
++            ? _additionalInfoController.text.trim()
++            : null,
++      );
++      if (!mounted) return;
++      ScaffoldMessenger.of(context).showSnackBar(
++        const SnackBar(
++          content: Text('Donation rejected. Donor has been notified.'),
++          backgroundColor: Colors.redAccent,
++        ),
++      );
++      Navigator.of(context).pop(true);
++    } catch (e) {
++      ScaffoldMessenger.of(context).showSnackBar(
++        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
++      );
++    } finally {
++      setState(() => _isSubmitting = false);
++    }
++  }
++
++  @override
++  Widget build(BuildContext context) {
++    return Scaffold(
++      backgroundColor: const Color(0xFF0F1923),
++      appBar: AppBar(
++        backgroundColor: const Color(0xFF1A2535),
++        foregroundColor: Colors.white,
++        title: const Text('Reject Donation',
++            style: TextStyle(fontWeight: FontWeight.bold)),
++        elevation: 0,
++      ),
++      body: Column(
++        children: [
++          _buildWarningBanner(),
++          Expanded(
++            child: SingleChildScrollView(
++              padding: const EdgeInsets.all(16),
++              child: Column(
++                crossAxisAlignment: CrossAxisAlignment.start,
++                children: [
++                  const Text('Select Rejection Reason *',
++                      style: TextStyle(
++                          color: Colors.white,
++                          fontWeight: FontWeight.bold,
++                          fontSize: 15)),
++                  const SizedBox(height: 12),
++                  ..._rejectionReasons
++                      .map((reason) => _buildReasonTile(reason)),
++                  const SizedBox(height: 20),
++                  const Text('Additional Information (optional)',
++                      style: TextStyle(color: Colors.white70, fontSize: 13)),
++                  const SizedBox(height: 8),
++                  TextField(
++                    controller: _additionalInfoController,
++                    style: const TextStyle(color: Colors.white),
++                    maxLines: 4,
++                    decoration: InputDecoration(
++                      hintText: 'Provide more context if needed...',
++                      hintStyle: const TextStyle(color: Colors.white38),
++                      filled: true,
++                      fillColor: const Color(0xFF1A2535),
++                      border: OutlineInputBorder(
++                        borderRadius: BorderRadius.circular(12),
++                        borderSide: const BorderSide(color: Color(0xFF2D3748)),
++                      ),
++                      enabledBorder: OutlineInputBorder(
++                        borderRadius: BorderRadius.circular(12),
++                        borderSide: const BorderSide(color: Color(0xFF2D3748)),
++                      ),
++                      focusedBorder: OutlineInputBorder(
++                        borderRadius: BorderRadius.circular(12),
++                        borderSide: const BorderSide(color: Colors.redAccent),
++                      ),
++                    ),
++                  ),
++                ],
++              ),
++            ),
++          ),
++          _buildSubmitButton(),
++        ],
++      ),
++    );
++  }
++
++  Widget _buildWarningBanner() {
++    return Container(
++      padding: const EdgeInsets.all(14),
++      color: Colors.redAccent.withOpacity(0.12),
++      child: Row(
++        children: const [
++          Icon(Icons.warning_amber_rounded, color: Colors.redAccent),
++          SizedBox(width: 10),
++          Expanded(
++            child: Text(
++              'This action will notify the donor. Please provide an accurate reason.',
++              style: TextStyle(color: Colors.redAccent, fontSize: 13),
++            ),
++          ),
++        ],
++      ),
++    );
++  }
++
++  Widget _buildReasonTile(String reason) {
++    final isSelected = _selectedReason == reason;
++    return GestureDetector(
++      onTap: () => setState(() => _selectedReason = reason),
++      child: Container(
++        margin: const EdgeInsets.only(bottom: 8),
++        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
++        decoration: BoxDecoration(
++          color: isSelected
++              ? Colors.redAccent.withOpacity(0.15)
++              : const Color(0xFF1A2535),
++          borderRadius: BorderRadius.circular(10),
++          border: Border.all(
++            color: isSelected ? Colors.redAccent : const Color(0xFF2D3748),
++            width: isSelected ? 1.5 : 1,
++          ),
++        ),
++        child: Row(
++          children: [
++            Icon(
++              isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
++              color: isSelected ? Colors.redAccent : Colors.white38,
++              size: 20,
++            ),
++            const SizedBox(width: 10),
++            Expanded(
++              child: Text(reason,
++                  style: TextStyle(
++                      color: isSelected ? Colors.white : Colors.white70,
++                      fontSize: 14)),
++            ),
++          ],
++        ),
++      ),
++    );
++  }
++
++  Widget _buildSubmitButton() {
++    return Container(
++      padding: const EdgeInsets.all(16),
++      decoration: const BoxDecoration(
++        color: Color(0xFF1A2535),
++        border: Border(top: BorderSide(color: Color(0xFF2D3748))),
++      ),
++      child: SizedBox(
++        width: double.infinity,
++        child: ElevatedButton.icon(
++          onPressed: (_selectedReason != null && !_isSubmitting)
++              ? _submitRejection
++              : null,
++          icon: _isSubmitting
++              ? const SizedBox(
++                  width: 16,
++                  height: 16,
++                  child: CircularProgressIndicator(
++                      strokeWidth: 2, color: Colors.white))
++              : const Icon(Icons.cancel_outlined),
++          label: const Text('Confirm Rejection',
++              style: TextStyle(fontWeight: FontWeight.bold)),
++          style: ElevatedButton.styleFrom(
++            backgroundColor: Colors.redAccent,
++            foregroundColor: Colors.white,
++            disabledBackgroundColor: const Color(0xFF2D3748),
++            disabledForegroundColor: Colors.white38,
++            padding: const EdgeInsets.symmetric(vertical: 14),
++            shape:
++                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
++          ),
++        ),
++      ),
++    );
++  }
++
++  @override
++  void dispose() {
++    _additionalInfoController.dispose();
++    super.dispose();
++  }
++}
+diff --git a/food_redistribution_app/lib/screens/volunteer/volunteer_pickup_proof_screen.dart b/food_redistribution_app/lib/screens/volunteer/volunteer_pickup_proof_screen.dart
+new file mode 100644
+index 0000000..3c88d5f
+--- /dev/null
++++ b/food_redistribution_app/lib/screens/volunteer/volunteer_pickup_proof_screen.dart
+@@ -0,0 +1,399 @@
++import 'dart:io';
++import 'package:flutter/material.dart';
++import 'package:image_picker/image_picker.dart';
++import '../../services/hygiene_service.dart';
++import 'volunteer_unsafe_cancel_screen.dart';
++
++class VolunteerPickupProofScreen extends StatefulWidget {
++  final String donationId;
++  final String volunteerId;
++  final String ngoId;
++  final String donorId;
++  final String donationTitle;
++
++  const VolunteerPickupProofScreen({
++    Key? key,
++    required this.donationId,
++    required this.volunteerId,
++    required this.ngoId,
++    required this.donorId,
++    required this.donationTitle,
++  }) : super(key: key);
++
++  @override
++  State<VolunteerPickupProofScreen> createState() =>
++      _VolunteerPickupProofScreenState();
++}
++
++class _VolunteerPickupProofScreenState
++    extends State<VolunteerPickupProofScreen> {
++  final HygieneService _hygieneService = HygieneService();
++  final ImagePicker _picker = ImagePicker();
++  final TextEditingController _notesController = TextEditingController();
++
++  File? _capturedImage;
++  String _foodCondition = 'good'; // good / moderate / unsafe
++  bool _isUploading = false;
++  bool _uploadComplete = false;
++
++  Future<void> _captureImage() async {
++    try {
++      final XFile? photo = await _picker.pickImage(
++        source: ImageSource.camera,
++        imageQuality: 80,
++        maxWidth: 1200,
++      );
++      if (photo != null) {
++        setState(() => _capturedImage = File(photo.path));
++      }
++    } catch (e) {
++      ScaffoldMessenger.of(context).showSnackBar(
++        SnackBar(
++            content: Text('Camera error: $e'), backgroundColor: Colors.red),
++      );
++    }
++  }
++
++  Future<void> _uploadProof() async {
++    if (_capturedImage == null) {
++      ScaffoldMessenger.of(context).showSnackBar(
++        const SnackBar(
++            content: Text('Please take a photo first.'),
++            backgroundColor: Colors.orange),
++      );
++      return;
++    }
++    setState(() => _isUploading = true);
++    try {
++      await _hygieneService.uploadPickupProofImage(
++        donationId: widget.donationId,
++        volunteerId: widget.volunteerId,
++        imageFile: _capturedImage!,
++        foodCondition: _foodCondition,
++        notes: _notesController.text.trim().isNotEmpty
++            ? _notesController.text.trim()
++            : null,
++      );
++      setState(() {
++        _isUploading = false;
++        _uploadComplete = true;
++      });
++      ScaffoldMessenger.of(context).showSnackBar(
++        const SnackBar(
++          content: Text('✅ Pickup proof uploaded successfully.'),
++          backgroundColor: Color(0xFF4CAF50),
++        ),
++      );
++    } catch (e) {
++      setState(() => _isUploading = false);
++      ScaffoldMessenger.of(context).showSnackBar(
++        SnackBar(
++            content: Text('Upload failed: $e'), backgroundColor: Colors.red),
++      );
++    }
++  }
++
++  void _cancelUnsafe() {
++    Navigator.of(context).pushReplacement(
++      MaterialPageRoute(
++        builder: (_) => VolunteerUnsafeCancelScreen(
++          donationId: widget.donationId,
++          volunteerId: widget.volunteerId,
++          ngoId: widget.ngoId,
++          donorId: widget.donorId,
++        ),
++      ),
++    );
++  }
++
++  @override
++  Widget build(BuildContext context) {
++    return Scaffold(
++      backgroundColor: const Color(0xFF0F1923),
++      appBar: AppBar(
++        backgroundColor: const Color(0xFF1A2535),
++        foregroundColor: Colors.white,
++        title: Column(
++          crossAxisAlignment: CrossAxisAlignment.start,
++          children: [
++            const Text('Pickup Proof',
++                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
++            Text(widget.donationTitle,
++                style: const TextStyle(fontSize: 11, color: Colors.white60)),
++          ],
++        ),
++        elevation: 0,
++      ),
++      body: Column(
++        children: [
++          _buildMandatoryBanner(),
++          Expanded(
++            child: SingleChildScrollView(
++              padding: const EdgeInsets.all(16),
++              child: Column(
++                crossAxisAlignment: CrossAxisAlignment.start,
++                children: [
++                  _buildPhotoSection(),
++                  const SizedBox(height: 20),
++                  _buildFoodConditionSelector(),
++                  const SizedBox(height: 20),
++                  _buildNotesField(),
++                ],
++              ),
++            ),
++          ),
++          _buildActionButtons(),
++        ],
++      ),
++    );
++  }
++
++  Widget _buildMandatoryBanner() {
++    return Container(
++      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
++      color: const Color(0xFF4CAF50).withOpacity(0.12),
++      child: Row(
++        children: const [
++          Icon(Icons.camera_alt, color: Color(0xFF4CAF50), size: 18),
++          SizedBox(width: 10),
++          Expanded(
++            child: Text(
++              'Photo is required before marking pickup complete.',
++              style: TextStyle(color: Color(0xFF4CAF50), fontSize: 12),
++            ),
++          ),
++        ],
++      ),
++    );
++  }
++
++  Widget _buildPhotoSection() {
++    return GestureDetector(
++      onTap: _captureImage,
++      child: Container(
++        height: 220,
++        width: double.infinity,
++        decoration: BoxDecoration(
++          color: const Color(0xFF1A2535),
++          borderRadius: BorderRadius.circular(16),
++          border: Border.all(
++            color: _capturedImage != null
++                ? const Color(0xFF4CAF50)
++                : const Color(0xFF2D3748),
++            width: 2,
++          ),
++        ),
++        child: _capturedImage != null
++            ? ClipRRect(
++                borderRadius: BorderRadius.circular(14),
++                child: Stack(
++                  fit: StackFit.expand,
++                  children: [
++                    Image.file(_capturedImage!, fit: BoxFit.cover),
++                    if (_uploadComplete)
++                      Container(
++                        color: const Color(0xFF4CAF50).withOpacity(0.5),
++                        child: const Center(
++                          child: Icon(Icons.check_circle,
++                              color: Colors.white, size: 60),
++                        ),
++                      ),
++                    Positioned(
++                      bottom: 8,
++                      right: 8,
++                      child: GestureDetector(
++                        onTap: _captureImage,
++                        child: Container(
++                          padding: const EdgeInsets.all(8),
++                          decoration: BoxDecoration(
++                            color: Colors.black54,
++                            borderRadius: BorderRadius.circular(8),
++                          ),
++                          child: const Icon(Icons.refresh,
++                              color: Colors.white, size: 18),
++                        ),
++                      ),
++                    ),
++                  ],
++                ),
++              )
++            : Column(
++                mainAxisAlignment: MainAxisAlignment.center,
++                children: const [
++                  Icon(Icons.add_a_photo_outlined,
++                      color: Color(0xFF4CAF50), size: 48),
++                  SizedBox(height: 10),
++                  Text('Tap to take a photo of the food',
++                      style: TextStyle(color: Colors.white70, fontSize: 14)),
++                  SizedBox(height: 4),
++                  Text('This is mandatory for pickup completion',
++                      style: TextStyle(color: Colors.white38, fontSize: 12)),
++                ],
++              ),
++      ),
++    );
++  }
++
++  Widget _buildFoodConditionSelector() {
++    return Column(
++      crossAxisAlignment: CrossAxisAlignment.start,
++      children: [
++        const Text('Food Condition *',
++            style: TextStyle(
++                color: Colors.white,
++                fontWeight: FontWeight.bold,
++                fontSize: 15)),
++        const SizedBox(height: 10),
++        Row(
++          children: [
++            _buildConditionChip('good', 'Good', const Color(0xFF4CAF50),
++                Icons.thumb_up_outlined),
++            const SizedBox(width: 10),
++            _buildConditionChip('moderate', 'Moderate', Colors.orange,
++                Icons.warning_amber_outlined),
++            const SizedBox(width: 10),
++            _buildConditionChip(
++                'unsafe', 'Unsafe', Colors.redAccent, Icons.dangerous_outlined),
++          ],
++        ),
++      ],
++    );
++  }
++
++  Widget _buildConditionChip(
++      String value, String label, Color color, IconData icon) {
++    final isSelected = _foodCondition == value;
++    return Expanded(
++      child: GestureDetector(
++        onTap: () => setState(() => _foodCondition = value),
++        child: AnimatedContainer(
++          duration: const Duration(milliseconds: 200),
++          padding: const EdgeInsets.symmetric(vertical: 12),
++          decoration: BoxDecoration(
++            color:
++                isSelected ? color.withOpacity(0.15) : const Color(0xFF1A2535),
++            borderRadius: BorderRadius.circular(12),
++            border: Border.all(
++                color: isSelected ? color : const Color(0xFF2D3748),
++                width: isSelected ? 2 : 1),
++          ),
++          child: Column(
++            children: [
++              Icon(icon, color: isSelected ? color : Colors.white38, size: 22),
++              const SizedBox(height: 4),
++              Text(label,
++                  style: TextStyle(
++                      color: isSelected ? color : Colors.white38,
++                      fontSize: 12,
++                      fontWeight:
++                          isSelected ? FontWeight.bold : FontWeight.normal)),
++            ],
++          ),
++        ),
++      ),
++    );
++  }
++
++  Widget _buildNotesField() {
++    return Column(
++      crossAxisAlignment: CrossAxisAlignment.start,
++      children: [
++        const Text('Condition Notes (optional)',
++            style: TextStyle(color: Colors.white70, fontSize: 13)),
++        const SizedBox(height: 8),
++        TextField(
++          controller: _notesController,
++          style: const TextStyle(color: Colors.white),
++          maxLines: 3,
++          decoration: InputDecoration(
++            hintText: 'Describe any observations about the food condition...',
++            hintStyle: const TextStyle(color: Colors.white38),
++            filled: true,
++            fillColor: const Color(0xFF1A2535),
++            border: OutlineInputBorder(
++              borderRadius: BorderRadius.circular(12),
++              borderSide: const BorderSide(color: Color(0xFF2D3748)),
++            ),
++            enabledBorder: OutlineInputBorder(
++              borderRadius: BorderRadius.circular(12),
++              borderSide: const BorderSide(color: Color(0xFF2D3748)),
++            ),
++            focusedBorder: OutlineInputBorder(
++              borderRadius: BorderRadius.circular(12),
++              borderSide: const BorderSide(color: Color(0xFF4CAF50)),
++            ),
++          ),
++        ),
++      ],
++    );
++  }
++
++  Widget _buildActionButtons() {
++    return Container(
++      padding: const EdgeInsets.all(16),
++      decoration: const BoxDecoration(
++        color: Color(0xFF1A2535),
++        border: Border(top: BorderSide(color: Color(0xFF2D3748))),
++      ),
++      child: Column(
++        children: [
++          SizedBox(
++            width: double.infinity,
++            child: ElevatedButton.icon(
++              onPressed:
++                  (_capturedImage != null && !_isUploading && !_uploadComplete)
++                      ? _uploadProof
++                      : null,
++              icon: _isUploading
++                  ? const SizedBox(
++                      width: 16,
++                      height: 16,
++                      child: CircularProgressIndicator(
++                          strokeWidth: 2, color: Colors.white))
++                  : const Icon(Icons.cloud_upload_outlined),
++              label: Text(
++                  _uploadComplete
++                      ? 'Proof Uploaded ✓'
++                      : _isUploading
++                          ? 'Uploading...'
++                          : 'Upload Pickup Proof',
++                  style: const TextStyle(fontWeight: FontWeight.bold)),
++              style: ElevatedButton.styleFrom(
++                backgroundColor: const Color(0xFF4CAF50),
++                foregroundColor: Colors.white,
++                disabledBackgroundColor: const Color(0xFF2D3748),
++                disabledForegroundColor: Colors.white38,
++                padding: const EdgeInsets.symmetric(vertical: 14),
++                shape: RoundedRectangleBorder(
++                    borderRadius: BorderRadius.circular(12)),
++              ),
++            ),
++          ),
++          const SizedBox(height: 10),
++          SizedBox(
++            width: double.infinity,
++            child: OutlinedButton.icon(
++              onPressed: _cancelUnsafe,
++              icon: const Icon(Icons.dangerous_outlined, size: 16),
++              label: const Text('Cancel – Food Unsafe',
++                  style: TextStyle(fontWeight: FontWeight.bold)),
++              style: OutlinedButton.styleFrom(
++                foregroundColor: Colors.redAccent,
++                side: const BorderSide(color: Colors.redAccent),
++                padding: const EdgeInsets.symmetric(vertical: 12),
++                shape: RoundedRectangleBorder(
++                    borderRadius: BorderRadius.circular(12)),
++              ),
++            ),
++          ),
++        ],
++      ),
++    );
++  }
++
++  @override
++  void dispose() {
++    _notesController.dispose();
++    super.dispose();
++  }
++}
+diff --git a/food_redistribution_app/lib/screens/volunteer/volunteer_unsafe_cancel_screen.dart b/food_redistribution_app/lib/screens/volunteer/volunteer_unsafe_cancel_screen.dart
+new file mode 100644
+index 0000000..eab8074
+--- /dev/null
++++ b/food_redistribution_app/lib/screens/volunteer/volunteer_unsafe_cancel_screen.dart
+@@ -0,0 +1,342 @@
++import 'package:flutter/material.dart';
++import '../../services/hygiene_service.dart';
++
++class VolunteerUnsafeCancelScreen extends StatefulWidget {
++  final String donationId;
++  final String volunteerId;
++  final String ngoId;
++  final String donorId;
++  final String? adminId;
++
++  const VolunteerUnsafeCancelScreen({
++    Key? key,
++    required this.donationId,
++    required this.volunteerId,
++    required this.ngoId,
++    required this.donorId,
++    this.adminId,
++  }) : super(key: key);
++
++  @override
++  State<VolunteerUnsafeCancelScreen> createState() =>
++      _VolunteerUnsafeCancelScreenState();
++}
++
++class _VolunteerUnsafeCancelScreenState
++    extends State<VolunteerUnsafeCancelScreen> {
++  final HygieneService _hygieneService = HygieneService();
++  final TextEditingController _detailsController = TextEditingController();
++
++  String? _selectedReason;
++  bool _isSubmitting = false;
++  bool _hasConfirmed = false;
++
++  static const List<String> _unsafeReasons = [
++    'Food is visibly spoiled or moldy',
++    'Strong foul odor detected',
++    'Improper storage temperature – food unsafe to serve',
++    'Pest contamination visible',
++    'Damaged/broken packaging with exposure',
++    'Food looks different from listing description',
++    'Donor confirmed food is no longer safe',
++    'Other safety concern (describe below)',
++  ];
++
++  Future<void> _submitCancellation() async {
++    if (_selectedReason == null) {
++      ScaffoldMessenger.of(context).showSnackBar(
++        const SnackBar(
++            content: Text('Please select a reason.'),
++            backgroundColor: Colors.orange),
++      );
++      return;
++    }
++    final details = _detailsController.text.trim();
++
++    setState(() => _isSubmitting = true);
++    try {
++      await _hygieneService.cancelPickupUnsafe(
++        donationId: widget.donationId,
++        volunteerId: widget.volunteerId,
++        reason: _selectedReason!,
++        details: details,
++        ngoId: widget.ngoId,
++        donorId: widget.donorId,
++        adminId: widget.adminId,
++      );
++      if (!mounted) return;
++      _showSuccessDialog();
++    } catch (e) {
++      ScaffoldMessenger.of(context).showSnackBar(
++        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
++      );
++    } finally {
++      setState(() => _isSubmitting = false);
++    }
++  }
++
++  void _showSuccessDialog() {
++    showDialog(
++      context: context,
++      barrierDismissible: false,
++      builder: (_) => AlertDialog(
++        backgroundColor: const Color(0xFF1A2535),
++        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
++        title: const Row(
++          children: [
++            Icon(Icons.check_circle, color: Color(0xFF4CAF50)),
++            SizedBox(width: 8),
++            Text('Cancellation Logged',
++                style: TextStyle(color: Colors.white, fontSize: 18)),
++          ],
++        ),
++        content: const Text(
++          'The pickup cancellation has been recorded.\n\nThe NGO, Donor, and Admin have been notified of the unsafe food condition.',
++          style: TextStyle(color: Colors.white70, fontSize: 14),
++        ),
++        actions: [
++          ElevatedButton(
++            onPressed: () {
++              Navigator.of(context).pop();
++              Navigator.of(context).pop();
++            },
++            style: ElevatedButton.styleFrom(
++                backgroundColor: const Color(0xFF4CAF50),
++                foregroundColor: Colors.white,
++                shape: RoundedRectangleBorder(
++                    borderRadius: BorderRadius.circular(10))),
++            child: const Text('Done'),
++          ),
++        ],
++      ),
++    );
++  }
++
++  @override
++  Widget build(BuildContext context) {
++    return Scaffold(
++      backgroundColor: const Color(0xFF0F1923),
++      appBar: AppBar(
++        backgroundColor: const Color(0xFF1A2535),
++        foregroundColor: Colors.white,
++        title: const Text('Cancel – Unsafe Food',
++            style: TextStyle(
++                fontWeight: FontWeight.bold, color: Colors.redAccent)),
++        elevation: 0,
++      ),
++      body: Column(
++        children: [
++          _buildDangerBanner(),
++          Expanded(
++            child: SingleChildScrollView(
++              padding: const EdgeInsets.all(16),
++              child: Column(
++                crossAxisAlignment: CrossAxisAlignment.start,
++                children: [
++                  const Text('Why is the food unsafe? *',
++                      style: TextStyle(
++                          color: Colors.white,
++                          fontWeight: FontWeight.bold,
++                          fontSize: 15)),
++                  const SizedBox(height: 12),
++                  ..._unsafeReasons.map((r) => _buildReasonTile(r)),
++                  const SizedBox(height: 20),
++                  const Text('Detailed Description *',
++                      style: TextStyle(
++                          color: Colors.white,
++                          fontWeight: FontWeight.bold,
++                          fontSize: 15)),
++                  const SizedBox(height: 8),
++                  TextField(
++                    controller: _detailsController,
++                    style: const TextStyle(color: Colors.white),
++                    maxLines: 4,
++                    decoration: InputDecoration(
++                      hintText:
++                          'Describe what you observed in detail. This will be included in the audit log...',
++                      hintStyle: const TextStyle(color: Colors.white38),
++                      filled: true,
++                      fillColor: const Color(0xFF1A2535),
++                      border: OutlineInputBorder(
++                        borderRadius: BorderRadius.circular(12),
++                        borderSide: const BorderSide(color: Color(0xFF2D3748)),
++                      ),
++                      enabledBorder: OutlineInputBorder(
++                        borderRadius: BorderRadius.circular(12),
++                        borderSide: const BorderSide(color: Color(0xFF2D3748)),
++                      ),
++                      focusedBorder: OutlineInputBorder(
++                        borderRadius: BorderRadius.circular(12),
++                        borderSide: const BorderSide(color: Colors.redAccent),
++                      ),
++                    ),
++                  ),
++                  const SizedBox(height: 20),
++                  _buildNotificationInfo(),
++                  const SizedBox(height: 16),
++                  _buildConfirmationCheckbox(),
++                ],
++              ),
++            ),
++          ),
++          _buildCancelButton(),
++        ],
++      ),
++    );
++  }
++
++  Widget _buildDangerBanner() {
++    return Container(
++      padding: const EdgeInsets.all(14),
++      color: Colors.redAccent.withOpacity(0.12),
++      child: Row(
++        children: const [
++          Icon(Icons.health_and_safety_outlined,
++              color: Colors.redAccent, size: 22),
++          SizedBox(width: 10),
++          Expanded(
++            child: Text(
++              'This action cannot be undone. All stakeholders will be immediately notified. A full audit log will be created.',
++              style: TextStyle(color: Colors.redAccent, fontSize: 12),
++            ),
++          ),
++        ],
++      ),
++    );
++  }
++
++  Widget _buildReasonTile(String reason) {
++    final isSelected = _selectedReason == reason;
++    return GestureDetector(
++      onTap: () => setState(() => _selectedReason = reason),
++      child: AnimatedContainer(
++        duration: const Duration(milliseconds: 150),
++        margin: const EdgeInsets.only(bottom: 8),
++        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
++        decoration: BoxDecoration(
++          color: isSelected
++              ? Colors.redAccent.withOpacity(0.12)
++              : const Color(0xFF1A2535),
++          borderRadius: BorderRadius.circular(10),
++          border: Border.all(
++            color: isSelected ? Colors.redAccent : const Color(0xFF2D3748),
++            width: isSelected ? 1.5 : 1,
++          ),
++        ),
++        child: Row(
++          children: [
++            Icon(
++              isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
++              color: isSelected ? Colors.redAccent : Colors.white38,
++              size: 20,
++            ),
++            const SizedBox(width: 10),
++            Expanded(
++              child: Text(
++                reason,
++                style: TextStyle(
++                    color: isSelected ? Colors.white : Colors.white70,
++                    fontSize: 14),
++              ),
++            ),
++          ],
++        ),
++      ),
++    );
++  }
++
++  Widget _buildNotificationInfo() {
++    return Container(
++      padding: const EdgeInsets.all(12),
++      decoration: BoxDecoration(
++        color: const Color(0xFF1A2535),
++        borderRadius: BorderRadius.circular(10),
++        border: Border.all(color: const Color(0xFF2D3748)),
++      ),
++      child: Column(
++        crossAxisAlignment: CrossAxisAlignment.start,
++        children: [
++          const Text('Will immediately notify:',
++              style: TextStyle(
++                  color: Colors.white70,
++                  fontWeight: FontWeight.bold,
++                  fontSize: 13)),
++          const SizedBox(height: 8),
++          _notifRow(Icons.business, 'NGO – ${widget.ngoId}'),
++          _notifRow(Icons.person, 'Donor – ${widget.donorId}'),
++          _notifRow(Icons.admin_panel_settings, 'Platform Admin'),
++        ],
++      ),
++    );
++  }
++
++  Widget _notifRow(IconData icon, String label) => Padding(
++        padding: const EdgeInsets.symmetric(vertical: 3),
++        child: Row(
++          children: [
++            Icon(icon, color: Colors.redAccent.withOpacity(0.7), size: 16),
++            const SizedBox(width: 8),
++            Flexible(
++                child: Text(label,
++                    style:
++                        const TextStyle(color: Colors.white60, fontSize: 12))),
++          ],
++        ),
++      );
++
++  Widget _buildConfirmationCheckbox() {
++    return CheckboxListTile(
++      value: _hasConfirmed,
++      onChanged: (v) => setState(() => _hasConfirmed = v ?? false),
++      activeColor: Colors.redAccent,
++      title: const Text(
++        'I confirm that the food was unsafe and I have a valid reason for this cancellation.',
++        style: TextStyle(color: Colors.white70, fontSize: 13),
++      ),
++      controlAffinity: ListTileControlAffinity.leading,
++      contentPadding: EdgeInsets.zero,
++    );
++  }
++
++  Widget _buildCancelButton() {
++    final canSubmit =
++        _selectedReason != null && _hasConfirmed && !_isSubmitting;
++    return Container(
++      padding: const EdgeInsets.all(16),
++      decoration: const BoxDecoration(
++        color: Color(0xFF1A2535),
++        border: Border(top: BorderSide(color: Color(0xFF2D3748))),
++      ),
++      child: SizedBox(
++        width: double.infinity,
++        child: ElevatedButton.icon(
++          onPressed: canSubmit ? _submitCancellation : null,
++          icon: _isSubmitting
++              ? const SizedBox(
++                  width: 16,
++                  height: 16,
++                  child: CircularProgressIndicator(
++                      strokeWidth: 2, color: Colors.white))
++              : const Icon(Icons.dangerous),
++          label: const Text('Submit Cancellation & Notify All',
++              style: TextStyle(fontWeight: FontWeight.bold)),
++          style: ElevatedButton.styleFrom(
++            backgroundColor: Colors.redAccent,
++            foregroundColor: Colors.white,
++            disabledBackgroundColor: const Color(0xFF2D3748),
++            disabledForegroundColor: Colors.white38,
++            padding: const EdgeInsets.symmetric(vertical: 14),
++            shape:
++                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
++          ),
++        ),
++      ),
++    );
++  }
++
++  @override
++  void dispose() {
++    _detailsController.dispose();
++    super.dispose();
++  }
++}
+diff --git a/food_redistribution_app/lib/services/hygiene_service.dart b/food_redistribution_app/lib/services/hygiene_service.dart
+new file mode 100644
+index 0000000..4ba2fdf
+--- /dev/null
++++ b/food_redistribution_app/lib/services/hygiene_service.dart
+@@ -0,0 +1,310 @@
++import 'dart:io';
++import 'package:cloud_firestore/cloud_firestore.dart';
++import 'package:firebase_storage/firebase_storage.dart';
++import '../models/hygiene_checklist.dart';
++
++/// HygieneService handles all Firestore operations related to:
++/// - Hygiene checklist submission by NGOs
++/// - Donation acceptance/rejection by NGOs
++/// - Clarification requests (NGO ↔ Donor)
++/// - Locking donation records after acceptance
++/// - Volunteer pickup proof image upload
++/// - Unsafe pickup cancellation with stakeholder notification
++class HygieneService {
++  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
++  final FirebaseStorage _storage = FirebaseStorage.instance;
++
++  // ─────────────────────────────────────────────────────────────
++  // 1. HYGIENE CHECKLIST
++  // ─────────────────────────────────────────────────────────────
++
++  /// Save/update the hygiene checklist for a donation (before accept/reject).
++  Future<void> submitHygieneChecklist(HygieneChecklist checklist) async {
++    await _firestore
++        .collection('donations')
++        .doc(checklist.donationId)
++        .collection('hygieneChecklist')
++        .doc('record')
++        .set(checklist.toFirestore(), SetOptions(merge: true));
++
++    // Also mirror key fields to the parent donation for easy querying
++    await _firestore.collection('donations').doc(checklist.donationId).update({
++      'hygieneChecklistComplete': checklist.allMandatoryChecked,
++      'hygieneChecklistAt': FieldValue.serverTimestamp(),
++    });
++  }
++
++  /// Fetch existing checklist record for a donation
++  Future<HygieneChecklist?> getHygieneChecklist(String donationId) async {
++    final doc = await _firestore
++        .collection('donations')
++        .doc(donationId)
++        .collection('hygieneChecklist')
++        .doc('record')
++        .get();
++    if (!doc.exists) return null;
++    return HygieneChecklist.fromFirestore(doc);
++  }
++
++  // ─────────────────────────────────────────────────────────────
++  // 2. ACCEPT DONATION (with lock)
++  // ─────────────────────────────────────────────────────────────
++
++  /// Accept a donation. Locks the record immediately after acceptance.
++  Future<void> acceptDonation({
++    required String donationId,
++    required String ngoId,
++    required HygieneChecklist checklist,
++  }) async {
++    // Submit the final checklist
++    await submitHygieneChecklist(
++      HygieneChecklist(
++        donationId: donationId,
++        ngoId: ngoId,
++        items: checklist.items,
++        isComplete: true,
++        completedAt: DateTime.now(),
++        notes: checklist.notes,
++      ),
++    );
++
++    // Accept + lock the donation
++    await _firestore.collection('donations').doc(donationId).update({
++      'status': 'accepted',
++      'isLocked': true,
++      'acceptedByNGO': ngoId,
++      'acceptedAt': FieldValue.serverTimestamp(),
++      'updatedAt': FieldValue.serverTimestamp(),
++    });
++  }
++
++  // ─────────────────────────────────────────────────────────────
++  // 3. REJECT DONATION
++  // ─────────────────────────────────────────────────────────────
++
++  /// Reject a donation with a mandatory reason.
++  Future<void> rejectDonation({
++    required String donationId,
++    required String ngoId,
++    required String reason,
++    String? additionalInfo,
++  }) async {
++    await _firestore.collection('donations').doc(donationId).update({
++      'status': 'rejected',
++      'rejectionReason': reason,
++      'rejectionAdditionalInfo': additionalInfo,
++      'rejectedByNGO': ngoId,
++      'rejectedAt': FieldValue.serverTimestamp(),
++      'updatedAt': FieldValue.serverTimestamp(),
++    });
++
++    // Log rejection event
++    await _firestore.collection('audit_logs').add({
++      'event': 'donation_rejected',
++      'donationId': donationId,
++      'ngoId': ngoId,
++      'reason': reason,
++      'timestamp': FieldValue.serverTimestamp(),
++    });
++  }
++
++  // ─────────────────────────────────────────────────────────────
++  // 4. CLARIFICATION REQUESTS
++  // ─────────────────────────────────────────────────────────────
++
++  /// NGO sends a clarification request to the donor.
++  Future<void> sendClarificationRequest({
++    required String donationId,
++    required String ngoId,
++    required String donorId,
++    required String question,
++  }) async {
++    // Store under donation subcollection
++    await _firestore
++        .collection('donations')
++        .doc(donationId)
++        .collection('clarifications')
++        .add({
++      'donationId': donationId,
++      'ngoId': ngoId,
++      'donorId': donorId,
++      'question': question,
++      'reply': null,
++      'isResolved': false,
++      'createdAt': FieldValue.serverTimestamp(),
++    });
++
++    // Update donation status to pending_clarification
++    await _firestore.collection('donations').doc(donationId).update({
++      'status': 'pending_clarification',
++      'updatedAt': FieldValue.serverTimestamp(),
++    });
++  }
++
++  /// Fetch all clarification requests for a donation
++  Stream<List<ClarificationRequest>> getClarifications(String donationId) {
++    return _firestore
++        .collection('donations')
++        .doc(donationId)
++        .collection('clarifications')
++        .orderBy('createdAt', descending: true)
++        .snapshots()
++        .map((snap) => snap.docs
++            .map((d) => ClarificationRequest.fromFirestore(d))
++            .toList());
++  }
++
++  /// Donor replies to a clarification request
++  Future<void> replyClarification({
++    required String donationId,
++    required String clarificationId,
++    required String reply,
++  }) async {
++    await _firestore
++        .collection('donations')
++        .doc(donationId)
++        .collection('clarifications')
++        .doc(clarificationId)
++        .update({
++      'reply': reply,
++      'repliedAt': FieldValue.serverTimestamp(),
++      'isResolved': true,
++    });
++
++    // Restore status to listed so NGO can review again
++    await _firestore.collection('donations').doc(donationId).update({
++      'status': 'listed',
++      'updatedAt': FieldValue.serverTimestamp(),
++    });
++  }
++
++  // ─────────────────────────────────────────────────────────────
++  // 5. PICKUP PROOF IMAGE UPLOAD
++  // ─────────────────────────────────────────────────────────────
++
++  /// Upload pickup proof image to Firebase Storage, save URL to Firestore.
++  Future<String> uploadPickupProofImage({
++    required String donationId,
++    required String volunteerId,
++    required File imageFile,
++    required String foodCondition, // good / moderate / unsafe
++    String? notes,
++  }) async {
++    // Upload to Storage
++    final ref = _storage.ref(
++        'pickup_proofs/$donationId/${DateTime.now().millisecondsSinceEpoch}.jpg');
++    await ref.putFile(imageFile);
++    final imageUrl = await ref.getDownloadURL();
++
++    // Save proof record
++    await _firestore
++        .collection('donations')
++        .doc(donationId)
++        .collection('pickupProofs')
++        .add({
++      'donationId': donationId,
++      'volunteerId': volunteerId,
++      'imageUrl': imageUrl,
++      'condition': foodCondition,
++      'notes': notes,
++      'uploadedAt': FieldValue.serverTimestamp(),
++    });
++
++    // Update donation with proof URL
++    await _firestore.collection('donations').doc(donationId).update({
++      'pickupProofImageUrl': imageUrl,
++      'pickupProofUploaded': true,
++      'pickupCondition': foodCondition,
++      'updatedAt': FieldValue.serverTimestamp(),
++    });
++
++    return imageUrl;
++  }
++
++  // ─────────────────────────────────────────────────────────────
++  // 6. UNSAFE PICKUP CANCELLATION
++  // ─────────────────────────────────────────────────────────────
++
++  /// Volunteer cancels pickup because food is unsafe.
++  /// Logs mandatory reason and triggers stakeholder notification.
++  Future<void> cancelPickupUnsafe({
++    required String donationId,
++    required String volunteerId,
++    required String reason,
++    required String details,
++    required String ngoId,
++    required String donorId,
++    String? adminId,
++  }) async {
++    final cancellationData = {
++      'donationId': donationId,
++      'volunteerId': volunteerId,
++      'reason': reason,
++      'details': details,
++      'cancelledAt': FieldValue.serverTimestamp(),
++      'notifiedStakeholders': [ngoId, donorId, if (adminId != null) adminId],
++    };
++
++    // Log cancellation to subcollection
++    await _firestore
++        .collection('donations')
++        .doc(donationId)
++        .collection('unsafeCancellations')
++        .add(cancellationData);
++
++    // Update donation status
++    await _firestore.collection('donations').doc(donationId).update({
++      'status': 'pickup_cancelled_unsafe',
++      'cancellationReason': reason,
++      'cancellationDetails': details,
++      'cancelledByVolunteer': volunteerId,
++      'cancelledAt': FieldValue.serverTimestamp(),
++      'updatedAt': FieldValue.serverTimestamp(),
++    });
++
++    // Audit log
++    await _firestore.collection('audit_logs').add({
++      'event': 'unsafe_pickup_cancelled',
++      'donationId': donationId,
++      'volunteerId': volunteerId,
++      'reason': reason,
++      'details': details,
++      'timestamp': FieldValue.serverTimestamp(),
++      'severity': 'high',
++    });
++
++    // Notification records for each stakeholder (picked up by notification service)
++    final message =
++        'Pickup cancelled: food deemed unsafe. Reason: $reason. Details: $details';
++    for (final uid in [ngoId, donorId, if (adminId != null) adminId]) {
++      await _firestore.collection('notifications').add({
++        'recipientId': uid,
++        'donationId': donationId,
++        'type': 'unsafe_pickup_cancelled',
++        'message': message,
++        'isRead': false,
++        'createdAt': FieldValue.serverTimestamp(),
++      });
++    }
++  }
++
++  // ─────────────────────────────────────────────────────────────
++  // HELPERS
++  // ─────────────────────────────────────────────────────────────
++
++  /// Check whether a donation record is locked
++  Future<bool> isDonationLocked(String donationId) async {
++    final doc = await _firestore.collection('donations').doc(donationId).get();
++    return (doc.data()?['isLocked'] as bool?) ?? false;
++  }
++
++  /// Get audit logs for a specific donation
++  Stream<List<Map<String, dynamic>>> getDonationAuditLogs(String donationId) {
++    return _firestore
++        .collection('audit_logs')
++        .where('donationId', isEqualTo: donationId)
++        .orderBy('timestamp', descending: true)
++        .snapshots()
++        .map((snap) => snap.docs.map((d) => d.data()).toList());
++  }
++}
+-- 
+2.53.0
+
