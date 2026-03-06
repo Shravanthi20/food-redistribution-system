@@ -5,11 +5,11 @@ class LogisticsManagementDashboard extends StatefulWidget {
   const LogisticsManagementDashboard({super.key});
 
   @override
-  State<LogisticsManagementDashboard> createState() =>
-      _LogisticsManagementDashboardState();
+  LogisticsManagementDashboardState createState() =>
+      LogisticsManagementDashboardState();
 }
 
-class _LogisticsManagementDashboardState
+class LogisticsManagementDashboardState
     extends State<LogisticsManagementDashboard> {
   String _selectedTimeRange = '24h';
 
@@ -636,6 +636,7 @@ class _LogisticsManagementDashboardState
 
   void _refreshData() {
     // Simulate data refresh
+    Future.delayed(const Duration(seconds: 2), () {});
   }
 
   void _exportData() {

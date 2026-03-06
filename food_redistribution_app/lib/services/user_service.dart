@@ -1,10 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/user.dart';
 import '../models/donor_profile.dart';
 import '../models/ngo_profile.dart';
 import '../models/volunteer_profile.dart';
 import '../config/firebase_schema.dart';
-import 'package:flutter/foundation.dart';
 
 class UserService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -207,18 +207,12 @@ class UserService {
             'updatedAt': Timestamp.now(),
           });
         } else if (role == UserRole.ngo.name) {
-          final orgQuery = await _firestore
-              .collection(Collections.organizations)
-              .where('ownerId', isEqualTo: userId)
-              .limit(1)
-              .get();
-
-          if (orgQuery.docs.isNotEmpty) {
-            batch.update(orgQuery.docs.first.reference, {
-              'isVerified': approved,
-              'updatedAt': Timestamp.now(),
-            });
-          }
+          final profileRef =
+              _firestore.collection(Collections.organizations).doc(userId);
+          batch.update(profileRef, {
+            'isVerified': approved,
+            'updatedAt': Timestamp.now(),
+          });
         } else if (role == UserRole.volunteer.name) {
           final profileRef =
               _firestore.collection(Collections.users).doc(userId);
@@ -383,16 +377,6 @@ class UserService {
               : null;
 
         case 'ngo':
-          final query = await _firestore
-              .collection(Collections.organizations)
-              .where('ownerId', isEqualTo: userId)
-              .limit(1)
-              .get();
-
-          if (query.docs.isNotEmpty) {
-            return NGOProfile.fromFirestore(query.docs.first);
-          }
-
           final profileDoc = await _firestore
               .collection(Collections.organizations)
               .doc(userId)

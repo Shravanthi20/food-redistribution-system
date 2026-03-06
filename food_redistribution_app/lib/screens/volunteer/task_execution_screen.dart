@@ -98,12 +98,13 @@ class _TaskExecutionScreenState extends State<TaskExecutionScreen> {
                     Provider.of<AuthProvider>(context, listen: false).user!.uid;
                 await _locationService.stopLocationTracking(userId);
                 await _updateStatus(DonationStatus.delivered);
-                if (!context.mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text("Delivery Confirmed! Tracking Stopped.")),
-                );
-                Navigator.pop(context);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text("Delivery Confirmed! Tracking Stopped.")),
+                  );
+                  Navigator.pop(context);
+                }
               }),
           ]
         ],
@@ -122,9 +123,7 @@ class _TaskExecutionScreenState extends State<TaskExecutionScreen> {
             .showSnackBar(SnackBar(content: Text("Error: $e")));
       }
     } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 

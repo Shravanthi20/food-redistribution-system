@@ -473,13 +473,14 @@ class NotificationDispatchService {
   ) async {
     switch (channel) {
       case NotificationChannel.push:
-        return await _notificationService.sendNotification(
+        await _notificationService.sendNotification(
           userId: recipientId,
           title: title,
           message: body,
           type: 'push',
           data: data,
         );
+        return true;
 
       case NotificationChannel.inApp:
         return await _sendInAppNotification(recipientId, title, body, data);
@@ -536,22 +537,20 @@ class NotificationDispatchService {
   Future<void> processScheduledNotifications() async {
     try {
       final now = DateTime.now();
-      final docs = await _firestoreService.query(
-        'scheduled_notifications',
-        where: [
-          {'field': 'status', 'operator': '==', 'value': 'pending'},
-          {'field': 'scheduledFor', 'operator': '<=', 'value': now},
-        ],
-        limit: 100, // Process in batches
-      );
+      final docs = await FirebaseFirestore.instance
+          .collection('scheduled_notifications')
+          .where('status', isEqualTo: 'pending')
+          .where('scheduledFor', isLessThanOrEqualTo: now)
+          .limit(100)
+          .get();
 
       for (final doc in docs.docs) {
-        final data = doc.data() as Map<String, dynamic>;
+        final data = doc.data();
         final notification = ScheduledNotification(
           id: data['id'],
           templateId: data['templateId'],
-          recipientIds: List<String>.from(data['recipientIds'] ?? []),
-          data: data['data'] as Map<String, dynamic>? ?? {},
+          recipientIds: List<String>.from(data['recipientIds']),
+          data: data['data'],
           scheduledFor: (data['scheduledFor'] as Timestamp).toDate(),
           priority: NotificationPriority.values.firstWhere(
             (p) => p.toString() == data['priority'],
@@ -834,13 +833,11 @@ class NotificationDispatchService {
     final start = startDate ?? DateTime.now().subtract(const Duration(days: 7));
     final end = endDate ?? DateTime.now();
 
-    final records = await _firestoreService.query(
-      'notification_records',
-      where: [
-        {'field': 'sentAt', 'operator': '>=', 'value': start},
-        {'field': 'sentAt', 'operator': '<=', 'value': end},
-      ],
-    );
+    final records = await FirebaseFirestore.instance
+        .collection('notification_records')
+        .where('sentAt', isGreaterThanOrEqualTo: start)
+        .where('sentAt', isLessThanOrEqualTo: end)
+        .get();
 
     final analytics = {
       'totalSent': 0,
@@ -852,23 +849,22 @@ class NotificationDispatchService {
     };
 
     for (final doc in records.docs) {
-      final data = doc.data() as Map<String, dynamic>;
+      final data = doc.data();
       analytics['totalSent'] = (analytics['totalSent'] as int) + 1;
 
-      final category = data['category'] as String? ?? 'unknown';
-      final categoryBreakdown =
-          analytics['categoryBreakdown'] as Map<String, int>;
-      categoryBreakdown[category] = (categoryBreakdown[category] ?? 0) + 1;
+      // Category breakdown
+      final category = data['category'] as String;
+      (analytics['categoryBreakdown'] as Map<String, int>)[category] =
+          ((analytics['categoryBreakdown'] as Map<String, int>)[category] ??
+                  0) +
+              1;
 
       // Daily trends
-      final sentAt = data['sentAt'];
-      if (sentAt is Timestamp) {
-        final date = sentAt.toDate();
-        final dateKey =
-            '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-        final dailyTrends = analytics['dailyTrends'] as Map<String, int>;
-        dailyTrends[dateKey] = (dailyTrends[dateKey] ?? 0) + 1;
-      }
+      final date = (data['sentAt'] as Timestamp).toDate();
+      final dateKey =
+          '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+      (analytics['dailyTrends'] as Map<String, int>)[dateKey] =
+          ((analytics['dailyTrends'] as Map<String, int>)[dateKey] ?? 0) + 1;
     }
 
     return analytics;

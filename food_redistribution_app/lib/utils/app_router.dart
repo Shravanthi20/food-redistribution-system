@@ -23,13 +23,11 @@ import '../screens/ngo/clarify_request_screen.dart';
 import '../screens/ngo/reject_donation_screen.dart';
 import '../screens/ngo/inspect_delivery_screen.dart';
 import '../screens/ngo/ngo_dashboard.dart';
-import '../screens/ngo/create_food_request_screen.dart'; // [NEW]
 import '../screens/ngo/update_demand_screen.dart';
 
 // Dashboards
 
 import '../screens/volunteer/volunteer_dashboard.dart';
-import '../real_time_tracking/demo/delivery_demo_screen.dart';
 import '../screens/admin/admin_dashboard_screen.dart';
 import '../screens/admin/admin_issues_screen.dart';
 import '../screens/admin/verify_user_screen.dart';
@@ -62,7 +60,6 @@ class AppRouter {
   static const String donorVerification =
       '/donor-verification'; // [NEW] Donor verification route
   static const String ngoDashboard = '/ngo-dashboard';
-  static const String ngoCreateRequest = '/ngo/create-request'; // [NEW]
   static const String volunteerDashboard = '/volunteer-dashboard';
   static const String adminDashboard = '/admin-dashboard';
   static const String adminIssues = '/admin-issues';
@@ -90,7 +87,6 @@ class AppRouter {
   static const String issueReporting = '/issue-reporting'; // [NEW]
   static const String verifyUser = '/admin/verify-user';
   static const String volunteerProfile = '/volunteer-profile';
-  static const String deliveryDemo = '/delivery-demo';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -153,10 +149,6 @@ class AppRouter {
       case ngoDashboard:
         return MaterialPageRoute(builder: (_) => const NGODashboard());
 
-      case ngoCreateRequest:
-        return MaterialPageRoute(
-            builder: (_) => const CreateFoodRequestScreen());
-
       case documentSubmission:
         return MaterialPageRoute(
           builder: (_) => const DocumentSubmissionScreen(),
@@ -217,9 +209,6 @@ class AppRouter {
 
       case adminDashboard:
         return MaterialPageRoute(builder: (_) => const AdminDashboardScreen());
-
-      case deliveryDemo:
-        return MaterialPageRoute(builder: (_) => const DeliveryDemoScreen());
 
       case adminIssues:
         return MaterialPageRoute(builder: (_) => const AdminIssuesScreen());

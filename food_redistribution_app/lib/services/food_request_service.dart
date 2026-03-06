@@ -20,17 +20,15 @@ class FoodRequestService {
   }) async {
     try {
       // Validate NGO exists and is verified
-      final query = await _firestore
+      final ngoDoc = await _firestore
           .collection(Collections.organizations)
-          .where('ownerId', isEqualTo: ngoId)
-          .limit(1)
+          .doc(ngoId)
           .get();
-
-      if (query.docs.isEmpty) {
+      if (!ngoDoc.exists) {
         throw Exception('NGO profile not found');
       }
 
-      final ngo = NGOProfile.fromFirestore(query.docs.first);
+      final ngo = NGOProfile.fromFirestore(ngoDoc);
       if (!ngo.isVerified) {
         throw Exception('NGO must be verified to create food requests');
       }
@@ -582,8 +580,8 @@ class FoodRequestService {
             requests.where((r) => r.status == RequestStatus.cancelled).length,
         'criticalRequests':
             requests.where((r) => r.urgency == RequestUrgency.critical).length,
-        'totalBeneficiaries': requests.fold<int>(
-            0, (total, r) => total + r.expectedBeneficiaries),
+        'totalBeneficiaries':
+            requests.fold<int>(0, (acc, r) => acc + r.expectedBeneficiaries),
       };
     } catch (e) {
       await _auditService.logEvent(

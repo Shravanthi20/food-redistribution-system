@@ -666,10 +666,8 @@ class QueryService {
     final resolvedQueries = queries.where((q) => q.resolvedAt != null).toList();
     if (resolvedQueries.isEmpty) return 0.0;
 
-    final totalHours =
-        resolvedQueries.fold<double>(0.0, (totalDuration, query) {
-      return totalDuration +
-          query.resolvedAt!.difference(query.createdAt).inHours;
+    final totalHours = resolvedQueries.fold<double>(0.0, (acc, query) {
+      return acc + query.resolvedAt!.difference(query.createdAt).inHours;
     });
 
     return totalHours / resolvedQueries.length;

@@ -11,18 +11,18 @@ class DeliveryCoordinationScreen extends StatefulWidget {
   const DeliveryCoordinationScreen({super.key});
 
   @override
-  State<DeliveryCoordinationScreen> createState() =>
-      _DeliveryCoordinationScreenState();
+  DeliveryCoordinationScreenState createState() =>
+      DeliveryCoordinationScreenState();
 }
 
-class _DeliveryCoordinationScreenState
+class DeliveryCoordinationScreenState
     extends State<DeliveryCoordinationScreen> {
   // ignore: unused_field
   late final VolunteerDispatchService _dispatchService;
   // ignore: unused_field
   late final RealTimeTrackingService _trackingService;
   // ignore: unused_field
-  late final RouteOptimizationService _routeService;
+  late final RouteOptimizationEngine _routeService;
   // late FoodDonationMatchingService _matchingService;
 
   final List<DeliveryTask> _activeTasks = [];
@@ -30,6 +30,8 @@ class _DeliveryCoordinationScreenState
   final List<MatchingResult> _availableMatches = [];
   DeliveryTask? _selectedTask;
   bool _isLoading = false;
+  // ignore: unused_field
+  String _searchQuery = '';
 
   // TextControllers for create task dialog
   final _donationIdController = TextEditingController();
@@ -124,7 +126,7 @@ class _DeliveryCoordinationScreenState
                 filled: true,
                 fillColor: Colors.grey[50],
               ),
-              onChanged: (value) {},
+              onChanged: (value) => setState(() => _searchQuery = value),
             ),
           ),
           const SizedBox(width: 12),
