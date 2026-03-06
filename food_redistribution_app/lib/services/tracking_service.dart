@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/food_donation.dart';
 import '../config/firebase_schema.dart';
-import 'package:flutter/foundation.dart';
 
 class TrackingService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

@@ -11,7 +11,6 @@ import '../services/firestore_service.dart';
 import '../services/location_service.dart';
 import '../services/notification_service.dart';
 import '../services/audit_service.dart';
-import 'package:flutter/foundation.dart';
 
 class NGOProvider extends ChangeNotifier {
   final FoodRequestService _requestService = FoodRequestService();
@@ -98,7 +97,7 @@ class NGOProvider extends ChangeNotifier {
   Future<void> _loadAvailableDonations(String ngoId) async {
     try {
       final available = await _donationService.getAvailableDonations();
-      final matched = await _donationService.getDonationsMatchedToNGO(ngoId);
+      final matched = await _donationService.getAvailableDonationsForNGO(ngoId);
 
       // Combine them so that the UI can find matched donations using getDonationById
       _availableDonations = [...available, ...matched];
