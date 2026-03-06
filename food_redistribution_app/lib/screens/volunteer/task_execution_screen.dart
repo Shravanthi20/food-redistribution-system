@@ -351,9 +351,7 @@ class _TaskExecutionScreenState extends State<TaskExecutionScreen> {
         ).showSnackBar(SnackBar(content: Text("Error: $e")));
       }
     } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 

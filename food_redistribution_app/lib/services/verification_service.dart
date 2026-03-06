@@ -1,8 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/user.dart';
 import 'notification_service.dart';
 import '../config/firebase_schema.dart';
-import 'package:flutter/foundation.dart';
 
 enum DocumentType {
   businessLicense,
@@ -202,37 +202,7 @@ class VerificationService {
             'verifiedAt': Timestamp.now(),
             'verifiedBy': adminId,
             'updatedAt': Timestamp.now(),
-            'isVerified': true,
           });
-
-          // Fetch user to update specific role profiles
-          final userDoc = await userRef.get();
-          if (userDoc.exists) {
-            final userData = userDoc.data() as Map<String, dynamic>;
-            final role = userData['role'];
-            if (role == UserRole.ngo.name || role == 'ngo') {
-              final orgQuery = await _firestore
-                  .collection(Collections.organizations)
-                  .where('ownerId', isEqualTo: userId)
-                  .limit(1)
-                  .get();
-
-              if (orgQuery.docs.isNotEmpty) {
-                batch.update(orgQuery.docs.first.reference, {
-                  'isVerified': true,
-                  'updatedAt': Timestamp.now(),
-                });
-              }
-            } else if (role == UserRole.donor.name ||
-                role == 'donor' ||
-                role == UserRole.volunteer.name ||
-                role == 'volunteer') {
-              batch.update(userRef, {
-                'isVerified': true,
-                'updatedAt': Timestamp.now(),
-              });
-            }
-          }
           break;
         case VerificationStatus.rejected:
           batch.update(userRef, {

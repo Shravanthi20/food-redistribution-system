@@ -1,10 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uuid/uuid.dart';
 import '../models/food_donation.dart';
 import '../models/ngo_profile.dart';
 import '../config/firebase_schema.dart';
 import 'user_service.dart';
-import 'package:flutter/foundation.dart';
 
 class FoodDonationService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -62,11 +62,6 @@ class FoodDonationService {
         isUrgent: donation.isUrgent,
       );
 
-      debugPrint('--- DEBUG: CREATING DONATION ---');
-      debugPrint('DonorID: $donorId');
-      debugPrint('HasRole(donor/admin): $hasRole');
-      debugPrint('Donation Data: ${donationWithId.toFirestore()}');
-
       // Store in Firestore
       await _firestore
           .collection(Collections.donations)
@@ -75,6 +70,10 @@ class FoodDonationService {
 
       // Log action
       await _logDonationAction('donation_created', donationId, donorId);
+
+      // [REMOVED] Client-Side Matching
+      // Relying on Cloud Functions (functions/index.js) as requested.
+      // _triggerClientSideMatching(donationId, donationWithId);
 
       return donationId;
     } catch (e) {
@@ -566,22 +565,6 @@ class FoodDonationService {
       return query.docs.map((doc) => FoodDonation.fromFirestore(doc)).toList();
     } catch (e) {
       debugPrint('Error getting donor donations: $e');
-      return [];
-    }
-  }
-
-  // Get donations matched/assigned to specific NGO
-  Future<List<FoodDonation>> getDonationsMatchedToNGO(String ngoId) async {
-    try {
-      final query = await _firestore
-          .collection(Collections.donations)
-          .where('assignedNGOId', isEqualTo: ngoId)
-          .orderBy('createdAt', descending: true)
-          .get();
-
-      return query.docs.map((doc) => FoodDonation.fromFirestore(doc)).toList();
-    } catch (e) {
-      debugPrint('Error getting donations matched to NGO: $e');
       return [];
     }
   }

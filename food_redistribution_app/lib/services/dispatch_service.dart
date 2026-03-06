@@ -505,13 +505,11 @@ class VolunteerDispatchService {
   /// Helper functions for data retrieval
   Future<FoodDonation?> _getDonation(String donationId) async {
     final doc = await _firestoreService.get('food_donations', donationId);
-    if (!doc.exists) return null;
     return FoodDonation.fromMap(doc.data()! as Map<String, dynamic>);
   }
 
   Future<VolunteerProfile?> _getVolunteer(String volunteerId) async {
     final doc = await _firestoreService.get('volunteer_profiles', volunteerId);
-    if (!doc.exists) return null;
     return VolunteerProfile.fromMap(doc.data()! as Map<String, dynamic>);
   }
 
@@ -561,7 +559,7 @@ class VolunteerDispatchService {
       'timestamp': DateTime.now(),
     };
 
-    await _firestoreService.create(
-        'dispatch_analytics', 'analysis_$taskId', analysis);
+    final docId = '${taskId}_${DateTime.now().millisecondsSinceEpoch}';
+    await _firestoreService.create('dispatch_analytics', docId, analysis);
   }
 }

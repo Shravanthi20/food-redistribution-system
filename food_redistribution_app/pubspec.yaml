@@ -38,7 +38,6 @@ dependencies:
   google_maps_flutter: ^2.9.0
   geocoding: ^3.0.0
   dart_geohash: ^2.0.0
-  flutter_background_geolocation: ^4.13.0
   workmanager: ^0.5.2
   
   # Notifications
@@ -62,6 +61,7 @@ dependencies:
   file_picker: ^10.3.10
   firebase_storage: ^12.4.10
   flutter_image_compress: ^2.4.0
+  image_picker: ^1.1.2
   fl_chart: ^0.66.2
 
 dev_dependencies:
@@ -73,7 +73,6 @@ dev_dependencies:
   mockito: ^5.4.4
   build_runner: ^2.4.13
 
-  firebase_core_platform_interface: any
 flutter:
   uses-material-design: true
 

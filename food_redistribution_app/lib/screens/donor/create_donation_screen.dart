@@ -142,7 +142,8 @@ class _CreateDonationScreenState extends State<CreateDonationScreen> {
 
     final donationId = await donationProvider.createDonation(donation);
 
-    if (donationId != null && mounted) {
+    if (!mounted) return;
+    if (donationId != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Donation created successfully!'),
@@ -150,7 +151,7 @@ class _CreateDonationScreenState extends State<CreateDonationScreen> {
         ),
       );
       Navigator.pop(context, true); // Return true to indicate success
-    } else if (mounted && donationProvider.errorMessage != null) {
+    } else if (donationProvider.errorMessage != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(donationProvider.errorMessage!),

@@ -12,6 +12,7 @@ import 'providers/ngo_provider.dart';
 import 'providers/accessibility_provider.dart';
 import 'utils/app_theme.dart';
 import 'utils/app_router.dart';
+//import 'screens/donor/donor_dashboard.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -56,7 +57,7 @@ class FoodRedistributionApp extends StatelessWidget {
             darkTheme: darkTheme,
             themeMode: themeProvider.themeMode,
             onGenerateRoute: AppRouter.generateRoute,
-            home: const WelcomeScreen(),
+            home: const WelcomeScreen(), // ✅ DIRECT OPEN
             debugShowCheckedModeBanner: false,
             builder: (context, child) {
               final mediaQueryData = MediaQuery.of(context);

@@ -4,9 +4,6 @@ import '../../providers/ngo_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../models/food_request.dart';
 import '../../services/location_service.dart';
-import '../../widgets/gradient_scaffold.dart';
-import '../../utils/app_theme.dart';
-import '../../widgets/custom_text_field.dart';
 
 class CreateFoodRequestScreen extends StatefulWidget {
   const CreateFoodRequestScreen({super.key});
@@ -38,10 +35,9 @@ class _CreateFoodRequestScreenState extends State<CreateFoodRequestScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return GradientScaffold(
-      showAnimatedBackground: true,
-      appBar: GlassAppBar(
-        title: 'Create Food Request',
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Create Food Request'),
         actions: [
           if (_isSubmitting)
             const Padding(
@@ -60,25 +56,30 @@ class _CreateFoodRequestScreenState extends State<CreateFoodRequestScreen> {
               // Basic Information
               Text(
                 'Basic Information',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: AppTheme.textPrimary, fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 16),
 
-              CustomTextField(
+              TextFormField(
                 controller: _titleController,
-                label: 'Request Title',
-                hintText: 'e.g., Urgent Food for 50 Children',
+                decoration: const InputDecoration(
+                  labelText: 'Request Title',
+                  hintText: 'e.g., Urgent Food for 50 Children',
+                  border: OutlineInputBorder(),
+                ),
                 validator: (value) =>
                     value?.isEmpty == true ? 'Title is required' : null,
               ),
 
               const SizedBox(height: 16),
 
-              CustomTextField(
+              TextFormField(
                 controller: _descriptionController,
-                label: 'Description',
-                hintText: 'Describe your food requirements and context',
+                decoration: const InputDecoration(
+                  labelText: 'Description',
+                  hintText: 'Describe your food requirements and context',
+                  border: OutlineInputBorder(),
+                ),
                 maxLines: 3,
                 validator: (value) =>
                     value?.isEmpty == true ? 'Description is required' : null,
@@ -89,8 +90,7 @@ class _CreateFoodRequestScreenState extends State<CreateFoodRequestScreen> {
               // Food Requirements
               Text(
                 'Food Requirements',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: AppTheme.textPrimary, fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 16),
 
@@ -98,9 +98,12 @@ class _CreateFoodRequestScreenState extends State<CreateFoodRequestScreen> {
                 children: [
                   Expanded(
                     flex: 2,
-                    child: CustomTextField(
+                    child: TextFormField(
                       controller: _quantityController,
-                      label: 'Quantity',
+                      decoration: const InputDecoration(
+                        labelText: 'Quantity',
+                        border: OutlineInputBorder(),
+                      ),
                       keyboardType: TextInputType.number,
                       validator: (value) {
                         if (value?.isEmpty == true) {
@@ -117,23 +120,9 @@ class _CreateFoodRequestScreenState extends State<CreateFoodRequestScreen> {
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       initialValue: _selectedUnit,
-                      dropdownColor: AppTheme.surfaceGlassDark,
-                      style: const TextStyle(color: AppTheme.textPrimary),
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: 'Unit',
-                        labelStyle:
-                            const TextStyle(color: AppTheme.textSecondary),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Colors.white24),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide:
-                              const BorderSide(color: AppTheme.accentTeal),
-                        ),
-                        filled: true,
-                        fillColor: Colors.white.withValues(alpha: 0.1),
+                        border: OutlineInputBorder(),
                       ),
                       items: const [
                         DropdownMenuItem(
@@ -153,11 +142,7 @@ class _CreateFoodRequestScreenState extends State<CreateFoodRequestScreen> {
               const SizedBox(height: 16),
 
               // Food Types
-              Text(
-                'Required Food Types:',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: AppTheme.textPrimary, fontWeight: FontWeight.bold),
-              ),
+              const Text('Required Food Types:'),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
@@ -166,17 +151,6 @@ class _CreateFoodRequestScreenState extends State<CreateFoodRequestScreen> {
                     .map((category) => FilterChip(
                           label: Text(category.name),
                           selected: _selectedFoodTypes.contains(category),
-                          backgroundColor:
-                              AppTheme.surfaceGlassDark.withValues(alpha: 0.5),
-                          selectedColor:
-                              AppTheme.accentTeal.withValues(alpha: 0.3),
-                          checkmarkColor: AppTheme.textPrimary,
-                          labelStyle: TextStyle(
-                            color: _selectedFoodTypes.contains(category)
-                                ? AppTheme.textPrimary
-                                : AppTheme.textSecondary,
-                          ),
-                          side: const BorderSide(color: Colors.white24),
                           onSelected: (selected) {
                             setState(() {
                               if (selected) {
@@ -193,11 +167,7 @@ class _CreateFoodRequestScreenState extends State<CreateFoodRequestScreen> {
               const SizedBox(height: 16),
 
               // Dietary Restrictions
-              Text(
-                'Dietary Restrictions:',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: AppTheme.textPrimary, fontWeight: FontWeight.bold),
-              ),
+              const Text('Dietary Restrictions:'),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
@@ -214,18 +184,6 @@ class _CreateFoodRequestScreenState extends State<CreateFoodRequestScreen> {
                           label: Text(restriction),
                           selected: _selectedDietaryRestrictions
                               .contains(restriction),
-                          backgroundColor:
-                              AppTheme.surfaceGlassDark.withValues(alpha: 0.5),
-                          selectedColor:
-                              AppTheme.accentTeal.withValues(alpha: 0.3),
-                          checkmarkColor: AppTheme.textPrimary,
-                          labelStyle: TextStyle(
-                            color: _selectedDietaryRestrictions
-                                    .contains(restriction)
-                                ? AppTheme.textPrimary
-                                : AppTheme.textSecondary,
-                          ),
-                          side: const BorderSide(color: Colors.white24),
                           onSelected: (selected) {
                             setState(() {
                               if (selected) {
@@ -243,12 +201,9 @@ class _CreateFoodRequestScreenState extends State<CreateFoodRequestScreen> {
               const SizedBox(height: 16),
 
               SwitchListTile(
-                title: const Text('Requires Refrigeration',
-                    style: TextStyle(color: AppTheme.textPrimary)),
+                title: const Text('Requires Refrigeration'),
                 subtitle: const Text(
-                    'Check if temperature controlled storage is needed',
-                    style: TextStyle(color: AppTheme.textSecondary)),
-                activeThumbColor: AppTheme.accentTeal,
+                    'Check if temperature controlled storage is needed'),
                 value: _requiresRefrigeration,
                 onChanged: (value) =>
                     setState(() => _requiresRefrigeration = value),
@@ -259,28 +214,15 @@ class _CreateFoodRequestScreenState extends State<CreateFoodRequestScreen> {
               // Timing and Urgency
               Text(
                 'Timing & Urgency',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: AppTheme.textPrimary, fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 16),
 
               DropdownButtonFormField<RequestUrgency>(
                 initialValue: _selectedUrgency,
-                dropdownColor: AppTheme.surfaceGlassDark,
-                style: const TextStyle(color: AppTheme.textPrimary),
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Urgency Level',
-                  labelStyle: const TextStyle(color: AppTheme.textSecondary),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Colors.white24),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppTheme.accentTeal),
-                  ),
-                  filled: true,
-                  fillColor: Colors.white.withValues(alpha: 0.1),
+                  border: OutlineInputBorder(),
                 ),
                 items: RequestUrgency.values
                     .map(
@@ -297,12 +239,9 @@ class _CreateFoodRequestScreenState extends State<CreateFoodRequestScreen> {
               const SizedBox(height: 16),
 
               ListTile(
-                title: const Text('Needed By',
-                    style: TextStyle(color: AppTheme.textPrimary)),
-                subtitle: Text(_selectedNeededBy.toString().substring(0, 16),
-                    style: const TextStyle(color: AppTheme.textSecondary)),
-                trailing: const Icon(Icons.calendar_today,
-                    color: AppTheme.accentTeal),
+                title: const Text('Needed By'),
+                subtitle: Text(_selectedNeededBy.toString().substring(0, 16)),
+                trailing: const Icon(Icons.calendar_today),
                 onTap: () async {
                   final date = await showDatePicker(
                     context: context,
@@ -338,15 +277,17 @@ class _CreateFoodRequestScreenState extends State<CreateFoodRequestScreen> {
               // Beneficiaries
               Text(
                 'Beneficiaries',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: AppTheme.textPrimary, fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 16),
 
-              CustomTextField(
+              TextFormField(
                 controller: _beneficiariesController,
-                label: 'Expected Number of Beneficiaries',
-                hintText: 'How many people will this food serve?',
+                decoration: const InputDecoration(
+                  labelText: 'Expected Number of Beneficiaries',
+                  hintText: 'How many people will this food serve?',
+                  border: OutlineInputBorder(),
+                ),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value?.isEmpty == true) {
@@ -360,11 +301,7 @@ class _CreateFoodRequestScreenState extends State<CreateFoodRequestScreen> {
               const SizedBox(height: 16),
 
               // Serving Population
-              Text(
-                'Serving Population:',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: AppTheme.textPrimary, fontWeight: FontWeight.bold),
-              ),
+              const Text('Serving Population:'),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
@@ -382,18 +319,6 @@ class _CreateFoodRequestScreenState extends State<CreateFoodRequestScreen> {
                           label: Text(population),
                           selected:
                               _selectedServingPopulation.contains(population),
-                          backgroundColor:
-                              AppTheme.surfaceGlassDark.withValues(alpha: 0.5),
-                          selectedColor:
-                              AppTheme.accentTeal.withValues(alpha: 0.3),
-                          checkmarkColor: AppTheme.textPrimary,
-                          labelStyle: TextStyle(
-                            color:
-                                _selectedServingPopulation.contains(population)
-                                    ? AppTheme.textPrimary
-                                    : AppTheme.textSecondary,
-                          ),
-                          side: const BorderSide(color: Colors.white24),
                           onSelected: (selected) {
                             setState(() {
                               if (selected) {
@@ -412,21 +337,16 @@ class _CreateFoodRequestScreenState extends State<CreateFoodRequestScreen> {
               // Location
               Text(
                 'Delivery Location',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: AppTheme.textPrimary, fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 16),
 
               ListTile(
-                title: const Text('Set Delivery Location',
-                    style: TextStyle(color: AppTheme.textPrimary)),
-                subtitle: Text(
-                    _deliveryLocation != null
-                        ? 'Location set'
-                        : 'Tap to set your delivery location',
-                    style: const TextStyle(color: AppTheme.textSecondary)),
-                trailing:
-                    const Icon(Icons.location_on, color: AppTheme.accentTeal),
+                title: const Text('Set Delivery Location'),
+                subtitle: Text(_deliveryLocation != null
+                    ? 'Location set'
+                    : 'Tap to set your delivery location'),
+                trailing: const Icon(Icons.location_on),
                 onTap: _setDeliveryLocation,
               ),
 
@@ -437,8 +357,6 @@ class _CreateFoodRequestScreenState extends State<CreateFoodRequestScreen> {
                 child: ElevatedButton(
                   onPressed: _isSubmitting ? null : _submitRequest,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                   child: _isSubmitting

@@ -1,8 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../config/firebase_schema.dart';
-import 'package:flutter/foundation.dart';
 
 class NotificationService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -35,7 +35,7 @@ class NotificationService {
   }
 
   // Send notification to user
-  Future<bool> sendNotification({
+  Future<void> sendNotification({
     required String userId,
     required String title,
     required String message,
@@ -52,21 +52,19 @@ class NotificationService {
         'read': false,
         'createdAt': Timestamp.now(),
       });
-      return true;
     } catch (e) {
       debugPrint('Error sending notification: $e');
-      return false;
     }
   }
 
   // Alias methods for compatibility with DispatchService
-  Future<bool> sendToUser({
+  Future<void> sendToUser({
     required String userId,
     required String title,
     required String body,
     Map<String, dynamic>? data,
   }) async {
-    return await sendNotification(
+    await sendNotification(
         userId: userId,
         title: title,
         message: body,
@@ -74,7 +72,7 @@ class NotificationService {
         data: data);
   }
 
-  Future<bool> sendToDonor({
+  Future<void> sendToDonor({
     required String donationId,
     required String title,
     required String body,
@@ -82,7 +80,7 @@ class NotificationService {
   }) async {
     // Note: In a real app, we'd look up the donorId from the donationId
     // For now, we'll assume the donorId is passed as donationId OR we'd need to fetch it
-    return await sendNotification(
+    await sendNotification(
         userId: donationId,
         title: title,
         message: body,
@@ -91,7 +89,7 @@ class NotificationService {
   }
 
   // Send notification to multiple stakeholders (Donor, NGO, potentially Admin)
-  Future<bool> sendToStakeholders({
+  Future<void> sendToStakeholders({
     required String taskId,
     required String title,
     required String body,
@@ -101,32 +99,26 @@ class NotificationService {
       // Fetch task to get donor and NGO IDs
       final taskDoc =
           await _firestore.collection(Collections.deliveries).doc(taskId).get();
-      if (!taskDoc.exists) return false;
+      if (!taskDoc.exists) return;
 
       final taskData = taskDoc.data()!;
       final donorId = taskData['donorId'] as String?;
       final ngoId = taskData['ngoId'] as String?;
       final volunteerId = taskData['volunteerId'] as String?;
 
-      bool success = true;
-
       if (donorId != null) {
-        success &= await sendToUser(
-            userId: donorId, title: title, body: body, data: data);
+        await sendToUser(userId: donorId, title: title, body: body, data: data);
       }
       if (ngoId != null) {
-        success &= await sendToUser(
-            userId: ngoId, title: title, body: body, data: data);
+        await sendToUser(userId: ngoId, title: title, body: body, data: data);
       }
       // Usually doesn't notify the volunteer about their own actions but could be useful
       if (volunteerId != null && (data?['notifyVolunteer'] == true)) {
-        success &= await sendToUser(
+        await sendToUser(
             userId: volunteerId, title: title, body: body, data: data);
       }
-      return success;
     } catch (e) {
       debugPrint('Error sending notifications to stakeholders: $e');
-      return false;
     }
   }
 

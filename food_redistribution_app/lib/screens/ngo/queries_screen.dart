@@ -3,8 +3,6 @@ import 'package:provider/provider.dart';
 import '../../providers/ngo_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../models/query.dart';
-import '../../widgets/glass_widgets.dart';
-import '../../utils/app_theme.dart';
 
 class QueriesScreen extends StatefulWidget {
   const QueriesScreen({super.key});
@@ -35,19 +33,9 @@ class _QueriesScreenState extends State<QueriesScreen> {
                       Expanded(
                         child: DropdownButtonFormField<QueryStatus>(
                           initialValue: _selectedStatus,
-                          dropdownColor: AppTheme.surfaceGlassDark,
-                          style: const TextStyle(color: AppTheme.textPrimary),
                           decoration: const InputDecoration(
                             labelText: 'Status',
-                            labelStyle:
-                                TextStyle(color: AppTheme.textSecondary),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white24),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: AppTheme.accentTeal),
-                            ),
+                            border: OutlineInputBorder(),
                           ),
                           items: [
                             const DropdownMenuItem<QueryStatus>(
@@ -69,19 +57,9 @@ class _QueriesScreenState extends State<QueriesScreen> {
                       Expanded(
                         child: DropdownButtonFormField<QueryType>(
                           initialValue: _selectedType,
-                          dropdownColor: AppTheme.surfaceGlassDark,
-                          style: const TextStyle(color: AppTheme.textPrimary),
                           decoration: const InputDecoration(
                             labelText: 'Type',
-                            labelStyle:
-                                TextStyle(color: AppTheme.textSecondary),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white24),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: AppTheme.accentTeal),
-                            ),
+                            border: OutlineInputBorder(),
                           ),
                           items: [
                             const DropdownMenuItem<QueryType>(
@@ -111,13 +89,11 @@ class _QueriesScreenState extends State<QueriesScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(Icons.help_outline,
-                              size: 64, color: AppTheme.textMuted),
+                              size: 64, color: Colors.grey),
                           SizedBox(height: 16),
-                          Text('No queries found',
-                              style: TextStyle(color: AppTheme.textPrimary)),
+                          Text('No queries found'),
                           SizedBox(height: 8),
-                          Text('Try adjusting your filters',
-                              style: TextStyle(color: AppTheme.textSecondary)),
+                          Text('Try adjusting your filters'),
                         ],
                       ),
                     )
@@ -155,9 +131,9 @@ class _QueriesScreenState extends State<QueriesScreen> {
   }
 
   Widget _buildQueryCard(Query query, NGOProvider ngoProvider) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: GlassContainer(
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -227,7 +203,6 @@ class _QueriesScreenState extends State<QueriesScreen> {
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: AppTheme.textPrimary,
               ),
             ),
 
@@ -236,7 +211,7 @@ class _QueriesScreenState extends State<QueriesScreen> {
             // Description
             Text(
               query.description,
-              style: const TextStyle(color: AppTheme.textSecondary),
+              style: TextStyle(color: Colors.grey[600]),
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
             ),
@@ -246,22 +221,19 @@ class _QueriesScreenState extends State<QueriesScreen> {
             // Metadata
             Row(
               children: [
-                const Icon(Icons.access_time,
-                    size: 16, color: AppTheme.textMuted),
+                Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
                 const SizedBox(width: 4),
                 Text(
                   'Created ${_formatDate(query.createdAt)}',
-                  style:
-                      const TextStyle(color: AppTheme.textMuted, fontSize: 12),
+                  style: TextStyle(color: Colors.grey[600], fontSize: 12),
                 ),
                 const SizedBox(width: 16),
                 if (query.updates.isNotEmpty) ...[
-                  const Icon(Icons.update, size: 16, color: AppTheme.textMuted),
+                  Icon(Icons.update, size: 16, color: Colors.grey[600]),
                   const SizedBox(width: 4),
                   Text(
                     'Last updated ${_formatDate(query.updates.last.timestamp)}',
-                    style: const TextStyle(
-                        color: AppTheme.textMuted, fontSize: 12),
+                    style: TextStyle(color: Colors.grey[600], fontSize: 12),
                   ),
                 ],
               ],

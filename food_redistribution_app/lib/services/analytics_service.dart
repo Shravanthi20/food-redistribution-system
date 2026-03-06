@@ -1,6 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../config/firebase_schema.dart';
-import 'package:flutter/foundation.dart';
 
 class AnalyticsService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -150,6 +150,7 @@ class AnalyticsService {
         } else if (address.contains('south')) {
           region = 'South Side';
         }
+
         counts[region] = (counts[region] ?? 0) + 1;
       }
 
