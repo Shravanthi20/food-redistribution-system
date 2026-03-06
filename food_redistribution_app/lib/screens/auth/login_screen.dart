@@ -192,12 +192,14 @@ class _LoginScreenState extends State<LoginScreen>
                                 ],
                               ),
                               border: Border.all(
-                                color: AppTheme.accentTeal.withValues(alpha: 0.3),
+                                color:
+                                    AppTheme.accentTeal.withValues(alpha: 0.3),
                                 width: 2,
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppTheme.accentTeal.withValues(alpha: 0.3),
+                                  color: AppTheme.accentTeal
+                                      .withValues(alpha: 0.3),
                                   blurRadius: 30,
                                   spreadRadius: 5,
                                 ),

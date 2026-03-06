@@ -292,11 +292,13 @@ class GlassTextField extends StatelessWidget {
                 fillColor: AppTheme.surfaceGlassDark,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
-                  borderSide: const BorderSide(color: AppTheme.surfaceGlassBorder),
+                  borderSide:
+                      const BorderSide(color: AppTheme.surfaceGlassBorder),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
-                  borderSide: const BorderSide(color: AppTheme.surfaceGlassBorder),
+                  borderSide:
+                      const BorderSide(color: AppTheme.surfaceGlassBorder),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
@@ -399,8 +401,9 @@ class GlassChip extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color:
-              isSelected ? color.withValues(alpha: 0.2) : AppTheme.surfaceGlassDark,
+          color: isSelected
+              ? color.withValues(alpha: 0.2)
+              : AppTheme.surfaceGlassDark,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected ? color : AppTheme.surfaceGlassBorder,

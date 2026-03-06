@@ -75,8 +75,8 @@ class DonationDetailScreen extends StatelessWidget {
                       // Status Header
                       Container(
                         padding: const EdgeInsets.all(20),
-                        color:
-                            _getStatusColor(donation.status).withValues(alpha: 0.1),
+                        color: _getStatusColor(donation.status)
+                            .withValues(alpha: 0.1),
                         child: Column(
                           children: [
                             Icon(

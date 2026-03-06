@@ -188,7 +188,8 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
                     Text(
                       'Help us distribute food to those in need',
                       style: TextStyle(
-                          fontSize: 16, color: Colors.white.withValues(alpha: 0.7)),
+                          fontSize: 16,
+                          color: Colors.white.withValues(alpha: 0.7)),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 32),
@@ -529,8 +530,8 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
                           style: TextStyle(color: Colors.white)),
                       subtitle: Text(
                           'We have refrigeration facilities for storage',
-                          style:
-                              TextStyle(color: Colors.white.withValues(alpha: 0.6))),
+                          style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.6))),
                       value: _refrigerationAvailable,
                       activeColor: AppTheme.accentTeal,
                       checkColor: Colors.white,
@@ -639,8 +640,8 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
                       children: [
                         Text(
                           'Already have an account? ',
-                          style:
-                              TextStyle(color: Colors.white.withValues(alpha: 0.7)),
+                          style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.7)),
                         ),
                         GestureDetector(
                           onTap: () {

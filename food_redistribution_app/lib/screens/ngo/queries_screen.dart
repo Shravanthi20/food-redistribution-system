@@ -162,7 +162,8 @@ class _QueriesScreenState extends State<QueriesScreen> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: _getPriorityColor(query.priority).withValues(alpha: 0.1),
+                    color: _getPriorityColor(query.priority)
+                        .withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -311,7 +312,8 @@ class _QueriesScreenState extends State<QueriesScreen> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: _getStatusColor(query.status).withValues(alpha: 0.1),
+                        color: _getStatusColor(query.status)
+                            .withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(

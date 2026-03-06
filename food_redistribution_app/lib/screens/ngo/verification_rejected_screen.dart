@@ -258,7 +258,8 @@ class _VerificationRejectedScreenState extends State<VerificationRejectedScreen>
                             Container(
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
-                                color: AppTheme.warningAmber.withValues(alpha: 0.2),
+                                color: AppTheme.warningAmber
+                                    .withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: const Icon(
@@ -290,8 +291,7 @@ class _VerificationRejectedScreenState extends State<VerificationRejectedScreen>
                         const SizedBox(height: 12),
                         ...(_rejectionDetails?['feedback'] as List<String>? ??
                                 [])
-                            .map((feedback) => _buildFeedbackItem(feedback))
-                            ,
+                            .map((feedback) => _buildFeedbackItem(feedback)),
                       ],
                     ),
                   ),
@@ -308,7 +308,8 @@ class _VerificationRejectedScreenState extends State<VerificationRejectedScreen>
                             Container(
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
-                                color: AppTheme.accentCyan.withValues(alpha: 0.2),
+                                color:
+                                    AppTheme.accentCyan.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: const Icon(
@@ -334,8 +335,7 @@ class _VerificationRejectedScreenState extends State<VerificationRejectedScreen>
                             .asMap()
                             .entries
                             .map((entry) =>
-                                _buildNextStepItem(entry.key + 1, entry.value))
-                            ,
+                                _buildNextStepItem(entry.key + 1, entry.value)),
                       ],
                     ),
                   ),
@@ -351,7 +351,8 @@ class _VerificationRejectedScreenState extends State<VerificationRejectedScreen>
                           Container(
                             padding: const EdgeInsets.all(14),
                             decoration: BoxDecoration(
-                              color: AppTheme.successTeal.withValues(alpha: 0.2),
+                              color:
+                                  AppTheme.successTeal.withValues(alpha: 0.2),
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(
@@ -384,7 +385,8 @@ class _VerificationRejectedScreenState extends State<VerificationRejectedScreen>
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 16, vertical: 8),
                             decoration: BoxDecoration(
-                              color: AppTheme.successTeal.withValues(alpha: 0.15),
+                              color:
+                                  AppTheme.successTeal.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(

@@ -523,7 +523,8 @@ class VerificationService {
         'documentCount': submittedDocs.length,
       });
 
-      debugPrint('Donor verification submitted successfully with ID: $submissionId');
+      debugPrint(
+          'Donor verification submitted successfully with ID: $submissionId');
       return submissionId;
     } catch (e) {
       debugPrint('Error submitting donor verification: $e');

@@ -396,7 +396,8 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
                       return DropdownMenuItem(
                         value: type,
                         child: Text(_getDonorTypeDisplayName(type),
-                            style: const TextStyle(color: AppTheme.textPrimary)),
+                            style:
+                                const TextStyle(color: AppTheme.textPrimary)),
                       );
                     }).toList(),
                     onChanged: (val) =>
@@ -446,8 +447,8 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
                         .map((country) => DropdownMenuItem(
                               value: country,
                               child: Text(country,
-                                  style:
-                                      const TextStyle(color: AppTheme.textPrimary)),
+                                  style: const TextStyle(
+                                      color: AppTheme.textPrimary)),
                             ))
                         .toList(),
                     onChanged: (val) {
