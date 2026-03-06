@@ -1,0 +1,339 @@
+# =============================================================================
+# CD Pipeline — Continuous Deployment
+# Triggers on:
+#   - Push to main/master (staging deployment)
+#   - Release tags v*.*.* (production deployment)
+# Deploys: Android APK/AAB, Firebase Rules, and web build
+# =============================================================================
+
+name: CD — Deploy
+
+on:
+  push:
+    branches: [ "main", "master" ]
+    # Only trigger CD when actual source files change, not docs
+    paths:
+      - 'food_redistribution_app/lib/**'
+      - 'food_redistribution_app/pubspec.*'
+      - 'food_redistribution_app/firestore.rules'
+      - 'food_redistribution_app/storage.rules'
+      - 'food_redistribution_app/firebase.json'
+  release:
+    types: [published]
+
+# Prevent concurrent deployments
+concurrency:
+  group: cd-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  FLUTTER_VERSION: '3.24.0'
+  JAVA_VERSION: '17'
+  WORKING_DIR: ./food_redistribution_app
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────
+  # JOB 1: Run CI checks first (gate)
+  # ─────────────────────────────────────────────────────────────────
+  ci-gate:
+    name: CI Gate — Verify Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.WORKING_DIR }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+          cache: true
+
+      - name: Cache Pub dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.WORKING_DIR }}/.dart_tool
+            ${{ env.WORKING_DIR }}/.packages
+            ~/.pub-cache
+          key: pub-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            pub-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Create CI firebase_options.dart
+        run: |
+          cat <<'EOF' > lib/firebase_options.dart
+          import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
+          import 'package:flutter/foundation.dart'
+              show defaultTargetPlatform, kIsWeb, TargetPlatform;
+
+          class DefaultFirebaseOptions {
+            static FirebaseOptions get currentPlatform {
+              return const FirebaseOptions(
+                apiKey: 'ci-dummy-key',
+                appId: '1:000000000000:android:0000000000000000',
+                messagingSenderId: '000000000000',
+                projectId: 'ci-dummy-project',
+              );
+            }
+          }
+          EOF
+
+      - name: Analyze project
+        run: flutter analyze --no-fatal-warnings
+
+      - name: Run tests
+        run: flutter test
+
+  # ─────────────────────────────────────────────────────────────────
+  # JOB 2: Build Release APK & AAB
+  # ─────────────────────────────────────────────────────────────────
+  build-release:
+    name: Build Release Artifacts
+    runs-on: ubuntu-latest
+    needs: ci-gate
+    defaults:
+      run:
+        working-directory: ${{ env.WORKING_DIR }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+          cache: true
+
+      - name: Cache Pub dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.WORKING_DIR }}/.dart_tool
+            ${{ env.WORKING_DIR }}/.packages
+            ~/.pub-cache
+          key: pub-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            pub-${{ runner.os }}-
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Create CI firebase_options.dart
+        run: |
+          cat <<'EOF' > lib/firebase_options.dart
+          import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
+          import 'package:flutter/foundation.dart'
+              show defaultTargetPlatform, kIsWeb, TargetPlatform;
+
+          class DefaultFirebaseOptions {
+            static FirebaseOptions get currentPlatform {
+              return const FirebaseOptions(
+                apiKey: 'ci-dummy-key',
+                appId: '1:000000000000:android:0000000000000000',
+                messagingSenderId: '000000000000',
+                projectId: 'ci-dummy-project',
+              );
+            }
+          }
+          EOF
+
+      # --- Signing Configuration ---
+      # For production, decode a base64-encoded keystore from secrets
+      - name: Decode Android keystore
+        if: github.event_name == 'release'
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 --decode > android/app/release-keystore.jks
+
+      - name: Create key.properties
+        if: github.event_name == 'release'
+        env:
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+        run: |
+          cat > android/key.properties <<EOF
+          storePassword=$STORE_PASSWORD
+          keyPassword=$KEY_PASSWORD
+          keyAlias=$KEY_ALIAS
+          storeFile=release-keystore.jks
+          EOF
+
+      # --- Build APK (always) ---
+      - name: Build release APK
+        run: flutter build apk --release
+
+      # --- Build AAB (for production releases only) ---
+      - name: Build release AAB (App Bundle)
+        if: github.event_name == 'release'
+        run: flutter build appbundle --release
+
+      # --- Upload Build Artifacts ---
+      - name: Upload release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk-${{ github.sha }}
+          path: ${{ env.WORKING_DIR }}/build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 30
+
+      - name: Upload release AAB
+        if: github.event_name == 'release'
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-aab-${{ github.ref_name }}
+          path: ${{ env.WORKING_DIR }}/build/app/outputs/bundle/release/app-release.aab
+          retention-days: 90
+
+  # ─────────────────────────────────────────────────────────────────
+  # JOB 3: Deploy Firebase Rules & Configuration
+  # ─────────────────────────────────────────────────────────────────
+  deploy-firebase:
+    name: Deploy Firebase Rules
+    runs-on: ubuntu-latest
+    needs: ci-gate
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    defaults:
+      run:
+        working-directory: ${{ env.WORKING_DIR }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Deploy Firestore rules
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        run: firebase deploy --only firestore:rules --token "$FIREBASE_TOKEN" --project food-redistribution-plat-86785
+
+      - name: Deploy Storage rules
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        run: firebase deploy --only storage --token "$FIREBASE_TOKEN" --project food-redistribution-plat-86785
+
+      - name: Deploy Firestore indexes
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        run: firebase deploy --only firestore:indexes --token "$FIREBASE_TOKEN" --project food-redistribution-plat-86785
+
+  # ─────────────────────────────────────────────────────────────────
+  # JOB 4: Build & Deploy Flutter Web (Firebase Hosting)
+  # ─────────────────────────────────────────────────────────────────
+  deploy-web:
+    name: Deploy Web to Firebase Hosting
+    runs-on: ubuntu-latest
+    needs: ci-gate
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    defaults:
+      run:
+        working-directory: ${{ env.WORKING_DIR }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Create CI firebase_options.dart
+        run: |
+          cat <<'EOF' > lib/firebase_options.dart
+          import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
+          import 'package:flutter/foundation.dart'
+              show defaultTargetPlatform, kIsWeb, TargetPlatform;
+
+          class DefaultFirebaseOptions {
+            static FirebaseOptions get currentPlatform {
+              return const FirebaseOptions(
+                apiKey: 'ci-dummy-key',
+                appId: '1:000000000000:android:0000000000000000',
+                messagingSenderId: '000000000000',
+                projectId: 'ci-dummy-project',
+              );
+            }
+          }
+          EOF
+
+      - name: Build Flutter Web
+        run: flutter build web --release
+
+      - name: Deploy to Firebase Hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          channelId: live
+          projectId: food-redistribution-plat-86785
+          entryPoint: ${{ env.WORKING_DIR }}
+
+  # ─────────────────────────────────────────────────────────────────
+  # JOB 5: Create GitHub Release with APK (on tag push)
+  # ─────────────────────────────────────────────────────────────────
+  github-release:
+    name: Attach APK to GitHub Release
+    runs-on: ubuntu-latest
+    needs: build-release
+    if: github.event_name == 'release'
+
+    steps:
+      - name: Download release APK
+        uses: actions/download-artifact@v4
+        with:
+          name: release-apk-${{ github.sha }}
+          path: ./artifacts
+
+      - name: Download release AAB
+        uses: actions/download-artifact@v4
+        with:
+          name: release-aab-${{ github.ref_name }}
+          path: ./artifacts
+
+      - name: Upload APK to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ./artifacts/app-release.apk
+            ./artifacts/app-release.aab
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
