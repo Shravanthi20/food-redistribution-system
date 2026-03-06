@@ -1,0 +1,77 @@
+name: Resolve PR Merge Conflicts
+
+on:
+  push:
+    branches:
+      - copilot/resolve-merge-conflicts
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  resolve-pr16-akshitha-hygiene-feature:
+    name: Merge master into akshitha-hygiene-feature (PR #16)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout akshitha-hygiene-feature
+        uses: actions/checkout@v4
+        with:
+          ref: akshitha-hygiene-feature
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure git
+        run: |
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+
+      - name: Fetch master
+        run: git fetch origin master
+
+      - name: Merge master with ours conflict strategy
+        run: |
+          git merge origin/master -X ours --no-edit \
+            -m "Merge master into akshitha-hygiene-feature, resolving conflicts"
+
+      - name: Ensure flutter_background_geolocation dependency is present
+        run: |
+          # flutter_background_geolocation was added in master but may have been
+          # overridden by the ours strategy. Ensure both deps are present.
+          if ! grep -q "flutter_background_geolocation" food_redistribution_app/pubspec.yaml; then
+            # Insert it after dart_geohash line
+            sed -i 's/  dart_geohash: \^2\.0\.0/  dart_geohash: ^2.0.0\n  flutter_background_geolocation: ^4.13.0/' \
+              food_redistribution_app/pubspec.yaml
+            git add food_redistribution_app/pubspec.yaml
+            git commit -m "chore: restore flutter_background_geolocation dep from master"
+          fi
+
+      - name: Push to akshitha-hygiene-feature
+        run: git push origin akshitha-hygiene-feature
+
+  resolve-pr17-accessibility-inclusive-ux:
+    name: Merge master into feature/accessibility-inclusive-ux (PR #17)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout feature/accessibility-inclusive-ux
+        uses: actions/checkout@v4
+        with:
+          ref: feature/accessibility-inclusive-ux
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure git
+        run: |
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+
+      - name: Fetch master
+        run: git fetch origin master
+
+      - name: Merge master with ours conflict strategy
+        run: |
+          git merge origin/master -X ours --no-edit \
+            -m "Merge master into feature/accessibility-inclusive-ux, resolving conflicts"
+
+      - name: Push to feature/accessibility-inclusive-ux
+        run: git push origin feature/accessibility-inclusive-ux
