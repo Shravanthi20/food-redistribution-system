@@ -1,0 +1,67 @@
+name: Fix Merge Conflicts – PR #16 and PR #17
+
+# Merges master into the two conflicted feature branches so that
+# PR #16 (akshitha-hygiene-feature) and PR #17 (feature/accessibility-inclusive-ux)
+# become conflict-free and ready to merge into master.
+#
+# Conflict strategy: -X ours
+#   When both branches modified the same lines, the feature-branch version is kept.
+#   This preserves all intentional feature work while incorporating master's changes.
+#
+# ── How to run ───────────────────────────────────────────────────────────────
+#
+#   Option A – GitHub Actions (one click):
+#     1. Go to Actions → "Fix Merge Conflicts – PR #16 and PR #17"
+#     2. Click "Run workflow" → Run
+#
+#   Option B – Run locally (requires push access to this repo):
+#     git clone https://github.com/Shravanthi20/food-redistribution-system.git
+#     cd food-redistribution-system
+#     bash scripts/fix-merge-conflicts.sh
+#
+# ─────────────────────────────────────────────────────────────────────────────
+
+on:
+  workflow_dispatch:   # Triggered manually from the Actions tab
+
+permissions:
+  contents: write      # Needed to push to the feature branches
+
+jobs:
+  fix-pr16:
+    name: Fix PR #16 – akshitha-hygiene-feature
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: akshitha-hygiene-feature
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Merge master (keep feature-branch changes on conflict)
+        run: |
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git fetch origin master
+          git merge origin/master -X ours --no-edit \
+            -m "Merge master into akshitha-hygiene-feature (conflict resolution)"
+          git push origin akshitha-hygiene-feature
+
+  fix-pr17:
+    name: Fix PR #17 – feature/accessibility-inclusive-ux
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/accessibility-inclusive-ux
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Merge master (keep feature-branch changes on conflict)
+        run: |
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git fetch origin master
+          git merge origin/master -X ours --no-edit \
+            -m "Merge master into feature/accessibility-inclusive-ux (conflict resolution)"
+          git push origin feature/accessibility-inclusive-ux
