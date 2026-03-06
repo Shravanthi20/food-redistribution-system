@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'dart:math' as math;
 
 /// Predictive Analytics Service
@@ -35,7 +36,7 @@ class PredictiveAnalyticsService {
       final hourlyDistribution = <int, int>{};
 
       for (final doc in snapshot.docs) {
-        final data = doc.data()! as Map<String, dynamic>;
+        final data = doc.data() as Map<String, dynamic>;
         final createdAt = (data['createdAt'] as Timestamp).toDate();
 
         // Count by day of week (0 = Monday, 6 = Sunday)

@@ -5,6 +5,7 @@ import '../../providers/donation_provider.dart';
 import '../../models/food_donation.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../widgets/loading_overlay.dart';
+import '../../widgets/gradient_scaffold.dart';
 
 class CreateDonationScreen extends StatefulWidget {
   const CreateDonationScreen({super.key});
@@ -162,10 +163,12 @@ class _CreateDonationScreenState extends State<CreateDonationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return GradientScaffold(
+      showAnimatedBackground: true,
       appBar: AppBar(
         title: const Text('Create Donation'),
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         foregroundColor: Colors.white,
       ),
       body: Consumer<DonationProvider>(

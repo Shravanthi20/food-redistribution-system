@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart'; // [NEW]
-import 'package:google_maps_flutter/google_maps_flutter.dart'; // [NEW] For LatLng
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../models/user.dart';
 import '../../services/user_service.dart';
 
 class UserSelectionScreen extends StatefulWidget {
   final UserRole role;
   final String title;
-  final LatLng? origin; // [NEW]
+  final LatLng? origin;
 
   const UserSelectionScreen({
     super.key,

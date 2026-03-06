@@ -6,7 +6,6 @@ import '../services/user_service.dart';
 // RBAC Middleware for protecting routes and widgets
 class RBACMiddleware {
   static final AuthService _authService = AuthService();
-
   // Route guard - check if user can access route
   static Future<bool> canAccessRoute(
       String routeName, UserRole? userRole) async {

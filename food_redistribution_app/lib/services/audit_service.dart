@@ -5,6 +5,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'dart:io';
 import '../models/enums.dart';
 import '../config/firebase_schema.dart';
+import 'package:flutter/foundation.dart';
 
 export '../models/enums.dart' show AuditEventType, AuditRiskLevel;
 
