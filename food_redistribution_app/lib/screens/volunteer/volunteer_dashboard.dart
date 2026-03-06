@@ -7,8 +7,6 @@ import '../../utils/app_router.dart';
 import '../../utils/app_theme.dart';
 import '../../widgets/gradient_scaffold.dart';
 import '../../widgets/glass_widgets.dart';
-import '../../real_time_tracking/widgets/delivery_status_panel.dart';
-import '../../real_time_tracking/widgets/donation_status_badge.dart';
 
 class VolunteerDashboard extends StatefulWidget {
   const VolunteerDashboard({super.key});
@@ -351,14 +349,13 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                         title: const Text('Sign Out',
                             style: TextStyle(color: AppTheme.errorCoral)),
                         onTap: () async {
-                          Navigator.pop(context); // Close bottom sheet
+                          Navigator.pop(context);
                           final auth =
                               Provider.of<AuthProvider>(context, listen: false);
                           await auth.signOut();
-                          if (context.mounted) {
-                            Navigator.pushNamedAndRemoveUntil(
-                                context, AppRouter.login, (route) => false);
-                          }
+                          if (!context.mounted) return;
+                          Navigator.pushNamedAndRemoveUntil(
+                              context, AppRouter.login, (route) => false);
                         },
                       ),
                     ],
@@ -578,13 +575,6 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                 );
               },
             ),
-          const SizedBox(height: 12),
-          // Real-time status panel for volunteers
-          DonationStatusBadge(
-              deliveryId: task.id.toString(), role: 'volunteer'),
-          const SizedBox(height: 8),
-          DeliveryStatusPanel(
-              role: 'volunteer', deliveryId: task.id.toString()),
         ],
       ),
     );

@@ -1,11 +1,11 @@
 #!/usr/bin/env dart
+// ignore_for_file: avoid_print
 
 import 'dart:math';
-import 'package:flutter/foundation.dart';
 
 void main() async {
-  debugPrint('🍽️  Food Redistribution App - Matching Algorithm Test');
-  debugPrint('=' * 50);
+  print('🍽️  Food Redistribution App - Matching Algorithm Test');
+  print('=' * 50);
 
   // Test Data Setup
   final testDonation = {
@@ -45,50 +45,47 @@ void main() async {
     }
   ];
 
-  debugPrint('📍 Test Donation: ${testDonation['title']}');
-  debugPrint('   Quantity: ${testDonation['quantity']} servings');
-  debugPrint('   Food Types: ${testDonation['foodTypes']}');
-  debugPrint('   Expires: ${testDonation['expiresAt']}');
-  debugPrint('');
+  print('📍 Test Donation: ${testDonation['title']}');
+  print('   Quantity: ${testDonation['quantity']} servings');
+  print('   Food Types: ${testDonation['foodTypes']}');
+  print('   Expires: ${testDonation['expiresAt']}');
+  print('');
 
-  debugPrint('🏢 Available NGOs:');
+  print('🏢 Available NGOs:');
   for (int i = 0; i < testNGOs.length; i++) {
     final ngo = testNGOs[i];
-    debugPrint('   ${i + 1}. ${ngo['organizationName']}');
-    debugPrint('      Serves: ${ngo['servingPopulation']}');
-    debugPrint('      Capacity: ${ngo['capacity']} people');
-    debugPrint('      Preferred: ${ngo['preferredFoodTypes']}');
+    print('   ${i + 1}. ${ngo['organizationName']}');
+    print('      Serves: ${ngo['servingPopulation']}');
+    print('      Capacity: ${ngo['capacity']} people');
+    print('      Preferred: ${ngo['preferredFoodTypes']}');
   }
-  debugPrint('');
+  print('');
 
   // Simulate Matching Algorithm
-  debugPrint('🎯 Running Matching Algorithm...');
+  print('🎯 Running Matching Algorithm...');
   final matches = _simulateMatching(testDonation, testNGOs);
 
-  debugPrint('📊 Matching Results:');
-  debugPrint('=' * 30);
+  print('📊 Matching Results:');
+  print('=' * 30);
 
   for (int i = 0; i < matches.length; i++) {
     final match = matches[i];
-    debugPrint(
+    print(
         'Rank ${i + 1}: ${match['ngoName']} (Score: ${match['score'].toStringAsFixed(2)})');
-    debugPrint('   Distance: ${match['distance'].toStringAsFixed(1)}km');
-    debugPrint(
-        '   Food Match: ${match['foodCompatibility'].toStringAsFixed(2)}');
-    debugPrint(
-        '   Capacity Match: ${match['capacityScore'].toStringAsFixed(2)}');
-    debugPrint(
+    print('   Distance: ${match['distance'].toStringAsFixed(1)}km');
+    print('   Food Match: ${match['foodCompatibility'].toStringAsFixed(2)}');
+    print('   Capacity Match: ${match['capacityScore'].toStringAsFixed(2)}');
+    print(
         '   Population Match: ${match['populationScore'].toStringAsFixed(2)}');
-    debugPrint('');
+    print('');
   }
 
-  debugPrint('✅ Algorithm Testing Complete!');
-  debugPrint(
-      '💡 The matching system is working with weighted scoring based on:');
-  debugPrint('   • Geographic proximity (30%)');
-  debugPrint('   • Food type compatibility (25%)');
-  debugPrint('   • NGO capacity (25%)');
-  debugPrint('   • Population served compatibility (20%)');
+  print('✅ Algorithm Testing Complete!');
+  print('💡 The matching system is working with weighted scoring based on:');
+  print('   • Geographic proximity (30%)');
+  print('   • Food type compatibility (25%)');
+  print('   • NGO capacity (25%)');
+  print('   • Population served compatibility (20%)');
 }
 
 List<Map<String, dynamic>> _simulateMatching(

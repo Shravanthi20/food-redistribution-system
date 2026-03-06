@@ -3,16 +3,22 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/tracking/location_tracking_model.dart';
 import '../models/enums.dart';
 import '../services/tracking/notification_handler.dart';
+import '../services/tracking/delay_detection_service.dart';
+import '../services/tracking/analytics_aggregation_service.dart';
 
 // Keep track of all deliveries happening right now
 class TrackingProvider extends ChangeNotifier {
-  late final FirebaseFirestore _firestore;
+  // ignore: unused_field
+  late final DelayDetectionService _delayDetectionService;
+  // ignore: unused_field
+  final AnalyticsAggregationService _analyticsService =
+      AnalyticsAggregationService();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  TrackingProvider({
-    FirebaseFirestore? firestore,
-    NotificationHandler? notificationHandler,
-  }) {
-    _firestore = firestore ?? FirebaseFirestore.instance;
+  TrackingProvider() {
+    _delayDetectionService = DelayDetectionService(
+      notificationHandler: NotificationHandler(),
+    );
   }
 
   // Tracking state
@@ -83,7 +89,7 @@ class TrackingProvider extends ChangeNotifier {
   }) async {
     try {
       await _firestore.collection('donations').doc(donationId).update({
-        'status': newStatus.name,
+        'status': newStatus,
         'updatedAt': FieldValue.serverTimestamp(),
         'updatedBy': userId,
         if (notes != null) 'notes': notes,
@@ -108,7 +114,6 @@ class TrackingProvider extends ChangeNotifier {
     required String taskId,
     required double latitude,
     required double longitude,
-    double? accuracy,
   }) async {
     try {
       final newLocation = LocationUpdate(
@@ -117,7 +122,6 @@ class TrackingProvider extends ChangeNotifier {
         taskId: taskId,
         latitude: latitude,
         longitude: longitude,
-        accuracy: accuracy ?? 0.0,
         timestamp: DateTime.now(),
         status: _trackingState.currentStatus ?? TrackingStatus.enRoute,
       );

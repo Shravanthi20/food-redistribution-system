@@ -433,19 +433,21 @@ class _FoodRequestDetailScreenState extends State<FoodRequestDetailScreen> {
               );
 
               if (success) {
-                if (!context.mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text('Request cancelled successfully')),
-                );
-                Navigator.pop(context);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('Request cancelled successfully')),
+                  );
+                  Navigator.pop(context);
+                }
               } else {
-                if (!context.mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                      content: Text(ngoProvider.errorMessage ??
-                          'Failed to cancel request')),
-                );
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                        content: Text(ngoProvider.errorMessage ??
+                            'Failed to cancel request')),
+                  );
+                }
               }
             },
             child: const Text('Yes, Cancel'),
@@ -479,17 +481,20 @@ class _FoodRequestDetailScreenState extends State<FoodRequestDetailScreen> {
               );
 
               if (success) {
-                if (!context.mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Match accepted successfully!')),
-                );
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('Match accepted successfully!')),
+                  );
+                }
               } else {
-                if (!context.mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                      content: Text(ngoProvider.errorMessage ??
-                          'Failed to accept match')),
-                );
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                        content: Text(ngoProvider.errorMessage ??
+                            'Failed to accept match')),
+                  );
+                }
               }
             },
             child: const Text('Accept'),

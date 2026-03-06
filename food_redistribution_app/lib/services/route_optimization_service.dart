@@ -100,8 +100,10 @@ class OptimizedRoute {
   }
 }
 
-class RouteOptimizationService {
+class RouteOptimizationEngine {
   final FirestoreService _firestoreService;
+  // ignore: unused_field
+  final LocationService _locationService;
   final AuditService _auditService;
 
   // Optimization parameters
@@ -110,11 +112,12 @@ class RouteOptimizationService {
   static const int _maxIterations = 1000; // For genetic algorithm
   static const double _mutationRate = 0.1;
 
-  RouteOptimizationService({
+  RouteOptimizationEngine({
     required FirestoreService firestoreService,
     required LocationService locationService,
     required AuditService auditService,
   })  : _firestoreService = firestoreService,
+        _locationService = locationService,
         _auditService = auditService;
 
   /// Optimize route for multiple delivery points

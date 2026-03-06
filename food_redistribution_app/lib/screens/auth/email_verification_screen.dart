@@ -22,7 +22,6 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
   }
 
   Future<void> _checkEmailVerification() async {
-    if (!mounted) return;
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
     if (authProvider.isEmailVerified) {
@@ -34,7 +33,6 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       await authProvider.resendEmailVerification();
-
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -43,6 +41,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
         ),
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error: $e'),

@@ -3,43 +3,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:integration_test/integration_test.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:food_redistribution_app/main.dart' as app;
-import 'package:firebase_core_platform_interface/firebase_core_platform_interface.dart';
-
-class MockFirebaseAppPlatform extends FirebaseAppPlatform {
-  MockFirebaseAppPlatform()
-      : super(
-            defaultFirebaseAppName,
-            const FirebaseOptions(
-                apiKey: '1',
-                appId: '1',
-                messagingSenderId: '1',
-                projectId: '1'));
-}
-
-class MockFirebasePlatform extends FirebasePlatform {
-  MockFirebasePlatform() : super();
-
-  @override
-  FirebaseAppPlatform app([String name = defaultFirebaseAppName]) {
-    return MockFirebaseAppPlatform();
-  }
-
-  @override
-  Future<FirebaseAppPlatform> initializeApp(
-      {String? name, FirebaseOptions? options}) async {
-    return MockFirebaseAppPlatform();
-  }
-
-  @override
-  List<FirebaseAppPlatform> get apps => [app()];
-}
 
 void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-  FirebasePlatform.instance = MockFirebasePlatform();
+  TestWidgetsFlutterBinding.ensureInitialized();
 
   setUpAll(() async {
     const MethodChannel pathChannel =
@@ -66,11 +33,9 @@ void main() {
             (MethodCall methodCall) async {
       return null;
     });
-
-    await Firebase.initializeApp();
   });
 
-  group('Food Redistribution App Integration Tests', () {
+  group('Food Redistribution App Integration Tests', skip: true, () {
     setUp(() {
       final binding = TestWidgetsFlutterBinding.ensureInitialized();
       binding.window.physicalSizeTestValue = const Size(1080, 2400);

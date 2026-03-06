@@ -275,9 +275,8 @@ class _AdminDashboardState extends State<AdminDashboard>
               await Provider.of<AdminDashboardProvider>(context, listen: false)
                   .reviewVerification(submissionId, adminId,
                       VerificationStatus.rejected, noteController.text);
-              if (ctx.mounted) {
-                Navigator.pop(ctx);
-              }
+              if (!ctx.mounted) return;
+              Navigator.pop(ctx);
             },
             child: const Text('Reject', style: TextStyle(color: Colors.red)),
           ),
