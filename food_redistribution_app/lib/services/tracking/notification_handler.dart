@@ -1,9 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 
 // Send push notifications to volunteers and NGOs
 class NotificationHandler {
-  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+  late final FirebaseMessaging _firebaseMessaging;
+
+  NotificationHandler({FirebaseMessaging? firebaseMessaging}) {
+    _firebaseMessaging = firebaseMessaging ?? FirebaseMessaging.instance;
+  }
 
   // Set up push notifications when app starts
   Future<void> initializeNotifications() async {

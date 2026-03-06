@@ -11,6 +11,7 @@ import '../services/firestore_service.dart';
 import '../services/location_service.dart';
 import '../services/notification_service.dart';
 import '../services/audit_service.dart';
+import 'package:flutter/foundation.dart';
 
 class NGOProvider extends ChangeNotifier {
   final FoodRequestService _requestService = FoodRequestService();
@@ -69,7 +70,7 @@ class NGOProvider extends ChangeNotifier {
       // Load requests and donations first (in parallel)
       await Future.wait([
         _loadMyRequests(ngoId),
-        _loadAvailableDonations(),
+        _loadAvailableDonations(ngoId),
         _loadMyQueries(ngoId),
       ]);
 
@@ -93,12 +94,16 @@ class NGOProvider extends ChangeNotifier {
     }
   }
 
-  // Load available donations (for manual matching)
-  Future<void> _loadAvailableDonations() async {
+  // Load available donations (for manual matching) and matched donations
+  Future<void> _loadAvailableDonations(String ngoId) async {
     try {
-      _availableDonations = await _donationService.getAvailableDonations();
+      final available = await _donationService.getAvailableDonations();
+      final matched = await _donationService.getDonationsMatchedToNGO(ngoId);
+
+      // Combine them so that the UI can find matched donations using getDonationById
+      _availableDonations = [...available, ...matched];
     } catch (e) {
-      throw Exception('Failed to load available donations: $e');
+      throw Exception('Failed to load available and matched donations: $e');
     }
   }
 
