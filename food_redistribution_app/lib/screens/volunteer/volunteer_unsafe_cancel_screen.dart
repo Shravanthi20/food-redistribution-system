@@ -274,7 +274,8 @@ class _VolunteerUnsafeCancelScreenState
         padding: const EdgeInsets.symmetric(vertical: 3),
         child: Row(
           children: [
-            Icon(icon, color: Colors.redAccent.withValues(alpha: 0.7), size: 16),
+            Icon(icon,
+                color: Colors.redAccent.withValues(alpha: 0.7), size: 16),
             const SizedBox(width: 8),
             Flexible(
                 child: Text(label,

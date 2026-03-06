@@ -393,8 +393,7 @@ class _DonorVerificationScreenState extends State<DonorVerificationScreen> {
         ..._documentRequirements
             .asMap()
             .entries
-            .map((entry) => _buildDocumentCard(entry.value, entry.key + 1))
-            ,
+            .map((entry) => _buildDocumentCard(entry.value, entry.key + 1)),
       ],
     );
   }
@@ -644,11 +643,13 @@ class _DonorVerificationScreenState extends State<DonorVerificationScreen> {
                 fillColor: AppTheme.surfaceGlass,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppTheme.surfaceGlassBorder),
+                  borderSide:
+                      const BorderSide(color: AppTheme.surfaceGlassBorder),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppTheme.surfaceGlassBorder),
+                  borderSide:
+                      const BorderSide(color: AppTheme.surfaceGlassBorder),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),

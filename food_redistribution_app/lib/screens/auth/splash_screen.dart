@@ -152,7 +152,8 @@ class _SplashScreenState extends State<SplashScreen> {
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: AppTheme.accentTeal.withValues(alpha: 0.3 * value),
+                          color: AppTheme.accentTeal
+                              .withValues(alpha: 0.3 * value),
                           blurRadius: 40 * value,
                           spreadRadius: 10 * value,
                         ),
@@ -201,8 +202,7 @@ class _SplashScreenState extends State<SplashScreen> {
               height: 32,
               child: CircularProgressIndicator(
                 strokeWidth: 3,
-                valueColor:
-                    AlwaysStoppedAnimation<Color>(AppTheme.accentTeal),
+                valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentTeal),
                 backgroundColor: AppTheme.surfaceGlassDark,
               ),
             ),

@@ -130,12 +130,14 @@ class _VerificationPendingScreenState extends State<VerificationPendingScreen>
                               ],
                             ),
                             border: Border.all(
-                              color: AppTheme.warningAmber.withValues(alpha: 0.5),
+                              color:
+                                  AppTheme.warningAmber.withValues(alpha: 0.5),
                               width: 2,
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: AppTheme.warningAmber.withValues(alpha: 0.3),
+                                color: AppTheme.warningAmber
+                                    .withValues(alpha: 0.3),
                                 blurRadius: 30,
                                 spreadRadius: 5,
                               ),
@@ -193,7 +195,8 @@ class _VerificationPendingScreenState extends State<VerificationPendingScreen>
                             Container(
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
-                                color: AppTheme.accentTeal.withValues(alpha: 0.2),
+                                color:
+                                    AppTheme.accentTeal.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: const Icon(
@@ -226,8 +229,9 @@ class _VerificationPendingScreenState extends State<VerificationPendingScreen>
                                   child: LinearProgressIndicator(
                                     value: _progressAnimation.value,
                                     backgroundColor: AppTheme.surfaceGlass,
-                                    valueColor: const AlwaysStoppedAnimation<Color>(
-                                        AppTheme.accentTeal),
+                                    valueColor:
+                                        const AlwaysStoppedAnimation<Color>(
+                                            AppTheme.accentTeal),
                                     minHeight: 10,
                                   ),
                                 ),
@@ -296,7 +300,8 @@ class _VerificationPendingScreenState extends State<VerificationPendingScreen>
                             Container(
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
-                                color: AppTheme.accentCyan.withValues(alpha: 0.2),
+                                color:
+                                    AppTheme.accentCyan.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: const Icon(
@@ -354,7 +359,8 @@ class _VerificationPendingScreenState extends State<VerificationPendingScreen>
                             Container(
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
-                                color: AppTheme.successTeal.withValues(alpha: 0.2),
+                                color:
+                                    AppTheme.successTeal.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: const Icon(

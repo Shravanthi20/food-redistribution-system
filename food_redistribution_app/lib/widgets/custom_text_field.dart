@@ -42,7 +42,8 @@ class CustomTextField extends StatelessWidget {
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w500,
-            color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black87,
+            color:
+                isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black87,
           ),
         ),
         const SizedBox(height: 8),
@@ -59,14 +60,16 @@ class CustomTextField extends StatelessWidget {
           decoration: InputDecoration(
             hintText: hintText ?? label,
             hintStyle: TextStyle(
-              color: isDark ? Colors.white.withValues(alpha: 0.5) : Colors.black45,
+              color:
+                  isDark ? Colors.white.withValues(alpha: 0.5) : Colors.black45,
             ),
             prefixIcon: prefixIcon,
             suffixIcon: suffixIcon,
             errorMaxLines: 2,
             filled: true,
-            fillColor:
-                isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.shade100,
+            fillColor: isDark
+                ? Colors.white.withValues(alpha: 0.1)
+                : Colors.grey.shade100,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
