@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'auth/donor_registration_screen.dart';
+import 'auth/ngo_registration_screen.dart';
+import 'auth/volunteer_registration_screen.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({Key? key}) : super(key: key);
@@ -98,15 +101,6 @@ class WelcomeScreen extends StatelessWidget {
                         icon: Icons.delivery_dining,
                         color: Colors.green,
                         onTap: () => _navigateToRole(context, 'volunteer'),
-                      ),
-                      const SizedBox(height: 16),
-                      _buildRoleCard(
-                        context,
-                        title: 'Coordinator',
-                        description: 'Manage logistics and optimize routes',
-                        icon: Icons.analytics,
-                        color: Colors.purple,
-                        onTap: () => _navigateToRole(context, 'coordinator'),
                       ),
                     ],
                   ),
@@ -208,21 +202,36 @@ class WelcomeScreen extends StatelessWidget {
   }
 
   void _navigateToRole(BuildContext context, String role) {
+    Widget destination;
+    
+    switch (role) {
+      case 'donor':
+        destination = const DonorRegistrationScreen();
+        break;
+      case 'ngo':
+        destination = const NGORegistrationScreen();
+        break;
+      case 'volunteer':
+        destination = const VolunteerRegistrationScreen();
+        break;
+      default:
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Registration for this role is coming soon!'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+        return;
+    }
+    
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => RoleDashboard(role: role),
-      ),
+      MaterialPageRoute(builder: (context) => destination),
     );
   }
 
   void _navigateToLogin(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Login feature coming soon!'),
-        backgroundColor: Colors.green,
-      ),
-    );
+    Navigator.pushNamed(context, '/login');
   }
 }
 
@@ -340,14 +349,14 @@ class RoleDashboard extends StatelessWidget {
                 child: Column(
                   children: [
                     Text(
-                      stat['value'],
+                      stat['value']!,
                       style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: _getRoleColor(role),
                       ),
                     ),
                     Text(
-                      stat['label'],
+                      stat['label']!,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Colors.grey.shade600,
                       ),
@@ -477,7 +486,6 @@ class RoleDashboard extends StatelessWidget {
       case 'donor': return 'Food Donor';
       case 'ngo': return 'NGO Partner';
       case 'volunteer': return 'Volunteer';
-      case 'coordinator': return 'Coordinator';
       default: return 'User';
     }
   }
@@ -487,7 +495,6 @@ class RoleDashboard extends StatelessWidget {
       case 'donor': return Colors.blue;
       case 'ngo': return Colors.orange;
       case 'volunteer': return Colors.green;
-      case 'coordinator': return Colors.purple;
       default: return Colors.grey;
     }
   }
@@ -497,7 +504,6 @@ class RoleDashboard extends StatelessWidget {
       case 'donor': return Icons.volunteer_activism;
       case 'ngo': return Icons.business_center;
       case 'volunteer': return Icons.delivery_dining;
-      case 'coordinator': return Icons.analytics;
       default: return Icons.person;
     }
   }
@@ -507,7 +513,6 @@ class RoleDashboard extends StatelessWidget {
       case 'donor': return 'Ready to share surplus food and make a difference?';
       case 'ngo': return 'Connect with donors and serve your community better.';
       case 'volunteer': return 'Help deliver food to those who need it most.';
-      case 'coordinator': return 'Optimize logistics and maximize our impact.';
       default: return 'Welcome to the platform!';
     }
   }
@@ -531,12 +536,6 @@ class RoleDashboard extends StatelessWidget {
           {'value': '18', 'label': 'Deliveries'},
           {'value': '24hrs', 'label': 'Time Volunteered'},
           {'value': '4.8★', 'label': 'Rating'},
-        ];
-      case 'coordinator':
-        return [
-          {'value': '156', 'label': 'Routes Optimized'},
-          {'value': '23%', 'label': 'Efficiency Gain'},
-          {'value': '12', 'label': 'Active Volunteers'},
         ];
       default:
         return [
@@ -569,13 +568,6 @@ class RoleDashboard extends StatelessWidget {
           {'label': 'Start Delivery', 'icon': Icons.local_shipping, 'action': 'start_delivery'},
           {'label': 'Update Status', 'icon': Icons.update, 'action': 'update_status'},
           {'label': 'My Schedule', 'icon': Icons.schedule, 'action': 'my_schedule'},
-        ];
-      case 'coordinator':
-        return [
-          {'label': 'Analytics', 'icon': Icons.analytics, 'action': 'analytics'},
-          {'label': 'Route Planning', 'icon': Icons.route, 'action': 'route_planning'},
-          {'label': 'Volunteer Management', 'icon': Icons.group, 'action': 'volunteer_management'},
-          {'label': 'System Health', 'icon': Icons.health_and_safety, 'action': 'system_health'},
         ];
       default:
         return [];

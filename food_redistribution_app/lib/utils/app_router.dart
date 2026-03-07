@@ -9,9 +9,14 @@ import '../screens/auth/email_verification_screen.dart';
 import '../screens/auth/onboarding_screen.dart';
 import '../screens/donor/donor_dashboard.dart';
 import '../screens/donor/create_donation_screen.dart';
+import '../screens/donor/donation_list_screen.dart';
+import '../screens/donor/donation_detail_screen.dart';
+import '../screens/donor/impact_reports_screen.dart';
 import '../screens/ngo/ngo_dashboard.dart';
 import '../screens/volunteer/volunteer_dashboard.dart';
 import '../screens/admin/admin_dashboard.dart';
+
+import '../models/food_donation.dart';
 
 class AppRouter {
   static const String splash = '/';
@@ -27,6 +32,9 @@ class AppRouter {
   static const String volunteerDashboard = '/volunteer-dashboard';
   static const String adminDashboard = '/admin-dashboard';
   static const String createDonation = '/create-donation';
+  static const String donationList = '/donation-list';
+  static const String donationDetail = '/donation-detail';
+  static const String impactReports = '/impact-reports';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -73,6 +81,18 @@ class AppRouter {
       
       case createDonation:
         return MaterialPageRoute(builder: (_) => const CreateDonationScreen());
+      
+      case donationList:
+        return MaterialPageRoute(builder: (_) => const DonationListScreen());
+      
+      case donationDetail:
+        final donation = settings.arguments as FoodDonation;
+        return MaterialPageRoute(
+          builder: (_) => DonationDetailScreen(donation: donation),
+        );
+      
+      case impactReports:
+        return MaterialPageRoute(builder: (_) => const ImpactReportsScreen());
       
       default:
         return MaterialPageRoute(
