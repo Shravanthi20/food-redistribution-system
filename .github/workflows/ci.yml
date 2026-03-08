@@ -17,6 +17,10 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+# Minimal permissions — read-only access to repository contents
+permissions:
+  contents: read
+
 env:
   FLUTTER_VERSION: '3.24.0'
   JAVA_VERSION: '17'
