@@ -26,7 +26,7 @@ class AccessibilitySettingsScreen extends StatelessWidget {
                 value: accessibilityProvider.highContrastMode,
                 onChanged: (bool value) {
                   accessibilityProvider.toggleHighContrastMode(value);
-                  // We also ensure dark or light theme might be tweaked, but the main.dart handles it
+                  // Theme adaptation for high contrast is handled in main.dart
                 },
               ),
               const Divider(),

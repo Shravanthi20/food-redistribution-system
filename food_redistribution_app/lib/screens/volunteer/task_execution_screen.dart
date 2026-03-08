@@ -319,7 +319,7 @@ class _TaskExecutionScreenState extends State<TaskExecutionScreen> {
                       _infoRow(
                         Icons.timer,
                         "Deadline",
-                        "Expires: ${_formatDate(donation.expiresAt)}",
+                        "Expires: ${_formatTime(donation.expiresAt)}",
                         simplified,
                       ),
                     ],
@@ -453,7 +453,7 @@ class _TaskExecutionScreenState extends State<TaskExecutionScreen> {
     );
   }
 
-  String _formatDate(DateTime dt) {
+  String _formatTime(DateTime dt) {
     return "${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}";
   }
 }

@@ -140,7 +140,7 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
     );
 
     if (success && mounted) {
-      Navigator.pushReplacementNamed(context, AppRouter.emailVerification);
+      Navigator.pushReplacementNamed(context, AppRouter.documentSubmission);
     } else if (mounted && authProvider.errorMessage != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
