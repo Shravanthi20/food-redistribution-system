@@ -31,7 +31,6 @@ cleanup_issues.py
 fix_imports.py
 fix_prints.py
 parse*.py
-parse_analyze.py
 
 # ---- Build and caches ----
 **/build/
