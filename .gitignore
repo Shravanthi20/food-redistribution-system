@@ -10,8 +10,27 @@
 # ---- Generated / log .txt ----
 analysis*.txt
 analysis_log*.txt
+analyze*.txt
 build_error.txt
 flutter_logs.txt
+
+# ---- Debug / scratch files ----
+status.txt
+diff.txt
+*_unmerged.txt
+issues.txt
+parsed.txt
+last*.txt
+unformatted_errors.txt
+clean_analyzer_result.txt
+git_log*.txt
+
+# ---- Scratch scripts ----
+check_analysis.py
+cleanup_issues.py
+fix_imports.py
+fix_prints.py
+parse*.py
 
 # ---- Build and caches ----
 **/build/
