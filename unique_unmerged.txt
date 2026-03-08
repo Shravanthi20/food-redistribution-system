@@ -1,2 +1,0 @@
-food_redistribution_app/README.md
-food_redistribution_app/lib/services/firestore_service.dart
