@@ -10,8 +10,22 @@
 # ---- Generated / log .txt ----
 analysis*.txt
 analysis_log*.txt
+analyze*.txt
 build_error.txt
 flutter_logs.txt
+git_*.txt
+git_log*.txt
+*_unmerged.txt
+status.txt
+diff.txt
+parsed.txt
+issues.txt
+last*.txt
+unformatted_errors.txt
+clean_analyzer_result.txt
+
+# ---- Build artifacts / screenshots ----
+flutter_0*.png
 
 # ---- Build and caches ----
 **/build/
