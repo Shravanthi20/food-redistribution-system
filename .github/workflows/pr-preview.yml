@@ -16,6 +16,10 @@ concurrency:
   group: pr-preview-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+  pull-requests: write
+
 env:
   FLUTTER_VERSION: '3.27.0'
   WORKING_DIR: ./food_redistribution_app

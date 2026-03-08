@@ -26,6 +26,9 @@ concurrency:
   group: cd-${{ github.ref }}
   cancel-in-progress: false
 
+permissions:
+  contents: write
+
 env:
   FLUTTER_VERSION: '3.27.0'
   JAVA_VERSION: '17'
