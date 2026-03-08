@@ -5,8 +5,11 @@ class DelayAlertWidget extends StatelessWidget {
   final String deliveryId;
   final DelayDetectionService detector;
 
-  const DelayAlertWidget(
-      {super.key, required this.deliveryId, required this.detector});
+  const DelayAlertWidget({
+    super.key,
+    required this.deliveryId,
+    required this.detector,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -24,8 +27,11 @@ class DelayAlertWidget extends StatelessWidget {
               const Icon(Icons.warning, color: Colors.white),
               const SizedBox(width: 8),
               Expanded(
-                  child: Text(snapshot.data!.message,
-                      style: const TextStyle(color: Colors.white))),
+                child: Text(
+                  snapshot.data!.message,
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ),
             ],
           ),
         );

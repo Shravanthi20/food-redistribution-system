@@ -19,14 +19,14 @@ class OfflineSyncQueue {
 
   final LifecycleLogService logService;
   final Future<void> Function(String deliveryId, DeliveryStatus status)
-      _applyCallback;
+  _applyCallback;
 
   Timer? _syncTimer;
 
-  OfflineSyncQueue(
-      {required Future<void> Function(String, DeliveryStatus) applyUpdate,
-      required this.logService})
-      : _applyCallback = applyUpdate {
+  OfflineSyncQueue({
+    required Future<void> Function(String, DeliveryStatus) applyUpdate,
+    required this.logService,
+  }) : _applyCallback = applyUpdate {
     _startPeriodicSync();
   }
 
@@ -39,8 +39,12 @@ class OfflineSyncQueue {
 
   void setOnline(bool online) {
     _isOnline = online;
-    logService.add('SYSTEM', 'NETWORK', online ? 'online' : 'offline',
-        'Network ${online ? 'restored' : 'lost'}');
+    logService.add(
+      'SYSTEM',
+      'NETWORK',
+      online ? 'online' : 'offline',
+      'Network ${online ? 'restored' : 'lost'}',
+    );
     if (online) sync();
   }
 
@@ -60,10 +64,18 @@ class OfflineSyncQueue {
       try {
         await _applyCallback(item.deliveryId, item.status);
         logService.add(
-            item.deliveryId, 'QUEUE', item.status.toString(), 'Synced');
+          item.deliveryId,
+          'QUEUE',
+          item.status.toString(),
+          'Synced',
+        );
       } catch (e) {
-        logService.add(item.deliveryId, 'QUEUE', item.status.toString(),
-            'Sync failed: $e');
+        logService.add(
+          item.deliveryId,
+          'QUEUE',
+          item.status.toString(),
+          'Sync failed: $e',
+        );
         // Re-enqueue and break to avoid tight loop
         _queue.insert(0, item);
         break;

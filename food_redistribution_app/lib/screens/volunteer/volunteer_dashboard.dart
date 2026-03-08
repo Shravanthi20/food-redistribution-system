@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../models/food_donation.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/donation_provider.dart';
+import '../../providers/accessibility_provider.dart';
 import '../../utils/app_router.dart';
 import '../../utils/app_theme.dart';
 import '../../widgets/gradient_scaffold.dart';
@@ -35,8 +36,10 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<AuthProvider>(context).appUser;
-    final donationProvider =
-        Provider.of<DonationProvider>(context, listen: false);
+    final donationProvider = Provider.of<DonationProvider>(
+      context,
+      listen: false,
+    );
 
     if (user == null) {
       return const GradientScaffold(
@@ -93,13 +96,17 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                 color: AppTheme.warningAmber.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                    color: AppTheme.warningAmber.withValues(alpha: 0.3)),
+                  color: AppTheme.warningAmber.withValues(alpha: 0.3),
+                ),
               ),
               child: const Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.notification_important_rounded,
-                      size: 16, color: AppTheme.warningAmber),
+                  Icon(
+                    Icons.notification_important_rounded,
+                    size: 16,
+                    color: AppTheme.warningAmber,
+                  ),
                   SizedBox(width: 8),
                   Text(
                     "NEW ASSIGNMENTS",
@@ -133,10 +140,13 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                       children: [
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 5),
+                            horizontal: 10,
+                            vertical: 5,
+                          ),
                           decoration: BoxDecoration(
-                            color:
-                                AppTheme.warningAmber.withValues(alpha: 0.15),
+                            color: AppTheme.warningAmber.withValues(
+                              alpha: 0.15,
+                            ),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: const Text(
@@ -162,7 +172,9 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                         Text(
                           "${donation.quantity} ${donation.unit} from Anonymous Donor",
                           style: const TextStyle(
-                              color: AppTheme.textSecondary, fontSize: 13),
+                            color: AppTheme.textSecondary,
+                            fontSize: 13,
+                          ),
                         ),
                         const SizedBox(height: 18),
                         Row(
@@ -173,7 +185,10 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                                 icon: Icons.check_rounded,
                                 onPressed: () async {
                                   await provider.acceptAssignment(
-                                      assignmentId, donationId, userId);
+                                    assignmentId,
+                                    donationId,
+                                    userId,
+                                  );
                                 },
                               ),
                             ),
@@ -184,11 +199,15 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                                 outlined: true,
                                 gradientColors: const [
                                   AppTheme.errorCoral,
-                                  AppTheme.errorCoral
+                                  AppTheme.errorCoral,
                                 ],
                                 onPressed: () async {
-                                  await provider.rejectAssignment(assignmentId,
-                                      donationId, userId, "User declined");
+                                  await provider.rejectAssignment(
+                                    assignmentId,
+                                    donationId,
+                                    userId,
+                                    "User declined",
+                                  );
                                 },
                               ),
                             ),
@@ -255,13 +274,18 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                 padding: EdgeInsets.all(24),
                 child: Column(
                   children: [
-                    Icon(Icons.inbox_rounded,
-                        size: 48, color: AppTheme.textMuted),
+                    Icon(
+                      Icons.inbox_rounded,
+                      size: 48,
+                      color: AppTheme.textMuted,
+                    ),
                     SizedBox(height: 12),
                     Text(
                       "No available tasks nearby",
                       style: TextStyle(
-                          color: AppTheme.textSecondary, fontSize: 15),
+                        color: AppTheme.textSecondary,
+                        fontSize: 15,
+                      ),
                     ),
                   ],
                 ),
@@ -332,30 +356,64 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                     padding: const EdgeInsets.all(20),
                     children: [
                       ListTile(
-                        leading: const Icon(Icons.person_rounded,
-                            color: AppTheme.accentTeal),
-                        title: const Text('Edit Profile',
-                            style: TextStyle(color: AppTheme.textPrimary)),
+                        leading: const Icon(
+                          Icons.person_rounded,
+                          color: AppTheme.accentTeal,
+                        ),
+                        title: const Text(
+                          'Edit Profile',
+                          style: TextStyle(color: AppTheme.textPrimary),
+                        ),
                         onTap: () {
                           Navigator.pop(context);
                           Navigator.pushNamed(
-                              context, AppRouter.volunteerProfile);
+                            context,
+                            AppRouter.volunteerProfile,
+                          );
                         },
                       ),
                       const Divider(color: AppTheme.surfaceGlassBorder),
                       ListTile(
-                        leading: const Icon(Icons.logout_rounded,
-                            color: AppTheme.errorCoral),
-                        title: const Text('Sign Out',
-                            style: TextStyle(color: AppTheme.errorCoral)),
-                        onTap: () async {
+                        leading: const Icon(
+                          Icons.accessibility_new_rounded,
+                          color: AppTheme.accentCyan,
+                        ),
+                        title: const Text(
+                          'Accessibility Settings',
+                          style: TextStyle(color: AppTheme.textPrimary),
+                        ),
+                        onTap: () {
                           Navigator.pop(context);
-                          final auth =
-                              Provider.of<AuthProvider>(context, listen: false);
+                          Navigator.pushNamed(
+                            context,
+                            AppRouter.accessibilitySettings,
+                          );
+                        },
+                      ),
+                      const Divider(color: AppTheme.surfaceGlassBorder),
+                      ListTile(
+                        leading: const Icon(
+                          Icons.logout_rounded,
+                          color: AppTheme.errorCoral,
+                        ),
+                        title: const Text(
+                          'Sign Out',
+                          style: TextStyle(color: AppTheme.errorCoral),
+                        ),
+                        onTap: () async {
+                          Navigator.pop(context); // Close bottom sheet
+                          final auth = Provider.of<AuthProvider>(
+                            context,
+                            listen: false,
+                          );
                           await auth.signOut();
-                          if (!context.mounted) return;
-                          Navigator.pushNamedAndRemoveUntil(
-                              context, AppRouter.login, (route) => false);
+                          if (context.mounted) {
+                            Navigator.pushNamedAndRemoveUntil(
+                              context,
+                              AppRouter.login,
+                              (route) => false,
+                            );
+                          }
                         },
                       ),
                     ],
@@ -389,8 +447,10 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                     ),
                   ),
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: isOnline
                           ? AppTheme.successTeal.withValues(alpha: 0.15)
@@ -468,8 +528,15 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
   }
 
   // ================= TASK CARD =================
-  Widget _taskCard(BuildContext context, FoodDonation task,
-      {bool isActive = false}) {
+  Widget _taskCard(
+    BuildContext context,
+    FoodDonation task, {
+    bool isActive = false,
+  }) {
+    final simplifiedMode = Provider.of<AccessibilityProvider>(
+      context,
+    ).simplifiedMode;
+
     return GlassContainer(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(18),
@@ -485,14 +552,30 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                   : AppTheme.accentCyan.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Text(
-              isActive ? "IN PROGRESS" : "AVAILABLE",
-              style: TextStyle(
-                color: isActive ? AppTheme.successTeal : AppTheme.accentCyan,
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.5,
-              ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (simplifiedMode)
+                  Icon(
+                    isActive ? Icons.play_circle_filled : Icons.event_available,
+                    size: 16,
+                    color: isActive
+                        ? AppTheme.successTeal
+                        : AppTheme.accentCyan,
+                  ),
+                if (simplifiedMode) const SizedBox(width: 4),
+                Text(
+                  isActive ? "IN PROGRESS" : "AVAILABLE",
+                  style: TextStyle(
+                    color: isActive
+                        ? AppTheme.successTeal
+                        : AppTheme.accentCyan,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 12),
@@ -505,49 +588,67 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
             ),
           ),
           const SizedBox(height: 12),
-          Row(
-            children: [
-              const Icon(Icons.location_on_rounded,
-                  size: 16, color: AppTheme.textMuted),
-              const SizedBox(width: 4),
-              const Text("~2.5 km",
-                  style:
-                      TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
-              const SizedBox(width: 14),
-              const Icon(Icons.schedule_rounded,
-                  size: 16, color: AppTheme.textMuted),
-              const SizedBox(width: 4),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: task.isUrgent
-                      ? AppTheme.errorCoral.withValues(alpha: 0.15)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(4),
+          if (!simplifiedMode) // Hide detailed text in simplified mode to reduce cognitive load
+            Row(
+              children: [
+                const Icon(
+                  Icons.location_on_rounded,
+                  size: 16,
+                  color: AppTheme.textMuted,
                 ),
-                child: Text(
-                  task.isUrgent ? "Urgent" : "Normal",
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight:
-                        task.isUrgent ? FontWeight.w600 : FontWeight.normal,
+                const SizedBox(width: 4),
+                const Text(
+                  "~2.5 km",
+                  style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                ),
+                const SizedBox(width: 14),
+                const Icon(
+                  Icons.schedule_rounded,
+                  size: 16,
+                  color: AppTheme.textMuted,
+                ),
+                const SizedBox(width: 4),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
                     color: task.isUrgent
-                        ? AppTheme.errorCoral
-                        : AppTheme.textSecondary,
+                        ? AppTheme.errorCoral.withValues(alpha: 0.15)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    task.isUrgent ? "Urgent" : "Normal",
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: task.isUrgent
+                          ? FontWeight.w600
+                          : FontWeight.normal,
+                      color: task.isUrgent
+                          ? AppTheme.errorCoral
+                          : AppTheme.textSecondary,
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
+              ],
+            ),
+          if (!simplifiedMode) const SizedBox(height: 10),
           Text(
-            "${task.quantity} ${task.unit} • ${task.foodTypes.map((e) => e.name).join(', ')}",
-            style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+            simplifiedMode
+                ? "${task.quantity} ${task.unit}"
+                : "${task.quantity} ${task.unit} • ${task.foodTypes.map((e) => e.name).join(', ')}",
+            style: TextStyle(
+              fontSize: simplifiedMode ? 16 : 13,
+              color: AppTheme.textSecondary,
+              fontWeight: simplifiedMode ? FontWeight.bold : FontWeight.normal,
+            ),
           ),
           const SizedBox(height: 16),
           if (!isActive)
             GradientButton(
-              text: 'Accept Task',
+              text: simplifiedMode ? 'GO' : 'Accept Task',
               icon: Icons.check_circle_rounded,
               width: double.infinity,
               onPressed: () {
@@ -560,12 +661,12 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
             )
           else
             GradientButton(
-              text: 'Continue Delivery',
+              text: simplifiedMode ? 'CONTINUE' : 'Continue Delivery',
               icon: Icons.local_shipping_rounded,
               width: double.infinity,
               gradientColors: const [
                 AppTheme.accentCyan,
-                AppTheme.accentCyanSoft
+                AppTheme.accentCyanSoft,
               ],
               onPressed: () {
                 Navigator.pushNamed(
@@ -574,6 +675,19 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                   arguments: {'donationId': task.id},
                 );
               },
+            ),
+          const SizedBox(height: 12),
+          // Real-time status panel for volunteers
+          if (!simplifiedMode)
+            DonationStatusBadge(
+              deliveryId: task.id.toString(),
+              role: 'volunteer',
+            ),
+          if (!simplifiedMode) const SizedBox(height: 8),
+          if (!simplifiedMode)
+            DeliveryStatusPanel(
+              role: 'volunteer',
+              deliveryId: task.id.toString(),
             ),
         ],
       ),
