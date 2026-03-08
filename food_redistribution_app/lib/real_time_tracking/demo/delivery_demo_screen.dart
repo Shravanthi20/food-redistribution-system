@@ -25,8 +25,9 @@ class _DeliveryDemoScreenState extends State<DeliveryDemoScreen> {
     super.initState();
     _log = LifecycleLogService();
     _delay = DelayDetectionService(
-        pickupThreshold: const Duration(seconds: 10),
-        deliveryThreshold: const Duration(seconds: 20));
+      pickupThreshold: const Duration(seconds: 10),
+      deliveryThreshold: const Duration(seconds: 20),
+    );
     _notifier = DeliveryNotificationEngine();
     _engine = StatusLifecycleEngine(_log, _notifier, _delay);
   }
@@ -55,8 +56,10 @@ class _DeliveryDemoScreenState extends State<DeliveryDemoScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Demo Delivery ID: $demoId',
-                style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              'Demo Delivery ID: $demoId',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             const SizedBox(height: 12),
             DeliveryStatusPanel(role: 'donor', deliveryId: demoId),
             const SizedBox(height: 8),
@@ -64,13 +67,16 @@ class _DeliveryDemoScreenState extends State<DeliveryDemoScreen> {
             const SizedBox(height: 8),
             DeliveryStatusPanel(role: 'volunteer', deliveryId: demoId),
             const SizedBox(height: 16),
-            Wrap(spacing: 8, children: [
-              _controlButton('Listed', DeliveryStatus.listed),
-              _controlButton('Accepted', DeliveryStatus.accepted),
-              _controlButton('Assigned', DeliveryStatus.assigned),
-              _controlButton('PickedUp', DeliveryStatus.pickedUp),
-              _controlButton('Delivered', DeliveryStatus.delivered),
-            ])
+            Wrap(
+              spacing: 8,
+              children: [
+                _controlButton('Listed', DeliveryStatus.listed),
+                _controlButton('Accepted', DeliveryStatus.accepted),
+                _controlButton('Assigned', DeliveryStatus.assigned),
+                _controlButton('PickedUp', DeliveryStatus.pickedUp),
+                _controlButton('Delivered', DeliveryStatus.delivered),
+              ],
+            ),
           ],
         ),
       ),

@@ -1,10 +1,4 @@
-enum DeliveryStatus {
-  listed,
-  accepted,
-  assigned,
-  pickedUp,
-  delivered,
-}
+enum DeliveryStatus { listed, accepted, assigned, pickedUp, delivered }
 
 class StatusTransitionValidator {
   static const Map<DeliveryStatus, List<DeliveryStatus>> _allowed = {

@@ -20,16 +20,17 @@ class SyncStatusIndicator extends StatelessWidget {
         ] else if (hasPending) ...[
           const SizedBox(width: 2),
           const SizedBox(
-              width: 18,
-              height: 18,
-              child: CircularProgressIndicator(strokeWidth: 2)),
+            width: 18,
+            height: 18,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
           const SizedBox(width: 6),
           const Text('Syncing', style: TextStyle(color: Colors.blue)),
         ] else ...[
           const Icon(Icons.cloud_done, color: Colors.green),
           const SizedBox(width: 6),
           const Text('Synced', style: TextStyle(color: Colors.green)),
-        ]
+        ],
       ],
     );
   }

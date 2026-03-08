@@ -6,8 +6,11 @@ class RealTimeStatusWidget extends StatelessWidget {
   final String deliveryId;
   final StatusLifecycleEngine engine;
 
-  const RealTimeStatusWidget(
-      {super.key, required this.deliveryId, required this.engine});
+  const RealTimeStatusWidget({
+    super.key,
+    required this.deliveryId,
+    required this.engine,
+  });
 
   @override
   Widget build(BuildContext context) {

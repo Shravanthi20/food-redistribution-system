@@ -25,8 +25,12 @@ class DeliveryStatusPanel extends StatefulWidget {
   final Object deliveryId;
   final DeliveryStatus? status;
 
-  const DeliveryStatusPanel(
-      {super.key, required this.role, required this.deliveryId, this.status});
+  const DeliveryStatusPanel({
+    super.key,
+    required this.role,
+    required this.deliveryId,
+    this.status,
+  });
 
   @override
   State<DeliveryStatusPanel> createState() => _DeliveryStatusPanelState();
@@ -37,7 +41,10 @@ final LifecycleLogService _sharedLogService = LifecycleLogService();
 final DelayDetectionService _sharedDelayDetector = DelayDetectionService();
 final DeliveryNotificationEngine _sharedNotifier = DeliveryNotificationEngine();
 final StatusLifecycleEngine _sharedEngine = StatusLifecycleEngine(
-    _sharedLogService, _sharedNotifier, _sharedDelayDetector);
+  _sharedLogService,
+  _sharedNotifier,
+  _sharedDelayDetector,
+);
 
 /// Public accessor for the shared `StatusLifecycleEngine` used by the panel widgets.
 StatusLifecycleEngine get sharedStatusLifecycleEngine => _sharedEngine;
@@ -131,8 +138,11 @@ class _DeliveryStatusPanelState extends State<DeliveryStatusPanel> {
         Icon(icon, color: color),
         const SizedBox(width: 8),
         Expanded(
-            child: Text('Status: $label',
-                style: TextStyle(fontSize: 16, color: color))),
+          child: Text(
+            'Status: $label',
+            style: TextStyle(fontSize: 16, color: color),
+          ),
+        ),
         const SizedBox(width: 8),
       ],
     );
@@ -141,14 +151,20 @@ class _DeliveryStatusPanelState extends State<DeliveryStatusPanel> {
   Widget _buildRoleHint() {
     switch (widget.role.toLowerCase()) {
       case 'donor':
-        return const Text('Role: Donor',
-            style: TextStyle(fontWeight: FontWeight.w600));
+        return const Text(
+          'Role: Donor',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        );
       case 'ngo':
-        return const Text('Role: NGO',
-            style: TextStyle(fontWeight: FontWeight.w600));
+        return const Text(
+          'Role: NGO',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        );
       case 'volunteer':
-        return const Text('Role: Volunteer',
-            style: TextStyle(fontWeight: FontWeight.w600));
+        return const Text(
+          'Role: Volunteer',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        );
       default:
         return const SizedBox.shrink();
     }
@@ -157,26 +173,33 @@ class _DeliveryStatusPanelState extends State<DeliveryStatusPanel> {
   Widget _buildRoleSpecific() {
     // Simple role-specific highlights — consumers can extend using engine APIs
     if (widget.role.toLowerCase() == 'donor') {
-      return const Text('You will be notified of changes.',
-          style: TextStyle(color: Colors.black54));
+      return const Text(
+        'You will be notified of changes.',
+        style: TextStyle(color: Colors.black54),
+      );
     }
 
     if (widget.role.toLowerCase() == 'ngo') {
-      final visible = _currentStatus == DeliveryStatus.assigned ||
+      final visible =
+          _currentStatus == DeliveryStatus.assigned ||
           _currentStatus == DeliveryStatus.pickedUp ||
           _currentStatus == DeliveryStatus.delivered;
-      return Text(visible ? 'NGO: Assigned/Active' : 'NGO: Not assigned',
-          style: const TextStyle(color: Colors.black54));
+      return Text(
+        visible ? 'NGO: Assigned/Active' : 'NGO: Not assigned',
+        style: const TextStyle(color: Colors.black54),
+      );
     }
 
     if (widget.role.toLowerCase() == 'volunteer') {
-      final highlight = _currentStatus == DeliveryStatus.assigned ||
+      final highlight =
+          _currentStatus == DeliveryStatus.assigned ||
           _currentStatus == DeliveryStatus.pickedUp;
       return Text(
-          highlight
-              ? 'Volunteer: You have an assignment'
-              : 'Volunteer: No assignment',
-          style: const TextStyle(color: Colors.black54));
+        highlight
+            ? 'Volunteer: You have an assignment'
+            : 'Volunteer: No assignment',
+        style: const TextStyle(color: Colors.black54),
+      );
     }
 
     return const SizedBox.shrink();
@@ -213,11 +236,13 @@ class _DeliveryStatusPanelState extends State<DeliveryStatusPanel> {
               Container(
                 padding: const EdgeInsets.all(8),
                 color: Colors.blue.shade50,
-                child: Row(children: [
-                  const Icon(Icons.notifications, size: 16),
-                  const SizedBox(width: 8),
-                  Expanded(child: Text(_lastNotification!))
-                ]),
+                child: Row(
+                  children: [
+                    const Icon(Icons.notifications, size: 16),
+                    const SizedBox(width: 8),
+                    Expanded(child: Text(_lastNotification!)),
+                  ],
+                ),
               ),
             ],
 
@@ -231,14 +256,18 @@ class _DeliveryStatusPanelState extends State<DeliveryStatusPanel> {
                   color: Colors.red.shade50,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Text('Delay: ${_currentDelayAlert!.message}',
-                    style: const TextStyle(color: Colors.red)),
+                child: Text(
+                  'Delay: ${_currentDelayAlert!.message}',
+                  style: const TextStyle(color: Colors.red),
+                ),
               ),
               const SizedBox(height: 8),
             ],
 
             DelayAlertWidget(
-                deliveryId: _deliveryIdStr, detector: _sharedDelayDetector),
+              deliveryId: _deliveryIdStr,
+              detector: _sharedDelayDetector,
+            ),
           ],
         ),
       ),
