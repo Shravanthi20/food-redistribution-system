@@ -14,46 +14,97 @@ class DeliveryNotificationEngine {
   }
 
   void _emit(
-      String deliveryId, String title, String body, NotificationTarget target) {
+    String deliveryId,
+    String title,
+    String body,
+    NotificationTarget target,
+  ) {
     final ev = NotificationEvent(
-        deliveryId: deliveryId, title: title, body: body, target: target);
+      deliveryId: deliveryId,
+      title: title,
+      body: body,
+      target: target,
+    );
     _events.add(ev);
   }
 
   /// Called by lifecycle engine on every status change
   void handleStatusChange(
-      String deliveryId, DeliveryStatus? from, DeliveryStatus to) {
+    String deliveryId,
+    DeliveryStatus? from,
+    DeliveryStatus to,
+  ) {
     // Notify Donor
     if (to == DeliveryStatus.accepted) {
-      _emit(deliveryId, 'Donation accepted', 'Your donation has been accepted',
-          NotificationTarget.donor);
+      _emit(
+        deliveryId,
+        'Donation accepted',
+        'Your donation has been accepted',
+        NotificationTarget.donor,
+      );
     }
 
     if (to == DeliveryStatus.assigned) {
-      _emit(deliveryId, 'Volunteer assigned', 'A volunteer has been assigned',
-          NotificationTarget.donor);
-      _emit(deliveryId, 'Assignment created', 'You have been assigned a pickup',
-          NotificationTarget.volunteer);
-      _emit(deliveryId, 'Volunteer assigned', 'Volunteer assigned to pickup',
-          NotificationTarget.ngo);
+      _emit(
+        deliveryId,
+        'Volunteer assigned',
+        'A volunteer has been assigned',
+        NotificationTarget.donor,
+      );
+      _emit(
+        deliveryId,
+        'Assignment created',
+        'You have been assigned a pickup',
+        NotificationTarget.volunteer,
+      );
+      _emit(
+        deliveryId,
+        'Volunteer assigned',
+        'Volunteer assigned to pickup',
+        NotificationTarget.ngo,
+      );
     }
 
     if (to == DeliveryStatus.pickedUp) {
-      _emit(deliveryId, 'Pickup started', 'Pickup has started',
-          NotificationTarget.donor);
-      _emit(deliveryId, 'Pickup started', 'Volunteer has started pickup',
-          NotificationTarget.ngo);
-      _emit(deliveryId, 'Pickup started', 'Pickup has started',
-          NotificationTarget.volunteer);
+      _emit(
+        deliveryId,
+        'Pickup started',
+        'Pickup has started',
+        NotificationTarget.donor,
+      );
+      _emit(
+        deliveryId,
+        'Pickup started',
+        'Volunteer has started pickup',
+        NotificationTarget.ngo,
+      );
+      _emit(
+        deliveryId,
+        'Pickup started',
+        'Pickup has started',
+        NotificationTarget.volunteer,
+      );
     }
 
     if (to == DeliveryStatus.delivered) {
-      _emit(deliveryId, 'Delivery completed', 'Delivery has been completed',
-          NotificationTarget.donor);
-      _emit(deliveryId, 'Delivery completed', 'Delivery completed',
-          NotificationTarget.ngo);
-      _emit(deliveryId, 'Delivery completed', 'Assignment completed',
-          NotificationTarget.volunteer);
+      _emit(
+        deliveryId,
+        'Delivery completed',
+        'Delivery has been completed',
+        NotificationTarget.donor,
+      );
+      _emit(
+        deliveryId,
+        'Delivery completed',
+        'Delivery completed',
+        NotificationTarget.ngo,
+      );
+      _emit(
+        deliveryId,
+        'Delivery completed',
+        'Assignment completed',
+        NotificationTarget.volunteer,
+      );
     }
   }
 

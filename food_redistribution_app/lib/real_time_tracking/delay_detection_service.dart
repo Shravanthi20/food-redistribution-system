@@ -20,15 +20,19 @@ class DelayDetectionService {
 
   final StreamController<DelayAlert> _alerts = StreamController.broadcast();
 
-  DelayDetectionService(
-      {Duration? pickupThreshold, Duration? deliveryThreshold})
-      : pickupThreshold = pickupThreshold ?? const Duration(minutes: 20),
+  DelayDetectionService({
+    Duration? pickupThreshold,
+    Duration? deliveryThreshold,
+  })  : pickupThreshold = pickupThreshold ?? const Duration(minutes: 20),
         deliveryThreshold = deliveryThreshold ?? const Duration(hours: 1);
 
   Stream<DelayAlert> get alerts => _alerts.stream;
 
   void onStatusChanged(
-      String deliveryId, DeliveryStatus? from, DeliveryStatus to) {
+    String deliveryId,
+    DeliveryStatus? from,
+    DeliveryStatus to,
+  ) {
     if (to == DeliveryStatus.assigned) {
       _assignedAt[deliveryId] = DateTime.now();
       // schedule check
@@ -52,9 +56,12 @@ class DelayDetectionService {
     if (assigned == null) return;
     final elapsed = DateTime.now().difference(assigned);
     if (elapsed >= pickupThreshold) {
-      _alerts.add(DelayAlert(
+      _alerts.add(
+        DelayAlert(
           deliveryId: deliveryId,
-          message: 'Pickup delayed by ${elapsed.inMinutes} minutes'));
+          message: 'Pickup delayed by ${elapsed.inMinutes} minutes',
+        ),
+      );
     }
   }
 
@@ -63,9 +70,12 @@ class DelayDetectionService {
     if (picked == null) return;
     final elapsed = DateTime.now().difference(picked);
     if (elapsed >= deliveryThreshold) {
-      _alerts.add(DelayAlert(
+      _alerts.add(
+        DelayAlert(
           deliveryId: deliveryId,
-          message: 'Delivery delayed by ${elapsed.inMinutes} minutes'));
+          message: 'Delivery delayed by ${elapsed.inMinutes} minutes',
+        ),
+      );
     }
   }
 

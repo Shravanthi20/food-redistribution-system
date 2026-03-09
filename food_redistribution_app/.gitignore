@@ -34,6 +34,7 @@ flutter_logs.txt
 *.sublime-project
 
 # ---- Flutter / Dart (generated) ----
+lib/generated/
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies

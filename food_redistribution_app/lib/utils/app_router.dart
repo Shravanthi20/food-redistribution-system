@@ -23,6 +23,7 @@ import '../screens/ngo/clarify_request_screen.dart';
 import '../screens/ngo/reject_donation_screen.dart';
 import '../screens/ngo/inspect_delivery_screen.dart';
 import '../screens/ngo/ngo_dashboard.dart';
+import '../screens/ngo/create_food_request_screen.dart';
 import '../screens/ngo/update_demand_screen.dart';
 
 // Dashboards
@@ -34,6 +35,7 @@ import '../screens/admin/verify_user_screen.dart';
 import '../screens/ngo/document_submission_screen.dart';
 import '../screens/ngo/verification_pending_screen.dart';
 import '../screens/ngo/verification_rejected_screen.dart';
+import '../screens/accessibility_settings_screen.dart'; // [NEW]
 
 // Donor flow
 import '../screens/volunteer/accept_task_screen.dart';
@@ -60,6 +62,7 @@ class AppRouter {
   static const String donorVerification =
       '/donor-verification'; // [NEW] Donor verification route
   static const String ngoDashboard = '/ngo-dashboard';
+  static const String ngoCreateRequest = '/ngo-create-request';
   static const String volunteerDashboard = '/volunteer-dashboard';
   static const String adminDashboard = '/admin-dashboard';
   static const String adminIssues = '/admin-issues';
@@ -68,6 +71,7 @@ class AppRouter {
   static const String donationList = '/donation-list';
   static const String donationDetail = '/donation-detail';
   static const String impactReports = '/impact-reports';
+  static const String accessibilitySettings = '/accessibility-settings';
 
   // ✅ NGO workflow routes
   static const String inspectDelivery = '/inspect-delivery';
@@ -118,25 +122,26 @@ class AppRouter {
 
       case donorRegistration:
         return MaterialPageRoute(
-            builder: (_) => const DonorRegistrationScreen());
+          builder: (_) => const DonorRegistrationScreen(),
+        );
 
       case ngoRegistration:
         return MaterialPageRoute(builder: (_) => const NGORegistrationScreen());
 
       case volunteerRegistration:
         return MaterialPageRoute(
-            builder: (_) => const VolunteerRegistrationScreen());
+          builder: (_) => const VolunteerRegistrationScreen(),
+        );
 
       case emailVerification:
         return MaterialPageRoute(
-            builder: (_) => const EmailVerificationScreen());
+          builder: (_) => const EmailVerificationScreen(),
+        );
 
       case onboarding:
         final args = settings.arguments as Map<String, dynamic>?;
         return MaterialPageRoute(
-          builder: (_) => OnboardingScreen(
-            userRole: args?['userRole'],
-          ),
+          builder: (_) => OnboardingScreen(userRole: args?['userRole']),
         );
 
       case donorDashboard:
@@ -144,10 +149,16 @@ class AppRouter {
 
       case donorVerification:
         return MaterialPageRoute(
-            builder: (_) => const DonorVerificationScreen());
+          builder: (_) => const DonorVerificationScreen(),
+        );
 
       case ngoDashboard:
         return MaterialPageRoute(builder: (_) => const NGODashboard());
+
+      case ngoCreateRequest:
+        return MaterialPageRoute(
+          builder: (_) => const CreateFoodRequestScreen(),
+        );
 
       case documentSubmission:
         return MaterialPageRoute(
@@ -170,26 +181,21 @@ class AppRouter {
         );
 
       case clarifyRequest:
-        return MaterialPageRoute(
-          builder: (_) => const ClarifyRequestScreen(),
-        );
+        return MaterialPageRoute(builder: (_) => const ClarifyRequestScreen());
 
       case rejectDonation:
-        return MaterialPageRoute(
-          builder: (_) => const RejectDonationScreen(),
-        );
+        return MaterialPageRoute(builder: (_) => const RejectDonationScreen());
 
       case updateDemand:
-        return MaterialPageRoute(
-          builder: (_) => const UpdateDemandScreen(),
-        );
+        return MaterialPageRoute(builder: (_) => const UpdateDemandScreen());
 
       case volunteerDashboard:
         return MaterialPageRoute(builder: (_) => const VolunteerDashboard());
 
       case volunteerProfile:
         return MaterialPageRoute(
-            builder: (_) => const VolunteerProfileScreen());
+          builder: (_) => const VolunteerProfileScreen(),
+        );
 
       case acceptTask:
         return MaterialPageRoute(builder: (_) => const AcceptTaskScreen());
@@ -233,11 +239,16 @@ class AppRouter {
       case impactReports:
         return MaterialPageRoute(builder: (_) => const ImpactReportsScreen());
 
+      case accessibilitySettings:
+        return MaterialPageRoute(
+          builder: (_) => const AccessibilitySettingsScreen(),
+        );
+
       case issueReporting:
         final args = settings.arguments as Map<String, dynamic>;
         return MaterialPageRoute(
-            builder: (_) =>
-                IssueReportingScreen(donationId: args['donationId']));
+          builder: (_) => IssueReportingScreen(donationId: args['donationId']),
+        );
 
       default:
         return _errorRoute();
@@ -248,9 +259,7 @@ class AppRouter {
     return MaterialPageRoute(
       builder: (_) => Scaffold(
         appBar: AppBar(title: const Text('Error')),
-        body: const Center(
-          child: Text('Page not found'),
-        ),
+        body: const Center(child: Text('Page not found')),
       ),
     );
   }
