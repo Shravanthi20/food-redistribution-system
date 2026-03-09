@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:food_redistribution_app/utils/app_theme.dart';
 import '../../services/hygiene_service.dart';
 import '../../models/hygiene_checklist.dart';
 
@@ -72,10 +73,10 @@ class _NgoClarifyRequestScreenState extends State<NgoClarifyRequestScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1923),
+      backgroundColor: AppTheme.surfaceWhite,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1A2535),
-        foregroundColor: Colors.white,
+        backgroundColor: AppTheme.surfaceOffWhite,
+        foregroundColor: AppTheme.textPrimary,
         title: const Text('Request Clarification',
             style: TextStyle(fontWeight: FontWeight.bold)),
         elevation: 0,
@@ -92,7 +93,7 @@ class _NgoClarifyRequestScreenState extends State<NgoClarifyRequestScreen> {
                 children: [
                   const Text('Quick Questions',
                       style: TextStyle(
-                          color: Colors.white70,
+                          color: Colors.black54,
                           fontSize: 13,
                           fontWeight: FontWeight.w600)),
                   const SizedBox(height: 8),
@@ -106,10 +107,10 @@ class _NgoClarifyRequestScreenState extends State<NgoClarifyRequestScreen> {
                               child: Chip(
                                 label: Text(q,
                                     style: const TextStyle(
-                                        fontSize: 11, color: Colors.white70)),
-                                backgroundColor: const Color(0xFF1A2535),
+                                        fontSize: 11, color: Colors.black54)),
+                                backgroundColor: AppTheme.surfaceOffWhite,
                                 side:
-                                    const BorderSide(color: Color(0xFF2D3748)),
+                                    const BorderSide(color: AppTheme.iosGray4),
                               ),
                             ))
                         .toList(),
@@ -117,26 +118,26 @@ class _NgoClarifyRequestScreenState extends State<NgoClarifyRequestScreen> {
                   const SizedBox(height: 20),
                   const Text('Your Question *',
                       style: TextStyle(
-                          color: Colors.white,
+                          color: AppTheme.textPrimary,
                           fontWeight: FontWeight.bold,
                           fontSize: 15)),
                   const SizedBox(height: 8),
                   TextField(
                     controller: _questionController,
-                    style: const TextStyle(color: Colors.white),
+                    style: const TextStyle(color: AppTheme.textPrimary),
                     maxLines: 5,
                     decoration: InputDecoration(
                       hintText: 'Type your question for the donor...',
-                      hintStyle: const TextStyle(color: Colors.white38),
+                      hintStyle: const TextStyle(color: Colors.black38),
                       filled: true,
-                      fillColor: const Color(0xFF1A2535),
+                      fillColor: AppTheme.surfaceOffWhite,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFF2D3748)),
+                        borderSide: const BorderSide(color: AppTheme.iosGray4),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFF2D3748)),
+                        borderSide: const BorderSide(color: AppTheme.iosGray4),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -187,7 +188,7 @@ class _NgoClarifyRequestScreenState extends State<NgoClarifyRequestScreen> {
           children: [
             const Text('Previous Clarifications',
                 style: TextStyle(
-                    color: Colors.white70,
+                    color: Colors.black54,
                     fontWeight: FontWeight.bold,
                     fontSize: 14)),
             const SizedBox(height: 8),
@@ -203,7 +204,7 @@ class _NgoClarifyRequestScreenState extends State<NgoClarifyRequestScreen> {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A2535),
+        color: AppTheme.surfaceOffWhite,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
           color: c.isResolved
@@ -221,12 +222,12 @@ class _NgoClarifyRequestScreenState extends State<NgoClarifyRequestScreen> {
               Expanded(
                   child: Text(c.question,
                       style:
-                          const TextStyle(color: Colors.white, fontSize: 13))),
+                          const TextStyle(color: AppTheme.textPrimary, fontSize: 13))),
             ],
           ),
           if (c.reply != null) ...[
             const SizedBox(height: 8),
-            const Divider(color: Color(0xFF2D3748), height: 1),
+            const Divider(color: AppTheme.iosGray4, height: 1),
             const SizedBox(height: 8),
             Row(
               children: [
@@ -260,8 +261,8 @@ class _NgoClarifyRequestScreenState extends State<NgoClarifyRequestScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: const BoxDecoration(
-        color: Color(0xFF1A2535),
-        border: Border(top: BorderSide(color: Color(0xFF2D3748))),
+        color: AppTheme.surfaceOffWhite,
+        border: Border(top: BorderSide(color: AppTheme.iosGray4)),
       ),
       child: SizedBox(
         width: double.infinity,
@@ -272,7 +273,7 @@ class _NgoClarifyRequestScreenState extends State<NgoClarifyRequestScreen> {
                   width: 16,
                   height: 16,
                   child: CircularProgressIndicator(
-                      strokeWidth: 2, color: Colors.white))
+                      strokeWidth: 2, color: AppTheme.textPrimary))
               : const Icon(Icons.send),
           label: const Text('Send Clarification Request',
               style: TextStyle(fontWeight: FontWeight.bold)),

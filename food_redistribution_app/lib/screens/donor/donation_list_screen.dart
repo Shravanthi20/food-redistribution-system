@@ -296,6 +296,7 @@ class _DonationListScreenState extends State<DonationListScreen> {
     );
 
     if (confirmed == true && userId != null) {
+      if (!mounted) return;
       final success = await donationProvider.cancelDonation(
         donation.id,
         userId,

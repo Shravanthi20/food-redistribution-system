@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:food_redistribution_app/utils/app_theme.dart';
 import '../../services/hygiene_service.dart';
 
 class VolunteerUnsafeCancelScreen extends StatefulWidget {
@@ -80,19 +81,19 @@ class _VolunteerUnsafeCancelScreenState
       context: context,
       barrierDismissible: false,
       builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF1A2535),
+        backgroundColor: AppTheme.surfaceOffWhite,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Row(
           children: [
             Icon(Icons.check_circle, color: Color(0xFF4CAF50)),
             SizedBox(width: 8),
             Text('Cancellation Logged',
-                style: TextStyle(color: Colors.white, fontSize: 18)),
+                style: TextStyle(color: AppTheme.textPrimary, fontSize: 18)),
           ],
         ),
         content: const Text(
           'The pickup cancellation has been recorded.\n\nThe NGO, Donor, and Admin have been notified of the unsafe food condition.',
-          style: TextStyle(color: Colors.white70, fontSize: 14),
+          style: TextStyle(color: Colors.black54, fontSize: 14),
         ),
         actions: [
           ElevatedButton(
@@ -115,10 +116,10 @@ class _VolunteerUnsafeCancelScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1923),
+      backgroundColor: AppTheme.surfaceWhite,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1A2535),
-        foregroundColor: Colors.white,
+        backgroundColor: AppTheme.surfaceOffWhite,
+        foregroundColor: AppTheme.textPrimary,
         title: const Text('Cancel – Unsafe Food',
             style: TextStyle(
                 fontWeight: FontWeight.bold, color: Colors.redAccent)),
@@ -135,7 +136,7 @@ class _VolunteerUnsafeCancelScreenState
                 children: [
                   const Text('Why is the food unsafe? *',
                       style: TextStyle(
-                          color: Colors.white,
+                          color: AppTheme.textPrimary,
                           fontWeight: FontWeight.bold,
                           fontSize: 15)),
                   const SizedBox(height: 12),
@@ -143,27 +144,27 @@ class _VolunteerUnsafeCancelScreenState
                   const SizedBox(height: 20),
                   const Text('Detailed Description *',
                       style: TextStyle(
-                          color: Colors.white,
+                          color: AppTheme.textPrimary,
                           fontWeight: FontWeight.bold,
                           fontSize: 15)),
                   const SizedBox(height: 8),
                   TextField(
                     controller: _detailsController,
-                    style: const TextStyle(color: Colors.white),
+                    style: const TextStyle(color: AppTheme.textPrimary),
                     maxLines: 4,
                     decoration: InputDecoration(
                       hintText:
                           'Describe what you observed in detail. This will be included in the audit log...',
-                      hintStyle: const TextStyle(color: Colors.white38),
+                      hintStyle: const TextStyle(color: Colors.black38),
                       filled: true,
-                      fillColor: const Color(0xFF1A2535),
+                      fillColor: AppTheme.surfaceOffWhite,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFF2D3748)),
+                        borderSide: const BorderSide(color: AppTheme.iosGray4),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFF2D3748)),
+                        borderSide: const BorderSide(color: AppTheme.iosGray4),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -216,10 +217,10 @@ class _VolunteerUnsafeCancelScreenState
         decoration: BoxDecoration(
           color: isSelected
               ? Colors.redAccent.withValues(alpha: 0.12)
-              : const Color(0xFF1A2535),
+              : AppTheme.surfaceOffWhite,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: isSelected ? Colors.redAccent : const Color(0xFF2D3748),
+            color: isSelected ? Colors.redAccent : AppTheme.iosGray4,
             width: isSelected ? 1.5 : 1,
           ),
         ),
@@ -227,7 +228,7 @@ class _VolunteerUnsafeCancelScreenState
           children: [
             Icon(
               isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
-              color: isSelected ? Colors.redAccent : Colors.white38,
+              color: isSelected ? Colors.redAccent : Colors.black38,
               size: 20,
             ),
             const SizedBox(width: 10),
@@ -235,7 +236,7 @@ class _VolunteerUnsafeCancelScreenState
               child: Text(
                 reason,
                 style: TextStyle(
-                    color: isSelected ? Colors.white : Colors.white70,
+                    color: isSelected ? Colors.redAccent : Colors.black54,
                     fontSize: 14),
               ),
             ),
@@ -249,16 +250,16 @@ class _VolunteerUnsafeCancelScreenState
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A2535),
+        color: AppTheme.surfaceOffWhite,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFF2D3748)),
+        border: Border.all(color: AppTheme.iosGray4),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text('Will immediately notify:',
               style: TextStyle(
-                  color: Colors.white70,
+                  color: Colors.black54,
                   fontWeight: FontWeight.bold,
                   fontSize: 13)),
           const SizedBox(height: 8),
@@ -280,7 +281,7 @@ class _VolunteerUnsafeCancelScreenState
             Flexible(
                 child: Text(label,
                     style:
-                        const TextStyle(color: Colors.white60, fontSize: 12))),
+                        const TextStyle(color: Colors.black45, fontSize: 12))),
           ],
         ),
       );
@@ -292,7 +293,7 @@ class _VolunteerUnsafeCancelScreenState
       activeColor: Colors.redAccent,
       title: const Text(
         'I confirm that the food was unsafe and I have a valid reason for this cancellation.',
-        style: TextStyle(color: Colors.white70, fontSize: 13),
+        style: TextStyle(color: Colors.black54, fontSize: 13),
       ),
       controlAffinity: ListTileControlAffinity.leading,
       contentPadding: EdgeInsets.zero,
@@ -305,8 +306,8 @@ class _VolunteerUnsafeCancelScreenState
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: const BoxDecoration(
-        color: Color(0xFF1A2535),
-        border: Border(top: BorderSide(color: Color(0xFF2D3748))),
+        color: AppTheme.surfaceOffWhite,
+        border: Border(top: BorderSide(color: AppTheme.iosGray4)),
       ),
       child: SizedBox(
         width: double.infinity,
@@ -317,15 +318,15 @@ class _VolunteerUnsafeCancelScreenState
                   width: 16,
                   height: 16,
                   child: CircularProgressIndicator(
-                      strokeWidth: 2, color: Colors.white))
+                      strokeWidth: 2, color: AppTheme.textPrimary))
               : const Icon(Icons.dangerous),
           label: const Text('Submit Cancellation & Notify All',
               style: TextStyle(fontWeight: FontWeight.bold)),
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.redAccent,
             foregroundColor: Colors.white,
-            disabledBackgroundColor: const Color(0xFF2D3748),
-            disabledForegroundColor: Colors.white38,
+            disabledBackgroundColor: AppTheme.iosGray5,
+            disabledForegroundColor: AppTheme.textMuted,
             padding: const EdgeInsets.symmetric(vertical: 14),
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

@@ -383,7 +383,12 @@ class NGOProvider extends ChangeNotifier {
       notifyListeners();
 
       // Get the current query to access its raiser user ID
-      final query = _myQueries.firstWhere((q) => q.id == queryId);
+      final queryIndex = _myQueries.indexWhere((q) => q.id == queryId);
+      if (queryIndex == -1) {
+        _errorMessage = 'Query not found in local data.';
+        return;
+      }
+      final query = _myQueries[queryIndex];
 
       await _queryService.addQueryUpdate(
         queryId,

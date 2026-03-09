@@ -351,10 +351,10 @@ class DonationDetailScreen extends StatelessWidget {
                     pickupLocation: _parseGeoPoint(donation.pickupLocation) ??
                         const LatLng(0, 0),
                     dropoffLocation: const LatLng(37.7749,
-                        -122.4194), // Placeholder for NGO location until fetched
+                        -122.4194), // TODO: Fetch real NGO location
                     volunteerLocation: LatLng(
-                      (data['latitude'] as num).toDouble(),
-                      (data['longitude'] as num).toDouble(),
+                      (data['latitude'] as num?)?.toDouble() ?? 0.0,
+                      (data['longitude'] as num?)?.toDouble() ?? 0.0,
                     ),
                     status: donation.status,
                   ),
@@ -607,7 +607,7 @@ class DonationDetailScreen extends StatelessWidget {
 
         await donationProvider.foodDonationService.forceAssignNGO(
           donationId: donation.id,
-          adminId: authProvider.user!.uid,
+          adminId: authProvider.user?.uid ?? '',
           ngoId: ngoId,
           reason: 'Manual Admin Override',
         );
@@ -649,7 +649,7 @@ class DonationDetailScreen extends StatelessWidget {
 
         await donationProvider.foodDonationService.forceAssignVolunteer(
           donationId: donation.id,
-          adminId: authProvider.user!.uid,
+          adminId: authProvider.user?.uid ?? '',
           volunteerId: volId,
           reason: 'Manual Admin Override',
         );
@@ -680,9 +680,15 @@ class DonationDetailScreen extends StatelessWidget {
     return null;
   }
 
-  String _formatTime(Timestamp? timestamp) {
+  String _formatTime(dynamic timestamp) {
     if (timestamp == null) return 'Unknown';
-    final dt = timestamp.toDate();
-    return '${dt.hour}:${dt.minute.toString().padLeft(2, '0')}';
+    if (timestamp is Timestamp) {
+      final dt = timestamp.toDate();
+      return '${dt.hour}:${dt.minute.toString().padLeft(2, '0')}';
+    }
+    if (timestamp is DateTime) {
+      return '${timestamp.hour}:${timestamp.minute.toString().padLeft(2, '0')}';
+    }
+    return 'Unknown';
   }
 }

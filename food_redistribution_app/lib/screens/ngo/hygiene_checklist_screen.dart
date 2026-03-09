@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:food_redistribution_app/utils/app_theme.dart';
 import '../../models/hygiene_checklist.dart';
 import '../../services/hygiene_service.dart';
 import 'ngo_reject_donation_screen.dart';
@@ -115,17 +116,17 @@ class _HygieneChecklistScreenState extends State<HygieneChecklistScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1923),
+      backgroundColor: AppTheme.surfaceWhite,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1A2535),
-        foregroundColor: Colors.white,
+        backgroundColor: AppTheme.surfaceOffWhite,
+        foregroundColor: AppTheme.textPrimary,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text('Hygiene Checklist',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             Text(widget.donationTitle,
-                style: const TextStyle(fontSize: 12, color: Colors.white60)),
+                style: const TextStyle(fontSize: 12, color: Colors.black45)),
           ],
         ),
         elevation: 0,
@@ -152,8 +153,8 @@ class _HygieneChecklistScreenState extends State<HygieneChecklistScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: const BoxDecoration(
-        color: Color(0xFF1A2535),
-        border: Border(bottom: BorderSide(color: Color(0xFF2D3748))),
+        color: AppTheme.surfaceOffWhite,
+        border: Border(bottom: BorderSide(color: AppTheme.iosGray4)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -162,7 +163,7 @@ class _HygieneChecklistScreenState extends State<HygieneChecklistScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text('Mandatory Items',
-                  style: TextStyle(color: Colors.white70, fontSize: 13)),
+                  style: TextStyle(color: Colors.black54, fontSize: 13)),
               Text('$checked / $total checked',
                   style: TextStyle(
                       color: _allMandatoryChecked
@@ -175,7 +176,7 @@ class _HygieneChecklistScreenState extends State<HygieneChecklistScreen> {
           const SizedBox(height: 8),
           LinearProgressIndicator(
             value: progress,
-            backgroundColor: const Color(0xFF2D3748),
+            backgroundColor: AppTheme.iosGray5,
             valueColor: AlwaysStoppedAnimation<Color>(
               progress == 1.0 ? const Color(0xFF4CAF50) : Colors.orange,
             ),
@@ -204,12 +205,12 @@ class _HygieneChecklistScreenState extends State<HygieneChecklistScreen> {
         return Container(
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
           decoration: BoxDecoration(
-            color: const Color(0xFF1A2535),
+            color: AppTheme.surfaceOffWhite,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: item.isChecked
                   ? const Color(0xFF4CAF50).withValues(alpha: 0.5)
-                  : const Color(0xFF2D3748),
+                  : AppTheme.iosGray4,
             ),
           ),
           child: CheckboxListTile(
@@ -222,7 +223,7 @@ class _HygieneChecklistScreenState extends State<HygieneChecklistScreen> {
             title: Text(
               item.question,
               style: TextStyle(
-                color: item.isChecked ? Colors.white : Colors.white70,
+                color: item.isChecked ? AppTheme.textPrimary : Colors.black54,
                 fontSize: 14,
               ),
             ),
@@ -230,7 +231,7 @@ class _HygieneChecklistScreenState extends State<HygieneChecklistScreen> {
                 ? const Text('Mandatory',
                     style: TextStyle(color: Colors.redAccent, fontSize: 11))
                 : const Text('Optional',
-                    style: TextStyle(color: Colors.white38, fontSize: 11)),
+                    style: TextStyle(color: Colors.black38, fontSize: 11)),
             controlAffinity: ListTileControlAffinity.leading,
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -245,20 +246,20 @@ class _HygieneChecklistScreenState extends State<HygieneChecklistScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: TextField(
         controller: _notesController,
-        style: const TextStyle(color: Colors.white),
+        style: const TextStyle(color: AppTheme.textPrimary),
         maxLines: 2,
         decoration: InputDecoration(
           hintText: 'Additional notes (optional)...',
-          hintStyle: const TextStyle(color: Colors.white38),
+          hintStyle: const TextStyle(color: Colors.black38),
           filled: true,
-          fillColor: const Color(0xFF1A2535),
+          fillColor: AppTheme.surfaceOffWhite,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFF2D3748)),
+            borderSide: const BorderSide(color: AppTheme.iosGray4),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFF2D3748)),
+            borderSide: const BorderSide(color: AppTheme.iosGray4),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -273,8 +274,8 @@ class _HygieneChecklistScreenState extends State<HygieneChecklistScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: const BoxDecoration(
-        color: Color(0xFF1A2535),
-        border: Border(top: BorderSide(color: Color(0xFF2D3748))),
+        color: AppTheme.surfaceOffWhite,
+        border: Border(top: BorderSide(color: AppTheme.iosGray4)),
       ),
       child: Column(
         children: [
@@ -297,8 +298,8 @@ class _HygieneChecklistScreenState extends State<HygieneChecklistScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF4CAF50),
                 foregroundColor: Colors.white,
-                disabledBackgroundColor: const Color(0xFF2D3748),
-                disabledForegroundColor: Colors.white38,
+                disabledBackgroundColor: AppTheme.iosGray5,
+                disabledForegroundColor: AppTheme.textMuted,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),

@@ -168,6 +168,7 @@ class DonationProvider extends ChangeNotifier {
       String assignmentId, String donationId, String volunteerId) async {
     try {
       _isLoading = true;
+      _errorMessage = null;
       notifyListeners();
       await _donationService.acceptAssignment(
           assignmentId, donationId, volunteerId);
@@ -186,6 +187,7 @@ class DonationProvider extends ChangeNotifier {
       String volunteerId, String reason) async {
     try {
       _isLoading = true;
+      _errorMessage = null;
       notifyListeners();
       await _donationService.rejectAssignment(
           assignmentId, donationId, volunteerId, reason);

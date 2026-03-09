@@ -48,7 +48,7 @@ class _DonorDashboardState extends State<DonorDashboard> {
         SnackBar(
           content: const Row(
             children: [
-              Icon(Icons.check_circle, color: AppTheme.primaryNavy),
+              Icon(Icons.check_circle, color: AppTheme.primaryBlue),
               SizedBox(width: 12),
               Text('Your account has been verified!'),
             ],

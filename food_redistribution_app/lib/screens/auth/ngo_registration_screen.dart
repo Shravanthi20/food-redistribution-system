@@ -189,8 +189,9 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
                       hintText: 'admin@organization.org',
                       keyboardType: TextInputType.emailAddress,
                       validator: (value) {
-                        if (value == null || value.isEmpty)
+                        if (value == null || value.isEmpty) {
                           return 'Email is required';
+                        }
                         if (!RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$')
                             .hasMatch(value)) {
                           return 'Enter a valid email address';
@@ -216,9 +217,12 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
                                   () => _obscurePassword = !_obscurePassword),
                             ),
                             validator: (value) {
-                              if (value == null || value.isEmpty)
-                                return 'Password is required';
-                              if (value.length < 6) return 'Min 6 chars';
+                              if (value == null || value.isEmpty) {
+                          return 'Password is required';
+                        }
+                              if (value.length < 6) {
+                          return 'Min 6 chars';
+                        }
                               return null;
                             },
                           ),
@@ -240,8 +244,9 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
                                       !_obscureConfirmPassword),
                             ),
                             validator: (value) {
-                              if (value != _passwordController.text)
-                                return 'Passwords do not match';
+                              if (value != _passwordController.text) {
+                          return 'Passwords do not match';
+                        }
                               return null;
                             },
                           ),
@@ -265,7 +270,7 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
                       ),
                       child: DropdownButtonHideUnderline(
                         child: DropdownButtonFormField<NGOType>(
-                          value: _selectedNGOType,
+                          initialValue: _selectedNGOType,
                           items: NGOType.values
                               .map((type) => DropdownMenuItem(
                                     value: type,
@@ -377,10 +382,12 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
                             label: 'DAILY CAPACITY (PEOPLE)',
                             keyboardType: TextInputType.number,
                             validator: (value) {
-                              if (value == null || value.isEmpty)
-                                return 'Required';
-                              if (int.tryParse(value) == null)
-                                return 'Enter a number';
+                              if (value == null || value.isEmpty) {
+                          return 'Required';
+                        }
+                              if (int.tryParse(value) == null) {
+                          return 'Enter a number';
+                        }
                               return null;
                             },
                           ),
@@ -392,10 +399,12 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
                             label: 'STORAGE CAPACITY (KG)',
                             keyboardType: TextInputType.number,
                             validator: (value) {
-                              if (value == null || value.isEmpty)
-                                return 'Required';
-                              if (int.tryParse(value) == null)
-                                return 'Enter a number';
+                              if (value == null || value.isEmpty) {
+                          return 'Required';
+                        }
+                              if (int.tryParse(value) == null) {
+                          return 'Enter a number';
+                        }
                               return null;
                             },
                           ),
@@ -427,7 +436,7 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
                               ? _selectedServingPopulation.add(pop)
                               : _selectedServingPopulation.remove(pop)),
                           backgroundColor: Colors.transparent,
-                          selectedColor: colorScheme.primary.withOpacity(0.12),
+                          selectedColor: colorScheme.primary.withValues(alpha: 0.12),
                           checkmarkColor: colorScheme.primary,
                           labelStyle: theme.textTheme.bodyMedium?.copyWith(
                             color: isSelected
@@ -461,7 +470,7 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
                               ? _selectedFoodTypes.add(type)
                               : _selectedFoodTypes.remove(type)),
                           backgroundColor: Colors.transparent,
-                          selectedColor: colorScheme.primary.withOpacity(0.12),
+                          selectedColor: colorScheme.primary.withValues(alpha: 0.12),
                           checkmarkColor: colorScheme.primary,
                           labelStyle: theme.textTheme.bodyMedium?.copyWith(
                             color: isSelected
@@ -539,7 +548,7 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
         subtitle: Text(sub, style: const TextStyle(fontSize: 12)),
         value: val,
         onChanged: onC,
-        activeColor: AppTheme.primaryEmerald,
+        activeThumbColor: AppTheme.primaryEmerald,
       ),
     );
   }

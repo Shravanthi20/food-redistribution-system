@@ -14,6 +14,9 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  bool _hasNavigated = false;
+  VoidCallback? _authListener;
+
   @override
   void initState() {
     super.initState();
@@ -22,15 +25,26 @@ class _SplashScreenState extends State<SplashScreen> {
     });
   }
 
+  @override
+  void dispose() {
+    // Remove listener to prevent memory leak
+    if (_authListener != null) {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      authProvider.removeListener(_authListener!);
+    }
+    super.dispose();
+  }
+
   void _checkAuthState() {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
-    // Listen to auth state changes
-    authProvider.addListener(() {
-      if (!authProvider.isLoading && mounted) {
+    // Listen to auth state changes (store reference for cleanup)
+    _authListener = () {
+      if (!authProvider.isLoading && mounted && !_hasNavigated) {
         _navigateToAppropriateScreen(authProvider);
       }
-    });
+    };
+    authProvider.addListener(_authListener!);
 
     // If already loaded, navigate immediately
     if (!authProvider.isLoading) {
@@ -39,11 +53,15 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void _navigateToAppropriateScreen(AuthProvider authProvider) {
+    if (_hasNavigated || !mounted) return;
+    _hasNavigated = true;
+
     if (authProvider.isAuthenticated) {
-// Bypass email verification for testing
+      // TODO: Re-enable email verification for production
       // if (!authProvider.isEmailVerified) {
       //   Navigator.pushReplacementNamed(context, AppRouter.emailVerification);
-      // } else
+      //   return;
+      // }
       if (authProvider.appUser != null) {
         _navigateBasedOnUserState(authProvider.appUser!);
       } else {
@@ -70,15 +88,11 @@ class _SplashScreenState extends State<SplashScreen> {
           Navigator.pushReplacementNamed(
               context, AppRouter.verificationPending);
           return;
-        // If we had a rejected state in enum, handle it. Assuming it might be handled via status or re-purposed state.
-        // For now, if active/verified:
+        case OnboardingState.profileComplete:
         case OnboardingState.verified:
         case OnboardingState.active:
           _navigateToRoleDashboard(user.role);
           return;
-        default:
-          // If profile not complete etc
-          break;
       }
     }
 

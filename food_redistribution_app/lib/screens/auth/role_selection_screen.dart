@@ -14,13 +14,13 @@ class RoleSelectionScreen extends StatelessWidget {
         title: const Text(
           'Choose Your Role',
           style: TextStyle(
-            color: Colors.white,
+            color: AppTheme.textPrimary,
             fontWeight: FontWeight.bold,
           ),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: AppTheme.textPrimary),
       ),
       body: SafeArea(
         child: Padding(
@@ -39,7 +39,7 @@ class RoleSelectionScreen extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: AppTheme.textPrimary,
                   ),
                 ),
               ),
@@ -48,7 +48,7 @@ class RoleSelectionScreen extends StatelessWidget {
                 'Select your role to get started',
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.white.withValues(alpha: 0.7),
+                  color: AppTheme.textSecondary,
                 ),
               ),
               const SizedBox(height: 40),
@@ -113,7 +113,7 @@ class RoleSelectionScreen extends StatelessWidget {
                   Text(
                     'Already have an account? ',
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.7),
+                      color: AppTheme.textSecondary,
                       fontSize: 14,
                     ),
                   ),
@@ -128,7 +128,7 @@ class RoleSelectionScreen extends StatelessWidget {
                       child: const Text(
                         'Sign In',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: AppTheme.textPrimary,
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
                         ),
@@ -199,7 +199,7 @@ class _RoleCard extends StatelessWidget {
                   Text(
                     title,
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: AppTheme.textPrimary,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -208,7 +208,7 @@ class _RoleCard extends StatelessWidget {
                   Text(
                     subtitle,
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.6),
+                      color: AppTheme.textMuted,
                       fontSize: 13,
                     ),
                   ),
@@ -216,7 +216,7 @@ class _RoleCard extends StatelessWidget {
                   Text(
                     description,
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.8),
+                      color: AppTheme.textSecondary,
                       fontSize: 14,
                     ),
                   ),
@@ -228,12 +228,12 @@ class _RoleCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.1),
+                color: AppTheme.primaryBlue.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
                 Icons.arrow_forward_ios,
-                color: Colors.white.withValues(alpha: 0.5),
+                color: AppTheme.textMuted,
                 size: 16,
               ),
             ),

@@ -165,7 +165,7 @@ class _VerificationPendingScreenState extends State<VerificationPendingScreen>
                       style:
                           Theme.of(context).textTheme.headlineSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                                color: AppTheme.textPrimary,
                               ),
                       textAlign: TextAlign.center,
                     ),
@@ -573,7 +573,7 @@ class _VerificationPendingScreenState extends State<VerificationPendingScreen>
             child: Center(
               child: isCompleted
                   ? const Icon(Icons.check_rounded,
-                      size: 18, color: Colors.white)
+                      size: 18, color: AppTheme.textPrimary)
                   : Text(
                       '$step',
                       style: const TextStyle(

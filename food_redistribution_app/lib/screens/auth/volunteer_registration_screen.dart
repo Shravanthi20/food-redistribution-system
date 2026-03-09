@@ -167,8 +167,9 @@ class _VolunteerRegistrationScreenState
                       hintText: 'yourname@example.com',
                       keyboardType: TextInputType.emailAddress,
                       validator: (value) {
-                        if (value == null || value.isEmpty)
+                        if (value == null || value.isEmpty) {
                           return 'Email is required';
+                        }
                         if (!RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$')
                             .hasMatch(value)) {
                           return 'Enter a valid email address';
@@ -194,9 +195,12 @@ class _VolunteerRegistrationScreenState
                                   () => _obscurePassword = !_obscurePassword),
                             ),
                             validator: (value) {
-                              if (value == null || value.isEmpty)
-                                return 'Password is required';
-                              if (value.length < 6) return 'Min 6 chars';
+                              if (value == null || value.isEmpty) {
+                          return 'Password is required';
+                        }
+                              if (value.length < 6) {
+                          return 'Min 6 chars';
+                        }
                               return null;
                             },
                           ),
@@ -218,8 +222,9 @@ class _VolunteerRegistrationScreenState
                                       !_obscureConfirmPassword),
                             ),
                             validator: (value) {
-                              if (value != _passwordController.text)
-                                return 'Passwords do not match';
+                              if (value != _passwordController.text) {
+                          return 'Passwords do not match';
+                        }
                               return null;
                             },
                           ),
@@ -280,7 +285,7 @@ class _VolunteerRegistrationScreenState
                             style: TextStyle(fontSize: 12)),
                         value: _hasVehicle,
                         onChanged: (v) => setState(() => _hasVehicle = v),
-                        activeColor: AppTheme.primaryEmerald,
+                        activeThumbColor: AppTheme.primaryEmerald,
                       ),
                     ),
                     if (_hasVehicle) ...[
@@ -335,7 +340,7 @@ class _VolunteerRegistrationScreenState
                               ? _selectedWorkingDays.add(day)
                               : _selectedWorkingDays.remove(day)),
                           backgroundColor: Colors.transparent,
-                          selectedColor: colorScheme.primary.withOpacity(0.12),
+                          selectedColor: colorScheme.primary.withValues(alpha: 0.12),
                           checkmarkColor: colorScheme.primary,
                           labelStyle: theme.textTheme.bodyMedium?.copyWith(
                             color: isSelected
@@ -371,7 +376,7 @@ class _VolunteerRegistrationScreenState
                               ? _selectedAvailabilityHours.add(hours)
                               : _selectedAvailabilityHours.remove(hours)),
                           backgroundColor: Colors.transparent,
-                          selectedColor: colorScheme.primary.withOpacity(0.12),
+                          selectedColor: colorScheme.primary.withValues(alpha: 0.12),
                           checkmarkColor: colorScheme.primary,
                           labelStyle: theme.textTheme.bodyMedium?.copyWith(
                             color: isSelected
@@ -407,7 +412,7 @@ class _VolunteerRegistrationScreenState
                               ? _selectedPreferredTasks.add(task)
                               : _selectedPreferredTasks.remove(task)),
                           backgroundColor: Colors.transparent,
-                          selectedColor: colorScheme.primary.withOpacity(0.12),
+                          selectedColor: colorScheme.primary.withValues(alpha: 0.12),
                           checkmarkColor: colorScheme.primary,
                           labelStyle: theme.textTheme.bodyMedium?.copyWith(
                             color: isSelected

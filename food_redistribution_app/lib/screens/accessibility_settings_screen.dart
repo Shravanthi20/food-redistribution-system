@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/accessibility_provider.dart';
+import '../providers/locale_provider.dart';
 import '../providers/theme_provider.dart';
 
 class AccessibilitySettingsScreen extends StatelessWidget {
@@ -10,11 +11,34 @@ class AccessibilitySettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Accessibility Settings')),
-      body: Consumer2<AccessibilityProvider, ThemeProvider>(
-        builder: (context, accessibilityProvider, themeProvider, child) {
+      body: Consumer3<AccessibilityProvider, ThemeProvider, LocaleProvider>(
+        builder: (context, accessibilityProvider, themeProvider, localeProvider,
+            child) {
           return ListView(
             padding: const EdgeInsets.all(16.0),
             children: [
+              // ── Language ───────────────────────────────────────────────
+              Text(
+                'Language',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 8),
+              RadioGroup<Locale>(
+                groupValue: localeProvider.locale,
+                onChanged: (Locale? value) {
+                  if (value != null) localeProvider.setLocale(value);
+                },
+                child: Column(
+                  children: LocaleProvider.supportedLocaleOptions.map(
+                    (opt) => RadioListTile<Locale>(
+                      title: Text(opt.displayName),
+                      value: opt.locale,
+                    ),
+                  ).toList(),
+                ),
+              ),
+              const Divider(),
+              // ── Display Options ────────────────────────────────────────
               Text(
                 'Display Options',
                 style: Theme.of(context).textTheme.titleLarge,

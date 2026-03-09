@@ -478,7 +478,7 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
                     child: Text(
                       index.toString(),
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: AppTheme.textPrimary,
                         fontWeight: FontWeight.bold,
                         fontSize: 13,
                       ),

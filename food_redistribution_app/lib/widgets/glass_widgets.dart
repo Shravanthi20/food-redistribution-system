@@ -40,21 +40,22 @@ class GlassContainer extends StatelessWidget {
           height: height,
           padding: padding ?? const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                (tintColor ?? Colors.white).withValues(alpha: 0.1),
-                (tintColor ?? Colors.white).withValues(alpha: 0.05),
-              ],
-            ),
+            color: (tintColor ?? AppTheme.surfaceWhite)
+                .withValues(alpha: 0.92),
             borderRadius: BorderRadius.circular(borderRadius),
             border: showBorder
                 ? Border.all(
-                    color: AppTheme.surfaceGlassBorder,
-                    width: 1.5,
+                    color: AppTheme.iosGray5.withValues(alpha: 0.5),
+                    width: 0.5,
                   )
                 : null,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 12,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
           child: child,
         ),
@@ -176,7 +177,7 @@ class GradientButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
-            child: _buildContent(AppTheme.primaryNavy),
+            child: _buildContent(Colors.white),
           ),
         ),
       ),
@@ -289,7 +290,7 @@ class GlassTextField extends StatelessWidget {
                 suffixIcon: suffixIcon,
                 errorMaxLines: 2,
                 filled: true,
-                fillColor: AppTheme.surfaceGlassDark,
+                fillColor: AppTheme.surfaceWhite,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
                   borderSide:
@@ -344,7 +345,7 @@ class GlassIconButton extends StatelessWidget {
         child: Material(
           color: isAccent
               ? AppTheme.accentTeal.withValues(alpha: 0.2)
-              : AppTheme.surfaceGlassDark,
+              : AppTheme.surfaceOffWhite,
           child: InkWell(
             onTap: onPressed,
             borderRadius: BorderRadius.circular(size / 2),
@@ -356,8 +357,8 @@ class GlassIconButton extends StatelessWidget {
                 border: Border.all(
                   color: isAccent
                       ? AppTheme.accentTeal.withValues(alpha: 0.5)
-                      : AppTheme.surfaceGlassBorder,
-                  width: 1.5,
+                      : AppTheme.iosGray4,
+                  width: 1,
                 ),
               ),
               child: Icon(
@@ -402,12 +403,12 @@ class GlassChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
           color: isSelected
-              ? color.withValues(alpha: 0.2)
-              : AppTheme.surfaceGlassDark,
+              ? color.withValues(alpha: 0.12)
+              : AppTheme.surfaceOffWhite,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? color : AppTheme.surfaceGlassBorder,
-            width: 1.5,
+            color: isSelected ? color : AppTheme.iosGray4,
+            width: 1,
           ),
         ),
         child: Row(
@@ -537,11 +538,11 @@ class GlassNavigationBar extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
           decoration: BoxDecoration(
-            color: AppTheme.primaryNavy.withValues(alpha: 0.8),
-            border: const Border(
+            color: AppTheme.surfaceWhite.withValues(alpha: 0.94),
+            border: Border(
               top: BorderSide(
-                color: AppTheme.surfaceGlassBorder,
-                width: 1,
+                color: AppTheme.iosGray5.withValues(alpha: 0.8),
+                width: 0.5,
               ),
             ),
           ),
@@ -732,7 +733,7 @@ class GlassProgressBar extends StatelessWidget {
     return Container(
       height: height,
       decoration: BoxDecoration(
-        color: backgroundColor ?? AppTheme.surfaceGlassDark,
+        color: backgroundColor ?? AppTheme.iosGray5,
         borderRadius: BorderRadius.circular(height / 2),
       ),
       child: FractionallySizedBox(

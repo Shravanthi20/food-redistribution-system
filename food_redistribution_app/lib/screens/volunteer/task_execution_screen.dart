@@ -172,7 +172,7 @@ class _TaskExecutionScreenState extends State<TaskExecutionScreen> {
                           "Have you collected the food from the donor?",
                           "Yes, Picked Up",
                         );
-                        if (confirmed) _updateStatus(DonationStatus.pickedUp);
+                        if (confirmed && mounted) _updateStatus(DonationStatus.pickedUp);
                       },
                     ),
                   );
@@ -185,18 +185,19 @@ class _TaskExecutionScreenState extends State<TaskExecutionScreen> {
                       "Mark En-route",
                       Colors.orange,
                       () async {
+                        final authProv = Provider.of<AuthProvider>(
+                          context,
+                          listen: false,
+                        );
                         final confirmed = await _showConfirmationDialog(
                           "En-route?",
                           "Start location tracking and head to the destination?",
                           "Yes, Start Next Leg",
                         );
-                        if (confirmed) {
-                          final userId = Provider.of<AuthProvider>(
-                            context,
-                            listen: false,
-                          ).appUser!.uid;
+                        if (confirmed && mounted) {
+                          final userId = authProv.appUser?.uid ?? '';
                           await _locationService.startLocationTracking(userId);
-                          await _updateStatus(DonationStatus.inTransit);
+                          if (mounted) await _updateStatus(DonationStatus.inTransit);
                         }
                       },
                     ),
@@ -212,16 +213,17 @@ class _TaskExecutionScreenState extends State<TaskExecutionScreen> {
                       "Confirm Delivery",
                       Colors.blue,
                       () async {
+                        final authProv = Provider.of<AuthProvider>(
+                          context,
+                          listen: false,
+                        );
                         final confirmed = await _showConfirmationDialog(
                           "Confirm Delivery",
                           "Has the food been successfully delivered to the NGO?",
                           "Yes, Delivered",
                         );
-                        if (confirmed) {
-                          final userId = Provider.of<AuthProvider>(
-                            context,
-                            listen: false,
-                          ).appUser!.uid;
+                        if (confirmed && mounted) {
+                          final userId = authProv.appUser?.uid ?? '';
                           await _locationService.stopLocationTracking(userId);
                           await _updateStatus(DonationStatus.delivered);
                           if (!context.mounted) return;

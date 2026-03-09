@@ -66,7 +66,7 @@ class _CreateDonationScreenState extends State<CreateDonationScreen> {
   }
 
   Future<void> _createDonation() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (_formKey.currentState?.validate() != true) return;
 
     if (_selectedFoodTypes.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -102,7 +102,7 @@ class _CreateDonationScreenState extends State<CreateDonationScreen> {
       title: _titleController.text.trim(),
       description: _descriptionController.text.trim(),
       foodTypes: _selectedFoodTypes,
-      quantity: int.parse(_quantityController.text.trim()),
+      quantity: int.tryParse(_quantityController.text.trim()) ?? 0,
       unit: _unitController.text.trim(),
       preparedAt: _preparedAt,
       expiresAt: _expiresAt,
@@ -132,10 +132,10 @@ class _CreateDonationScreenState extends State<CreateDonationScreen> {
       status: DonationStatus.listed,
       estimatedMeals: _estimatedMealsController.text.trim().isEmpty
           ? 0
-          : int.parse(_estimatedMealsController.text.trim()),
+          : int.tryParse(_estimatedMealsController.text.trim()) ?? 0,
       estimatedPeopleServed: _estimatedPeopleController.text.trim().isEmpty
           ? 0
-          : int.parse(_estimatedPeopleController.text.trim()),
+          : int.tryParse(_estimatedPeopleController.text.trim()) ?? 0,
       createdAt: DateTime.now(),
       isUrgent: _isUrgent,
     );

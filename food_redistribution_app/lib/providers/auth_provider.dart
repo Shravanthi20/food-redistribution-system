@@ -1,13 +1,16 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart'; // [NEW]
-import 'package:flutter/foundation.dart'; // [NEW] for kIsWeb
-import 'dart:io'; // [NEW] for File
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart'; // for kIsWeb
+import 'dart:async';
 import '../services/auth_service.dart';
 import '../models/user.dart';
 import '../models/ngo_profile.dart';
 import '../services/verification_service.dart';
+
+// Conditional import for dart:io (not available on web)
+import 'auth_provider_io.dart' if (dart.library.html) 'auth_provider_web.dart';
 
 class AuthProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();
@@ -27,28 +30,51 @@ class AuthProvider extends ChangeNotifier {
   bool get isAuthenticated => _firebaseUser != null;
   bool get isEmailVerified => _firebaseUser?.emailVerified ?? false;
 
+  StreamSubscription<User?>? _authSubscription;
+
   AuthProvider() {
     _initializeAuth();
   }
 
   void _initializeAuth() {
-    _authService.authStateChanges.listen((User? user) async {
-      _firebaseUser = user;
+    // Timeout: if auth state never emits within 10s, stop loading
+    Future.delayed(const Duration(seconds: 10), () {
+      if (_isLoading) {
+        _isLoading = false;
+        notifyListeners();
+      }
+    });
 
-      if (user != null) {
-        try {
-          _appUser = await _authService.getCurrentAppUser();
-        } catch (e) {
-          debugPrint('Error getting app user: $e');
+    _authSubscription = _authService.authStateChanges.listen(
+      (User? user) async {
+        _firebaseUser = user;
+
+        if (user != null) {
+          try {
+            _appUser = await _authService.getCurrentAppUser();
+          } catch (e) {
+            debugPrint('Error getting app user: $e');
+            _appUser = null;
+          }
+        } else {
           _appUser = null;
         }
-      } else {
-        _appUser = null;
-      }
 
-      _isLoading = false;
-      notifyListeners();
-    });
+        _isLoading = false;
+        notifyListeners();
+      },
+      onError: (error) {
+        debugPrint('Auth state stream error: $error');
+        _isLoading = false;
+        notifyListeners();
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _authSubscription?.cancel();
+    super.dispose();
   }
 
   Future<bool> signIn({
@@ -66,6 +92,13 @@ class AuthProvider extends ChangeNotifier {
       );
 
       if (credential != null) {
+        // Eagerly fetch appUser to avoid race condition with stream listener
+        try {
+          _firebaseUser = credential.user;
+          _appUser = await _authService.getCurrentAppUser();
+        } catch (e) {
+          debugPrint('Error fetching user after sign-in: $e');
+        }
         return true;
       }
       return false;
@@ -199,16 +232,23 @@ class AuthProvider extends ChangeNotifier {
           .child('$userId.${file.extension}');
 
       if (kIsWeb) {
+        if (file.bytes == null) {
+          throw Exception('File bytes not available. Ensure file is loaded with withData: true.');
+        }
         await ref.putData(file.bytes!);
       } else {
-        await ref.putFile(File(file.path!));
+        if (file.path == null) {
+          throw Exception('File path not available.');
+        }
+        await ref.putFile(platformFile(file.path!));
       }
 
       final url = await ref.getDownloadURL();
 
-      // 2. Update User Verification Status (Legacy field support)
+      // 2. Update User Verification Status & advance onboarding state
       await _firestore.collection('users').doc(userId).update({
         'verificationDocUrl': url,
+        'onboardingState': OnboardingState.documentSubmitted.name,
         'updatedAt': FieldValue.serverTimestamp(),
       });
 

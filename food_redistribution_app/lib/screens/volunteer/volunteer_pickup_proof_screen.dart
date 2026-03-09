@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:food_redistribution_app/utils/app_theme.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../services/hygiene_service.dart';
 import 'volunteer_unsafe_cancel_screen.dart';
@@ -112,17 +113,17 @@ class _VolunteerPickupProofScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1923),
+      backgroundColor: AppTheme.surfaceWhite,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1A2535),
-        foregroundColor: Colors.white,
+        backgroundColor: AppTheme.surfaceOffWhite,
+        foregroundColor: AppTheme.textPrimary,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text('Pickup Proof',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             Text(widget.donationTitle,
-                style: const TextStyle(fontSize: 11, color: Colors.white60)),
+                style: const TextStyle(fontSize: 11, color: Colors.black45)),
           ],
         ),
         elevation: 0,
@@ -177,12 +178,12 @@ class _VolunteerPickupProofScreenState
         height: 220,
         width: double.infinity,
         decoration: BoxDecoration(
-          color: const Color(0xFF1A2535),
+          color: AppTheme.surfaceOffWhite,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: _capturedImage != null
                 ? const Color(0xFF4CAF50)
-                : const Color(0xFF2D3748),
+                : AppTheme.iosGray4,
             width: 2,
           ),
         ),
@@ -198,7 +199,7 @@ class _VolunteerPickupProofScreenState
                         color: const Color(0xFF4CAF50).withValues(alpha: 0.5),
                         child: const Center(
                           child: Icon(Icons.check_circle,
-                              color: Colors.white, size: 60),
+                              color: AppTheme.textPrimary, size: 60),
                         ),
                       ),
                     Positioned(
@@ -213,7 +214,7 @@ class _VolunteerPickupProofScreenState
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: const Icon(Icons.refresh,
-                              color: Colors.white, size: 18),
+                              color: AppTheme.textPrimary, size: 18),
                         ),
                       ),
                     ),
@@ -227,10 +228,10 @@ class _VolunteerPickupProofScreenState
                       color: Color(0xFF4CAF50), size: 48),
                   SizedBox(height: 10),
                   Text('Tap to take a photo of the food',
-                      style: TextStyle(color: Colors.white70, fontSize: 14)),
+                      style: TextStyle(color: Colors.black54, fontSize: 14)),
                   SizedBox(height: 4),
                   Text('This is mandatory for pickup completion',
-                      style: TextStyle(color: Colors.white38, fontSize: 12)),
+                      style: TextStyle(color: Colors.black38, fontSize: 12)),
                 ],
               ),
       ),
@@ -243,7 +244,7 @@ class _VolunteerPickupProofScreenState
       children: [
         const Text('Food Condition *',
             style: TextStyle(
-                color: Colors.white,
+                color: AppTheme.textPrimary,
                 fontWeight: FontWeight.bold,
                 fontSize: 15)),
         const SizedBox(height: 10),
@@ -275,19 +276,19 @@ class _VolunteerPickupProofScreenState
           decoration: BoxDecoration(
             color: isSelected
                 ? color.withValues(alpha: 0.15)
-                : const Color(0xFF1A2535),
+                : AppTheme.surfaceOffWhite,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-                color: isSelected ? color : const Color(0xFF2D3748),
+                color: isSelected ? color : AppTheme.iosGray4,
                 width: isSelected ? 2 : 1),
           ),
           child: Column(
             children: [
-              Icon(icon, color: isSelected ? color : Colors.white38, size: 22),
+              Icon(icon, color: isSelected ? color : Colors.black38, size: 22),
               const SizedBox(height: 4),
               Text(label,
                   style: TextStyle(
-                      color: isSelected ? color : Colors.white38,
+                      color: isSelected ? color : Colors.black38,
                       fontSize: 12,
                       fontWeight:
                           isSelected ? FontWeight.bold : FontWeight.normal)),
@@ -303,24 +304,24 @@ class _VolunteerPickupProofScreenState
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text('Condition Notes (optional)',
-            style: TextStyle(color: Colors.white70, fontSize: 13)),
+            style: TextStyle(color: Colors.black54, fontSize: 13)),
         const SizedBox(height: 8),
         TextField(
           controller: _notesController,
-          style: const TextStyle(color: Colors.white),
+          style: const TextStyle(color: AppTheme.textPrimary),
           maxLines: 3,
           decoration: InputDecoration(
             hintText: 'Describe any observations about the food condition...',
-            hintStyle: const TextStyle(color: Colors.white38),
+            hintStyle: const TextStyle(color: Colors.black38),
             filled: true,
-            fillColor: const Color(0xFF1A2535),
+            fillColor: AppTheme.surfaceOffWhite,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFF2D3748)),
+              borderSide: const BorderSide(color: AppTheme.iosGray4),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFF2D3748)),
+              borderSide: const BorderSide(color: AppTheme.iosGray4),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -336,8 +337,8 @@ class _VolunteerPickupProofScreenState
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: const BoxDecoration(
-        color: Color(0xFF1A2535),
-        border: Border(top: BorderSide(color: Color(0xFF2D3748))),
+        color: AppTheme.surfaceOffWhite,
+        border: Border(top: BorderSide(color: AppTheme.iosGray4)),
       ),
       child: Column(
         children: [
@@ -365,8 +366,8 @@ class _VolunteerPickupProofScreenState
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF4CAF50),
                 foregroundColor: Colors.white,
-                disabledBackgroundColor: const Color(0xFF2D3748),
-                disabledForegroundColor: Colors.white38,
+                disabledBackgroundColor: AppTheme.iosGray5,
+                disabledForegroundColor: AppTheme.textMuted,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),

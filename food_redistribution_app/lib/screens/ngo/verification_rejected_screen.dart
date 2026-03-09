@@ -172,7 +172,7 @@ class _VerificationRejectedScreenState extends State<VerificationRejectedScreen>
                       style:
                           Theme.of(context).textTheme.headlineSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                                color: AppTheme.textPrimary,
                               ),
                       textAlign: TextAlign.center,
                     ),
@@ -553,7 +553,7 @@ class _VerificationRejectedScreenState extends State<VerificationRejectedScreen>
               child: Text(
                 step.toString(),
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.textPrimary,
                   fontWeight: FontWeight.bold,
                   fontSize: 13,
                 ),

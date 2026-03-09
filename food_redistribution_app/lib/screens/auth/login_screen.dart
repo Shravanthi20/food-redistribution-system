@@ -52,7 +52,7 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   Future<void> _signIn() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (_formKey.currentState?.validate() != true) return;
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
@@ -67,13 +67,16 @@ class _LoginScreenState extends State<LoginScreen>
     if (success && mounted) {
       if (authProvider.appUser != null) {
         _navigateBasedOnUser(authProvider.appUser!);
+      } else {
+        // appUser is null after successful sign-in — show feedback
+        _showErrorSnackBar('Login succeeded but failed to load user profile. Please try again.');
       }
     } else if (mounted && authProvider.errorMessage != null) {
       _showErrorSnackBar(authProvider.errorMessage!);
     }
   }
 
-  void _navigateBasedOnUser(dynamic user) {
+  void _navigateBasedOnUser(AppUser user) {
     // Admin users bypass all verification/onboarding - go directly to dashboard
     if (user.role == UserRole.admin) {
       Navigator.pushReplacementNamed(context, AppRouter.adminDashboard);
@@ -89,12 +92,11 @@ class _LoginScreenState extends State<LoginScreen>
           Navigator.pushReplacementNamed(
               context, AppRouter.verificationPending);
           return;
+        case OnboardingState.profileComplete:
         case OnboardingState.verified:
         case OnboardingState.active:
           _navigateToRoleDashboard(user.role);
           return;
-        default:
-          break;
       }
     }
 
@@ -121,9 +123,6 @@ class _LoginScreenState extends State<LoginScreen>
       case OnboardingState.active:
         _navigateToRoleDashboard(user.role);
         break;
-      default:
-        // Fallback
-        _navigateToRoleDashboard(user.role);
     }
   }
 
@@ -313,25 +312,28 @@ class _LoginScreenState extends State<LoginScreen>
                           ),
 
                           const SizedBox(height: 32),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Text(
-                                "Don't have an account? ",
-                                style: TextStyle(color: AppTheme.textSecondary),
-                              ),
-                              TextButton(
-                                onPressed: () => Navigator.pushNamed(
-                                    context, AppRouter.roleSelection),
-                                child: const Text(
-                                  'Create Account',
-                                  style: TextStyle(
-                                    color: AppTheme.accentTeal,
-                                    fontWeight: FontWeight.w600,
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Text(
+                                  "Don't have an account?",
+                                  style: TextStyle(color: AppTheme.textSecondary),
+                                ),
+                                TextButton(
+                                  onPressed: () => Navigator.pushNamed(
+                                      context, AppRouter.roleSelection),
+                                  child: const Text(
+                                    'Create Account',
+                                    style: TextStyle(
+                                      color: AppTheme.accentTeal,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                           const SizedBox(height: 24),
                         ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:food_redistribution_app/utils/app_theme.dart';
 import '../../services/hygiene_service.dart';
 
 class NgoRejectDonationScreen extends StatefulWidget {
@@ -76,10 +77,10 @@ class _NgoRejectDonationScreenState extends State<NgoRejectDonationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1923),
+      backgroundColor: AppTheme.surfaceWhite,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1A2535),
-        foregroundColor: Colors.white,
+        backgroundColor: AppTheme.surfaceOffWhite,
+        foregroundColor: AppTheme.textPrimary,
         title: const Text('Reject Donation',
             style: TextStyle(fontWeight: FontWeight.bold)),
         elevation: 0,
@@ -95,7 +96,7 @@ class _NgoRejectDonationScreenState extends State<NgoRejectDonationScreen> {
                 children: [
                   const Text('Select Rejection Reason *',
                       style: TextStyle(
-                          color: Colors.white,
+                          color: AppTheme.textPrimary,
                           fontWeight: FontWeight.bold,
                           fontSize: 15)),
                   const SizedBox(height: 12),
@@ -103,24 +104,24 @@ class _NgoRejectDonationScreenState extends State<NgoRejectDonationScreen> {
                       .map((reason) => _buildReasonTile(reason)),
                   const SizedBox(height: 20),
                   const Text('Additional Information (optional)',
-                      style: TextStyle(color: Colors.white70, fontSize: 13)),
+                      style: TextStyle(color: Colors.black54, fontSize: 13)),
                   const SizedBox(height: 8),
                   TextField(
                     controller: _additionalInfoController,
-                    style: const TextStyle(color: Colors.white),
+                    style: const TextStyle(color: AppTheme.textPrimary),
                     maxLines: 4,
                     decoration: InputDecoration(
                       hintText: 'Provide more context if needed...',
-                      hintStyle: const TextStyle(color: Colors.white38),
+                      hintStyle: const TextStyle(color: Colors.black38),
                       filled: true,
-                      fillColor: const Color(0xFF1A2535),
+                      fillColor: AppTheme.surfaceOffWhite,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFF2D3748)),
+                        borderSide: const BorderSide(color: AppTheme.iosGray4),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFF2D3748)),
+                        borderSide: const BorderSide(color: AppTheme.iosGray4),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -167,10 +168,10 @@ class _NgoRejectDonationScreenState extends State<NgoRejectDonationScreen> {
         decoration: BoxDecoration(
           color: isSelected
               ? Colors.redAccent.withValues(alpha: 0.15)
-              : const Color(0xFF1A2535),
+              : AppTheme.surfaceOffWhite,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: isSelected ? Colors.redAccent : const Color(0xFF2D3748),
+            color: isSelected ? Colors.redAccent : AppTheme.iosGray4,
             width: isSelected ? 1.5 : 1,
           ),
         ),
@@ -178,14 +179,14 @@ class _NgoRejectDonationScreenState extends State<NgoRejectDonationScreen> {
           children: [
             Icon(
               isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
-              color: isSelected ? Colors.redAccent : Colors.white38,
+              color: isSelected ? Colors.redAccent : Colors.black38,
               size: 20,
             ),
             const SizedBox(width: 10),
             Expanded(
               child: Text(reason,
                   style: TextStyle(
-                      color: isSelected ? Colors.white : Colors.white70,
+                      color: isSelected ? Colors.redAccent : Colors.black54,
                       fontSize: 14)),
             ),
           ],
@@ -198,8 +199,8 @@ class _NgoRejectDonationScreenState extends State<NgoRejectDonationScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: const BoxDecoration(
-        color: Color(0xFF1A2535),
-        border: Border(top: BorderSide(color: Color(0xFF2D3748))),
+        color: AppTheme.surfaceOffWhite,
+        border: Border(top: BorderSide(color: AppTheme.iosGray4)),
       ),
       child: SizedBox(
         width: double.infinity,
@@ -219,8 +220,8 @@ class _NgoRejectDonationScreenState extends State<NgoRejectDonationScreen> {
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.redAccent,
             foregroundColor: Colors.white,
-            disabledBackgroundColor: const Color(0xFF2D3748),
-            disabledForegroundColor: Colors.white38,
+            disabledBackgroundColor: AppTheme.iosGray5,
+            disabledForegroundColor: AppTheme.textMuted,
             padding: const EdgeInsets.symmetric(vertical: 14),
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

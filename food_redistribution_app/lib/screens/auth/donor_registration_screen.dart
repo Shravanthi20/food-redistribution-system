@@ -351,7 +351,7 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
                         width: 100,
                         child: DropdownButtonFormField<String>(
                           initialValue: _selectedCountryCode,
-                          dropdownColor: AppTheme.primaryNavyLight,
+                          dropdownColor: AppTheme.surfaceWhite,
                           style: const TextStyle(color: AppTheme.textPrimary),
                           decoration: _buildInputDecoration('Code'),
                           items: _countryCodes
@@ -388,7 +388,7 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
                 children: [
                   DropdownButtonFormField<DonorType>(
                     initialValue: _selectedDonorType,
-                    dropdownColor: AppTheme.primaryNavyLight,
+                    dropdownColor: AppTheme.surfaceWhite,
                     style: const TextStyle(color: AppTheme.textPrimary),
                     decoration: _buildInputDecoration('Business Type',
                         prefixIcon: Icons.category_outlined),
@@ -439,7 +439,7 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
                 children: [
                   DropdownButtonFormField<String>(
                     initialValue: _selectedCountry,
-                    dropdownColor: AppTheme.primaryNavyLight,
+                    dropdownColor: AppTheme.surfaceWhite,
                     style: const TextStyle(color: AppTheme.textPrimary),
                     decoration: _buildInputDecoration('Country',
                         prefixIcon: Icons.public_rounded),
@@ -462,7 +462,7 @@ class _DonorRegistrationScreenState extends State<DonorRegistrationScreen> {
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
                     initialValue: _selectedState,
-                    dropdownColor: AppTheme.primaryNavyLight,
+                    dropdownColor: AppTheme.surfaceWhite,
                     style: const TextStyle(color: AppTheme.textPrimary),
                     decoration: _buildInputDecoration('State',
                         prefixIcon: Icons.map_outlined),

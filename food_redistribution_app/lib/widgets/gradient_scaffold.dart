@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../utils/app_theme.dart';
 
-/// A scaffold with a deep ocean gradient background
+/// A scaffold with a clean iOS-style gradient background
 /// Use this as a replacement for Scaffold to get the themed background
 class GradientScaffold extends StatelessWidget {
   final Widget body;
@@ -38,24 +38,23 @@ class GradientScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.light.copyWith(
+      value: SystemUiOverlayStyle.dark.copyWith(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
-        systemNavigationBarColor: AppTheme.primaryNavy,
-        systemNavigationBarIconBrightness: Brightness.light,
+        statusBarIconBrightness: Brightness.dark,
+        systemNavigationBarColor: AppTheme.surfaceWhite,
+        systemNavigationBarIconBrightness: Brightness.dark,
       ),
       child: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
             colors: gradientColors ??
                 [
                   AppTheme.gradientStart,
                   AppTheme.gradientMiddle,
                   AppTheme.gradientEnd,
                 ],
-            stops: const [0.0, 0.5, 1.0],
           ),
         ),
         child: Stack(
@@ -84,37 +83,37 @@ class GradientScaffold extends StatelessWidget {
   }
 }
 
-/// Animated floating orbs for background decoration
+/// Subtle animated background shapes for iOS feel
 class _AnimatedBackgroundElements extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // Large cyan orb - top right
+        // Soft blue glow - top right
         Positioned(
           top: -100,
           right: -80,
           child: _GlowingOrb(
             size: 300,
-            color: AppTheme.accentCyan.withValues(alpha: 0.15),
+            color: AppTheme.primaryBlue.withValues(alpha: 0.04),
           ),
         ),
-        // Medium teal orb - center left
+        // Gentle green glow - center left
         Positioned(
           top: MediaQuery.of(context).size.height * 0.3,
           left: -120,
           child: _GlowingOrb(
             size: 250,
-            color: AppTheme.accentTeal.withValues(alpha: 0.1),
+            color: AppTheme.accentTeal.withValues(alpha: 0.03),
           ),
         ),
-        // Small accent orb - bottom right
+        // Subtle accent glow - bottom right
         Positioned(
           bottom: 100,
           right: -60,
           child: _GlowingOrb(
             size: 180,
-            color: AppTheme.accentCyanSoft.withValues(alpha: 0.12),
+            color: AppTheme.primaryBlueLight.withValues(alpha: 0.04),
           ),
         ),
       ],
@@ -167,7 +166,7 @@ class _GlowingOrb extends StatelessWidget {
   }
 }
 
-/// A customized app bar for the Deep Ocean theme
+/// A customized app bar with iOS-style frosted glass effect
 class GlassAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String? title;
   final Widget? titleWidget;
@@ -204,7 +203,7 @@ class GlassAppBar extends StatelessWidget implements PreferredSizeWidget {
           leading: leading,
           automaticallyImplyLeading: automaticallyImplyLeading,
           elevation: elevation,
-          backgroundColor: AppTheme.surfaceGlassDark,
+          backgroundColor: AppTheme.surfaceWhite.withValues(alpha: 0.85),
           bottom: bottom,
         ),
       ),
@@ -212,7 +211,7 @@ class GlassAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 }
 
-/// A floating action button with Deep Ocean styling
+/// A floating action button with iOS styling
 class GlassFAB extends StatelessWidget {
   final VoidCallback? onPressed;
   final IconData icon;
@@ -237,11 +236,11 @@ class GlassFAB extends StatelessWidget {
         icon: Icon(icon),
         label: Text(label!),
         tooltip: tooltip,
-        backgroundColor: AppTheme.accentTeal,
-        foregroundColor: AppTheme.primaryNavy,
-        elevation: 8,
+        backgroundColor: AppTheme.primaryBlue,
+        foregroundColor: Colors.white,
+        elevation: 4,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(18),
         ),
       );
     }
@@ -251,20 +250,20 @@ class GlassFAB extends StatelessWidget {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: AppTheme.accentTeal.withValues(alpha: 0.4),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
+            color: AppTheme.primaryBlue.withValues(alpha: 0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: FloatingActionButton(
         onPressed: onPressed,
         tooltip: tooltip,
-        backgroundColor: AppTheme.accentTeal,
-        foregroundColor: AppTheme.primaryNavy,
+        backgroundColor: AppTheme.primaryBlue,
+        foregroundColor: Colors.white,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(18),
         ),
         child: Icon(icon),
       ),
@@ -272,7 +271,7 @@ class GlassFAB extends StatelessWidget {
   }
 }
 
-/// A dialog with Deep Ocean glassmorphism styling
+/// A dialog with iOS-style frosted glass styling
 class GlassDialog extends StatelessWidget {
   final String? title;
   final Widget? content;
@@ -296,13 +295,9 @@ class GlassDialog extends StatelessWidget {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
         child: AlertDialog(
-          backgroundColor: AppTheme.primaryNavyLight.withValues(alpha: 0.95),
+          backgroundColor: AppTheme.surfaceWhite.withValues(alpha: 0.96),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-            side: const BorderSide(
-              color: AppTheme.surfaceGlassBorder,
-              width: 1,
-            ),
+            borderRadius: BorderRadius.circular(20),
           ),
           title: title != null
               ? Text(
@@ -343,7 +338,7 @@ class GlassDialog extends StatelessWidget {
   }
 }
 
-/// A bottom sheet with Deep Ocean styling
+/// A bottom sheet with iOS-style frosted glass styling
 class GlassBottomSheet extends StatelessWidget {
   final Widget child;
   final bool showHandle;
@@ -362,12 +357,12 @@ class GlassBottomSheet extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
         child: Container(
           decoration: BoxDecoration(
-            color: AppTheme.primaryNavyLight.withValues(alpha: 0.95),
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-            border: const Border(
+            color: AppTheme.surfaceWhite.withValues(alpha: 0.96),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            border: Border(
               top: BorderSide(
-                color: AppTheme.surfaceGlassBorder,
-                width: 1,
+                color: AppTheme.iosGray5.withValues(alpha: 0.5),
+                width: 0.5,
               ),
             ),
           ),
@@ -380,7 +375,7 @@ class GlassBottomSheet extends StatelessWidget {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: AppTheme.surfaceGlassBorder,
+                    color: AppTheme.iosGray3,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),

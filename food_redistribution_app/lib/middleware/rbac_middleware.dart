@@ -11,18 +11,18 @@ class RBACMiddleware {
       String routeName, UserRole? userRole) async {
     if (userRole == null) return false;
 
-    // Admin routes
-    if (routeName.startsWith('/admin/')) {
+    // Admin routes (both /admin/ and /admin- prefixed)
+    if (routeName.startsWith('/admin/') || routeName.startsWith('/admin-')) {
       return userRole == UserRole.admin;
     }
 
     // Role-specific routes
     switch (routeName) {
-      case '/donor/dashboard':
+      case '/donor-dashboard':
         return userRole == UserRole.donor || userRole == UserRole.admin;
-      case '/ngo/dashboard':
+      case '/ngo-dashboard':
         return userRole == UserRole.ngo || userRole == UserRole.admin;
-      case '/volunteer/dashboard':
+      case '/volunteer-dashboard':
         return userRole == UserRole.volunteer || userRole == UserRole.admin;
       default:
         return true; // Public routes
@@ -162,7 +162,8 @@ class UnauthorizedWidget extends StatelessWidget {
     } else if (currentUser!.status == UserStatus.suspended) {
       message = 'Your account has been suspended.';
       suggestion = 'Contact support for assistance';
-    } else if (currentUser!.status != UserStatus.verified) {
+    } else if (currentUser!.status != UserStatus.verified &&
+               currentUser!.status != UserStatus.active) {
       message = 'Your account needs to be verified to access this feature.';
       suggestion = 'Complete your verification process';
     } else if (requiredRoles != null) {
@@ -206,8 +207,9 @@ class UnauthorizedWidget extends StatelessWidget {
                   onPressed: () {
                     if (currentUser == null) {
                       Navigator.pushReplacementNamed(context, '/login');
-                    } else if (currentUser!.status != UserStatus.verified) {
-                      Navigator.pushReplacementNamed(context, '/verification');
+                    } else if (currentUser!.status != UserStatus.verified &&
+                               currentUser!.status != UserStatus.active) {
+                      Navigator.pushReplacementNamed(context, '/donor-verification');
                     } else {
                       Navigator.pushReplacementNamed(context, '/');
                     }

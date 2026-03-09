@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:food_redistribution_app/utils/app_theme.dart';
 import '../../services/hygiene_service.dart';
 import '../../models/hygiene_checklist.dart';
 
@@ -61,17 +62,17 @@ class _DonorClarificationReplyScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1923),
+      backgroundColor: AppTheme.surfaceWhite,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1A2535),
-        foregroundColor: Colors.white,
+        backgroundColor: AppTheme.surfaceOffWhite,
+        foregroundColor: AppTheme.textPrimary,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text('Clarification Requests',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             Text(widget.donationTitle,
-                style: const TextStyle(fontSize: 11, color: Colors.white60)),
+                style: const TextStyle(fontSize: 11, color: Colors.black45)),
           ],
         ),
         elevation: 0,
@@ -104,13 +105,13 @@ class _DonorClarificationReplyScreenState
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.mark_email_read_outlined, color: Colors.white24, size: 60),
+          Icon(Icons.mark_email_read_outlined, color: Colors.black26, size: 60),
           SizedBox(height: 12),
           Text('No clarification requests yet',
-              style: TextStyle(color: Colors.white38, fontSize: 16)),
+              style: TextStyle(color: Colors.black38, fontSize: 16)),
           SizedBox(height: 4),
           Text('The NGO will contact you here if they need more info.',
-              style: TextStyle(color: Colors.white24, fontSize: 13)),
+              style: TextStyle(color: Colors.black26, fontSize: 13)),
         ],
       ),
     );
@@ -124,7 +125,7 @@ class _DonorClarificationReplyScreenState
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A2535),
+        color: AppTheme.surfaceOffWhite,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: c.isResolved
@@ -155,7 +156,7 @@ class _DonorClarificationReplyScreenState
               ),
               Text(
                 _formatDate(c.createdAt),
-                style: const TextStyle(color: Colors.white38, fontSize: 11),
+                style: const TextStyle(color: Colors.black38, fontSize: 11),
               ),
             ],
           ),
@@ -185,7 +186,7 @@ class _DonorClarificationReplyScreenState
                       const SizedBox(height: 4),
                       Text(c.question,
                           style: const TextStyle(
-                              color: Colors.white, fontSize: 14)),
+                              color: AppTheme.textPrimary, fontSize: 14)),
                     ],
                   ),
                 ),
@@ -219,7 +220,7 @@ class _DonorClarificationReplyScreenState
                         const SizedBox(height: 4),
                         Text(c.reply!,
                             style: const TextStyle(
-                                color: Colors.white, fontSize: 14)),
+                                color: AppTheme.textPrimary, fontSize: 14)),
                       ],
                     ),
                   ),
@@ -233,20 +234,20 @@ class _DonorClarificationReplyScreenState
             const SizedBox(height: 12),
             TextField(
               controller: controller,
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: AppTheme.textPrimary),
               maxLines: 3,
               decoration: InputDecoration(
                 hintText: 'Type your reply...',
-                hintStyle: const TextStyle(color: Colors.white38),
+                hintStyle: const TextStyle(color: Colors.black38),
                 filled: true,
-                fillColor: const Color(0xFF0F1923),
+                fillColor: AppTheme.surfaceWhite,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: Color(0xFF2D3748)),
+                  borderSide: const BorderSide(color: AppTheme.iosGray4),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: Color(0xFF2D3748)),
+                  borderSide: const BorderSide(color: AppTheme.iosGray4),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),

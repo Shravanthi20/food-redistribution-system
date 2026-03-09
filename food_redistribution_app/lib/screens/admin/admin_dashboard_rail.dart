@@ -37,14 +37,14 @@ class AdminDashboardRail extends StatelessWidget {
         backgroundColor: Colors.transparent,
         selectedIconTheme: const IconThemeData(color: AppTheme.accentTeal),
         unselectedIconTheme:
-            IconThemeData(color: Colors.white.withValues(alpha: 0.6)),
+            IconThemeData(color: AppTheme.textMuted),
         selectedLabelTextStyle: const TextStyle(
           color: AppTheme.accentTeal,
           fontWeight: FontWeight.bold,
           fontSize: 12,
         ),
         unselectedLabelTextStyle: TextStyle(
-          color: Colors.white.withValues(alpha: 0.6),
+          color: AppTheme.textMuted,
           fontSize: 11,
         ),
         indicatorColor: AppTheme.accentTeal.withValues(alpha: 0.2),
