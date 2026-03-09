@@ -48,6 +48,13 @@ pubspec.lock
 **/doc/api/
 **/ios/Flutter/.last_build_id
 
+# ---- Platform generated plugin registrants (auto-generated, conflict-prone) ----
+**/linux/flutter/generated_plugin_registrant.cc
+**/linux/flutter/generated_plugins.cmake
+**/macos/Flutter/GeneratedPluginRegistrant.swift
+**/windows/flutter/generated_plugin_registrant.cc
+**/windows/flutter/generated_plugins.cmake
+
 # ---- Firebase / secrets (machine or env specific) ----
 lib/firebase_options.dart
 **/google-services.json
