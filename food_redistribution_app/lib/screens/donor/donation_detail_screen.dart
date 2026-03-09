@@ -347,16 +347,21 @@ class DonationDetailScreen extends StatelessWidget {
 
               return Column(
                 children: [
-                  LiveTrackingMap(
-                    pickupLocation: _parseGeoPoint(donation.pickupLocation) ??
-                        const LatLng(0, 0),
-                    dropoffLocation: const LatLng(37.7749,
-                        -122.4194), // TODO: Fetch real NGO location
-                    volunteerLocation: LatLng(
-                      (data['latitude'] as num?)?.toDouble() ?? 0.0,
-                      (data['longitude'] as num?)?.toDouble() ?? 0.0,
-                    ),
-                    status: donation.status,
+                  FutureBuilder<LatLng>(
+                    future: _fetchNgoLocation(donation.assignedNGOId),
+                    builder: (context, ngoSnap) {
+                      final dropoff = ngoSnap.data ?? const LatLng(0, 0);
+                      return LiveTrackingMap(
+                        pickupLocation: _parseGeoPoint(donation.pickupLocation) ??
+                            const LatLng(0, 0),
+                        dropoffLocation: dropoff,
+                        volunteerLocation: LatLng(
+                          (data['latitude'] as num?)?.toDouble() ?? 0.0,
+                          (data['longitude'] as num?)?.toDouble() ?? 0.0,
+                        ),
+                        status: donation.status,
+                      );
+                    },
                   ),
                   const SizedBox(height: 8),
                   Text('Last update: ${_formatTime(data['timestamp'])}',
@@ -668,6 +673,28 @@ class DonationDetailScreen extends StatelessWidget {
         }
       }
     }
+  }
+
+  Future<LatLng> _fetchNgoLocation(String? ngoId) async {
+    if (ngoId == null || ngoId.isEmpty) return const LatLng(0, 0);
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(ngoId)
+          .get();
+      if (doc.exists) {
+        final data = doc.data()!;
+        final loc = data['location'] as Map<String, dynamic>?;
+        if (loc != null) {
+          final lat = loc['latitude'] as num?;
+          final lng = loc['longitude'] as num?;
+          if (lat != null && lng != null) {
+            return LatLng(lat.toDouble(), lng.toDouble());
+          }
+        }
+      }
+    } catch (_) {}
+    return const LatLng(0, 0);
   }
 
   LatLng? _parseGeoPoint(Map<String, dynamic>? location) {

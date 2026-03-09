@@ -800,5 +800,619 @@
   "@logoutSuccessful": { "description": "Logout success message" },
 
   "registrationSuccessful": "Account created successfully",
-  "@registrationSuccessful": { "description": "Registration success message" }
+  "@registrationSuccessful": { "description": "Registration success message" },
+
+  "hygieneChecklist": "Hygiene Checklist",
+  "@hygieneChecklist": { "description": "Hygiene checklist screen title" },
+
+  "packagingSealed": "Is the food properly packaged and sealed?",
+  "@packagingSealed": { "description": "Hygiene checklist item" },
+
+  "withinExpiry": "Is the food within its expiry date?",
+  "@withinExpiry": { "description": "Hygiene checklist item" },
+
+  "temperatureAppropriate": "Is the food stored at an appropriate temperature?",
+  "@temperatureAppropriate": { "description": "Hygiene checklist item" },
+
+  "normalOdor": "Does the food have a normal, acceptable odor?",
+  "@normalOdor": { "description": "Hygiene checklist item" },
+
+  "freshAppearance": "Does the food look fresh and free from mold/discoloration?",
+  "@freshAppearance": { "description": "Hygiene checklist item" },
+
+  "noContamination": "Is there no visible sign of contamination or pests?",
+  "@noContamination": { "description": "Hygiene checklist item" },
+
+  "allergenLabelProvided": "Are allergen labels/information provided?",
+  "@allergenLabelProvided": { "description": "Hygiene checklist item — optional" },
+
+  "quantityMatchesListing": "Does the quantity match what was listed in the donation?",
+  "@quantityMatchesListing": { "description": "Hygiene checklist item — optional" },
+
+  "donationAcceptedLocked": "Donation accepted & record locked.",
+  "@donationAcceptedLocked": { "description": "Success message after donation accepted" },
+
+  "mandatoryItemsRequired": "All mandatory items must be checked before accepting",
+  "@mandatoryItemsRequired": { "description": "Hygiene checklist validation" },
+
+  "requestClarification": "Request Clarification",
+  "@requestClarification": { "description": "Action to request clarification from donor" },
+
+  "additionalNotes": "Additional Notes",
+  "@additionalNotes": { "description": "Label for additional notes field" },
+
+  "mandatory": "Mandatory",
+  "@mandatory": { "description": "Mandatory label" },
+
+  "pickupProof": "Pickup Proof",
+  "@pickupProof": { "description": "Pickup proof screen title" },
+
+  "takePhoto": "Take Photo",
+  "@takePhoto": { "description": "Take photo button" },
+
+  "retakePhoto": "Retake Photo",
+  "@retakePhoto": { "description": "Retake photo button" },
+
+  "foodCondition": "Food Condition",
+  "@foodCondition": { "description": "Food condition selector label" },
+
+  "conditionGood": "Good",
+  "@conditionGood": { "description": "Good food condition" },
+
+  "conditionModerate": "Moderate",
+  "@conditionModerate": { "description": "Moderate food condition" },
+
+  "conditionUnsafe": "Unsafe",
+  "@conditionUnsafe": { "description": "Unsafe food condition" },
+
+  "uploadProof": "Upload Proof",
+  "@uploadProof": { "description": "Upload proof button" },
+
+  "photoRequired": "Please take a photo first.",
+  "@photoRequired": { "description": "Validation: photo required before upload" },
+
+  "proofUploaded": "Pickup proof uploaded successfully.",
+  "@proofUploaded": { "description": "Proof upload success message" },
+
+  "mandatoryPhotoNotice": "A photo of the food at pickup is mandatory for compliance.",
+  "@mandatoryPhotoNotice": { "description": "Notice about mandatory pickup photo" },
+
+  "cancelUnsafeFood": "Cancel – Unsafe Food",
+  "@cancelUnsafeFood": { "description": "Unsafe food cancellation screen title" },
+
+  "whyFoodUnsafe": "Why is the food unsafe?",
+  "@whyFoodUnsafe": { "description": "Question for unsafe cancellation" },
+
+  "detailedDescription": "Detailed Description",
+  "@detailedDescription": { "description": "Detailed description label" },
+
+  "cancellationLogged": "Cancellation Logged",
+  "@cancellationLogged": { "description": "Cancellation success dialog title" },
+
+  "stakeholdersNotified": "The pickup cancellation has been recorded. The NGO, Donor, and Admin have been notified of the unsafe food condition.",
+  "@stakeholdersNotified": { "description": "Notification confirmation message" },
+
+  "selectReasonRequired": "Please select a reason.",
+  "@selectReasonRequired": { "description": "Validation: reason selection required" },
+
+  "confirmCancellation": "I confirm this food is unsafe",
+  "@confirmCancellation": { "description": "Confirmation checkbox for unsafe cancellation" },
+
+  "unsafeReasonSpoiled": "Food is visibly spoiled or moldy",
+  "@unsafeReasonSpoiled": { "description": "Unsafe reason option" },
+
+  "unsafeReasonOdor": "Strong foul odor detected",
+  "@unsafeReasonOdor": { "description": "Unsafe reason option" },
+
+  "unsafeReasonTemperature": "Improper storage temperature – food unsafe to serve",
+  "@unsafeReasonTemperature": { "description": "Unsafe reason option" },
+
+  "unsafeReasonPest": "Pest contamination visible",
+  "@unsafeReasonPest": { "description": "Unsafe reason option" },
+
+  "unsafeReasonPackaging": "Damaged/broken packaging with exposure",
+  "@unsafeReasonPackaging": { "description": "Unsafe reason option" },
+
+  "unsafeReasonMismatch": "Food looks different from listing description",
+  "@unsafeReasonMismatch": { "description": "Unsafe reason option" },
+
+  "unsafeReasonDonorConfirmed": "Donor confirmed food is no longer safe",
+  "@unsafeReasonDonorConfirmed": { "description": "Unsafe reason option" },
+
+  "unsafeReasonOther": "Other safety concern (describe below)",
+  "@unsafeReasonOther": { "description": "Unsafe reason option" },
+
+  "accessibilitySettings": "Accessibility Settings",
+  "@accessibilitySettings": { "description": "Accessibility settings screen title" },
+
+  "displayOptions": "Display Options",
+  "@displayOptions": { "description": "Display options section header" },
+
+  "highContrastMode": "High Contrast Mode",
+  "@highContrastMode": { "description": "High contrast mode toggle" },
+
+  "enhanceVisibility": "Enhance text and elements visibility",
+  "@enhanceVisibility": { "description": "High contrast mode description" },
+
+  "textSize": "Text Size",
+  "@textSize": { "description": "Text size setting label" },
+
+  "adjustTextSize": "Adjust the text size for easier reading.",
+  "@adjustTextSize": { "description": "Text size description" },
+
+  "simplifiedUiMode": "Simplified UI Mode",
+  "@simplifiedUiMode": { "description": "Simplified UI toggle" },
+
+  "reduceClutter": "Reduce clutter and focus on essential actions",
+  "@reduceClutter": { "description": "Simplified mode description" },
+
+  "enableDarkTheme": "Enable dark theme",
+  "@enableDarkTheme": { "description": "Dark mode description" },
+
+  "analyticsPredictions": "Analytics & Predictions",
+  "@analyticsPredictions": { "description": "Admin analytics screen title" },
+
+  "performanceMetrics": "Performance Metrics",
+  "@performanceMetrics": { "description": "Performance metrics section" },
+
+  "realTimeTrackingManagement": "Real-Time Tracking",
+  "@realTimeTrackingManagement": { "description": "Admin tracking screen title" },
+
+  "allTasks": "All Tasks",
+  "@allTasks": { "description": "Filter chip label" },
+
+  "delayed": "Delayed",
+  "@delayed": { "description": "Delayed status" },
+
+  "completed": "Completed",
+  "@completed": { "description": "Completed status" },
+
+  "deliveryFeedback": "Delivery Feedback",
+  "@deliveryFeedback": { "description": "Feedback screen title" },
+
+  "rateExperience": "Rate your experience",
+  "@rateExperience": { "description": "Feedback prompt" },
+
+  "feedbackComments": "Comments (optional)",
+  "@feedbackComments": { "description": "Feedback comments field" },
+
+  "submitFeedback": "Submit Feedback",
+  "@submitFeedback": { "description": "Submit feedback button" },
+
+  "feedbackSubmitted": "Thank you! Your feedback has been submitted.",
+  "@feedbackSubmitted": { "description": "Feedback success message" },
+
+  "foodQuality": "Food Quality",
+  "@foodQuality": { "description": "Food quality rating label" },
+
+  "deliveryTimeliness": "Delivery Timeliness",
+  "@deliveryTimeliness": { "description": "Delivery timeliness rating label" },
+
+  "overallSatisfaction": "Overall Satisfaction",
+  "@overallSatisfaction": { "description": "Overall satisfaction rating label" },
+
+  "volunteerBehavior": "Volunteer Behavior",
+  "@volunteerBehavior": { "description": "Volunteer behavior rating label" },
+
+  "syncStatus": "Sync Status",
+  "@syncStatus": { "description": "Sync status label" },
+
+  "offlineStatus": "Offline",
+  "@offlineStatus": { "description": "Offline status" },
+
+  "syncingStatus": "Syncing",
+  "@syncingStatus": { "description": "Syncing status" },
+
+  "syncedStatus": "Synced",
+  "@syncedStatus": { "description": "Synced status" },
+
+  "deliveryDelayedAlert": "Delivery delayed by {minutes} minutes",
+  "@deliveryDelayedAlert": {
+    "description": "Delay alert message",
+    "placeholders": { "minutes": { "type": "int" } }
+  },
+
+  "pickupDelayedAlert": "Pickup delayed by {minutes} minutes",
+  "@pickupDelayedAlert": {
+    "description": "Pickup delay alert message",
+    "placeholders": { "minutes": { "type": "int" } }
+  },
+
+  "inspectFoodDelivery": "Inspect Food Delivery",
+  "@inspectFoodDelivery": { "description": "Delivery inspection screen title" },
+
+  "deliveryInspection": "Delivery Inspection",
+  "@deliveryInspection": { "description": "Delivery inspection header" },
+
+  "temperatureCheck": "Temperature appropriate",
+  "@temperatureCheck": { "description": "Inspection checklist item" },
+
+  "packagingIntact": "Packaging intact",
+  "@packagingIntact": { "description": "Inspection checklist item" },
+
+  "noUnusualSmell": "No unusual smell",
+  "@noUnusualSmell": { "description": "Inspection checklist item" },
+
+  "colorNormal": "Color looks normal",
+  "@colorNormal": { "description": "Inspection checklist item" },
+
+  "noVisibleContamination": "No visible contamination",
+  "@noVisibleContamination": { "description": "Inspection checklist item" },
+
+  "properLabeling": "Proper labeling present",
+  "@properLabeling": { "description": "Inspection checklist item" },
+
+  "withinExpiryDate": "Within expiry date",
+  "@withinExpiryDate": { "description": "Inspection checklist item" },
+
+  "quantityMatchesDesc": "Quantity matches description",
+  "@quantityMatchesDesc": { "description": "Inspection checklist item" },
+
+  "overallApproval": "Overall Approval",
+  "@overallApproval": { "description": "Overall approval section" },
+
+  "approveDelivery": "Approve Delivery",
+  "@approveDelivery": { "description": "Approve delivery button" },
+
+  "rejectDeliveryAction": "Reject Delivery",
+  "@rejectDeliveryAction": { "description": "Reject delivery button" },
+
+  "rejectionReason": "Rejection Reason",
+  "@rejectionReason": { "description": "Rejection reason field label" },
+
+  "clarificationRequests": "Clarification Requests",
+  "@clarificationRequests": { "description": "Clarification requests screen title" },
+
+  "noRequestsYet": "No clarification requests yet.",
+  "@noRequestsYet": { "description": "Empty state for clarification list" },
+
+  "replySent": "Reply sent to the NGO.",
+  "@replySent": { "description": "Reply success message" },
+
+  "writeReply": "Write a reply…",
+  "@writeReply": { "description": "Reply text field hint" },
+
+  "impactReportsTitle": "Impact Reports",
+  "@impactReportsTitle": { "description": "Impact reports screen title" },
+
+  "completedDeliveries": "Completed Deliveries",
+  "@completedDeliveries": { "description": "Stat: completed deliveries" },
+
+  "peopleServed": "People Served",
+  "@peopleServed": { "description": "Stat: people served" },
+
+  "co2Saved": "CO₂ Saved (kg)",
+  "@co2Saved": { "description": "Stat: CO₂ saved" },
+
+  "completionRate": "Completion Rate",
+  "@completionRate": { "description": "Stat: completion rate" },
+
+  "thisWeek": "This Week",
+  "@thisWeek": { "description": "Period: this week" },
+
+  "thisMonth": "This Month",
+  "@thisMonth": { "description": "Period: this month" },
+
+  "lastThreeMonths": "Last 3 Months",
+  "@lastThreeMonths": { "description": "Period: last 3 months" },
+
+  "thisYear": "This Year",
+  "@thisYear": { "description": "Period: this year" },
+
+  "allTime": "All Time",
+  "@allTime": { "description": "Period: all time" },
+
+  "foodRedistribution": "Food Redistribution",
+  "@foodRedistribution": { "description": "App title on welcome screen" },
+
+  "welcomeBack": "Welcome Back!",
+  "@welcomeBack": { "description": "Welcome back greeting" },
+
+  "quickActions": "Quick Actions",
+  "@quickActions": { "description": "Quick actions section header" },
+
+  "recentActivity": "Recent Activity",
+  "@recentActivity": { "description": "Recent activity section header" },
+
+  "noRecentActivity": "No recent activity",
+  "@noRecentActivity": { "description": "Empty state for recent activity" },
+
+  "registrationComingSoon": "Registration for this role is coming soon!",
+  "@registrationComingSoon": { "description": "Shown when a role is not yet available" },
+
+  "chooseLanguageLabel": "Choose Language / भाषा चुनें / மொழி தேர்வு",
+  "@chooseLanguageLabel": { "description": "Multilingual language picker title" },
+
+  "createAccount": "Create Account",
+  "@createAccount": { "description": "Create account button" },
+
+  "emailPlaceholder": "your@email.com",
+  "@emailPlaceholder": { "description": "Email field placeholder" },
+
+  "loginProfileLoadError": "Login succeeded but failed to load user profile. Please try again.",
+  "@loginProfileLoadError": { "description": "Error when login succeeds but profile fails to load" },
+
+  "resetLinkSent": "Reset link sent! Check your email.",
+  "@resetLinkSent": { "description": "Password reset link sent confirmation" },
+
+  "resetPasswordInstructions": "Enter your email to receive a password reset link.",
+  "@resetPasswordInstructions": { "description": "Instructions on forgot password screen" },
+
+  "emailAddress": "Email Address",
+  "@emailAddress": { "description": "Email address field label" },
+
+  "sendResetLink": "Send Reset Link",
+  "@sendResetLink": { "description": "Send password reset link button" },
+
+  "signInToContinue": "Sign in to continue your mission",
+  "@signInToContinue": { "description": "Login screen subtitle" },
+
+  "readyToReduceWaste": "Ready to reduce food waste today?",
+  "@readyToReduceWaste": { "description": "Motivational text on donor dashboard" },
+
+  "yourImpact": "Your Impact",
+  "@yourImpact": { "description": "Impact statistics section header" },
+
+  "inProgress": "In Progress",
+  "@inProgress": { "description": "In progress status label" },
+
+  "createNewDonation": "Create New Donation",
+  "@createNewDonation": { "description": "Create new donation action" },
+
+  "postSurplusFood": "Post surplus food for redistribution",
+  "@postSurplusFood": { "description": "Description for create donation action" },
+
+  "viewManageDonations": "View and manage all your donations",
+  "@viewManageDonations": { "description": "Description for my donations action" },
+
+  "seeContributionStats": "See your contribution statistics",
+  "@seeContributionStats": { "description": "Description for impact report action" },
+
+  "recentDonations": "Recent Donations",
+  "@recentDonations": { "description": "Recent donations section header" },
+
+  "noDonationsYet": "No donations yet",
+  "@noDonationsYet": { "description": "Empty state title for no donations" },
+
+  "createFirstDonation": "Create your first donation to start making an impact!",
+  "@createFirstDonation": { "description": "Empty state message for no donations" },
+
+  "newDonation": "New Donation",
+  "@newDonation": { "description": "FAB label for new donation" },
+
+  "accountVerified": "Your account has been verified!",
+  "@accountVerified": { "description": "Account verification success message" },
+
+  "documentsUnderReview": "Your documents are under review. You'll be able to create donations once verified.",
+  "@documentsUnderReview": { "description": "Verification pending explanation" },
+
+  "usuallyTakes": "Usually takes 24-48 hours",
+  "@usuallyTakes": { "description": "Verification time estimate" },
+
+  "overview": "Overview",
+  "@overview": { "description": "Overview tab label" },
+
+  "available": "Available",
+  "@available": { "description": "Available tab label" },
+
+  "queries": "Queries",
+  "@queries": { "description": "Queries tab label" },
+
+  "manageFoodRequests": "Manage your food requests and track donations.",
+  "@manageFoodRequests": { "description": "NGO dashboard welcome subtitle" },
+
+  "requestStatistics": "Request Statistics",
+  "@requestStatistics": { "description": "Request statistics section header" },
+
+  "totalRequests": "Total Requests",
+  "@totalRequests": { "description": "Total requests stat label" },
+
+  "totalBeneficiaries": "Total Beneficiaries",
+  "@totalBeneficiaries": { "description": "Total beneficiaries stat label" },
+
+  "recentRequests": "Recent Requests",
+  "@recentRequests": { "description": "Recent requests section header" },
+
+  "viewAllRequests": "View All Requests",
+  "@viewAllRequests": { "description": "View all requests button" },
+
+  "noFoodRequestsFound": "No food requests found",
+  "@noFoodRequestsFound": { "description": "Empty state for food requests" },
+
+  "createRequestToStart": "Create a request to get started",
+  "@createRequestToStart": { "description": "Empty state hint for food requests" },
+
+  "settingsLanguage": "Settings & Language",
+  "@settingsLanguage": { "description": "Settings and language tooltip" },
+
+  "goodMorning": "Good morning,",
+  "@goodMorning": { "description": "Morning greeting" },
+
+  "goodAfternoon": "Good afternoon,",
+  "@goodAfternoon": { "description": "Afternoon greeting" },
+
+  "goodEvening": "Good evening,",
+  "@goodEvening": { "description": "Evening greeting" },
+
+  "onlineStatus": "Online",
+  "@onlineStatus": { "description": "Online status label" },
+
+  "offlineLabel": "Offline",
+  "@offlineLabel": { "description": "Offline status label" },
+
+  "newAssignments": "NEW ASSIGNMENTS",
+  "@newAssignments": { "description": "New assignments section header" },
+
+  "accept": "Accept",
+  "@accept": { "description": "Accept action button" },
+
+  "decline": "Decline",
+  "@decline": { "description": "Decline action button" },
+
+  "noNewPickupRequests": "No new pickup requests right now. Check back soon!",
+  "@noNewPickupRequests": { "description": "Empty state for new pickup requests" },
+
+  "noActiveTasks": "No active tasks. Accept a request to get started!",
+  "@noActiveTasks": { "description": "Empty state for active tasks" },
+
+  "noAvailableTasksNearby": "No available tasks nearby",
+  "@noAvailableTasksNearby": { "description": "Empty state for available tasks" },
+
+  "editProfile": "Edit Profile",
+  "@editProfile": { "description": "Edit profile action" },
+
+  "myActiveTasks": "My Active Tasks",
+  "@myActiveTasks": { "description": "Active tasks section header" },
+
+  "availableTasks": "Available Tasks",
+  "@availableTasks": { "description": "Available tasks section header" },
+
+  "visibleToNearbyTasks": "Visible to nearby surplus tasks",
+  "@visibleToNearbyTasks": { "description": "Online status description" },
+
+  "continueDelivery": "Continue Delivery",
+  "@continueDelivery": { "description": "Continue delivery button" },
+
+  "goButton": "GO",
+  "@goButton": { "description": "Go button label" },
+
+  "locationTBD": "Location TBD",
+  "@locationTBD": { "description": "Placeholder when location is not set" },
+
+  "normalPriority": "Normal",
+  "@normalPriority": { "description": "Normal priority label" },
+
+  "listed": "Listed",
+  "@listed": { "description": "Listed donation status" },
+
+  "impactReport": "Impact Report",
+  "@impactReport": { "description": "Impact report action card title" },
+
+  "ngoPartner": "NGO Partner",
+  "@ngoPartner": { "description": "NGO partner role label" },
+
+  "confirmLogoutQuestion": "Are you sure you want to logout?",
+  "@confirmLogoutQuestion": { "description": "Logout confirmation for NGO/admin" },
+
+  "matchedActionRequired": "MATCHED — ACTION REQUIRED",
+  "@matchedActionRequired": { "description": "Matched action required header" },
+
+  "statusLabel": "Status: ",
+  "@statusLabel": { "description": "Status label prefix" },
+
+  "reducingWaste": "Reducing waste, feeding communities",
+  "@reducingWaste": { "description": "App tagline variant on welcome screen" },
+
+  "systemOverview": "System Overview",
+  "@systemOverview": { "description": "Admin tab: system overview" },
+  "certificateVerifications": "Certificate Verifications",
+  "@certificateVerifications": { "description": "Admin tab: certificate verifications" },
+  "userGovernance": "User Governance",
+  "@userGovernance": { "description": "Admin tab: user governance" },
+  "manualOverrides": "Manual Overrides",
+  "@manualOverrides": { "description": "Admin tab: manual overrides" },
+  "analyticsReporting": "Analytics & Reporting",
+  "@analyticsReporting": { "description": "Admin tab: analytics" },
+  "algorithmMatching": "Algorithm Matching",
+  "@algorithmMatching": { "description": "Admin tab: algorithm matching" },
+  "auditCompliance": "Audit & Compliance",
+  "@auditCompliance": { "description": "Admin tab: audit" },
+  "verify": "Verify",
+  "@verify": { "description": "Short verify label" },
+  "gov": "Gov",
+  "@gov": { "description": "Short governance label" },
+  "manual": "Manual",
+  "@manual": { "description": "Short manual label" },
+  "stats": "Stats",
+  "@stats": { "description": "Short stats label" },
+  "matching": "Matching",
+  "@matching": { "description": "Short matching label" },
+  "audit": "Audit",
+  "@audit": { "description": "Short audit label" },
+  "toggleTheme": "Toggle Theme",
+  "@toggleTheme": { "description": "Theme toggle tooltip" },
+  "refreshData": "Refresh Data",
+  "@refreshData": { "description": "Refresh data tooltip" },
+  "totalUsersLabel": "Total Users",
+  "@totalUsersLabel": { "description": "Admin metric: total users" },
+  "wastePrevented": "Waste Prevented",
+  "@wastePrevented": { "description": "Admin metric: waste prevented" },
+  "activeMatches": "Active Matches",
+  "@activeMatches": { "description": "Admin metric: active matches" },
+  "recentSystemActivity": "Recent System Activity",
+  "@recentSystemActivity": { "description": "Admin section: recent activity" },
+  "systemHealth": "System Health",
+  "@systemHealth": { "description": "Admin section: system health" },
+  "database": "Database",
+  "@database": { "description": "System health: database" },
+  "authService": "Auth Service",
+  "@authService": { "description": "System health: auth service" },
+  "deliveries": "Deliveries",
+  "@deliveries": { "description": "System health: deliveries" },
+  "regionalAnalytics": "Regional Analytics",
+  "@regionalAnalytics": { "description": "System health: regional analytics" },
+  "operational": "Operational",
+  "@operational": { "description": "Health status: operational" },
+  "checking": "Checking...",
+  "@checking": { "description": "Health status: checking" },
+  "waitingForData": "Waiting for Data",
+  "@waitingForData": { "description": "Health status: waiting for data" },
+  "ngoCertificates": "NGO Certificates",
+  "@ngoCertificates": { "description": "Verification tab: NGO certificates" },
+  "highVolumeDonors": "High-Volume Donors",
+  "@highVolumeDonors": { "description": "Verification tab: high-volume donors" },
+  "noPendingVerifications": "No pending verifications for this role",
+  "@noPendingVerifications": { "description": "Empty state for verifications" },
+  "searchByEmailOrName": "Search by email or name...",
+  "@searchByEmailOrName": { "description": "Search placeholder in governance" },
+  "searchUsersToManage": "Search for users to manage roles and restrictions",
+  "@searchUsersToManage": { "description": "Empty state for user governance" },
+  "suspend7Days": "Suspend (7 Days)",
+  "@suspend7Days": { "description": "Governance action: suspend" },
+  "restrictRole": "Restrict Role",
+  "@restrictRole": { "description": "Governance action: restrict role" },
+  "auditHistory": "Audit History",
+  "@auditHistory": { "description": "Governance action: audit history" },
+  "allDonationsMatched": "All donations are currently matched or non-pending.",
+  "@allDonationsMatched": { "description": "Empty state for overrides" },
+  "forceNgo": "Force NGO",
+  "@forceNgo": { "description": "Override action: force NGO" },
+  "assignVolunteer": "Assign Volunteer",
+  "@assignVolunteer": { "description": "Override action: assign volunteer" },
+  "regionalActivityOverview": "Regional Activity Overview",
+  "@regionalActivityOverview": { "description": "Analytics section: regional" },
+  "gatheringRegionalData": "Gathering regional data...",
+  "@gatheringRegionalData": { "description": "Loading state for regional data" },
+  "deliveryPerformance": "Delivery Performance",
+  "@deliveryPerformance": { "description": "Analytics section: delivery" },
+  "noMatchingSessions": "No matching sessions recorded yet",
+  "@noMatchingSessions": { "description": "Empty state for matching" },
+  "topMatches": "Top Matches:",
+  "@topMatches": { "description": "Matching section header" },
+  "criteriaBreakdown": "Criteria Breakdown:",
+  "@criteriaBreakdown": { "description": "Matching score breakdown" },
+  "filter": "Filter:",
+  "@filter": { "description": "Audit filter label" },
+  "security": "Security",
+  "@security": { "description": "Audit filter: security" },
+  "hygiene": "Hygiene",
+  "@hygiene": { "description": "Audit filter: hygiene" },
+  "governance": "Governance",
+  "@governance": { "description": "Audit filter: governance" },
+  "noAuditLogs": "No audit logs found matching criteria",
+  "@noAuditLogs": { "description": "Empty state for audit" },
+  "systemEvent": "System Event",
+  "@systemEvent": { "description": "Default audit event type" },
+  "confirmSuspension": "Confirm Suspension",
+  "@confirmSuspension": { "description": "Suspension dialog title" },
+  "suspendConfirmMessage": "Are you sure you want to suspend this user for 7 days? This will revoke their access immediately.",
+  "@suspendConfirmMessage": { "description": "Suspension dialog body" },
+  "suspend": "Suspend",
+  "@suspend": { "description": "Suspend button label" },
+  "noEmail": "No Email",
+  "@noEmail": { "description": "Placeholder when email is missing" },
+  "verificationSuccessful": "Verification Successful",
+  "@verificationSuccessful": { "description": "Snackbar: verification approved" },
+  "userSuspended": "User status updated to SUSPENDED",
+  "@userSuspended": { "description": "Snackbar: user suspended" }
 }

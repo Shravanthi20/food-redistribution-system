@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/food_donation_service.dart';
 import '../../models/food_donation.dart';
+import '../../utils/app_localizations_ext.dart';
 
 class InspectDeliveryScreen extends StatefulWidget {
   final FoodDonation donation;
@@ -55,7 +56,7 @@ class _InspectDeliveryScreenState extends State<InspectDeliveryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Inspect Food Delivery'),
+        title: Text(context.l10n.inspectFoodDelivery),
         backgroundColor: Colors.blue.shade700,
         foregroundColor: Colors.white,
       ),
@@ -84,7 +85,7 @@ class _InspectDeliveryScreenState extends State<InspectDeliveryScreen> {
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                              'Delivery Inspection',
+                              context.l10n.deliveryInspection,
                               style: Theme.of(context)
                                   .textTheme
                                   .headlineSmall
@@ -326,7 +327,12 @@ class _InspectDeliveryScreenState extends State<InspectDeliveryScreen> {
               const SizedBox(height: 32),
 
               // Submit Button
-              SizedBox(
+              Semantics(
+                button: true,
+                label: _overallApproval == true
+                    ? 'Approve Delivery'
+                    : 'Reject Delivery',
+                child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: _isSubmitting || _overallApproval == null
@@ -360,11 +366,12 @@ class _InspectDeliveryScreenState extends State<InspectDeliveryScreen> {
                         )
                       : Text(
                           _overallApproval == true
-                              ? 'Accept Delivery'
-                              : 'Reject Delivery',
+                              ? context.l10n.approveDelivery
+                              : context.l10n.rejectDeliveryAction,
                           style: const TextStyle(
                               fontSize: 16, fontWeight: FontWeight.bold),
                         ),
+                ),
                 ),
               ),
 

@@ -25,6 +25,7 @@ import '../screens/ngo/inspect_delivery_screen.dart';
 import '../screens/ngo/ngo_dashboard.dart';
 import '../screens/ngo/create_food_request_screen.dart';
 import '../screens/ngo/update_demand_screen.dart';
+import '../screens/ngo/recipient_feedback_screen.dart';
 
 // Dashboards
 
@@ -91,6 +92,7 @@ class AppRouter {
   static const String issueReporting = '/issue-reporting'; // [NEW]
   static const String verifyUser = '/admin/verify-user';
   static const String volunteerProfile = '/volunteer-profile';
+  static const String recipientFeedback = '/recipient-feedback';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -198,10 +200,19 @@ class AppRouter {
         );
 
       case acceptTask:
-        return MaterialPageRoute(builder: (_) => const AcceptTaskScreen());
+        final acceptArgs = settings.arguments as FoodDonation?;
+        return MaterialPageRoute(
+          builder: (_) => AcceptTaskScreen(donation: acceptArgs),
+        );
 
       case rejectTask:
-        return MaterialPageRoute(builder: (_) => const RejectTaskScreen());
+        final rejectArgs = settings.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(
+          builder: (_) => RejectTaskScreen(
+            donationId: rejectArgs?['donationId'],
+            assignmentId: rejectArgs?['assignmentId'],
+          ),
+        );
 
       case taskExecution:
         final args = settings.arguments as Map<String, dynamic>?;
@@ -226,7 +237,10 @@ class AppRouter {
         );
 
       case createDonation:
-        return MaterialPageRoute(builder: (_) => const CreateDonationScreen());
+        final existingDonation = settings.arguments as FoodDonation?;
+        return MaterialPageRoute(
+          builder: (_) => CreateDonationScreen(existingDonation: existingDonation),
+        );
       case donationList:
         return MaterialPageRoute(builder: (_) => const DonationListScreen());
 
@@ -242,6 +256,15 @@ class AppRouter {
       case accessibilitySettings:
         return MaterialPageRoute(
           builder: (_) => const AccessibilitySettingsScreen(),
+        );
+
+      case recipientFeedback:
+        final args = settings.arguments as Map<String, dynamic>;
+        return MaterialPageRoute(
+          builder: (_) => RecipientFeedbackScreen(
+            donationId: args['donationId'],
+            recipientId: args['recipientId'],
+          ),
         );
 
       case issueReporting:

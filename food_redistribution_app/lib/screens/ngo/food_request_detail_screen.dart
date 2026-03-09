@@ -396,9 +396,10 @@ class _FoodRequestDetailScreenState extends State<FoodRequestDetailScreen> {
       String action, FoodRequest request, NGOProvider ngoProvider) {
     switch (action) {
       case 'edit':
-        // Navigate to edit screen
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Edit functionality coming soon')),
+        Navigator.pushNamed(
+          context,
+          '/ngo-create-request',
+          arguments: request,
         );
         break;
       case 'cancel':

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../utils/app_localizations_ext.dart';
 
 /// Admin Real-Time Tracking Management Screen
 class AdminRealTimeTrackingScreen extends StatefulWidget {
@@ -21,7 +22,7 @@ class _AdminRealTimeTrackingScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Real-Time Tracking'),
+        title: Text(context.l10n.realTimeTrackingManagement),
         elevation: 0,
       ),
       body: Column(

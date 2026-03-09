@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:geolocator/geolocator.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/donation_provider.dart';
 import '../../models/food_donation.dart';
@@ -8,7 +9,9 @@ import '../../widgets/loading_overlay.dart';
 import '../../widgets/gradient_scaffold.dart';
 
 class CreateDonationScreen extends StatefulWidget {
-  const CreateDonationScreen({super.key});
+  final FoodDonation? existingDonation;
+
+  const CreateDonationScreen({super.key, this.existingDonation});
 
   @override
   State<CreateDonationScreen> createState() => _CreateDonationScreenState();
@@ -16,6 +19,75 @@ class CreateDonationScreen extends StatefulWidget {
 
 class _CreateDonationScreenState extends State<CreateDonationScreen> {
   final _formKey = GlobalKey<FormState>();
+  double? _currentLat;
+  double? _currentLng;
+
+  bool get _isEditing => widget.existingDonation != null;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCurrentLocation();
+    if (_isEditing) {
+      _prefillForm(widget.existingDonation!);
+    }
+  }
+
+  Future<void> _loadCurrentLocation() async {
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) return;
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) return;
+      }
+      if (permission == LocationPermission.deniedForever) return;
+
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
+      );
+      if (mounted) {
+        setState(() {
+          _currentLat = position.latitude;
+          _currentLng = position.longitude;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error getting location: $e');
+    }
+  }
+
+  void _prefillForm(FoodDonation donation) {
+    _titleController.text = donation.title;
+    _descriptionController.text = donation.description;
+    _quantityController.text = donation.quantity.toString();
+    _unitController.text = donation.unit;
+    _allergenController.text = donation.allergenInfo ?? '';
+    _instructionsController.text = donation.specialInstructions ?? '';
+    _pickupAddressController.text = donation.pickupAddress;
+    _contactPhoneController.text = donation.donorContactPhone;
+    _estimatedMealsController.text = donation.estimatedMeals > 0 
+        ? donation.estimatedMeals.toString() : '';
+    _estimatedPeopleController.text = donation.estimatedPeopleServed > 0 
+        ? donation.estimatedPeopleServed.toString() : '';
+    _selectedFoodTypes.addAll(donation.foodTypes);
+    _preparedAt = donation.preparedAt;
+    _expiresAt = donation.expiresAt;
+    _availableFrom = donation.availableFrom;
+    _availableUntil = donation.availableUntil;
+    _safetyLevel = donation.safetyLevel;
+    _requiresRefrigeration = donation.requiresRefrigeration;
+    _isVegetarian = donation.isVegetarian;
+    _isVegan = donation.isVegan;
+    _isHalal = donation.isHalal;
+    // Extract location if available
+    if (donation.pickupLocation.containsKey('latitude')) {
+      _currentLat = (donation.pickupLocation['latitude'] as num?)?.toDouble();
+      _currentLng = (donation.pickupLocation['longitude'] as num?)?.toDouble();
+    }
+  }
 
   void _showErrorSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -120,11 +192,9 @@ class _CreateDonationScreenState extends State<CreateDonationScreen> {
           ? null
           : _instructionsController.text.trim(),
       images: [],
-      // TODO: Implement actual map picker. Using placeholder coordinates for now.
       pickupLocation: {
-        'latitude':
-            37.7749, // Default to San Francisco or user's current loc if available
-        'longitude': -122.4194,
+        'latitude': _currentLat ?? 0.0,
+        'longitude': _currentLng ?? 0.0,
         'address': _pickupAddressController.text.trim(),
       },
       pickupAddress: _pickupAddressController.text.trim(),

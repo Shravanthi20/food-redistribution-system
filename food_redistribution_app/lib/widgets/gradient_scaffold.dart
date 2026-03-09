@@ -28,7 +28,7 @@ class GradientScaffold extends StatelessWidget {
     this.bottomNavigationBar,
     this.drawer,
     this.endDrawer,
-    this.extendBodyBehindAppBar = true,
+    this.extendBodyBehindAppBar = false,
     this.extendBody = false,
     this.backgroundColor,
     this.gradientColors,

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:food_redistribution_app/utils/app_theme.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../services/hygiene_service.dart';
+import '../../utils/app_localizations_ext.dart';
 import 'volunteer_unsafe_cancel_screen.dart';
 
 class VolunteerPickupProofScreen extends StatefulWidget {
@@ -120,8 +121,8 @@ class _VolunteerPickupProofScreenState
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Pickup Proof',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text(context.l10n.pickupProof,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             Text(widget.donationTitle,
                 style: const TextStyle(fontSize: 11, color: Colors.black45)),
           ],
@@ -242,8 +243,8 @@ class _VolunteerPickupProofScreenState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Food Condition *',
-            style: TextStyle(
+        Text('${context.l10n.foodCondition} *',
+            style: const TextStyle(
                 color: AppTheme.textPrimary,
                 fontWeight: FontWeight.bold,
                 fontSize: 15)),

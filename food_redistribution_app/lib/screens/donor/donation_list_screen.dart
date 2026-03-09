@@ -265,9 +265,11 @@ class _DonationListScreenState extends State<DonationListScreen> {
   }
 
   void _editDonation(FoodDonation donation) {
-    // Navigate to edit screen (to be implemented)
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Edit feature coming soon')),
+    // Navigate to create donation screen with existing donation data for editing
+    Navigator.pushNamed(
+      context,
+      '/create-donation',
+      arguments: donation,
     );
   }
 

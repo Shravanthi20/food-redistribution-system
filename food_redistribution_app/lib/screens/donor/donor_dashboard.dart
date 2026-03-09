@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/donation_provider.dart';
 import '../../models/food_donation.dart';
+import '../../utils/app_localizations_ext.dart';
 import '../../utils/app_router.dart';
 import '../../utils/app_theme.dart';
 import '../../widgets/gradient_scaffold.dart';
@@ -46,11 +47,11 @@ class _DonorDashboardState extends State<DonorDashboard> {
     if (statusChanged && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Row(
+          content: Row(
             children: [
-              Icon(Icons.check_circle, color: AppTheme.primaryBlue),
-              SizedBox(width: 12),
-              Text('Your account has been verified!'),
+              const Icon(Icons.check_circle, color: AppTheme.primaryBlue),
+              const SizedBox(width: 12),
+              Text(context.l10n.accountVerified),
             ],
           ),
           backgroundColor: AppTheme.successTeal,
@@ -69,29 +70,37 @@ class _DonorDashboardState extends State<DonorDashboard> {
     return GradientScaffold(
       showAnimatedBackground: true,
       appBar: GlassAppBar(
-        title: 'Dashboard',
+        title: context.l10n.dashboard,
         actions: [
+          GlassIconButton(
+            icon: Icons.settings_rounded,
+            size: 40,
+            onPressed: () {
+              Navigator.pushNamed(context, AppRouter.accessibilitySettings);
+            },
+          ),
+          const SizedBox(width: 4),
           GlassIconButton(
             icon: Icons.logout_rounded,
             size: 40,
             onPressed: () async {
               final confirmed = await GlassDialog.show<bool>(
                 context: context,
-                title: 'Sign Out',
-                content: const Text(
-                  'Are you sure you want to sign out?',
-                  style: TextStyle(color: AppTheme.textSecondary),
+                title: context.l10n.signOut,
+                content: Text(
+                  context.l10n.confirmLogout,
+                  style: const TextStyle(color: AppTheme.textSecondary),
                 ),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context, false),
-                    child: const Text('Cancel',
-                        style: TextStyle(color: AppTheme.textMuted)),
+                    child: Text(context.l10n.cancel,
+                        style: const TextStyle(color: AppTheme.textMuted)),
                   ),
                   TextButton(
                     onPressed: () => Navigator.pop(context, true),
-                    child: const Text('Sign Out',
-                        style: TextStyle(color: AppTheme.errorCoral)),
+                    child: Text(context.l10n.signOut,
+                        style: const TextStyle(color: AppTheme.errorCoral)),
                   ),
                 ],
               );
@@ -201,9 +210,9 @@ class _DonorDashboardState extends State<DonorDashboard> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
-                                      'Welcome Back!',
-                                      style: TextStyle(
+                                    Text(
+                                      context.l10n.welcomeBack,
+                                      style: const TextStyle(
                                         fontSize: 20,
                                         fontWeight: FontWeight.w600,
                                         color: AppTheme.textPrimary,
@@ -234,15 +243,15 @@ class _DonorDashboardState extends State<DonorDashboard> {
                                     AppTheme.successTeal.withValues(alpha: 0.2),
                               ),
                             ),
-                            child: const Row(
+                            child: Row(
                               children: [
-                                Icon(Icons.eco_rounded,
+                                const Icon(Icons.eco_rounded,
                                     color: AppTheme.successTeal, size: 20),
-                                SizedBox(width: 10),
+                                const SizedBox(width: 10),
                                 Expanded(
                                   child: Text(
-                                    'Ready to reduce food waste today?',
-                                    style: TextStyle(
+                                    context.l10n.readyToReduceWaste,
+                                    style: const TextStyle(
                                       color: AppTheme.successTeal,
                                       fontWeight: FontWeight.w500,
                                       fontSize: 14,
@@ -258,9 +267,9 @@ class _DonorDashboardState extends State<DonorDashboard> {
                     const SizedBox(height: 28),
 
                     // Statistics Section
-                    const Text(
-                      'Your Impact',
-                      style: TextStyle(
+                    Text(
+                      context.l10n.yourImpact,
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                         color: AppTheme.textPrimary,
@@ -272,7 +281,7 @@ class _DonorDashboardState extends State<DonorDashboard> {
                       children: [
                         Expanded(
                           child: GlassStatCard(
-                            title: 'Active',
+                            title: context.l10n.active,
                             value: activeCount.toString(),
                             icon: Icons.list_alt_rounded,
                             accentColor: AppTheme.accentCyan,
@@ -281,7 +290,7 @@ class _DonorDashboardState extends State<DonorDashboard> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: GlassStatCard(
-                            title: 'Total',
+                            title: context.l10n.total,
                             value: myDonations.length.toString(),
                             icon: Icons.all_inclusive_rounded,
                             accentColor: AppTheme.infoCyan,
@@ -295,7 +304,7 @@ class _DonorDashboardState extends State<DonorDashboard> {
                       children: [
                         Expanded(
                           child: GlassStatCard(
-                            title: 'Delivered',
+                            title: context.l10n.statusDelivered,
                             value: deliveredCount.toString(),
                             icon: Icons.check_circle_rounded,
                             accentColor: AppTheme.successTeal,
@@ -304,7 +313,7 @@ class _DonorDashboardState extends State<DonorDashboard> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: GlassStatCard(
-                            title: 'In Progress',
+                            title: context.l10n.inProgress,
                             value: inProgressCount.toString(),
                             icon: Icons.local_shipping_rounded,
                             accentColor: AppTheme.warningAmber,
@@ -315,9 +324,9 @@ class _DonorDashboardState extends State<DonorDashboard> {
                     const SizedBox(height: 28),
 
                     // Quick Actions Section
-                    const Text(
-                      'Quick Actions',
-                      style: TextStyle(
+                    Text(
+                      context.l10n.quickActions,
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                         color: AppTheme.textPrimary,
@@ -326,8 +335,8 @@ class _DonorDashboardState extends State<DonorDashboard> {
                     const SizedBox(height: 16),
 
                     _buildActionCard(
-                      'Create New Donation',
-                      'Post surplus food for redistribution',
+                      context.l10n.createNewDonation,
+                      context.l10n.postSurplusFood,
                       Icons.add_circle_rounded,
                       AppTheme.successTeal,
                       () => Navigator.push(
@@ -339,8 +348,8 @@ class _DonorDashboardState extends State<DonorDashboard> {
                     const SizedBox(height: 12),
 
                     _buildActionCard(
-                      'My Donations',
-                      'View and manage all your donations',
+                      context.l10n.myDonations,
+                      context.l10n.viewManageDonations,
                       Icons.list_rounded,
                       AppTheme.accentCyan,
                       () => Navigator.push(
@@ -352,8 +361,8 @@ class _DonorDashboardState extends State<DonorDashboard> {
                     const SizedBox(height: 12),
 
                     _buildActionCard(
-                      'Impact Report',
-                      'See your contribution statistics',
+                      context.l10n.impactReport,
+                      context.l10n.seeContributionStats,
                       Icons.analytics_rounded,
                       AppTheme.infoCyan,
                       () =>
@@ -366,9 +375,9 @@ class _DonorDashboardState extends State<DonorDashboard> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
-                            'Recent Donations',
-                            style: TextStyle(
+                          Text(
+                            context.l10n.recentDonations,
+                            style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w600,
                               color: AppTheme.textPrimary,
@@ -381,9 +390,9 @@ class _DonorDashboardState extends State<DonorDashboard> {
                                   builder: (context) =>
                                       const DonationListScreen()),
                             ),
-                            child: const Text(
-                              'View All',
-                              style: TextStyle(color: AppTheme.accentTeal),
+                            child: Text(
+                              context.l10n.viewAll,
+                              style: const TextStyle(color: AppTheme.accentTeal),
                             ),
                           ),
                         ],
@@ -393,7 +402,7 @@ class _DonorDashboardState extends State<DonorDashboard> {
                         return GlassListTile(
                           title: donation.title,
                           subtitle:
-                              '${donation.quantity} ${donation.unit} • ${_getStatusDisplayName(donation.status)}',
+                              '${donation.quantity} ${donation.unit} • ${_getStatusDisplayName(context, donation.status)}',
                           leading: Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
@@ -419,6 +428,36 @@ class _DonorDashboardState extends State<DonorDashboard> {
                           ),
                         );
                       }),
+                    ] else ...[
+                      // Empty state for new users
+                      GlassContainer(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 32, horizontal: 20),
+                        child: Column(
+                          children: [
+                            Icon(Icons.restaurant_rounded,
+                                size: 48,
+                                color: AppTheme.accentTeal
+                                    .withValues(alpha: 0.4)),
+                            const SizedBox(height: 16),
+                            Text(
+                              context.l10n.noDonationsYet,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: AppTheme.textSecondary,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              context.l10n.createFirstDonation,
+                              style: const TextStyle(
+                                  color: AppTheme.textMuted, fontSize: 13),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ],
                 ),
@@ -438,7 +477,7 @@ class _DonorDashboardState extends State<DonorDashboard> {
         },
         icon: Icons.add_rounded,
         extended: true,
-        label: 'New Donation',
+        label: context.l10n.newDonation,
       ),
     );
   }
@@ -521,22 +560,22 @@ class _DonorDashboardState extends State<DonorDashboard> {
     }
   }
 
-  String _getStatusDisplayName(DonationStatus status) {
+  String _getStatusDisplayName(BuildContext context, DonationStatus status) {
     switch (status) {
       case DonationStatus.listed:
-        return 'Listed';
+        return context.l10n.listed;
       case DonationStatus.matched:
-        return 'Matched';
+        return context.l10n.statusMatched;
       case DonationStatus.pickedUp:
-        return 'Picked Up';
+        return context.l10n.statusPickedUp;
       case DonationStatus.inTransit:
-        return 'In Transit';
+        return context.l10n.statusInTransit;
       case DonationStatus.delivered:
-        return 'Delivered';
+        return context.l10n.statusDelivered;
       case DonationStatus.cancelled:
-        return 'Cancelled';
+        return context.l10n.statusCancelled;
       case DonationStatus.expired:
-        return 'Expired';
+        return context.l10n.statusExpired;
     }
   }
 
@@ -562,10 +601,10 @@ class _DonorDashboardState extends State<DonorDashboard> {
                 ),
               ),
               const SizedBox(width: 12),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Verification Pending',
-                  style: TextStyle(
+                  context.l10n.verificationPending,
+                  style: const TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 17,
                     color: AppTheme.warningAmber,
@@ -579,9 +618,9 @@ class _DonorDashboardState extends State<DonorDashboard> {
             ],
           ),
           const SizedBox(height: 14),
-          const Text(
-            'Your documents are under review. You\'ll be able to create donations once verified.',
-            style: TextStyle(
+          Text(
+            context.l10n.documentsUnderReview,
+            style: const TextStyle(
               color: AppTheme.textSecondary,
               fontSize: 14,
             ),
@@ -593,15 +632,15 @@ class _DonorDashboardState extends State<DonorDashboard> {
               color: AppTheme.surfaceGlassDark,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Row(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.schedule_rounded,
+                const Icon(Icons.schedule_rounded,
                     color: AppTheme.textMuted, size: 14),
-                SizedBox(width: 6),
+                const SizedBox(width: 6),
                 Text(
-                  'Usually takes 24-48 hours',
-                  style: TextStyle(
+                  context.l10n.usuallyTakes,
+                  style: const TextStyle(
                     color: AppTheme.textTertiary,
                     fontSize: 12,
                   ),

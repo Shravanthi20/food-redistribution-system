@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../services/analytics_service.dart';
 
 class LogisticsManagementDashboard extends StatefulWidget {
   const LogisticsManagementDashboard({super.key});
@@ -11,7 +13,199 @@ class LogisticsManagementDashboard extends StatefulWidget {
 
 class LogisticsManagementDashboardState
     extends State<LogisticsManagementDashboard> {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final AnalyticsService _analytics = AnalyticsService();
   String _selectedTimeRange = '24h';
+  bool _isLoading = true;
+
+  // KPI data
+  int _totalDeliveries = 0;
+  double _foodRescuedKg = 0;
+  double _successRate = 0;
+  int _activeVolunteers = 0;
+  int _totalVolunteers = 0;
+
+  // Chart data
+  List<FlSpot> _deliveryTrends = [];
+  Map<String, int> _volunteerStatuses = {};
+  Map<String, int> _foodTypeCounts = {};
+  List<MapEntry<String, int>> _dailyDeliveries = [];
+
+  // Performance data
+  Map<String, dynamic> _systemAnalytics = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAllData();
+  }
+
+  Future<void> _loadAllData() async {
+    setState(() => _isLoading = true);
+    try {
+      await Future.wait([
+        _loadKPIs(),
+        _loadChartData(),
+        _loadPerformanceData(),
+      ]);
+    } catch (e) {
+      debugPrint('Error loading logistics data: $e');
+    }
+    if (mounted) setState(() => _isLoading = false);
+  }
+
+  Duration _getTimeRange() {
+    switch (_selectedTimeRange) {
+      case '1h':
+        return const Duration(hours: 1);
+      case '7d':
+        return const Duration(days: 7);
+      case '30d':
+        return const Duration(days: 30);
+      default:
+        return const Duration(hours: 24);
+    }
+  }
+
+  Future<void> _loadKPIs() async {
+    final cutoff = DateTime.now().subtract(_getTimeRange());
+    final cutoffTs = Timestamp.fromDate(cutoff);
+
+    // Total deliveries in range
+    final deliveredSnap = await _firestore
+        .collection('donations')
+        .where('status', isEqualTo: 'delivered')
+        .where('updatedAt', isGreaterThan: cutoffTs)
+        .get();
+    _totalDeliveries = deliveredSnap.docs.length;
+
+    // Food rescued (quantity * 0.5 kg estimate)
+    double totalKg = 0;
+    for (var doc in deliveredSnap.docs) {
+      final qty = (doc.data()['quantity'] as num?)?.toDouble() ?? 0;
+      totalKg += qty * 0.5;
+    }
+    _foodRescuedKg = totalKg;
+
+    // Success rate
+    final allInRange = await _firestore
+        .collection('donations')
+        .where('updatedAt', isGreaterThan: cutoffTs)
+        .get();
+    final terminated = allInRange.docs.where((d) {
+      final s = d.data()['status'] as String?;
+      return s == 'delivered' || s == 'cancelled' || s == 'expired';
+    }).length;
+    _successRate = terminated > 0
+        ? (deliveredSnap.docs.length / terminated) * 100
+        : 0;
+
+    // Active volunteers
+    final volSnap = await _firestore
+        .collection('users')
+        .where('role', isEqualTo: 'volunteer')
+        .get();
+    _totalVolunteers = volSnap.docs.length;
+    _activeVolunteers = volSnap.docs.where((d) {
+      final data = d.data();
+      return data['isOnline'] == true ||
+          (data['updatedAt'] != null &&
+              (data['updatedAt'] as Timestamp).toDate().isAfter(cutoff));
+    }).length;
+  }
+
+  Future<void> _loadChartData() async {
+    final range = _getTimeRange();
+    final cutoff = DateTime.now().subtract(range);
+    final cutoffTs = Timestamp.fromDate(cutoff);
+
+    // Delivery trends (group by day or hour)
+    final donationsSnap = await _firestore
+        .collection('donations')
+        .where('status', isEqualTo: 'delivered')
+        .where('updatedAt', isGreaterThan: cutoffTs)
+        .get();
+
+    // Group by time buckets
+    Map<int, int> buckets = {};
+    int numBuckets = _selectedTimeRange == '1h' ? 6 : 7;
+    for (int i = 0; i < numBuckets; i++) {
+      buckets[i] = 0;
+    }
+    for (var doc in donationsSnap.docs) {
+      final ts = (doc.data()['updatedAt'] as Timestamp?)?.toDate();
+      if (ts == null) continue;
+      final elapsed = DateTime.now().difference(ts);
+      final bucketSize = range.inMinutes / numBuckets;
+      int bucket = numBuckets - 1 - (elapsed.inMinutes / bucketSize).floor();
+      bucket = bucket.clamp(0, numBuckets - 1);
+      buckets[bucket] = (buckets[bucket] ?? 0) + 1;
+    }
+    _deliveryTrends = buckets.entries
+        .map((e) => FlSpot(e.key.toDouble(), e.value.toDouble()))
+        .toList()
+      ..sort((a, b) => a.x.compareTo(b.x));
+
+    // Volunteer statuses
+    final volSnap = await _firestore
+        .collection('users')
+        .where('role', isEqualTo: 'volunteer')
+        .get();
+    int online = 0, busy = 0, offline = 0;
+    for (var doc in volSnap.docs) {
+      final data = doc.data();
+      // Check if assigned to active delivery
+      final activeDelivery = await _firestore
+          .collection('delivery_tasks')
+          .where('assignedVolunteerId', isEqualTo: doc.id)
+          .where('status', whereIn: ['in_transit', 'picking_up'])
+          .limit(1)
+          .get();
+      if (activeDelivery.docs.isNotEmpty) {
+        busy++;
+      } else if (data['isOnline'] == true) {
+        online++;
+      } else {
+        offline++;
+      }
+    }
+    _volunteerStatuses = {'Active': online, 'Busy': busy, 'Offline': offline};
+
+    // Food type distribution
+    final allDonations = await _firestore
+        .collection('donations')
+        .where('createdAt', isGreaterThan: cutoffTs)
+        .get();
+    Map<String, int> typeCounts = {};
+    for (var doc in allDonations.docs) {
+      final types = doc.data()['foodTypes'];
+      if (types is List) {
+        for (var t in types) {
+          final name = t.toString();
+          typeCounts[name] = (typeCounts[name] ?? 0) + 1;
+        }
+      }
+    }
+    _foodTypeCounts = typeCounts;
+
+    // Daily deliveries for bar chart
+    Map<String, int> daily = {};
+    final dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    for (var name in dayNames) {
+      daily[name] = 0;
+    }
+    for (var doc in donationsSnap.docs) {
+      final ts = (doc.data()['updatedAt'] as Timestamp?)?.toDate();
+      if (ts == null) continue;
+      final dayName = dayNames[ts.weekday - 1];
+      daily[dayName] = (daily[dayName] ?? 0) + 1;
+    }
+    _dailyDeliveries = daily.entries.toList();
+  }
+
+  Future<void> _loadPerformanceData() async {
+    _systemAnalytics = await _analytics.getSystemAnalytics();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,27 +219,37 @@ class LogisticsManagementDashboardState
         elevation: 0,
         actions: [
           _buildTimeRangeSelector(),
-          IconButton(icon: const Icon(Icons.refresh), onPressed: _refreshData),
+          IconButton(
+            icon: _isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2))
+                : const Icon(Icons.refresh),
+            onPressed: _isLoading ? null : _refreshData,
+          ),
           IconButton(icon: const Icon(Icons.download), onPressed: _exportData),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildKPICards(),
-            const SizedBox(height: 24),
-            _buildChartsSection(),
-            const SizedBox(height: 24),
-            _buildOperationalMetrics(),
-            const SizedBox(height: 24),
-            _buildResourceManagement(),
-            const SizedBox(height: 24),
-            _buildPerformanceAnalysis(),
-          ],
-        ),
-      ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildKPICards(),
+                  const SizedBox(height: 24),
+                  _buildChartsSection(),
+                  const SizedBox(height: 24),
+                  _buildOperationalMetrics(),
+                  const SizedBox(height: 24),
+                  _buildResourceManagement(),
+                  const SizedBox(height: 24),
+                  _buildPerformanceAnalysis(),
+                ],
+              ),
+            ),
     );
   }
 
@@ -58,12 +262,19 @@ class LogisticsManagementDashboardState
         items: ['1h', '24h', '7d', '30d']
             .map((range) => DropdownMenuItem(value: range, child: Text(range)))
             .toList(),
-        onChanged: (value) => setState(() => _selectedTimeRange = value!),
+        onChanged: (value) {
+          setState(() => _selectedTimeRange = value!);
+          _loadAllData();
+        },
       ),
     );
   }
 
   Widget _buildKPICards() {
+    final foodStr = _foodRescuedKg >= 1000
+        ? '${(_foodRescuedKg / 1000).toStringAsFixed(1)}K kg'
+        : '${_foodRescuedKg.toStringAsFixed(0)} kg';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -73,40 +284,28 @@ class LogisticsManagementDashboardState
         Row(
           children: [
             Expanded(
-                child: _buildKPICard('Total Deliveries', '247', '+12%',
-                    Colors.blue, Icons.local_shipping)),
+                child: _buildKPICard('Total Deliveries', '$_totalDeliveries',
+                    '', Colors.blue, Icons.local_shipping)),
             const SizedBox(width: 12),
             Expanded(
                 child: _buildKPICard(
-                    'Food Rescued', '1.2K kg', '+8%', Colors.green, Icons.eco)),
+                    'Food Rescued', foodStr, '', Colors.green, Icons.eco)),
             const SizedBox(width: 12),
             Expanded(
-                child: _buildKPICard('Avg Delivery Time', '32 min', '-5%',
-                    Colors.orange, Icons.timer)),
+                child: _buildKPICard(
+                    'Success Rate',
+                    '${_successRate.toStringAsFixed(1)}%',
+                    '',
+                    Colors.purple,
+                    Icons.trending_up)),
             const SizedBox(width: 12),
             Expanded(
-                child: _buildKPICard('Efficiency Rate', '94.2%', '+3%',
-                    Colors.purple, Icons.trending_up)),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-                child: _buildKPICard('Active Volunteers', '28', '+2',
-                    Colors.teal, Icons.people)),
-            const SizedBox(width: 12),
-            Expanded(
-                child: _buildKPICard('Route Optimization', '87%', '+11%',
-                    Colors.indigo, Icons.route)),
-            const SizedBox(width: 12),
-            Expanded(
-                child: _buildKPICard('Cost per Delivery', '\$4.20', '-8%',
-                    Colors.red, Icons.attach_money)),
-            const SizedBox(width: 12),
-            Expanded(
-                child: _buildKPICard('Customer Satisfaction', '4.7/5', '+0.2',
-                    Colors.amber, Icons.star)),
+                child: _buildKPICard(
+                    'Active Volunteers',
+                    '$_activeVolunteers',
+                    '/$_totalVolunteers',
+                    Colors.teal,
+                    Icons.people)),
           ],
         ),
       ],
@@ -215,35 +414,28 @@ class LogisticsManagementDashboardState
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           const SizedBox(height: 16),
           Expanded(
-            child: LineChart(
-              LineChartData(
-                gridData: const FlGridData(show: false),
-                titlesData: const FlTitlesData(show: false),
-                borderData: FlBorderData(show: false),
-                lineBarsData: [
-                  LineChartBarData(
-                    spots: [
-                      const FlSpot(0, 3),
-                      const FlSpot(1, 4),
-                      const FlSpot(2, 6),
-                      const FlSpot(3, 5),
-                      const FlSpot(4, 7),
-                      const FlSpot(5, 8),
-                      const FlSpot(6, 6),
-                      const FlSpot(7, 9),
-                    ],
-                    isCurved: true,
-                    color: Colors.blue,
-                    barWidth: 3,
-                    belowBarData: BarAreaData(
-                      show: true,
-                      color: Colors.blue.withValues(alpha: 0.1),
+            child: _deliveryTrends.isEmpty
+                ? const Center(child: Text('No delivery data yet'))
+                : LineChart(
+                    LineChartData(
+                      gridData: const FlGridData(show: false),
+                      titlesData: const FlTitlesData(show: false),
+                      borderData: FlBorderData(show: false),
+                      lineBarsData: [
+                        LineChartBarData(
+                          spots: _deliveryTrends,
+                          isCurved: true,
+                          color: Colors.blue,
+                          barWidth: 3,
+                          belowBarData: BarAreaData(
+                            show: true,
+                            color: Colors.blue.withValues(alpha: 0.1),
+                          ),
+                          dotData: const FlDotData(show: false),
+                        ),
+                      ],
                     ),
-                    dotData: const FlDotData(show: false),
                   ),
-                ],
-              ),
-            ),
           ),
         ],
       ),
@@ -251,6 +443,7 @@ class LogisticsManagementDashboardState
   }
 
   Widget _buildVolunteerDistributionChart() {
+    final total = _volunteerStatuses.values.fold(0, (a, b) => a + b);
     return Container(
       height: 300,
       padding: const EdgeInsets.all(16),
@@ -268,22 +461,36 @@ class LogisticsManagementDashboardState
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           const SizedBox(height: 16),
           Expanded(
-            child: PieChart(
-              PieChartData(
-                sections: [
-                  PieChartSectionData(
-                      value: 65, color: Colors.green, title: 'Active\n65%'),
-                  PieChartSectionData(
-                      value: 20, color: Colors.orange, title: 'Busy\n20%'),
-                  PieChartSectionData(
-                      value: 10, color: Colors.red, title: 'Offline\n10%'),
-                  PieChartSectionData(
-                      value: 5, color: Colors.grey, title: 'Break\n5%'),
-                ],
-                sectionsSpace: 2,
-                centerSpaceRadius: 40,
-              ),
-            ),
+            child: total == 0
+                ? const Center(child: Text('No volunteers found'))
+                : PieChart(
+                    PieChartData(
+                      sections: _volunteerStatuses.entries.map((e) {
+                        final pct = total > 0
+                            ? (e.value / total * 100).toStringAsFixed(0)
+                            : '0';
+                        Color color;
+                        switch (e.key) {
+                          case 'Active':
+                            color = Colors.green;
+                            break;
+                          case 'Busy':
+                            color = Colors.orange;
+                            break;
+                          default:
+                            color = Colors.grey;
+                        }
+                        return PieChartSectionData(
+                          value: e.value.toDouble(),
+                          color: color,
+                          title: '${e.key}\n$pct%',
+                          titleStyle: const TextStyle(fontSize: 10, color: Colors.white),
+                        );
+                      }).toList(),
+                      sectionsSpace: 2,
+                      centerSpaceRadius: 40,
+                    ),
+                  ),
           ),
         ],
       ),
@@ -304,50 +511,53 @@ class LogisticsManagementDashboardState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Route Efficiency',
+          const Text('Deliveries by Day',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           const SizedBox(height: 16),
           Expanded(
-            child: BarChart(
-              BarChartData(
-                alignment: BarChartAlignment.spaceAround,
-                maxY: 100,
-                gridData: const FlGridData(show: false),
-                titlesData: FlTitlesData(
-                  leftTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      getTitlesWidget: (value, meta) => Text(
-                          ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'][value.toInt()]),
+            child: _dailyDeliveries.isEmpty
+                ? const Center(child: Text('No data'))
+                : BarChart(
+                    BarChartData(
+                      alignment: BarChartAlignment.spaceAround,
+                      gridData: const FlGridData(show: false),
+                      titlesData: FlTitlesData(
+                        leftTitles: const AxisTitles(
+                            sideTitles: SideTitles(showTitles: false)),
+                        bottomTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            getTitlesWidget: (value, meta) {
+                              final idx = value.toInt();
+                              if (idx >= 0 && idx < _dailyDeliveries.length) {
+                                return Text(_dailyDeliveries[idx].key,
+                                    style: const TextStyle(fontSize: 10));
+                              }
+                              return const Text('');
+                            },
+                          ),
+                        ),
+                        topTitles: const AxisTitles(
+                            sideTitles: SideTitles(showTitles: false)),
+                        rightTitles: const AxisTitles(
+                            sideTitles: SideTitles(showTitles: false)),
+                      ),
+                      borderData: FlBorderData(show: false),
+                      barGroups: _dailyDeliveries.asMap().entries.map((e) {
+                        final colors = [
+                          Colors.blue, Colors.green, Colors.orange,
+                          Colors.purple, Colors.teal, Colors.red, Colors.indigo
+                        ];
+                        return BarChartGroupData(x: e.key, barRods: [
+                          BarChartRodData(
+                            toY: e.value.value.toDouble(),
+                            color: colors[e.key % colors.length],
+                            width: 20,
+                          )
+                        ]);
+                      }).toList(),
                     ),
                   ),
-                  topTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
-                  rightTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
-                ),
-                borderData: FlBorderData(show: false),
-                barGroups: [
-                  BarChartGroupData(x: 0, barRods: [
-                    BarChartRodData(toY: 85, color: Colors.blue, width: 20)
-                  ]),
-                  BarChartGroupData(x: 1, barRods: [
-                    BarChartRodData(toY: 92, color: Colors.green, width: 20)
-                  ]),
-                  BarChartGroupData(x: 2, barRods: [
-                    BarChartRodData(toY: 78, color: Colors.orange, width: 20)
-                  ]),
-                  BarChartGroupData(x: 3, barRods: [
-                    BarChartRodData(toY: 94, color: Colors.purple, width: 20)
-                  ]),
-                  BarChartGroupData(x: 4, barRods: [
-                    BarChartRodData(toY: 88, color: Colors.teal, width: 20)
-                  ]),
-                ],
-              ),
-            ),
           ),
         ],
       ),
@@ -355,6 +565,10 @@ class LogisticsManagementDashboardState
   }
 
   Widget _buildFoodTypeDistributionChart() {
+    final total = _foodTypeCounts.values.fold(0, (a, b) => a + b);
+    final chartColors = [Colors.red, Colors.blue, Colors.green, Colors.orange, Colors.purple, Colors.teal];
+    final entries = _foodTypeCounts.entries.toList();
+
     return Container(
       height: 250,
       padding: const EdgeInsets.all(16),
@@ -372,39 +586,45 @@ class LogisticsManagementDashboardState
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           const SizedBox(height: 16),
           Expanded(
-            child: Row(
-              children: [
-                Expanded(
-                  child: PieChart(
-                    PieChartData(
-                      sections: [
-                        PieChartSectionData(
-                            value: 35, color: Colors.red, title: '35%'),
-                        PieChartSectionData(
-                            value: 25, color: Colors.blue, title: '25%'),
-                        PieChartSectionData(
-                            value: 20, color: Colors.green, title: '20%'),
-                        PieChartSectionData(
-                            value: 20, color: Colors.orange, title: '20%'),
-                      ],
-                      sectionsSpace: 1,
-                      centerSpaceRadius: 30,
-                    ),
+            child: entries.isEmpty
+                ? const Center(child: Text('No food type data'))
+                : Row(
+                    children: [
+                      Expanded(
+                        child: PieChart(
+                          PieChartData(
+                            sections: entries.asMap().entries.map((e) {
+                              final pct = total > 0
+                                  ? (e.value.value / total * 100).toStringAsFixed(0)
+                                  : '0';
+                              return PieChartSectionData(
+                                value: e.value.value.toDouble(),
+                                color: chartColors[e.key % chartColors.length],
+                                title: '$pct%',
+                                titleStyle: const TextStyle(fontSize: 10, color: Colors.white),
+                              );
+                            }).toList(),
+                            sectionsSpace: 1,
+                            centerSpaceRadius: 30,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 120),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: entries.asMap().entries.map((e) {
+                            return _buildLegendItem(
+                              e.value.key,
+                              chartColors[e.key % chartColors.length],
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                const SizedBox(width: 16),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _buildLegendItem('Prepared Meals', Colors.red),
-                    _buildLegendItem('Fresh Produce', Colors.blue),
-                    _buildLegendItem('Bakery Items', Colors.green),
-                    _buildLegendItem('Packaged Goods', Colors.orange),
-                  ],
-                ),
-              ],
-            ),
           ),
         ],
       ),
@@ -430,6 +650,11 @@ class LogisticsManagementDashboardState
   }
 
   Widget _buildOperationalMetrics() {
+    final completed = _systemAnalytics['completedDonationsThisMonth'] ?? 0;
+    final total = _systemAnalytics['totalDonationsThisMonth'] ?? 0;
+    final wasteReduced = _systemAnalytics['wasteReduced'] ?? 0.0;
+    final successPct = total > 0 ? (completed / total * 100).toStringAsFixed(1) : '0';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -448,23 +673,26 @@ class LogisticsManagementDashboardState
           ),
           child: Column(
             children: [
-              _buildMetricRow('Average Pickup Time', '8 minutes',
-                  'Target: 10 min', Colors.green),
+              _buildMetricRow('Donations This Month', '$total',
+                  '', Colors.blue),
               const Divider(),
-              _buildMetricRow('Average Delivery Time', '24 minutes',
-                  'Target: 30 min', Colors.green),
-              const Divider(),
-              _buildMetricRow(
-                  'Route Deviation', '12%', 'Target: <15%', Colors.orange),
+              _buildMetricRow('Completed Deliveries', '$completed',
+                  '', Colors.green),
               const Divider(),
               _buildMetricRow(
-                  'Food Waste Reduction', '89%', 'Target: 85%', Colors.green),
+                  'Completion Rate', '$successPct%', '', 
+                  double.tryParse(successPct) != null && double.parse(successPct) >= 80 
+                      ? Colors.green : Colors.orange),
               const Divider(),
               _buildMetricRow(
-                  'Volunteer Utilization', '76%', 'Target: 80%', Colors.orange),
+                  'Food Waste Reduced', 
+                  '${(wasteReduced as double).toStringAsFixed(1)} kg',
+                  '', Colors.green),
               const Divider(),
-              _buildMetricRow('Customer Response Time', '3.2 min',
-                  'Target: 5 min', Colors.green),
+              _buildMetricRow(
+                  'Active Volunteers', '$_activeVolunteers/$_totalVolunteers',
+                  '', _activeVolunteers > _totalVolunteers * 0.5 
+                      ? Colors.green : Colors.orange),
             ],
           ),
         ),
@@ -499,6 +727,10 @@ class LogisticsManagementDashboardState
   }
 
   Widget _buildResourceManagement() {
+    final volUtilPct = _totalVolunteers > 0
+        ? (_activeVolunteers / _totalVolunteers * 100).toStringAsFixed(0)
+        : '0';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -508,24 +740,36 @@ class LogisticsManagementDashboardState
         Row(
           children: [
             Expanded(
-                child: _buildResourceCard('Active Vehicles', '18/25',
-                    'Fleet utilization 72%', Colors.blue)),
+                child: _buildResourceCard(
+                    'Available Volunteers',
+                    '$_activeVolunteers/$_totalVolunteers',
+                    'Capacity utilization $volUtilPct%',
+                    Colors.green)),
             const SizedBox(width: 12),
             Expanded(
-                child: _buildResourceCard('Available Volunteers', '28/40',
-                    'Capacity utilization 70%', Colors.green)),
+                child: _buildResourceCard(
+                    'Deliveries (Period)',
+                    '$_totalDeliveries',
+                    'In selected time range',
+                    Colors.blue)),
           ],
         ),
         const SizedBox(height: 12),
         Row(
           children: [
             Expanded(
-                child: _buildResourceCard('Storage Capacity', '85%',
-                    '2.1 tons remaining', Colors.orange)),
+                child: _buildResourceCard(
+                    'Food Rescued',
+                    '${_foodRescuedKg.toStringAsFixed(1)} kg',
+                    'Estimated weight saved',
+                    Colors.orange)),
             const SizedBox(width: 12),
             Expanded(
-                child: _buildResourceCard('Operational Budget', '67%',
-                    '\$8,400 remaining', Colors.purple)),
+                child: _buildResourceCard(
+                    'Success Rate',
+                    '${_successRate.toStringAsFixed(1)}%',
+                    'Delivered vs cancelled',
+                    Colors.purple)),
           ],
         ),
       ],
@@ -562,6 +806,26 @@ class LogisticsManagementDashboardState
   }
 
   Widget _buildPerformanceAnalysis() {
+    final activeUsers = _systemAnalytics['activeUsers'] ?? 0;
+    final monthlyTotal = _systemAnalytics['totalDonationsThisMonth'] ?? 0;
+    final monthlyCompleted = _systemAnalytics['completedDonationsThisMonth'] ?? 0;
+
+    // Find top food type
+    String topFoodType = 'N/A';
+    if (_foodTypeCounts.isNotEmpty) {
+      final sorted = _foodTypeCounts.entries.toList()
+        ..sort((a, b) => b.value.compareTo(a.value));
+      topFoodType = sorted.first.key;
+    }
+
+    // Find busiest day 
+    String busiestDay = 'N/A';
+    if (_dailyDeliveries.isNotEmpty) {
+      final sorted = _dailyDeliveries.toList()
+        ..sort((a, b) => b.value.compareTo(a.value));
+      if (sorted.first.value > 0) busiestDay = sorted.first.key;
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -580,20 +844,21 @@ class LogisticsManagementDashboardState
           ),
           child: Column(
             children: [
-              _buildPerformanceItem('Most Efficient Route', 'Downtown Circuit',
-                  '94% efficiency', Icons.route, Colors.green),
+              _buildPerformanceItem('Most Donated Food Type', topFoodType,
+                  '${_foodTypeCounts[topFoodType] ?? 0} donations', Icons.restaurant, Colors.green),
               const Divider(),
-              _buildPerformanceItem('Top Performing Volunteer', 'Maria Garcia',
-                  '4.9★ rating', Icons.person, Colors.blue),
+              _buildPerformanceItem('Active Users (30d)', '$activeUsers users',
+                  'Active this month', Icons.people, Colors.blue),
               const Divider(),
-              _buildPerformanceItem('Peak Demand Time', '6:00 PM - 8:00 PM',
-                  '40% of daily volume', Icons.schedule, Colors.orange),
+              _buildPerformanceItem('Busiest Day', busiestDay,
+                  'Most deliveries', Icons.schedule, Colors.orange),
               const Divider(),
-              _buildPerformanceItem('Cost Optimization', 'Route Consolidation',
-                  '\$340 saved this week', Icons.savings, Colors.purple),
+              _buildPerformanceItem('Monthly Donations', '$monthlyTotal created',
+                  '$monthlyCompleted completed', Icons.volunteer_activism, Colors.purple),
               const Divider(),
-              _buildPerformanceItem('Quality Score', 'Delivery Accuracy',
-                  '97.2% success rate', Icons.check_circle, Colors.green),
+              _buildPerformanceItem('Delivery Success', 
+                  '${_successRate.toStringAsFixed(1)}%',
+                  'Based on completed vs terminated', Icons.check_circle, Colors.green),
             ],
           ),
         ),
@@ -635,25 +900,26 @@ class LogisticsManagementDashboardState
   }
 
   void _refreshData() {
-    // Simulate data refresh
-    Future.delayed(const Duration(seconds: 2), () {});
+    _loadAllData();
   }
 
   void _exportData() {
-    // Implement data export functionality
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Export Data'),
-        content:
-            const Text('Export logistics data for the selected time range?'),
+        content: Text(
+          'Logistics Summary ($_selectedTimeRange):\n\n'
+          '• Deliveries: $_totalDeliveries\n'
+          '• Food Rescued: ${_foodRescuedKg.toStringAsFixed(1)} kg\n'
+          '• Success Rate: ${_successRate.toStringAsFixed(1)}%\n'
+          '• Active Volunteers: $_activeVolunteers/$_totalVolunteers\n'
+          '\nCopy this summary to share.',
+        ),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel')),
-          ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Export')),
+              child: const Text('Close')),
         ],
       ),
     );
