@@ -223,6 +223,16 @@ jobs:
           }
           EOF
 
+      - name: Create CI google-services.json
+        run: |
+          cat <<'EOF' > android/app/google-services.json
+          {
+            "project_info": { "project_number": "000000000000", "project_id": "ci-dummy-project", "storage_bucket": "ci-dummy-project.appspot.com" },
+            "client": [{ "client_info": { "mobilesdk_app_id": "1:000000000000:android:0000000000000000", "android_client_info": { "package_name": "com.example.food_redistribution_app" } }, "api_key": [{ "current_key": "ci-dummy-key" }] }],
+            "configuration_version": "1"
+          }
+          EOF
+
       - name: Build debug APK
         run: flutter build apk --debug
 
