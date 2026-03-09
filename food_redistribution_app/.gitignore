@@ -56,7 +56,6 @@ pubspec.lock
 **/windows/flutter/generated_plugins.cmake
 
 # ---- Firebase / secrets (machine or env specific) ----
-lib/firebase_options.dart
 **/google-services.json
 **/GoogleService-Info.plist
 .env
