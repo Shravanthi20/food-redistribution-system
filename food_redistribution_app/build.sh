@@ -7,6 +7,9 @@ export PATH="$PATH:`pwd`/flutter/bin"
 echo "Downloading Dependencies..."
 flutter pub get
 
+echo "Generating Localization Files..."
+flutter gen-l10n
+
 echo "Building App for Web..."
 flutter build web --no-wasm-dry-run
 
