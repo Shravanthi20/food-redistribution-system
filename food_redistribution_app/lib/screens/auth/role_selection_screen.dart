@@ -247,7 +247,7 @@ class _RoleCard extends StatelessWidget {
                 color: AppTheme.primaryBlue.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.arrow_forward_ios,
                 color: AppTheme.textMuted,
                 size: 16,

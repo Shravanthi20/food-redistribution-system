@@ -25,20 +25,22 @@ class AccessibilitySettingsScreen extends StatelessWidget {
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 8),
-              Column(
-                children: LocaleProvider.supportedLocaleOptions
-                    .map(
-                      (opt) => RadioListTile<Locale>(
-                        title: Text(opt.displayName),
-                        value: opt.locale,
-                        groupValue: localeProvider.locale,
-                        onChanged: (Locale? value) {
-                          if (value != null) localeProvider.setLocale(value);
-                        },
-                        activeColor: AppTheme.accentTeal,
-                      ),
-                    )
-                    .toList(),
+              RadioGroup<Locale>(
+                groupValue: localeProvider.locale,
+                onChanged: (Locale? value) {
+                  if (value != null) localeProvider.setLocale(value);
+                },
+                child: Column(
+                  children: LocaleProvider.supportedLocaleOptions
+                      .map(
+                        (opt) => RadioListTile<Locale>(
+                          title: Text(opt.displayName),
+                          value: opt.locale,
+                          activeColor: AppTheme.accentTeal,
+                        ),
+                      )
+                      .toList(),
+                ),
               ),
               const Divider(),
               // ── Display Options ────────────────────────────────────────
@@ -48,28 +50,28 @@ class AccessibilitySettingsScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               // Replaced SwitchListTile with RadioListTiles for High Contrast Mode
-              RadioListTile<bool>(
-                title: Text(context.l10n.highContrastMode,
-                    style: const TextStyle(color: AppTheme.textPrimary)),
-                value: true,
+              RadioGroup<bool>(
                 groupValue: accessibilityProvider.highContrastMode,
                 onChanged: (bool? value) {
                   if (value != null) {
                     accessibilityProvider.toggleHighContrastMode(value);
                   }
                 },
-              ),
-              const Divider(color: AppTheme.iosGray4),
-              RadioListTile<bool>(
-                title: Text(context.l10n.standardContrast,
-                    style: const TextStyle(color: AppTheme.textPrimary)),
-                value: false,
-                groupValue: accessibilityProvider.highContrastMode,
-                onChanged: (bool? value) {
-                  if (value != null) {
-                    accessibilityProvider.toggleHighContrastMode(value);
-                  }
-                },
+                child: Column(
+                  children: [
+                    RadioListTile<bool>(
+                      title: Text(context.l10n.highContrastMode,
+                          style: const TextStyle(color: AppTheme.textPrimary)),
+                      value: true,
+                    ),
+                    const Divider(color: AppTheme.iosGray4),
+                    RadioListTile<bool>(
+                      title: Text(context.l10n.standardContrast,
+                          style: const TextStyle(color: AppTheme.textPrimary)),
+                      value: false,
+                    ),
+                  ],
+                ),
               ),
               // Theme adaptation for high contrast is handled in main.dart
               const Divider(),
