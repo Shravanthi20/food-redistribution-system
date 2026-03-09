@@ -89,7 +89,8 @@ class _VolunteerUnsafeCancelScreenState
             const Icon(Icons.check_circle, color: Color(0xFF4CAF50)),
             const SizedBox(width: 8),
             Text(context.l10n.cancellationLogged,
-                style: const TextStyle(color: AppTheme.textPrimary, fontSize: 18)),
+                style:
+                    const TextStyle(color: AppTheme.textPrimary, fontSize: 18)),
           ],
         ),
         content: Text(

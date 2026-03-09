@@ -348,9 +348,8 @@ class _LanguagePickerButton extends StatelessWidget {
                 title: Text(
                   opt.displayName,
                   style: TextStyle(
-                    color: isSelected
-                        ? AppTheme.accentTeal
-                        : AppTheme.textPrimary,
+                    color:
+                        isSelected ? AppTheme.accentTeal : AppTheme.textPrimary,
                     fontWeight:
                         isSelected ? FontWeight.bold : FontWeight.normal,
                   ),
@@ -470,9 +469,8 @@ class _RoleDashboardState extends State<RoleDashboard> {
             .collection('donations')
             .where('assignedVolunteerId', isEqualTo: userId)
             .get();
-        final completed = tasks.docs
-            .where((d) => d.data()['status'] == 'delivered')
-            .length;
+        final completed =
+            tasks.docs.where((d) => d.data()['status'] == 'delivered').length;
         // Fetch profile for rating
         final profile =
             await _firestore.collection('volunteer_profiles').doc(userId).get();
@@ -522,7 +520,8 @@ class _RoleDashboardState extends State<RoleDashboard> {
         ),
         child: SafeArea(
           child: _isLoading
-              ? const Center(child: CircularProgressIndicator(color: Colors.white))
+              ? const Center(
+                  child: CircularProgressIndicator(color: Colors.white))
               : SingleChildScrollView(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
@@ -709,8 +708,8 @@ class _RoleDashboardState extends State<RoleDashboard> {
         const SizedBox(height: 12),
         Card(
           elevation: 4,
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: _recentActivity.isEmpty
@@ -754,7 +753,8 @@ class _RoleDashboardState extends State<RoleDashboard> {
                                   : Colors.blue;
                       return ListTile(
                         dense: true,
-                        leading: Icon(Icons.circle, size: 10, color: statusColor),
+                        leading:
+                            Icon(Icons.circle, size: 10, color: statusColor),
                         title: Text(
                           activity['title'] ?? 'Activity',
                           style: const TextStyle(fontWeight: FontWeight.w500),

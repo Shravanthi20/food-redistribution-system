@@ -26,17 +26,19 @@ class AccessibilitySettingsScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Column(
-                children: LocaleProvider.supportedLocaleOptions.map(
-                  (opt) => RadioListTile<Locale>(
-                    title: Text(opt.displayName),
-                    value: opt.locale,
-                    groupValue: localeProvider.locale,
-                    onChanged: (Locale? value) {
-                      if (value != null) localeProvider.setLocale(value);
-                    },
-                    activeColor: AppTheme.accentTeal,
-                  ),
-                ).toList(),
+                children: LocaleProvider.supportedLocaleOptions
+                    .map(
+                      (opt) => RadioListTile<Locale>(
+                        title: Text(opt.displayName),
+                        value: opt.locale,
+                        groupValue: localeProvider.locale,
+                        onChanged: (Locale? value) {
+                          if (value != null) localeProvider.setLocale(value);
+                        },
+                        activeColor: AppTheme.accentTeal,
+                      ),
+                    )
+                    .toList(),
               ),
               const Divider(),
               // ── Display Options ────────────────────────────────────────
@@ -46,19 +48,20 @@ class AccessibilitySettingsScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Semantics(
-                label: context.l10n.highContrastMode,
-                toggled: accessibilityProvider.highContrastMode,
-                child: SwitchListTile(
-                title: Text(context.l10n.highContrastMode),
-                subtitle: Text(context.l10n.enhanceVisibility),
-                value: accessibilityProvider.highContrastMode,
-                onChanged: (bool value) {
-                  accessibilityProvider.toggleHighContrastMode(value);
-                  // Theme adaptation for high contrast is handled in main.dart
-                },
-              )),
+                  label: context.l10n.highContrastMode,
+                  toggled: accessibilityProvider.highContrastMode,
+                  child: SwitchListTile(
+                    title: Text(context.l10n.highContrastMode),
+                    subtitle: Text(context.l10n.enhanceVisibility),
+                    value: accessibilityProvider.highContrastMode,
+                    onChanged: (bool value) {
+                      accessibilityProvider.toggleHighContrastMode(value);
+                      // Theme adaptation for high contrast is handled in main.dart
+                    },
+                  )),
               const Divider(),
-              Text(context.l10n.textSize, style: Theme.of(context).textTheme.titleMedium),
+              Text(context.l10n.textSize,
+                  style: Theme.of(context).textTheme.titleMedium),
               Slider(
                 value: accessibilityProvider.textScaleFactor,
                 min: 0.8,
@@ -76,30 +79,30 @@ class AccessibilitySettingsScreen extends StatelessWidget {
               ),
               const Divider(),
               Semantics(
-                label: context.l10n.simplifiedUiMode,
-                toggled: accessibilityProvider.simplifiedMode,
-                child: SwitchListTile(
-                title: Text(context.l10n.simplifiedUiMode),
-                subtitle: Text(
-                  context.l10n.reduceClutter,
-                ),
-                value: accessibilityProvider.simplifiedMode,
-                onChanged: (bool value) {
-                  accessibilityProvider.toggleSimplifiedMode(value);
-                },
-              )),
+                  label: context.l10n.simplifiedUiMode,
+                  toggled: accessibilityProvider.simplifiedMode,
+                  child: SwitchListTile(
+                    title: Text(context.l10n.simplifiedUiMode),
+                    subtitle: Text(
+                      context.l10n.reduceClutter,
+                    ),
+                    value: accessibilityProvider.simplifiedMode,
+                    onChanged: (bool value) {
+                      accessibilityProvider.toggleSimplifiedMode(value);
+                    },
+                  )),
               const Divider(),
               Semantics(
-                label: context.l10n.darkMode,
-                toggled: themeProvider.isDarkMode,
-                child: SwitchListTile(
-                title: Text(context.l10n.darkMode),
-                subtitle: Text(context.l10n.enableDarkTheme),
-                value: themeProvider.isDarkMode,
-                onChanged: (bool value) {
-                  themeProvider.toggleTheme();
-                },
-              )),
+                  label: context.l10n.darkMode,
+                  toggled: themeProvider.isDarkMode,
+                  child: SwitchListTile(
+                    title: Text(context.l10n.darkMode),
+                    subtitle: Text(context.l10n.enableDarkTheme),
+                    value: themeProvider.isDarkMode,
+                    onChanged: (bool value) {
+                      themeProvider.toggleTheme();
+                    },
+                  )),
             ],
           );
         },

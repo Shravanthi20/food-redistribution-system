@@ -196,11 +196,11 @@ class _VolunteerRegistrationScreenState
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                          return 'Password is required';
-                        }
+                                return 'Password is required';
+                              }
                               if (value.length < 6) {
-                          return 'Min 6 chars';
-                        }
+                                return 'Min 6 chars';
+                              }
                               return null;
                             },
                           ),
@@ -223,8 +223,8 @@ class _VolunteerRegistrationScreenState
                             ),
                             validator: (value) {
                               if (value != _passwordController.text) {
-                          return 'Passwords do not match';
-                        }
+                                return 'Passwords do not match';
+                              }
                               return null;
                             },
                           ),
@@ -340,7 +340,8 @@ class _VolunteerRegistrationScreenState
                               ? _selectedWorkingDays.add(day)
                               : _selectedWorkingDays.remove(day)),
                           backgroundColor: Colors.transparent,
-                          selectedColor: colorScheme.primary.withValues(alpha: 0.12),
+                          selectedColor:
+                              colorScheme.primary.withValues(alpha: 0.12),
                           checkmarkColor: colorScheme.primary,
                           labelStyle: theme.textTheme.bodyMedium?.copyWith(
                             color: isSelected
@@ -376,7 +377,8 @@ class _VolunteerRegistrationScreenState
                               ? _selectedAvailabilityHours.add(hours)
                               : _selectedAvailabilityHours.remove(hours)),
                           backgroundColor: Colors.transparent,
-                          selectedColor: colorScheme.primary.withValues(alpha: 0.12),
+                          selectedColor:
+                              colorScheme.primary.withValues(alpha: 0.12),
                           checkmarkColor: colorScheme.primary,
                           labelStyle: theme.textTheme.bodyMedium?.copyWith(
                             color: isSelected
@@ -412,7 +414,8 @@ class _VolunteerRegistrationScreenState
                               ? _selectedPreferredTasks.add(task)
                               : _selectedPreferredTasks.remove(task)),
                           backgroundColor: Colors.transparent,
-                          selectedColor: colorScheme.primary.withValues(alpha: 0.12),
+                          selectedColor:
+                              colorScheme.primary.withValues(alpha: 0.12),
                           checkmarkColor: colorScheme.primary,
                           labelStyle: theme.textTheme.bodyMedium?.copyWith(
                             color: isSelected

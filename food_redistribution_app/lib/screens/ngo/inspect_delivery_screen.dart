@@ -333,45 +333,45 @@ class _InspectDeliveryScreenState extends State<InspectDeliveryScreen> {
                     ? 'Approve Delivery'
                     : 'Reject Delivery',
                 child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _isSubmitting || _overallApproval == null
-                      ? null
-                      : _submitInspection,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _overallApproval == true
-                        ? Colors.green.shade700
-                        : Colors.red.shade700,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _isSubmitting || _overallApproval == null
+                        ? null
+                        : _submitInspection,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _overallApproval == true
+                          ? Colors.green.shade700
+                          : Colors.red.shade700,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
-                  ),
-                  child: _isSubmitting
-                      ? const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
+                    child: _isSubmitting
+                        ? const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
                               ),
-                            ),
-                            SizedBox(width: 12),
-                            Text('Processing...'),
-                          ],
-                        )
-                      : Text(
-                          _overallApproval == true
-                              ? context.l10n.approveDelivery
-                              : context.l10n.rejectDeliveryAction,
-                          style: const TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                ),
+                              SizedBox(width: 12),
+                              Text('Processing...'),
+                            ],
+                          )
+                        : Text(
+                            _overallApproval == true
+                                ? context.l10n.approveDelivery
+                                : context.l10n.rejectDeliveryAction,
+                            style: const TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                  ),
                 ),
               ),
 

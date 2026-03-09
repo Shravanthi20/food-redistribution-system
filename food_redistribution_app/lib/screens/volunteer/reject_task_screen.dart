@@ -57,8 +57,7 @@ class _RejectTaskScreenState extends State<RejectTaskScreen> {
       final assignmentId = widget.assignmentId ?? args?['assignmentId'];
 
       if (donationId != null && assignmentId != null) {
-        final authProvider =
-            Provider.of<AuthProvider>(context, listen: false);
+        final authProvider = Provider.of<AuthProvider>(context, listen: false);
         final donationProvider =
             Provider.of<DonationProvider>(context, listen: false);
         final userId = authProvider.user?.uid ?? '';

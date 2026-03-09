@@ -352,8 +352,9 @@ class DonationDetailScreen extends StatelessWidget {
                     builder: (context, ngoSnap) {
                       final dropoff = ngoSnap.data ?? const LatLng(0, 0);
                       return LiveTrackingMap(
-                        pickupLocation: _parseGeoPoint(donation.pickupLocation) ??
-                            const LatLng(0, 0),
+                        pickupLocation:
+                            _parseGeoPoint(donation.pickupLocation) ??
+                                const LatLng(0, 0),
                         dropoffLocation: dropoff,
                         volunteerLocation: LatLng(
                           (data['latitude'] as num?)?.toDouble() ?? 0.0,
@@ -678,10 +679,8 @@ class DonationDetailScreen extends StatelessWidget {
   Future<LatLng> _fetchNgoLocation(String? ngoId) async {
     if (ngoId == null || ngoId.isEmpty) return const LatLng(0, 0);
     try {
-      final doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(ngoId)
-          .get();
+      final doc =
+          await FirebaseFirestore.instance.collection('users').doc(ngoId).get();
       if (doc.exists) {
         final data = doc.data()!;
         final loc = data['location'] as Map<String, dynamic>?;

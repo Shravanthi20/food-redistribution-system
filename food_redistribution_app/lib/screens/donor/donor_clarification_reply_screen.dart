@@ -71,7 +71,8 @@ class _DonorClarificationReplyScreenState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(context.l10n.clarificationRequests,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             Text(widget.donationTitle,
                 style: const TextStyle(fontSize: 11, color: Colors.black45)),
           ],
@@ -106,7 +107,8 @@ class _DonorClarificationReplyScreenState
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.mark_email_read_outlined, color: Colors.black26, size: 60),
+          const Icon(Icons.mark_email_read_outlined,
+              color: Colors.black26, size: 60),
           const SizedBox(height: 12),
           Text(context.l10n.noRequestsYet,
               style: const TextStyle(color: Colors.black38, fontSize: 16)),

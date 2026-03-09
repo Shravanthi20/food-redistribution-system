@@ -60,7 +60,7 @@ parse*.py
 **/functions/node_modules/
 
 # ---- Firebase / env (machine or env specific) ----
-**/firebase_options.dart
+# **/firebase_options.dart (Allowed for Vercel build)
 **/google-services.json
 **/GoogleService-Info.plist
 .firebase/

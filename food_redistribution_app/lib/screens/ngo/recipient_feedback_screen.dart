@@ -239,9 +239,8 @@ class _RecipientFeedbackScreenState extends State<RecipientFeedbackScreen> {
             child: SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: (_isFormValid && !_isSubmitting)
-                    ? _submitFeedback
-                    : null,
+                onPressed:
+                    (_isFormValid && !_isSubmitting) ? _submitFeedback : null,
                 icon: _isSubmitting
                     ? const SizedBox(
                         width: 16,

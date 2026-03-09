@@ -233,7 +233,8 @@ class AuthProvider extends ChangeNotifier {
 
       if (kIsWeb) {
         if (file.bytes == null) {
-          throw Exception('File bytes not available. Ensure file is loaded with withData: true.');
+          throw Exception(
+              'File bytes not available. Ensure file is loaded with withData: true.');
         }
         await ref.putData(file.bytes!);
       } else {

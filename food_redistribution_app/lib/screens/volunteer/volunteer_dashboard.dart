@@ -63,10 +63,8 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
     if (user == null) return;
     setState(() => isOnline = value);
     try {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .update({'isOnline': value, 'updatedAt': FieldValue.serverTimestamp()});
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).update(
+          {'isOnline': value, 'updatedAt': FieldValue.serverTimestamp()});
     } catch (e) {
       debugPrint('Error toggling online status: $e');
     }
@@ -401,7 +399,8 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
               children: [
                 Text(
                   _getGreeting(),
-                  style: const TextStyle(fontSize: 12, color: AppTheme.textMuted),
+                  style:
+                      const TextStyle(fontSize: 12, color: AppTheme.textMuted),
                 ),
                 Text(
                   name,
@@ -549,7 +548,9 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          isOnline ? context.l10n.onlineStatus : context.l10n.offlineLabel,
+                          isOnline
+                              ? context.l10n.onlineStatus
+                              : context.l10n.offlineLabel,
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 13,
@@ -674,7 +675,8 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                     task.pickupAddress.isNotEmpty
                         ? task.pickupAddress
                         : context.l10n.locationTBD,
-                    style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                    style: const TextStyle(
+                        fontSize: 12, color: AppTheme.textSecondary),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -697,7 +699,9 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
-                    task.isUrgent ? context.l10n.isUrgent : context.l10n.normalPriority,
+                    task.isUrgent
+                        ? context.l10n.isUrgent
+                        : context.l10n.normalPriority,
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight:
@@ -724,7 +728,9 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
           const SizedBox(height: 16),
           if (!isActive)
             GradientButton(
-              text: simplifiedMode ? context.l10n.goButton : context.l10n.acceptTask,
+              text: simplifiedMode
+                  ? context.l10n.goButton
+                  : context.l10n.acceptTask,
               icon: Icons.check_circle_rounded,
               width: double.infinity,
               onPressed: () {
@@ -737,7 +743,9 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
             )
           else
             GradientButton(
-              text: simplifiedMode ? context.l10n.continueDelivery : context.l10n.continueDelivery,
+              text: simplifiedMode
+                  ? context.l10n.continueDelivery
+                  : context.l10n.continueDelivery,
               icon: Icons.local_shipping_rounded,
               width: double.infinity,
               gradientColors: const [

@@ -163,7 +163,7 @@ class UnauthorizedWidget extends StatelessWidget {
       message = 'Your account has been suspended.';
       suggestion = 'Contact support for assistance';
     } else if (currentUser!.status != UserStatus.verified &&
-               currentUser!.status != UserStatus.active) {
+        currentUser!.status != UserStatus.active) {
       message = 'Your account needs to be verified to access this feature.';
       suggestion = 'Complete your verification process';
     } else if (requiredRoles != null) {
@@ -208,8 +208,9 @@ class UnauthorizedWidget extends StatelessWidget {
                     if (currentUser == null) {
                       Navigator.pushReplacementNamed(context, '/login');
                     } else if (currentUser!.status != UserStatus.verified &&
-                               currentUser!.status != UserStatus.active) {
-                      Navigator.pushReplacementNamed(context, '/donor-verification');
+                        currentUser!.status != UserStatus.active) {
+                      Navigator.pushReplacementNamed(
+                          context, '/donor-verification');
                     } else {
                       Navigator.pushReplacementNamed(context, '/');
                     }

@@ -63,7 +63,8 @@ class DeliveryCoordinationScreenState
       // Load active delivery tasks from Firestore
       final tasksSnapshot = await _firestore
           .collection('delivery_tasks')
-          .where('status', whereIn: ['pending', 'assigned', 'pickedUp', 'inTransit'])
+          .where('status',
+              whereIn: ['pending', 'assigned', 'pickedUp', 'inTransit'])
           .orderBy('scheduledTime', descending: true)
           .limit(50)
           .get();
@@ -78,25 +79,25 @@ class DeliveryCoordinationScreenState
       // Count stats
       final now = DateTime.now();
       final todayStart = DateTime(now.year, now.month, now.day);
-      
+
       _inTransitCount = _activeTasks
           .where((t) => t.status == DeliveryStatus.inTransit)
           .length;
-      
+
       final completedSnapshot = await _firestore
           .collection('delivery_tasks')
           .where('status', isEqualTo: 'delivered')
-          .where('scheduledTime', isGreaterThanOrEqualTo: Timestamp.fromDate(todayStart))
+          .where('scheduledTime',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(todayStart))
           .get();
       _completedTodayCount = completedSnapshot.docs.length;
 
       _delayedCount = _activeTasks.where((t) {
         final scheduled = t.scheduledTime;
-        return scheduled.isBefore(now) && 
-               t.status != DeliveryStatus.delivered &&
-               t.status != DeliveryStatus.cancelled;
+        return scheduled.isBefore(now) &&
+            t.status != DeliveryStatus.delivered &&
+            t.status != DeliveryStatus.cancelled;
       }).length;
-
     } catch (e) {
       debugPrint('Error loading tasks: $e');
     } finally {
@@ -107,10 +108,8 @@ class DeliveryCoordinationScreenState
   Future<void> _loadTaskDetails(DeliveryTask task) async {
     try {
       // Load donation data
-      final donationDoc = await _firestore
-          .collection('donations')
-          .doc(task.donationId)
-          .get();
+      final donationDoc =
+          await _firestore.collection('donations').doc(task.donationId).get();
       _selectedDonationData = donationDoc.data();
 
       // Load volunteer data if assigned
@@ -270,11 +269,16 @@ class DeliveryCoordinationScreenState
   Widget _buildTasksList() {
     final filtered = _searchQuery.isEmpty
         ? _activeTasks
-        : _activeTasks.where((t) =>
-            t.pickupAddress.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-            t.deliveryAddress.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-            t.donationId.toLowerCase().contains(_searchQuery.toLowerCase())
-          ).toList();
+        : _activeTasks
+            .where((t) =>
+                t.pickupAddress
+                    .toLowerCase()
+                    .contains(_searchQuery.toLowerCase()) ||
+                t.deliveryAddress
+                    .toLowerCase()
+                    .contains(_searchQuery.toLowerCase()) ||
+                t.donationId.toLowerCase().contains(_searchQuery.toLowerCase()))
+            .toList();
 
     return Container(
       color: Colors.white,
@@ -290,7 +294,9 @@ class DeliveryCoordinationScreenState
             child: filtered.isEmpty
                 ? Center(
                     child: Text(
-                      _searchQuery.isEmpty ? 'No active tasks' : 'No tasks match "$_searchQuery"',
+                      _searchQuery.isEmpty
+                          ? 'No active tasks'
+                          : 'No tasks match "$_searchQuery"',
                       style: TextStyle(color: Colors.grey[500]),
                     ),
                   )
@@ -362,9 +368,7 @@ class DeliveryCoordinationScreenState
           child: Text(
             statusText,
             style: TextStyle(
-                fontSize: 10,
-                color: statusColor,
-                fontWeight: FontWeight.bold),
+                fontSize: 10, color: statusColor, fontWeight: FontWeight.bold),
           ),
         ),
       ),
@@ -439,7 +443,8 @@ class DeliveryCoordinationScreenState
         Row(
           children: [
             Text(task.id.length > 12 ? task.id.substring(0, 12) : task.id,
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                style:
+                    const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
             const Spacer(),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -461,13 +466,17 @@ class DeliveryCoordinationScreenState
         const SizedBox(height: 12),
         Row(
           children: [
-            _buildInfoChip(Icons.schedule, 'Priority: ${task.priority.name}',
-                task.priority == DispatchPriority.immediate || task.priority == DispatchPriority.urgent
+            _buildInfoChip(
+                Icons.schedule,
+                'Priority: ${task.priority.name}',
+                task.priority == DispatchPriority.immediate ||
+                        task.priority == DispatchPriority.urgent
                     ? Colors.red
                     : Colors.blue),
             const SizedBox(width: 8),
             if (task.specialInstructions != null)
-              _buildInfoChip(Icons.info, task.specialInstructions!, Colors.grey),
+              _buildInfoChip(
+                  Icons.info, task.specialInstructions!, Colors.grey),
           ],
         ),
       ],
@@ -589,14 +598,20 @@ class DeliveryCoordinationScreenState
 
   Widget _buildVolunteerInfo() {
     final volunteerName = _selectedVolunteerData != null
-        ? '${_selectedVolunteerData!['profile']?['firstName'] ?? ''} ${_selectedVolunteerData!['profile']?['lastName'] ?? ''}'.trim()
+        ? '${_selectedVolunteerData!['profile']?['firstName'] ?? ''} ${_selectedVolunteerData!['profile']?['lastName'] ?? ''}'
+            .trim()
         : 'Unassigned';
     final initials = volunteerName.isNotEmpty && volunteerName != 'Unassigned'
-        ? volunteerName.split(' ').map((w) => w.isNotEmpty ? w[0] : '').take(2).join()
+        ? volunteerName
+            .split(' ')
+            .map((w) => w.isNotEmpty ? w[0] : '')
+            .take(2)
+            .join()
         : '?';
     final phone = _selectedVolunteerData?['profile']?['phone'] ?? '';
     final rating = _selectedVolunteerData?['profile']?['rating'];
-    final completedTasks = _selectedVolunteerData?['profile']?['completedTasks'] ?? 0;
+    final completedTasks =
+        _selectedVolunteerData?['profile']?['completedTasks'] ?? 0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -614,7 +629,8 @@ class DeliveryCoordinationScreenState
             children: [
               CircleAvatar(
                 backgroundColor: Colors.blue,
-                child: Text(initials, style: const TextStyle(color: Colors.white)),
+                child:
+                    Text(initials, style: const TextStyle(color: Colors.white)),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -911,7 +927,8 @@ class DeliveryCoordinationScreenState
         'updatedAt': FieldValue.serverTimestamp(),
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Task unassigned. Awaiting new volunteer.')),
+        const SnackBar(
+            content: Text('Task unassigned. Awaiting new volunteer.')),
       );
       _loadActiveTasks();
     } catch (e) {
@@ -957,7 +974,9 @@ class DeliveryCoordinationScreenState
     final pickupAddress = _pickupAddressController.text.trim();
     final deliveryAddress = _deliveryAddressController.text.trim();
 
-    if (donationId.isEmpty || pickupAddress.isEmpty || deliveryAddress.isEmpty) {
+    if (donationId.isEmpty ||
+        pickupAddress.isEmpty ||
+        deliveryAddress.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill all fields')),
       );

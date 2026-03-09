@@ -392,7 +392,8 @@ class _DonorDashboardState extends State<DonorDashboard> {
                             ),
                             child: Text(
                               context.l10n.viewAll,
-                              style: const TextStyle(color: AppTheme.accentTeal),
+                              style:
+                                  const TextStyle(color: AppTheme.accentTeal),
                             ),
                           ),
                         ],
@@ -437,8 +438,8 @@ class _DonorDashboardState extends State<DonorDashboard> {
                           children: [
                             Icon(Icons.restaurant_rounded,
                                 size: 48,
-                                color: AppTheme.accentTeal
-                                    .withValues(alpha: 0.4)),
+                                color:
+                                    AppTheme.accentTeal.withValues(alpha: 0.4)),
                             const SizedBox(height: 16),
                             Text(
                               context.l10n.noDonationsYet,

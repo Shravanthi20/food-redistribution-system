@@ -218,11 +218,11 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                          return 'Password is required';
-                        }
+                                return 'Password is required';
+                              }
                               if (value.length < 6) {
-                          return 'Min 6 chars';
-                        }
+                                return 'Min 6 chars';
+                              }
                               return null;
                             },
                           ),
@@ -245,8 +245,8 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
                             ),
                             validator: (value) {
                               if (value != _passwordController.text) {
-                          return 'Passwords do not match';
-                        }
+                                return 'Passwords do not match';
+                              }
                               return null;
                             },
                           ),
@@ -383,11 +383,11 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
                             keyboardType: TextInputType.number,
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                          return 'Required';
-                        }
+                                return 'Required';
+                              }
                               if (int.tryParse(value) == null) {
-                          return 'Enter a number';
-                        }
+                                return 'Enter a number';
+                              }
                               return null;
                             },
                           ),
@@ -400,11 +400,11 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
                             keyboardType: TextInputType.number,
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                          return 'Required';
-                        }
+                                return 'Required';
+                              }
                               if (int.tryParse(value) == null) {
-                          return 'Enter a number';
-                        }
+                                return 'Enter a number';
+                              }
                               return null;
                             },
                           ),
@@ -436,7 +436,8 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
                               ? _selectedServingPopulation.add(pop)
                               : _selectedServingPopulation.remove(pop)),
                           backgroundColor: Colors.transparent,
-                          selectedColor: colorScheme.primary.withValues(alpha: 0.12),
+                          selectedColor:
+                              colorScheme.primary.withValues(alpha: 0.12),
                           checkmarkColor: colorScheme.primary,
                           labelStyle: theme.textTheme.bodyMedium?.copyWith(
                             color: isSelected
@@ -470,7 +471,8 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
                               ? _selectedFoodTypes.add(type)
                               : _selectedFoodTypes.remove(type)),
                           backgroundColor: Colors.transparent,
-                          selectedColor: colorScheme.primary.withValues(alpha: 0.12),
+                          selectedColor:
+                              colorScheme.primary.withValues(alpha: 0.12),
                           checkmarkColor: colorScheme.primary,
                           labelStyle: theme.textTheme.bodyMedium?.copyWith(
                             color: isSelected

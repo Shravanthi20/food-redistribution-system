@@ -125,7 +125,8 @@ class _HygieneChecklistScreenState extends State<HygieneChecklistScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(context.l10n.hygieneChecklist,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             Text(widget.donationTitle,
                 style: const TextStyle(fontSize: 12, color: Colors.black45)),
           ],
@@ -230,9 +231,11 @@ class _HygieneChecklistScreenState extends State<HygieneChecklistScreen> {
             ),
             subtitle: item.isMandatory
                 ? Text(context.l10n.mandatory,
-                    style: const TextStyle(color: Colors.redAccent, fontSize: 11))
+                    style:
+                        const TextStyle(color: Colors.redAccent, fontSize: 11))
                 : Text(context.l10n.optional,
-                    style: const TextStyle(color: Colors.black38, fontSize: 11)),
+                    style:
+                        const TextStyle(color: Colors.black38, fontSize: 11)),
             controlAffinity: ListTileControlAffinity.leading,
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -319,7 +322,8 @@ class _HygieneChecklistScreenState extends State<HygieneChecklistScreen> {
                 child: OutlinedButton.icon(
                   onPressed: _requestClarification,
                   icon: const Icon(Icons.help_outline, size: 16),
-                  label: Text(context.l10n.clarifyRequest, style: const TextStyle(fontSize: 12)),
+                  label: Text(context.l10n.clarifyRequest,
+                      style: const TextStyle(fontSize: 12)),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.orange,
                     side: const BorderSide(color: Colors.orange),
@@ -335,7 +339,8 @@ class _HygieneChecklistScreenState extends State<HygieneChecklistScreen> {
                 child: OutlinedButton.icon(
                   onPressed: _rejectDonation,
                   icon: const Icon(Icons.cancel_outlined, size: 16),
-                  label: Text(context.l10n.rejectDonation, style: const TextStyle(fontSize: 12)),
+                  label: Text(context.l10n.rejectDonation,
+                      style: const TextStyle(fontSize: 12)),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.redAccent,
                     side: const BorderSide(color: Colors.redAccent),

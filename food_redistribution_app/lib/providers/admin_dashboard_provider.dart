@@ -149,7 +149,12 @@ class AdminDashboardProvider extends ChangeNotifier {
     notifyListeners();
     try {
       // Fetch all users and filter client-side by name/email
-      final allRoles = [UserRole.donor, UserRole.ngo, UserRole.volunteer, UserRole.admin];
+      final allRoles = [
+        UserRole.donor,
+        UserRole.ngo,
+        UserRole.volunteer,
+        UserRole.admin
+      ];
       List<Map<String, dynamic>> results = [];
       for (final role in allRoles) {
         final users = await _userService.getUsersByRole(role);
@@ -157,7 +162,8 @@ class AdminDashboardProvider extends ChangeNotifier {
       }
       final lowerQuery = query.toLowerCase();
       _allUsers = results.where((u) {
-        final name = (u['fullName'] ?? u['firstName'] ?? '').toString().toLowerCase();
+        final name =
+            (u['fullName'] ?? u['firstName'] ?? '').toString().toLowerCase();
         final email = (u['email'] ?? '').toString().toLowerCase();
         return name.contains(lowerQuery) || email.contains(lowerQuery);
       }).toList();

@@ -122,7 +122,8 @@ class _VolunteerPickupProofScreenState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(context.l10n.pickupProof,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             Text(widget.donationTitle,
                 style: const TextStyle(fontSize: 11, color: Colors.black45)),
           ],

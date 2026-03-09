@@ -172,7 +172,8 @@ class _TaskExecutionScreenState extends State<TaskExecutionScreen> {
                           "Have you collected the food from the donor?",
                           "Yes, Picked Up",
                         );
-                        if (confirmed && mounted) _updateStatus(DonationStatus.pickedUp);
+                        if (confirmed && mounted)
+                          _updateStatus(DonationStatus.pickedUp);
                       },
                     ),
                   );
@@ -197,7 +198,8 @@ class _TaskExecutionScreenState extends State<TaskExecutionScreen> {
                         if (confirmed && mounted) {
                           final userId = authProv.appUser?.uid ?? '';
                           await _locationService.startLocationTracking(userId);
-                          if (mounted) await _updateStatus(DonationStatus.inTransit);
+                          if (mounted)
+                            await _updateStatus(DonationStatus.inTransit);
                         }
                       },
                     ),

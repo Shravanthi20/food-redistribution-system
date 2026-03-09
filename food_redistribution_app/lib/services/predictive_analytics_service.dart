@@ -44,8 +44,10 @@ class PredictiveAnalyticsService {
     String? region,
   }) {
     final key = 'volunteerDemand_${forecastDays}_${region ?? 'all'}';
-    return _cached(key, () => _predictVolunteerDemandImpl(
-      forecastDays: forecastDays, region: region));
+    return _cached(
+        key,
+        () => _predictVolunteerDemandImpl(
+            forecastDays: forecastDays, region: region));
   }
 
   Future<VolunteerDemandForecast> _predictVolunteerDemandImpl({
@@ -134,8 +136,10 @@ class PredictiveAnalyticsService {
     String? region,
   }) {
     final key = 'surplusTrends_${historicalDays}_${region ?? 'all'}';
-    return _cached(key, () => _analyzeSurplusTrendsImpl(
-      historicalDays: historicalDays, region: region));
+    return _cached(
+        key,
+        () => _analyzeSurplusTrendsImpl(
+            historicalDays: historicalDays, region: region));
   }
 
   Future<SurplusTrendAnalysis> _analyzeSurplusTrendsImpl({
@@ -345,8 +349,8 @@ class PredictiveAnalyticsService {
     int forecastDays = 7,
   }) {
     final key = 'deliveryPerf_$forecastDays';
-    return _cached(key, () => _forecastDeliveryPerformanceImpl(
-      forecastDays: forecastDays));
+    return _cached(key,
+        () => _forecastDeliveryPerformanceImpl(forecastDays: forecastDays));
   }
 
   Future<DeliveryPerformanceForecast> _forecastDeliveryPerformanceImpl({

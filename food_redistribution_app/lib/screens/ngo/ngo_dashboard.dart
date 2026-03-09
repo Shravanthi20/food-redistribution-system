@@ -72,9 +72,15 @@ class _NGODashboardState extends State<NGODashboard>
             bottom: TabBar(
               controller: _tabController,
               tabs: [
-                Tab(icon: const Icon(Icons.dashboard), text: context.l10n.overview),
-                Tab(icon: const Icon(Icons.restaurant), text: context.l10n.myRequests),
-                Tab(icon: const Icon(Icons.local_shipping), text: context.l10n.available),
+                Tab(
+                    icon: const Icon(Icons.dashboard),
+                    text: context.l10n.overview),
+                Tab(
+                    icon: const Icon(Icons.restaurant),
+                    text: context.l10n.myRequests),
+                Tab(
+                    icon: const Icon(Icons.local_shipping),
+                    text: context.l10n.available),
                 Tab(icon: const Icon(Icons.help), text: context.l10n.queries),
               ],
             ),

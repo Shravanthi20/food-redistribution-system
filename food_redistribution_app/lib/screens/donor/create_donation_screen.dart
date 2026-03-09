@@ -46,7 +46,8 @@ class _CreateDonationScreenState extends State<CreateDonationScreen> {
       if (permission == LocationPermission.deniedForever) return;
 
       final position = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
+        locationSettings:
+            const LocationSettings(accuracy: LocationAccuracy.high),
       );
       if (mounted) {
         setState(() {
@@ -68,10 +69,11 @@ class _CreateDonationScreenState extends State<CreateDonationScreen> {
     _instructionsController.text = donation.specialInstructions ?? '';
     _pickupAddressController.text = donation.pickupAddress;
     _contactPhoneController.text = donation.donorContactPhone;
-    _estimatedMealsController.text = donation.estimatedMeals > 0 
-        ? donation.estimatedMeals.toString() : '';
-    _estimatedPeopleController.text = donation.estimatedPeopleServed > 0 
-        ? donation.estimatedPeopleServed.toString() : '';
+    _estimatedMealsController.text =
+        donation.estimatedMeals > 0 ? donation.estimatedMeals.toString() : '';
+    _estimatedPeopleController.text = donation.estimatedPeopleServed > 0
+        ? donation.estimatedPeopleServed.toString()
+        : '';
     _selectedFoodTypes.addAll(donation.foodTypes);
     _preparedAt = donation.preparedAt;
     _expiresAt = donation.expiresAt;

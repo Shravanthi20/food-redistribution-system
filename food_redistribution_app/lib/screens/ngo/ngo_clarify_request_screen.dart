@@ -221,8 +221,8 @@ class _NgoClarifyRequestScreenState extends State<NgoClarifyRequestScreen> {
               const SizedBox(width: 6),
               Expanded(
                   child: Text(c.question,
-                      style:
-                          const TextStyle(color: AppTheme.textPrimary, fontSize: 13))),
+                      style: const TextStyle(
+                          color: AppTheme.textPrimary, fontSize: 13))),
             ],
           ),
           if (c.reply != null) ...[

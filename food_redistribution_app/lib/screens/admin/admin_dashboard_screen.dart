@@ -81,8 +81,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   iconTheme: const IconThemeData(color: AppTheme.textPrimary),
                   actions: [
                     IconButton(
-                      icon: Icon(Icons.settings,
-                          color: AppTheme.textSecondary),
+                      icon: Icon(Icons.settings, color: AppTheme.textSecondary),
                       onPressed: () => Navigator.pushNamed(
                           context, AppRouter.accessibilitySettings),
                       tooltip: context.l10n.settingsLanguage,
@@ -102,14 +101,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       },
                     ),
                     IconButton(
-                      icon: Icon(Icons.refresh,
-                          color: AppTheme.textSecondary),
+                      icon: Icon(Icons.refresh, color: AppTheme.textSecondary),
                       onPressed: () => provider.loadDashboardData(),
                       tooltip: context.l10n.refreshData,
                     ),
                     IconButton(
-                      icon: Icon(Icons.logout,
-                          color: AppTheme.textSecondary),
+                      icon: Icon(Icons.logout, color: AppTheme.textSecondary),
                       onPressed: () => _handleSignOut(context),
                       tooltip: context.l10n.signOut,
                     ),
@@ -139,26 +136,31 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           type: BottomNavigationBarType.fixed,
                           backgroundColor: Colors.transparent,
                           selectedItemColor: AppTheme.accentTeal,
-                          unselectedItemColor:
-                              AppTheme.textMuted,
+                          unselectedItemColor: AppTheme.textMuted,
                           selectedLabelStyle: const TextStyle(fontSize: 10),
                           unselectedLabelStyle: const TextStyle(fontSize: 10),
                           items: [
                             BottomNavigationBarItem(
-                                icon: const Icon(Icons.dashboard), label: context.l10n.overview),
+                                icon: const Icon(Icons.dashboard),
+                                label: context.l10n.overview),
                             BottomNavigationBarItem(
                                 icon: const Icon(Icons.verified_user),
                                 label: context.l10n.verify),
                             BottomNavigationBarItem(
-                                icon: const Icon(Icons.people), label: context.l10n.gov),
+                                icon: const Icon(Icons.people),
+                                label: context.l10n.gov),
                             BottomNavigationBarItem(
-                                icon: const Icon(Icons.swap_calls), label: context.l10n.manual),
+                                icon: const Icon(Icons.swap_calls),
+                                label: context.l10n.manual),
                             BottomNavigationBarItem(
-                                icon: const Icon(Icons.analytics), label: context.l10n.stats),
+                                icon: const Icon(Icons.analytics),
+                                label: context.l10n.stats),
                             BottomNavigationBarItem(
-                                icon: const Icon(Icons.hub), label: context.l10n.matching),
+                                icon: const Icon(Icons.hub),
+                                label: context.l10n.matching),
                             BottomNavigationBarItem(
-                                icon: const Icon(Icons.history_edu), label: context.l10n.audit),
+                                icon: const Icon(Icons.history_edu),
+                                label: context.l10n.audit),
                           ],
                         ),
                       )
@@ -213,9 +215,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.dashboard_customize, size: 64, color: Colors.grey[400]),
+              Icon(Icons.dashboard_customize,
+                  size: 64, color: Colors.grey[400]),
               const SizedBox(height: 16),
-              Text('Tab $_selectedIndex', style: TextStyle(color: Colors.grey[600])),
+              Text('Tab $_selectedIndex',
+                  style: TextStyle(color: Colors.grey[600])),
             ],
           ),
         );
@@ -311,7 +315,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   const TextStyle(fontSize: 12, fontStyle: FontStyle.italic)),
           const SizedBox(height: 12),
           Text(context.l10n.criteriaBreakdown,
-              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+              style:
+                  const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
           Wrap(
             spacing: 8,
@@ -398,18 +403,28 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       children: [
                         _buildHealthItem(
                           context.l10n.database,
-                          health['database'] == true ? context.l10n.operational : context.l10n.checking,
-                          health['database'] == true ? Colors.green : Colors.orange,
+                          health['database'] == true
+                              ? context.l10n.operational
+                              : context.l10n.checking,
+                          health['database'] == true
+                              ? Colors.green
+                              : Colors.orange,
                         ),
                         _buildHealthItem(
                           context.l10n.authService,
-                          health['auth'] == true ? context.l10n.operational : context.l10n.checking,
+                          health['auth'] == true
+                              ? context.l10n.operational
+                              : context.l10n.checking,
                           health['auth'] == true ? Colors.green : Colors.orange,
                         ),
                         _buildHealthItem(
                           context.l10n.deliveries,
-                          health['deliveries'] == true ? context.l10n.operational : context.l10n.checking,
-                          health['deliveries'] == true ? Colors.green : Colors.orange,
+                          health['deliveries'] == true
+                              ? context.l10n.operational
+                              : context.l10n.checking,
+                          health['deliveries'] == true
+                              ? Colors.green
+                              : Colors.orange,
                         ),
                         _buildHealthItem(
                           context.l10n.regionalAnalytics,
@@ -570,10 +585,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     style: const TextStyle(color: AppTheme.textPrimary),
                     decoration: InputDecoration(
                       hintText: context.l10n.searchByEmailOrName,
-                      hintStyle:
-                          TextStyle(color: AppTheme.textMuted),
-                      prefixIcon: Icon(Icons.search,
-                          color: AppTheme.textMuted),
+                      hintStyle: TextStyle(color: AppTheme.textMuted),
+                      prefixIcon: Icon(Icons.search, color: AppTheme.textMuted),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(
@@ -617,8 +630,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         const SizedBox(height: 16),
                         Text(
                           context.l10n.searchUsersToManage,
-                          style: TextStyle(
-                              color: AppTheme.textMuted),
+                          style: TextStyle(color: AppTheme.textMuted),
                         ),
                       ],
                     ),
@@ -675,7 +687,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               ),
               title: Text(donation.title,
                   style: const TextStyle(
-                      color: AppTheme.textPrimary, fontWeight: FontWeight.bold)),
+                      color: AppTheme.textPrimary,
+                      fontWeight: FontWeight.bold)),
               subtitle: Text(
                 'Status: ${donation.status.name} • Available Until: ${_formatDate(donation.availableUntil)}',
                 style: TextStyle(color: AppTheme.textMuted),
@@ -689,8 +702,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('Pickup: ${donation.pickupAddress}',
-                          style: TextStyle(
-                              color: AppTheme.textSecondary)),
+                          style: TextStyle(color: AppTheme.textSecondary)),
                       const SizedBox(height: 16),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -801,8 +813,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         ),
         Expanded(
           child: provider.auditLogs.isEmpty
-              ? Center(
-                  child: Text(context.l10n.noAuditLogs))
+              ? Center(child: Text(context.l10n.noAuditLogs))
               : ListView.builder(
                   itemCount: provider.auditLogs.length,
                   itemBuilder: (context, index) {
@@ -856,8 +867,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   fontWeight: FontWeight.bold,
                   color: AppTheme.textPrimary)),
           const SizedBox(height: 4),
-          Text(title,
-              style: TextStyle(color: AppTheme.textMuted)),
+          Text(title, style: TextStyle(color: AppTheme.textMuted)),
         ],
       ),
     );
@@ -908,8 +918,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 ),
                 Text(
                   'User: ${log['userId'] ?? 'System'} • IP: ${log['ipAddress'] ?? 'N/A'}',
-                  style: TextStyle(
-                      color: AppTheme.textMuted, fontSize: 12),
+                  style: TextStyle(color: AppTheme.textMuted, fontSize: 12),
                 ),
               ],
             ),
@@ -918,9 +927,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(_formatDate(log['timestamp']),
-                  style: TextStyle(
-                      fontSize: 11,
-                      color: AppTheme.textMuted)),
+                  style: TextStyle(fontSize: 11, color: AppTheme.textMuted)),
               if (showDetails)
                 Text(log['riskLevel'] ?? 'low',
                     style: TextStyle(
@@ -1025,15 +1032,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 const SizedBox(height: 4),
                 Text(
                   'Role: ${user['role']} • Status: ${user['status']}',
-                  style: TextStyle(
-                      color: AppTheme.textMuted, fontSize: 13),
+                  style: TextStyle(color: AppTheme.textMuted, fontSize: 13),
                 ),
               ],
             ),
           ),
           PopupMenuButton<String>(
-            icon: Icon(Icons.more_vert,
-                color: AppTheme.textMuted),
+            icon: Icon(Icons.more_vert, color: AppTheme.textMuted),
             color: AppTheme.primaryNavyLight,
             onSelected: (val) {
               if (val == 'suspend') _handleSuspendUser(user['id']);
@@ -1042,20 +1047,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               PopupMenuItem(
                 value: 'suspend',
                 child: Text(context.l10n.suspend7Days,
-                    style:
-                        TextStyle(color: AppTheme.textSecondary)),
+                    style: TextStyle(color: AppTheme.textSecondary)),
               ),
               PopupMenuItem(
                 value: 'restrict',
                 child: Text(context.l10n.restrictRole,
-                    style:
-                        TextStyle(color: AppTheme.textSecondary)),
+                    style: TextStyle(color: AppTheme.textSecondary)),
               ),
               PopupMenuItem(
                 value: 'history',
                 child: Text(context.l10n.auditHistory,
-                    style:
-                        TextStyle(color: AppTheme.textSecondary)),
+                    style: TextStyle(color: AppTheme.textSecondary)),
               ),
             ],
           ),

@@ -38,7 +38,8 @@ class StorageService {
       if (!await file.exists()) return null;
 
       final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final ref = _storage.ref().child('food_images/${donationId}_$timestamp.jpg');
+      final ref =
+          _storage.ref().child('food_images/${donationId}_$timestamp.jpg');
       final uploadTask = await ref.putFile(
         file,
         SettableMetadata(contentType: 'image/jpeg'),
@@ -60,9 +61,8 @@ class StorageService {
       if (!await file.exists()) return null;
 
       final ext = documentPath.split('.').last;
-      final ref = _storage
-          .ref()
-          .child('verification_docs/$userId/${documentType}_${DateTime.now().millisecondsSinceEpoch}.$ext');
+      final ref = _storage.ref().child(
+          'verification_docs/$userId/${documentType}_${DateTime.now().millisecondsSinceEpoch}.$ext');
       final uploadTask = await ref.putFile(file);
       return await uploadTask.ref.getDownloadURL();
     } catch (e) {

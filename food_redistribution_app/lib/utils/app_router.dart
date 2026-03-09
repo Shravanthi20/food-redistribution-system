@@ -239,7 +239,8 @@ class AppRouter {
       case createDonation:
         final existingDonation = settings.arguments as FoodDonation?;
         return MaterialPageRoute(
-          builder: (_) => CreateDonationScreen(existingDonation: existingDonation),
+          builder: (_) =>
+              CreateDonationScreen(existingDonation: existingDonation),
         );
       case donationList:
         return MaterialPageRoute(builder: (_) => const DonationListScreen());

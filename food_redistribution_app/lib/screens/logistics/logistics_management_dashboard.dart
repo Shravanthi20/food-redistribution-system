@@ -96,9 +96,8 @@ class LogisticsManagementDashboardState
       final s = d.data()['status'] as String?;
       return s == 'delivered' || s == 'cancelled' || s == 'expired';
     }).length;
-    _successRate = terminated > 0
-        ? (deliveredSnap.docs.length / terminated) * 100
-        : 0;
+    _successRate =
+        terminated > 0 ? (deliveredSnap.docs.length / terminated) * 100 : 0;
 
     // Active volunteers
     final volSnap = await _firestore
@@ -300,12 +299,8 @@ class LogisticsManagementDashboardState
                     Icons.trending_up)),
             const SizedBox(width: 12),
             Expanded(
-                child: _buildKPICard(
-                    'Active Volunteers',
-                    '$_activeVolunteers',
-                    '/$_totalVolunteers',
-                    Colors.teal,
-                    Icons.people)),
+                child: _buildKPICard('Active Volunteers', '$_activeVolunteers',
+                    '/$_totalVolunteers', Colors.teal, Icons.people)),
           ],
         ),
       ],
@@ -484,7 +479,8 @@ class LogisticsManagementDashboardState
                           value: e.value.toDouble(),
                           color: color,
                           title: '${e.key}\n$pct%',
-                          titleStyle: const TextStyle(fontSize: 10, color: Colors.white),
+                          titleStyle: const TextStyle(
+                              fontSize: 10, color: Colors.white),
                         );
                       }).toList(),
                       sectionsSpace: 2,
@@ -545,8 +541,13 @@ class LogisticsManagementDashboardState
                       borderData: FlBorderData(show: false),
                       barGroups: _dailyDeliveries.asMap().entries.map((e) {
                         final colors = [
-                          Colors.blue, Colors.green, Colors.orange,
-                          Colors.purple, Colors.teal, Colors.red, Colors.indigo
+                          Colors.blue,
+                          Colors.green,
+                          Colors.orange,
+                          Colors.purple,
+                          Colors.teal,
+                          Colors.red,
+                          Colors.indigo
                         ];
                         return BarChartGroupData(x: e.key, barRods: [
                           BarChartRodData(
@@ -566,7 +567,14 @@ class LogisticsManagementDashboardState
 
   Widget _buildFoodTypeDistributionChart() {
     final total = _foodTypeCounts.values.fold(0, (a, b) => a + b);
-    final chartColors = [Colors.red, Colors.blue, Colors.green, Colors.orange, Colors.purple, Colors.teal];
+    final chartColors = [
+      Colors.red,
+      Colors.blue,
+      Colors.green,
+      Colors.orange,
+      Colors.purple,
+      Colors.teal
+    ];
     final entries = _foodTypeCounts.entries.toList();
 
     return Container(
@@ -595,13 +603,15 @@ class LogisticsManagementDashboardState
                           PieChartData(
                             sections: entries.asMap().entries.map((e) {
                               final pct = total > 0
-                                  ? (e.value.value / total * 100).toStringAsFixed(0)
+                                  ? (e.value.value / total * 100)
+                                      .toStringAsFixed(0)
                                   : '0';
                               return PieChartSectionData(
                                 value: e.value.value.toDouble(),
                                 color: chartColors[e.key % chartColors.length],
                                 title: '$pct%',
-                                titleStyle: const TextStyle(fontSize: 10, color: Colors.white),
+                                titleStyle: const TextStyle(
+                                    fontSize: 10, color: Colors.white),
                               );
                             }).toList(),
                             sectionsSpace: 1,
@@ -653,7 +663,8 @@ class LogisticsManagementDashboardState
     final completed = _systemAnalytics['completedDonationsThisMonth'] ?? 0;
     final total = _systemAnalytics['totalDonationsThisMonth'] ?? 0;
     final wasteReduced = _systemAnalytics['wasteReduced'] ?? 0.0;
-    final successPct = total > 0 ? (completed / total * 100).toStringAsFixed(1) : '0';
+    final successPct =
+        total > 0 ? (completed / total * 100).toStringAsFixed(1) : '0';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -673,26 +684,34 @@ class LogisticsManagementDashboardState
           ),
           child: Column(
             children: [
-              _buildMetricRow('Donations This Month', '$total',
-                  '', Colors.blue),
-              const Divider(),
-              _buildMetricRow('Completed Deliveries', '$completed',
-                  '', Colors.green),
+              _buildMetricRow(
+                  'Donations This Month', '$total', '', Colors.blue),
               const Divider(),
               _buildMetricRow(
-                  'Completion Rate', '$successPct%', '', 
-                  double.tryParse(successPct) != null && double.parse(successPct) >= 80 
-                      ? Colors.green : Colors.orange),
+                  'Completed Deliveries', '$completed', '', Colors.green),
               const Divider(),
               _buildMetricRow(
-                  'Food Waste Reduced', 
+                  'Completion Rate',
+                  '$successPct%',
+                  '',
+                  double.tryParse(successPct) != null &&
+                          double.parse(successPct) >= 80
+                      ? Colors.green
+                      : Colors.orange),
+              const Divider(),
+              _buildMetricRow(
+                  'Food Waste Reduced',
                   '${(wasteReduced as double).toStringAsFixed(1)} kg',
-                  '', Colors.green),
+                  '',
+                  Colors.green),
               const Divider(),
               _buildMetricRow(
-                  'Active Volunteers', '$_activeVolunteers/$_totalVolunteers',
-                  '', _activeVolunteers > _totalVolunteers * 0.5 
-                      ? Colors.green : Colors.orange),
+                  'Active Volunteers',
+                  '$_activeVolunteers/$_totalVolunteers',
+                  '',
+                  _activeVolunteers > _totalVolunteers * 0.5
+                      ? Colors.green
+                      : Colors.orange),
             ],
           ),
         ),
@@ -808,7 +827,8 @@ class LogisticsManagementDashboardState
   Widget _buildPerformanceAnalysis() {
     final activeUsers = _systemAnalytics['activeUsers'] ?? 0;
     final monthlyTotal = _systemAnalytics['totalDonationsThisMonth'] ?? 0;
-    final monthlyCompleted = _systemAnalytics['completedDonationsThisMonth'] ?? 0;
+    final monthlyCompleted =
+        _systemAnalytics['completedDonationsThisMonth'] ?? 0;
 
     // Find top food type
     String topFoodType = 'N/A';
@@ -818,7 +838,7 @@ class LogisticsManagementDashboardState
       topFoodType = sorted.first.key;
     }
 
-    // Find busiest day 
+    // Find busiest day
     String busiestDay = 'N/A';
     if (_dailyDeliveries.isNotEmpty) {
       final sorted = _dailyDeliveries.toList()
@@ -844,8 +864,12 @@ class LogisticsManagementDashboardState
           ),
           child: Column(
             children: [
-              _buildPerformanceItem('Most Donated Food Type', topFoodType,
-                  '${_foodTypeCounts[topFoodType] ?? 0} donations', Icons.restaurant, Colors.green),
+              _buildPerformanceItem(
+                  'Most Donated Food Type',
+                  topFoodType,
+                  '${_foodTypeCounts[topFoodType] ?? 0} donations',
+                  Icons.restaurant,
+                  Colors.green),
               const Divider(),
               _buildPerformanceItem('Active Users (30d)', '$activeUsers users',
                   'Active this month', Icons.people, Colors.blue),
@@ -853,12 +877,19 @@ class LogisticsManagementDashboardState
               _buildPerformanceItem('Busiest Day', busiestDay,
                   'Most deliveries', Icons.schedule, Colors.orange),
               const Divider(),
-              _buildPerformanceItem('Monthly Donations', '$monthlyTotal created',
-                  '$monthlyCompleted completed', Icons.volunteer_activism, Colors.purple),
+              _buildPerformanceItem(
+                  'Monthly Donations',
+                  '$monthlyTotal created',
+                  '$monthlyCompleted completed',
+                  Icons.volunteer_activism,
+                  Colors.purple),
               const Divider(),
-              _buildPerformanceItem('Delivery Success', 
+              _buildPerformanceItem(
+                  'Delivery Success',
                   '${_successRate.toStringAsFixed(1)}%',
-                  'Based on completed vs terminated', Icons.check_circle, Colors.green),
+                  'Based on completed vs terminated',
+                  Icons.check_circle,
+                  Colors.green),
             ],
           ),
         ),

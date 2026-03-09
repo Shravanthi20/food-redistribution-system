@@ -324,7 +324,8 @@ class _LoginScreenState extends State<LoginScreen>
                               children: [
                                 const Text(
                                   "Don't have an account?",
-                                  style: TextStyle(color: AppTheme.textSecondary),
+                                  style:
+                                      TextStyle(color: AppTheme.textSecondary),
                                 ),
                                 TextButton(
                                   onPressed: () => Navigator.pushNamed(
@@ -364,14 +365,13 @@ class _LoginScreenState extends State<LoginScreen>
           context: context,
           backgroundColor: Colors.transparent,
           builder: (_) => Container(
-            padding:
-                const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
             decoration: BoxDecoration(
               color: AppTheme.primaryNavy,
               borderRadius:
                   const BorderRadius.vertical(top: Radius.circular(20)),
-              border: Border.all(
-                  color: AppTheme.accentTeal.withValues(alpha: 0.3)),
+              border:
+                  Border.all(color: AppTheme.accentTeal.withValues(alpha: 0.3)),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -396,17 +396,15 @@ class _LoginScreenState extends State<LoginScreen>
                 ),
                 const SizedBox(height: 16),
                 ...LocaleProvider.supportedLocaleOptions.map((opt) {
-                  final isSelected =
-                      localeProvider.locale.languageCode ==
-                          opt.locale.languageCode;
+                  final isSelected = localeProvider.locale.languageCode ==
+                      opt.locale.languageCode;
                   return ListTile(
                     leading: Icon(
                       isSelected
                           ? Icons.radio_button_checked
                           : Icons.radio_button_off,
-                      color: isSelected
-                          ? AppTheme.accentTeal
-                          : AppTheme.textMuted,
+                      color:
+                          isSelected ? AppTheme.accentTeal : AppTheme.textMuted,
                     ),
                     title: Text(
                       opt.displayName,
@@ -414,9 +412,8 @@ class _LoginScreenState extends State<LoginScreen>
                         color: isSelected
                             ? AppTheme.accentTeal
                             : AppTheme.textPrimary,
-                        fontWeight: isSelected
-                            ? FontWeight.bold
-                            : FontWeight.normal,
+                        fontWeight:
+                            isSelected ? FontWeight.bold : FontWeight.normal,
                       ),
                     ),
                     onTap: () {
