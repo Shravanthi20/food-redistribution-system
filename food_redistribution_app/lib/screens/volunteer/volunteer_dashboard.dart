@@ -8,6 +8,8 @@ import '../../utils/app_router.dart';
 import '../../utils/app_theme.dart';
 import '../../widgets/gradient_scaffold.dart';
 import '../../widgets/glass_widgets.dart';
+import '../../real_time_tracking/widgets/donation_status_badge.dart';
+import '../../real_time_tracking/widgets/delivery_status_panel.dart';
 
 class VolunteerDashboard extends StatefulWidget {
   const VolunteerDashboard({super.key});
@@ -559,17 +561,15 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                   Icon(
                     isActive ? Icons.play_circle_filled : Icons.event_available,
                     size: 16,
-                    color: isActive
-                        ? AppTheme.successTeal
-                        : AppTheme.accentCyan,
+                    color:
+                        isActive ? AppTheme.successTeal : AppTheme.accentCyan,
                   ),
                 if (simplifiedMode) const SizedBox(width: 4),
                 Text(
                   isActive ? "IN PROGRESS" : "AVAILABLE",
                   style: TextStyle(
-                    color: isActive
-                        ? AppTheme.successTeal
-                        : AppTheme.accentCyan,
+                    color:
+                        isActive ? AppTheme.successTeal : AppTheme.accentCyan,
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.5,
@@ -623,9 +623,8 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                     task.isUrgent ? "Urgent" : "Normal",
                     style: TextStyle(
                       fontSize: 12,
-                      fontWeight: task.isUrgent
-                          ? FontWeight.w600
-                          : FontWeight.normal,
+                      fontWeight:
+                          task.isUrgent ? FontWeight.w600 : FontWeight.normal,
                       color: task.isUrgent
                           ? AppTheme.errorCoral
                           : AppTheme.textSecondary,

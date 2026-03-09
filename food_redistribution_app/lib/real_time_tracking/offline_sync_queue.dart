@@ -19,7 +19,7 @@ class OfflineSyncQueue {
 
   final LifecycleLogService logService;
   final Future<void> Function(String deliveryId, DeliveryStatus status)
-  _applyCallback;
+      _applyCallback;
 
   Timer? _syncTimer;
 

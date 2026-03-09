@@ -9,7 +9,7 @@ class DeliveryNotificationEngine {
   final NotificationEventRouter _router;
 
   DeliveryNotificationEngine({NotificationEventRouter? router})
-    : _router = router ?? NotificationEventRouter() {
+      : _router = router ?? NotificationEventRouter() {
     _events.stream.listen((e) => _router.route(e));
   }
 

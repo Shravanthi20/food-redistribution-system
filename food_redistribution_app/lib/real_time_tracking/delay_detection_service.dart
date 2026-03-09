@@ -8,7 +8,7 @@ class DelayAlert {
   final DateTime timestamp;
 
   DelayAlert({required this.deliveryId, required this.message})
-    : timestamp = DateTime.now();
+      : timestamp = DateTime.now();
 }
 
 class DelayDetectionService {
@@ -23,8 +23,8 @@ class DelayDetectionService {
   DelayDetectionService({
     Duration? pickupThreshold,
     Duration? deliveryThreshold,
-  }) : pickupThreshold = pickupThreshold ?? const Duration(minutes: 20),
-       deliveryThreshold = deliveryThreshold ?? const Duration(hours: 1);
+  })  : pickupThreshold = pickupThreshold ?? const Duration(minutes: 20),
+        deliveryThreshold = deliveryThreshold ?? const Duration(hours: 1);
 
   Stream<DelayAlert> get alerts => _alerts.stream;
 

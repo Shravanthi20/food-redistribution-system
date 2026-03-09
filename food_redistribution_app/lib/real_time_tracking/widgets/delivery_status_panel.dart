@@ -180,8 +180,7 @@ class _DeliveryStatusPanelState extends State<DeliveryStatusPanel> {
     }
 
     if (widget.role.toLowerCase() == 'ngo') {
-      final visible =
-          _currentStatus == DeliveryStatus.assigned ||
+      final visible = _currentStatus == DeliveryStatus.assigned ||
           _currentStatus == DeliveryStatus.pickedUp ||
           _currentStatus == DeliveryStatus.delivered;
       return Text(
@@ -191,8 +190,7 @@ class _DeliveryStatusPanelState extends State<DeliveryStatusPanel> {
     }
 
     if (widget.role.toLowerCase() == 'volunteer') {
-      final highlight =
-          _currentStatus == DeliveryStatus.assigned ||
+      final highlight = _currentStatus == DeliveryStatus.assigned ||
           _currentStatus == DeliveryStatus.pickedUp;
       return Text(
         highlight

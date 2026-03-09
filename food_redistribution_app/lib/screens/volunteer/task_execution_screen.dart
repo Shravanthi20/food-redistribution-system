@@ -24,7 +24,6 @@ class _TaskExecutionScreenState extends State<TaskExecutionScreen> {
   int _getStepFromStatus(DonationStatus status) {
     switch (status) {
       case DonationStatus.matched:
-      case DonationStatus.accepted:
         return 0; // Go to Pickup
       case DonationStatus.pickedUp:
         return 1; // En-Route
@@ -74,7 +73,7 @@ class _TaskExecutionScreenState extends State<TaskExecutionScreen> {
     );
     if (confirmed) {
       // In a real app, you might re-assign or un-match the task here
-      await _updateStatus(DonationStatus.available);
+      await _updateStatus(DonationStatus.listed);
       if (mounted) {
         Navigator.pop(context);
       }
@@ -272,9 +271,8 @@ class _TaskExecutionScreenState extends State<TaskExecutionScreen> {
                     ],
                   ),
                   isActive: currentStep >= 0,
-                  state: currentStep > 0
-                      ? StepState.complete
-                      : StepState.indexed,
+                  state:
+                      currentStep > 0 ? StepState.complete : StepState.indexed,
                 ),
                 Step(
                   title: Text(
@@ -293,9 +291,8 @@ class _TaskExecutionScreenState extends State<TaskExecutionScreen> {
                     style: const TextStyle(fontSize: 16),
                   ),
                   isActive: currentStep >= 1,
-                  state: currentStep > 1
-                      ? StepState.complete
-                      : StepState.indexed,
+                  state:
+                      currentStep > 1 ? StepState.complete : StepState.indexed,
                 ),
                 Step(
                   title: Text(
@@ -440,9 +437,8 @@ class _TaskExecutionScreenState extends State<TaskExecutionScreen> {
                   value,
                   style: TextStyle(
                     fontSize: simplified ? 18 : 16,
-                    fontWeight: simplified
-                        ? FontWeight.w600
-                        : FontWeight.normal,
+                    fontWeight:
+                        simplified ? FontWeight.w600 : FontWeight.normal,
                   ),
                 ),
               ],

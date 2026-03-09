@@ -134,7 +134,7 @@ class _VolunteerRegistrationScreenState
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
@@ -142,7 +142,8 @@ class _VolunteerRegistrationScreenState
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text('Volunteer Enrollment', style: theme.textTheme.headlineMedium?.copyWith(fontSize: 18)),
+        title: Text('Volunteer Enrollment',
+            style: theme.textTheme.headlineMedium?.copyWith(fontSize: 18)),
       ),
       body: Consumer<AuthProvider>(
         builder: (context, authProvider, child) {
@@ -150,13 +151,15 @@ class _VolunteerRegistrationScreenState
             isLoading: authProvider.isLoading,
             child: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
               child: Form(
                 key: _formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildSectionHeader('Individual Access', 'Create your volunteer profile'),
+                    _buildSectionHeader(
+                        'Individual Access', 'Create your volunteer profile'),
                     const SizedBox(height: 24),
                     CustomTextField(
                       controller: _emailController,
@@ -164,8 +167,10 @@ class _VolunteerRegistrationScreenState
                       hintText: 'yourname@example.com',
                       keyboardType: TextInputType.emailAddress,
                       validator: (value) {
-                        if (value == null || value.isEmpty) return 'Email is required';
-                        if (!RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(value)) {
+                        if (value == null || value.isEmpty)
+                          return 'Email is required';
+                        if (!RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$')
+                            .hasMatch(value)) {
                           return 'Enter a valid email address';
                         }
                         return null;
@@ -180,11 +185,17 @@ class _VolunteerRegistrationScreenState
                             label: 'SECURE PASSWORD',
                             obscureText: _obscurePassword,
                             suffixIcon: IconButton(
-                              icon: Icon(_obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined, size: 18),
-                              onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                              icon: Icon(
+                                  _obscurePassword
+                                      ? Icons.visibility_outlined
+                                      : Icons.visibility_off_outlined,
+                                  size: 18),
+                              onPressed: () => setState(
+                                  () => _obscurePassword = !_obscurePassword),
                             ),
                             validator: (value) {
-                              if (value == null || value.isEmpty) return 'Password is required';
+                              if (value == null || value.isEmpty)
+                                return 'Password is required';
                               if (value.length < 6) return 'Min 6 chars';
                               return null;
                             },
@@ -197,26 +208,45 @@ class _VolunteerRegistrationScreenState
                             label: 'CONFIRM',
                             obscureText: _obscureConfirmPassword,
                             suffixIcon: IconButton(
-                              icon: Icon(_obscureConfirmPassword ? Icons.visibility_outlined : Icons.visibility_off_outlined, size: 18),
-                              onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+                              icon: Icon(
+                                  _obscureConfirmPassword
+                                      ? Icons.visibility_outlined
+                                      : Icons.visibility_off_outlined,
+                                  size: 18),
+                              onPressed: () => setState(() =>
+                                  _obscureConfirmPassword =
+                                      !_obscureConfirmPassword),
                             ),
                             validator: (value) {
-                              if (value != _passwordController.text) return 'Passwords do not match';
+                              if (value != _passwordController.text)
+                                return 'Passwords do not match';
                               return null;
                             },
                           ),
                         ),
                       ],
                     ),
-                    
                     const SizedBox(height: 48),
-                    _buildSectionHeader('Personal Identity', 'Verify your contact information'),
+                    _buildSectionHeader(
+                        'Personal Identity', 'Verify your contact information'),
                     const SizedBox(height: 24),
                     Row(
                       children: [
-                        Expanded(child: CustomTextField(controller: _firstNameController, label: 'FIRST NAME', validator: (v) => (v == null || v.isEmpty) ? 'Required' : null)),
+                        Expanded(
+                            child: CustomTextField(
+                                controller: _firstNameController,
+                                label: 'FIRST NAME',
+                                validator: (v) => (v == null || v.isEmpty)
+                                    ? 'Required'
+                                    : null)),
                         const SizedBox(width: 16),
-                        Expanded(child: CustomTextField(controller: _lastNameController, label: 'LAST NAME', validator: (v) => (v == null || v.isEmpty) ? 'Required' : null)),
+                        Expanded(
+                            child: CustomTextField(
+                                controller: _lastNameController,
+                                label: 'LAST NAME',
+                                validator: (v) => (v == null || v.isEmpty)
+                                    ? 'Required'
+                                    : null)),
                       ],
                     ),
                     const SizedBox(height: 20),
@@ -225,15 +255,16 @@ class _VolunteerRegistrationScreenState
                       label: 'MOBILE NUMBER',
                       keyboardType: TextInputType.phone,
                       hintText: '+1 234 567 890',
-                      validator: (value) => (value == null || value.isEmpty) ? 'Required' : null,
+                      validator: (value) =>
+                          (value == null || value.isEmpty) ? 'Required' : null,
                     ),
                     const SizedBox(height: 20),
                     CustomTextField(
                       controller: _cityController,
                       label: 'CURRENT CITY',
-                      validator: (value) => (value == null || value.isEmpty) ? 'Required' : null,
+                      validator: (value) =>
+                          (value == null || value.isEmpty) ? 'Required' : null,
                     ),
-                    
                     const SizedBox(height: 32),
                     Container(
                       decoration: BoxDecoration(
@@ -242,14 +273,16 @@ class _VolunteerRegistrationScreenState
                         border: Border.all(color: AppTheme.slate200),
                       ),
                       child: SwitchListTile(
-                        title: const Text('I have a vehicle for transport', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
-                        subtitle: const Text('Bicycle, motorcycle, or car', style: TextStyle(fontSize: 12)),
+                        title: const Text('I have a vehicle for transport',
+                            style: TextStyle(
+                                fontWeight: FontWeight.w700, fontSize: 15)),
+                        subtitle: const Text('Bicycle, motorcycle, or car',
+                            style: TextStyle(fontSize: 12)),
                         value: _hasVehicle,
                         onChanged: (v) => setState(() => _hasVehicle = v),
                         activeColor: AppTheme.primaryEmerald,
                       ),
                     ),
-
                     if (_hasVehicle) ...[
                       const SizedBox(height: 20),
                       CustomTextField(
@@ -264,7 +297,6 @@ class _VolunteerRegistrationScreenState
                         hintText: 'License number',
                       ),
                     ],
-
                     const SizedBox(height: 20),
                     CustomTextField(
                       controller: _maxRadiusController,
@@ -272,9 +304,9 @@ class _VolunteerRegistrationScreenState
                       keyboardType: TextInputType.number,
                       hintText: 'e.g., 10',
                     ),
-
                     const SizedBox(height: 48),
-                    _buildSectionHeader('Emergency Contact', 'For safety and coordination'),
+                    _buildSectionHeader(
+                        'Emergency Contact', 'For safety and coordination'),
                     const SizedBox(height: 24),
                     CustomTextField(
                       controller: _emergencyContactController,
@@ -287,9 +319,9 @@ class _VolunteerRegistrationScreenState
                       label: 'EMERGENCY PHONE',
                       keyboardType: TextInputType.phone,
                     ),
-
                     const SizedBox(height: 48),
-                    _buildSectionHeader('Working Days', 'When are you available?'),
+                    _buildSectionHeader(
+                        'Working Days', 'When are you available?'),
                     const SizedBox(height: 16),
                     Wrap(
                       spacing: 8,
@@ -299,76 +331,101 @@ class _VolunteerRegistrationScreenState
                         return FilterChip(
                           label: Text(day),
                           selected: isSelected,
-                          onSelected: (s) => setState(() => s ? _selectedWorkingDays.add(day) : _selectedWorkingDays.remove(day)),
+                          onSelected: (s) => setState(() => s
+                              ? _selectedWorkingDays.add(day)
+                              : _selectedWorkingDays.remove(day)),
                           backgroundColor: Colors.transparent,
                           selectedColor: colorScheme.primary.withOpacity(0.12),
                           checkmarkColor: colorScheme.primary,
                           labelStyle: theme.textTheme.bodyMedium?.copyWith(
-                            color: isSelected ? colorScheme.primary : theme.textTheme.bodyMedium?.color,
-                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
+                            color: isSelected
+                                ? colorScheme.primary
+                                : theme.textTheme.bodyMedium?.color,
+                            fontWeight:
+                                isSelected ? FontWeight.w700 : FontWeight.w400,
                           ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
-                            side: BorderSide(color: isSelected ? colorScheme.primary : AppTheme.slate200),
+                            side: BorderSide(
+                                color: isSelected
+                                    ? colorScheme.primary
+                                    : AppTheme.slate200),
                           ),
                         );
                       }).toList(),
                     ),
-
                     const SizedBox(height: 32),
-                    _buildSectionHeader('Availability Hours', 'Preferred time slots'),
+                    _buildSectionHeader(
+                        'Availability Hours', 'Preferred time slots'),
                     const SizedBox(height: 16),
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
                       children: _availabilityHoursOptions.map((hours) {
-                        final isSelected = _selectedAvailabilityHours.contains(hours);
+                        final isSelected =
+                            _selectedAvailabilityHours.contains(hours);
                         return FilterChip(
                           label: Text(hours),
                           selected: isSelected,
-                          onSelected: (s) => setState(() => s ? _selectedAvailabilityHours.add(hours) : _selectedAvailabilityHours.remove(hours)),
+                          onSelected: (s) => setState(() => s
+                              ? _selectedAvailabilityHours.add(hours)
+                              : _selectedAvailabilityHours.remove(hours)),
                           backgroundColor: Colors.transparent,
                           selectedColor: colorScheme.primary.withOpacity(0.12),
                           checkmarkColor: colorScheme.primary,
                           labelStyle: theme.textTheme.bodyMedium?.copyWith(
-                            color: isSelected ? colorScheme.primary : theme.textTheme.bodyMedium?.color,
-                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
+                            color: isSelected
+                                ? colorScheme.primary
+                                : theme.textTheme.bodyMedium?.color,
+                            fontWeight:
+                                isSelected ? FontWeight.w700 : FontWeight.w400,
                           ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
-                            side: BorderSide(color: isSelected ? colorScheme.primary : AppTheme.slate200),
+                            side: BorderSide(
+                                color: isSelected
+                                    ? colorScheme.primary
+                                    : AppTheme.slate200),
                           ),
                         );
                       }).toList(),
                     ),
-
                     const SizedBox(height: 32),
-                    _buildSectionHeader('Preferred Tasks', 'What would you like to help with?'),
+                    _buildSectionHeader(
+                        'Preferred Tasks', 'What would you like to help with?'),
                     const SizedBox(height: 16),
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
                       children: _preferredTasksOptions.map((task) {
-                        final isSelected = _selectedPreferredTasks.contains(task);
+                        final isSelected =
+                            _selectedPreferredTasks.contains(task);
                         return FilterChip(
                           label: Text(task),
                           selected: isSelected,
-                          onSelected: (s) => setState(() => s ? _selectedPreferredTasks.add(task) : _selectedPreferredTasks.remove(task)),
+                          onSelected: (s) => setState(() => s
+                              ? _selectedPreferredTasks.add(task)
+                              : _selectedPreferredTasks.remove(task)),
                           backgroundColor: Colors.transparent,
                           selectedColor: colorScheme.primary.withOpacity(0.12),
                           checkmarkColor: colorScheme.primary,
                           labelStyle: theme.textTheme.bodyMedium?.copyWith(
-                            color: isSelected ? colorScheme.primary : theme.textTheme.bodyMedium?.color,
-                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
+                            color: isSelected
+                                ? colorScheme.primary
+                                : theme.textTheme.bodyMedium?.color,
+                            fontWeight:
+                                isSelected ? FontWeight.w700 : FontWeight.w400,
                           ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
-                            side: BorderSide(color: isSelected ? colorScheme.primary : AppTheme.slate200),
+                            side: BorderSide(
+                                color: isSelected
+                                    ? colorScheme.primary
+                                    : AppTheme.slate200),
                           ),
                         );
                       }).toList(),
                     ),
-                    
                     const SizedBox(height: 80),
                     ElevatedButton(
                       onPressed: _register,
@@ -389,7 +446,11 @@ class _VolunteerRegistrationScreenState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontSize: 22, fontWeight: FontWeight.w800)),
+        Text(title,
+            style: Theme.of(context)
+                .textTheme
+                .headlineMedium
+                ?.copyWith(fontSize: 22, fontWeight: FontWeight.w800)),
         const SizedBox(height: 4),
         Text(subtitle, style: Theme.of(context).textTheme.bodyMedium),
       ],
