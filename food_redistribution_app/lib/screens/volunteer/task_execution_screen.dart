@@ -4,6 +4,7 @@ import '../../models/food_donation.dart';
 import '../../services/food_donation_service.dart';
 import '../../services/location_service.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/accessibility_provider.dart';
 
 class TaskExecutionScreen extends StatefulWidget {
   final String donationId;
@@ -20,16 +21,84 @@ class _TaskExecutionScreenState extends State<TaskExecutionScreen> {
 
   bool _isLoading = false;
 
+  int _getStepFromStatus(DonationStatus status) {
+    switch (status) {
+      case DonationStatus.matched:
+        return 0; // Go to Pickup
+      case DonationStatus.pickedUp:
+        return 1; // En-Route
+      case DonationStatus.inTransit:
+        return 2; // Arrived / Delivered
+      case DonationStatus.delivered:
+        return 3; // Done
+      default:
+        return 0;
+    }
+  }
+
+  Future<bool> _showConfirmationDialog(
+    String title,
+    String content,
+    String confirmText,
+  ) async {
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        content: Text(content),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).primaryColor,
+            ),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(confirmText),
+          ),
+        ],
+      ),
+    );
+    return result ?? false;
+  }
+
+  Future<void> _handleCancelTask() async {
+    final confirmed = await _showConfirmationDialog(
+      "Cancel Task?",
+      "Are you sure you want to cancel this delivery task? This action cannot be undone.",
+      "Yes, Cancel Task",
+    );
+    if (confirmed) {
+      // In a real app, you might re-assign or un-match the task here
+      await _updateStatus(DonationStatus.listed);
+      if (mounted) {
+        Navigator.pop(context);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF7F9FC),
       appBar: AppBar(
-        title:
-            const Text("Task Execution", style: TextStyle(color: Colors.black)),
+        title: const Text(
+          "Task Execution",
+          style: TextStyle(color: Colors.black),
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.cancel_outlined, color: Colors.red),
+            tooltip: "Cancel Task",
+            onPressed: _handleCancelTask,
+          ),
+        ],
       ),
       body: StreamBuilder<FoodDonation?>(
         stream: _donationService.getDonationStream(widget.donationId),
@@ -45,68 +114,221 @@ class _TaskExecutionScreenState extends State<TaskExecutionScreen> {
           final donation = snapshot.data!;
           final status = donation.status;
 
-          return _buildContent(context, donation, status);
+          return Consumer<AccessibilityProvider>(
+            builder: (context, accessibility, child) {
+              return _buildContent(
+                context,
+                donation,
+                status,
+                accessibility.simplifiedMode,
+              );
+            },
+          );
         },
       ),
     );
   }
 
   Widget _buildContent(
-      BuildContext context, FoodDonation donation, DonationStatus status) {
+    BuildContext context,
+    FoodDonation donation,
+    DonationStatus status,
+    bool simplified,
+  ) {
+    int currentStep = _getStepFromStatus(status);
+
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _statusCard(status),
-          const SizedBox(height: 20),
+          if (!simplified) _statusCard(status),
+          if (!simplified) const SizedBox(height: 20),
 
-          const Text("Pickup & Drop Details",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 10),
-
-          _infoRow(Icons.store, "Pickup", donation.pickupAddress),
-          // In a real app, Drop address would be from the assigned NGO
-          _infoRow(Icons.location_on, "Drop", "Assigned NGO Location"),
-          _infoRow(Icons.restaurant, "Food",
-              "${donation.quantity} ${donation.unit} of ${donation.foodTypes.join(', ')}"),
-          _infoRow(Icons.timer, "Deadline",
-              "Expires: ${_formatDate(donation.expiresAt)}"),
-
-          const SizedBox(height: 25),
-
-          if (_isLoading)
-            const Center(child: CircularProgressIndicator())
-          else ...[
-            // ACTION BUTTONS
-            if (status == DonationStatus.matched)
-              _buildActionButton("Confirm Pickup", Colors.green,
-                  () => _updateStatus(DonationStatus.pickedUp)),
-
-            if (status == DonationStatus.pickedUp)
-              _buildActionButton("Mark En-route", Colors.orange, () async {
-                // Start Tracking
-                final userId =
-                    Provider.of<AuthProvider>(context, listen: false).user!.uid;
-                await _locationService.startLocationTracking(userId);
-                await _updateStatus(DonationStatus.inTransit);
-              }),
-
-            if (status == DonationStatus.inTransit)
-              _buildActionButton("Confirm Delivery", Colors.blue, () async {
-                final userId =
-                    Provider.of<AuthProvider>(context, listen: false).user!.uid;
-                await _locationService.stopLocationTracking(userId);
-                await _updateStatus(DonationStatus.delivered);
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text("Delivery Confirmed! Tracking Stopped.")),
+          // Simplified Step-by-Step UI
+          Expanded(
+            child: Stepper(
+              physics: const ClampingScrollPhysics(),
+              currentStep: currentStep > 2
+                  ? 2
+                  : currentStep, // Max step is 2 (3 steps total)
+              controlsBuilder: (context, details) {
+                if (_isLoading) {
+                  return const Padding(
+                    padding: EdgeInsets.only(top: 16),
+                    child: Center(child: CircularProgressIndicator()),
                   );
-                  Navigator.pop(context);
                 }
-              }),
-          ]
+
+                if (currentStep == 0 && details.stepIndex == 0) {
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 16.0),
+                    child: _buildActionButton(
+                      "Confirm Pickup",
+                      Colors.green,
+                      () async {
+                        final confirmed = await _showConfirmationDialog(
+                          "Confirm Pickup",
+                          "Have you collected the food from the donor?",
+                          "Yes, Picked Up",
+                        );
+                        if (confirmed) _updateStatus(DonationStatus.pickedUp);
+                      },
+                    ),
+                  );
+                }
+
+                if (currentStep == 1 && details.stepIndex == 1) {
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 16.0),
+                    child: _buildActionButton(
+                      "Mark En-route",
+                      Colors.orange,
+                      () async {
+                        final confirmed = await _showConfirmationDialog(
+                          "En-route?",
+                          "Start location tracking and head to the destination?",
+                          "Yes, Start Next Leg",
+                        );
+                        if (confirmed) {
+                          final userId = Provider.of<AuthProvider>(
+                            context,
+                            listen: false,
+                          ).appUser!.uid;
+                          await _locationService.startLocationTracking(userId);
+                          await _updateStatus(DonationStatus.inTransit);
+                        }
+                      },
+                    ),
+                  );
+                }
+
+                if (currentStep == 2 &&
+                    details.stepIndex == 2 &&
+                    status != DonationStatus.delivered) {
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 16.0),
+                    child: _buildActionButton(
+                      "Confirm Delivery",
+                      Colors.blue,
+                      () async {
+                        final confirmed = await _showConfirmationDialog(
+                          "Confirm Delivery",
+                          "Has the food been successfully delivered to the NGO?",
+                          "Yes, Delivered",
+                        );
+                        if (confirmed) {
+                          final userId = Provider.of<AuthProvider>(
+                            context,
+                            listen: false,
+                          ).appUser!.uid;
+                          await _locationService.stopLocationTracking(userId);
+                          await _updateStatus(DonationStatus.delivered);
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                "Delivery Confirmed! Tracking Stopped.",
+                              ),
+                            ),
+                          );
+                          Navigator.pop(
+                            context,
+                          ); // Go back to dashboard on complete
+                        }
+                      },
+                    ),
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+              steps: [
+                Step(
+                  title: Text(
+                    "1. Pickup Food",
+                    style: simplified
+                        ? const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          )
+                        : null,
+                  ),
+                  content: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _infoRow(
+                        Icons.store,
+                        "Pickup Address",
+                        donation.pickupAddress,
+                        simplified,
+                      ),
+                      _infoRow(
+                        Icons.restaurant,
+                        "Items",
+                        "${donation.quantity} ${donation.unit} of ${donation.foodTypes.map((e) => e.name).join(', ')}",
+                        simplified,
+                      ),
+                    ],
+                  ),
+                  isActive: currentStep >= 0,
+                  state:
+                      currentStep > 0 ? StepState.complete : StepState.indexed,
+                ),
+                Step(
+                  title: Text(
+                    "2. Start Delivery Leg",
+                    style: simplified
+                        ? const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          )
+                        : null,
+                  ),
+                  content: Text(
+                    simplified
+                        ? "Head to the drop location."
+                        : "Start tracking and navigate to the NGO.",
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  isActive: currentStep >= 1,
+                  state:
+                      currentStep > 1 ? StepState.complete : StepState.indexed,
+                ),
+                Step(
+                  title: Text(
+                    "3. Drop-off Food",
+                    style: simplified
+                        ? const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          )
+                        : null,
+                  ),
+                  content: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _infoRow(
+                        Icons.location_on,
+                        "Drop Address",
+                        "Assigned NGO Location",
+                        simplified,
+                      ),
+                      _infoRow(
+                        Icons.timer,
+                        "Deadline",
+                        "Expires: ${_formatTime(donation.expiresAt)}",
+                        simplified,
+                      ),
+                    ],
+                  ),
+                  isActive: currentStep >= 2,
+                  state: status == DonationStatus.delivered
+                      ? StepState.complete
+                      : StepState.indexed,
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -116,11 +338,14 @@ class _TaskExecutionScreenState extends State<TaskExecutionScreen> {
     setState(() => _isLoading = true);
     try {
       await _donationService.updateDonationStatus(
-          donationId: widget.donationId, status: newStatus);
+        donationId: widget.donationId,
+        status: newStatus,
+      );
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text("Error: $e")));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Error: $e")));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -130,36 +355,32 @@ class _TaskExecutionScreenState extends State<TaskExecutionScreen> {
   Widget _buildActionButton(String label, Color color, VoidCallback onPressed) {
     return SizedBox(
       width: double.infinity,
-      child: ElevatedButton(
+      child: ElevatedButton.icon(
         style: ElevatedButton.styleFrom(
           backgroundColor: color,
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
         ),
         onPressed: onPressed,
-        child: Text(label),
+        icon: const Icon(Icons.check_circle_outline, size: 28),
+        label: Text(
+          label,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }
 
   Widget _statusCard(DonationStatus status) {
     Color color = Colors.grey;
-    String statusText = status.name;
+    String statusText = status.name.toUpperCase();
 
-    switch (status) {
-      case DonationStatus.pickedUp:
-        color = Colors.green;
-        break;
-      case DonationStatus.inTransit:
-        color = Colors.orange;
-        break;
-      case DonationStatus.delivered:
-        color = Colors.blue;
-        break;
-      default:
-        break;
-    }
+    if (status == DonationStatus.pickedUp) color = Colors.green;
+    if (status == DonationStatus.inTransit) color = Colors.orange;
+    if (status == DonationStatus.delivered) color = Colors.blue;
 
     return Container(
       width: double.infinity,
@@ -167,37 +388,68 @@ class _TaskExecutionScreenState extends State<TaskExecutionScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
+        boxShadow: const [
+          BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
+        ],
       ),
       child: Row(
         children: [
-          Icon(Icons.info, color: color),
-          const SizedBox(width: 10),
+          Icon(Icons.info_outline, color: color, size: 28),
+          const SizedBox(width: 12),
           Text(
-            "Current Status: $statusText",
+            "Status: $statusText",
             style: TextStyle(
-                fontWeight: FontWeight.bold, fontSize: 15, color: color),
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: color,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _infoRow(IconData icon, String title, String value) {
+  Widget _infoRow(IconData icon, String title, String value, bool simplified) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: 12),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 18, color: Colors.green),
-          const SizedBox(width: 8),
-          Text("$title: ", style: const TextStyle(fontWeight: FontWeight.bold)),
+          Icon(
+            icon,
+            size: simplified ? 28 : 22,
+            color: Theme.of(context).primaryColor,
+          ),
+          const SizedBox(width: 12),
           Expanded(
-              child: Text(value, style: const TextStyle(color: Colors.grey))),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (!simplified)
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black54,
+                    ),
+                  ),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: simplified ? 18 : 16,
+                    fontWeight:
+                        simplified ? FontWeight.w600 : FontWeight.normal,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 
-  String _formatDate(DateTime dt) {
-    return "${dt.hour}:${dt.minute}";
+  String _formatTime(DateTime dt) {
+    return "${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}";
   }
 }

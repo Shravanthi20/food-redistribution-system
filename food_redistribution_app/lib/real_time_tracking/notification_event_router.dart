@@ -6,11 +6,12 @@ class NotificationEvent {
   final String body;
   final NotificationTarget target;
 
-  NotificationEvent(
-      {required this.deliveryId,
-      required this.title,
-      required this.body,
-      required this.target});
+  NotificationEvent({
+    required this.deliveryId,
+    required this.title,
+    required this.body,
+    required this.target,
+  });
 }
 
 class NotificationEventRouter {
@@ -21,6 +22,7 @@ class NotificationEventRouter {
     // Keep this method minimal and replaceable by consumer.
     // ignore: avoid_print
     print(
-        '[NotificationRouter] -> ${event.target}: ${event.title} (${event.deliveryId}) - ${event.body}');
+      '[NotificationRouter] -> ${event.target}: ${event.title} (${event.deliveryId}) - ${event.body}',
+    );
   }
 }

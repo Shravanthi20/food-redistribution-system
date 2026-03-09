@@ -7,8 +7,6 @@ import '../../widgets/custom_text_field.dart';
 import '../../widgets/loading_overlay.dart';
 import '../../utils/app_router.dart';
 import '../../utils/app_theme.dart';
-import '../../widgets/gradient_scaffold.dart';
-import '../../widgets/glass_widgets.dart';
 
 class NGORegistrationScreen extends StatefulWidget {
   const NGORegistrationScreen({super.key});
@@ -22,15 +20,16 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  final _organizationNameController = TextEditingController();
-  final _registrationNumberController = TextEditingController();
+  final _orgNameController = TextEditingController();
+  final _regNumberController = TextEditingController();
   final _addressController = TextEditingController();
+  final _descriptionController = TextEditingController();
   final _cityController = TextEditingController();
   final _stateController = TextEditingController();
   final _zipCodeController = TextEditingController();
-  final _operatingHoursController = TextEditingController();
   final _capacityController = TextEditingController();
   final _storagCapacityController = TextEditingController();
+  final _operatingHoursController = TextEditingController();
   final _contactPersonController = TextEditingController();
   final _contactPhoneController = TextEditingController();
 
@@ -68,15 +67,16 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
-    _organizationNameController.dispose();
-    _registrationNumberController.dispose();
+    _orgNameController.dispose();
+    _regNumberController.dispose();
     _addressController.dispose();
+    _descriptionController.dispose();
     _cityController.dispose();
     _stateController.dispose();
     _zipCodeController.dispose();
-    _operatingHoursController.dispose();
     _capacityController.dispose();
     _storagCapacityController.dispose();
+    _operatingHoursController.dispose();
     _contactPersonController.dispose();
     _contactPhoneController.dispose();
     super.dispose();
@@ -89,7 +89,7 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please select at least one serving population'),
-          backgroundColor: Colors.orange,
+          behavior: SnackBarBehavior.floating,
         ),
       );
       return;
@@ -99,7 +99,7 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please select at least one preferred food type'),
-          backgroundColor: Colors.orange,
+          behavior: SnackBarBehavior.floating,
         ),
       );
       return;
@@ -108,9 +108,9 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
     final ngoProfile = NGOProfile(
-      userId: '', // Will be set by the service
-      organizationName: _organizationNameController.text.trim(),
-      registrationNumber: _registrationNumberController.text.trim(),
+      userId: '',
+      organizationName: _orgNameController.text.trim(),
+      registrationNumber: _regNumberController.text.trim(),
       ngoType: _selectedNGOType,
       address: _addressController.text.trim(),
       city: _cityController.text.trim(),
@@ -119,7 +119,7 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
       location: {
         'latitude': 37.7750,
         'longitude': -122.4180,
-      }, // [TESTING] Hardcoded SF location to match Donor default
+      },
       capacity: int.tryParse(_capacityController.text.trim()) ?? 0,
       servingPopulation: _selectedServingPopulation,
       operatingHours: _operatingHoursController.text.trim(),
@@ -128,6 +128,8 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
       refrigerationAvailable: _refrigerationAvailable,
       contactPerson: _contactPersonController.text.trim(),
       contactPhone: _contactPhoneController.text.trim(),
+      description: _descriptionController.text.trim(),
+      isVerified: false,
       createdAt: DateTime.now(),
     );
 
@@ -143,7 +145,8 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(authProvider.errorMessage!),
-          backgroundColor: Colors.red,
+          backgroundColor: Theme.of(context).colorScheme.error,
+          behavior: SnackBarBehavior.floating,
         ),
       );
     }
@@ -151,244 +154,71 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return GradientScaffold(
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('NGO Registration',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text('NGO Accreditation',
+            style: theme.textTheme.headlineMedium?.copyWith(fontSize: 18)),
       ),
       body: Consumer<AuthProvider>(
         builder: (context, authProvider, child) {
           return LoadingOverlay(
             isLoading: authProvider.isLoading,
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24.0),
+              physics: const BouncingScrollPhysics(),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
               child: Form(
                 key: _formKey,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Header
-                    ShaderMask(
-                      shaderCallback: (bounds) => const LinearGradient(
-                        colors: [AppTheme.accentTeal, AppTheme.accentCyan],
-                      ).createShader(bounds),
-                      child: const Text(
-                        'Join as an NGO Partner',
-                        style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Help us distribute food to those in need',
-                      style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.white.withValues(alpha: 0.7)),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 32),
-
-                    // Account Information
-                    const Text(
-                      'Account Information',
-                      style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white),
-                    ),
-                    const SizedBox(height: 16),
-
+                    _buildSectionHeader('Organization Access',
+                        'Define credentials for your primary account'),
+                    const SizedBox(height: 24),
                     CustomTextField(
                       controller: _emailController,
-                      label: 'Email Address',
+                      label: 'INSTITUTIONAL EMAIL',
+                      hintText: 'admin@organization.org',
                       keyboardType: TextInputType.emailAddress,
                       validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your email';
-                        }
+                        if (value == null || value.isEmpty)
+                          return 'Email is required';
                         if (!RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$')
                             .hasMatch(value)) {
-                          return 'Please enter a valid email address';
+                          return 'Enter a valid email address';
                         }
                         return null;
                       },
                     ),
-                    const SizedBox(height: 16),
-
-                    CustomTextField(
-                      controller: _passwordController,
-                      label: 'Password',
-                      obscureText: _obscurePassword,
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility
-                              : Icons.visibility_off,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                        },
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter a password';
-                        }
-                        if (value.length < 6) {
-                          return 'Password must be at least 6 characters';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 16),
-
-                    CustomTextField(
-                      controller: _confirmPasswordController,
-                      label: 'Confirm Password',
-                      obscureText: _obscureConfirmPassword,
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscureConfirmPassword
-                              ? Icons.visibility
-                              : Icons.visibility_off,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _obscureConfirmPassword = !_obscureConfirmPassword;
-                          });
-                        },
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please confirm your password';
-                        }
-                        if (value != _passwordController.text) {
-                          return 'Passwords do not match';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 32),
-
-                    // Organization Information
-                    const Text(
-                      'Organization Information',
-                      style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // NGO Type Dropdown
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Organization Type',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.white.withValues(alpha: 0.9),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        DropdownButtonFormField<NGOType>(
-                          initialValue: _selectedNGOType,
-                          dropdownColor: AppTheme.primaryNavyLight,
-                          style: const TextStyle(color: Colors.white),
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: Colors.white.withValues(alpha: 0.1),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(
-                                  color: Colors.white.withValues(alpha: 0.3)),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(
-                                  color: Colors.white.withValues(alpha: 0.3)),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(
-                                  color: AppTheme.accentTeal, width: 2),
-                            ),
-                          ),
-                          items: NGOType.values.map((type) {
-                            return DropdownMenuItem(
-                              value: type,
-                              child: Text(_getNGOTypeDisplayName(type),
-                                  style: const TextStyle(color: Colors.white)),
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            if (value != null) {
-                              setState(() {
-                                _selectedNGOType = value;
-                              });
-                            }
-                          },
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-
-                    CustomTextField(
-                      controller: _organizationNameController,
-                      label: 'Organization Name',
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter organization name';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 16),
-
-                    CustomTextField(
-                      controller: _registrationNumberController,
-                      label: 'Registration Number',
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter registration number';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 16),
-
-                    CustomTextField(
-                      controller: _addressController,
-                      label: 'Organization Address',
-                      maxLines: 2,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter organization address';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 16),
-
+                    const SizedBox(height: 20),
                     Row(
                       children: [
                         Expanded(
                           child: CustomTextField(
-                            controller: _cityController,
-                            label: 'City',
+                            controller: _passwordController,
+                            label: 'PASSWORD',
+                            obscureText: _obscurePassword,
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                  _obscurePassword
+                                      ? Icons.visibility_outlined
+                                      : Icons.visibility_off_outlined,
+                                  size: 18),
+                              onPressed: () => setState(
+                                  () => _obscurePassword = !_obscurePassword),
+                            ),
                             validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter city';
-                              }
+                              if (value == null || value.isEmpty)
+                                return 'Password is required';
+                              if (value.length < 6) return 'Min 6 chars';
                               return null;
                             },
                           ),
@@ -396,110 +226,161 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
                         const SizedBox(width: 16),
                         Expanded(
                           child: CustomTextField(
-                            controller: _stateController,
-                            label: 'State',
+                            controller: _confirmPasswordController,
+                            label: 'CONFIRM',
+                            obscureText: _obscureConfirmPassword,
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                  _obscureConfirmPassword
+                                      ? Icons.visibility_outlined
+                                      : Icons.visibility_off_outlined,
+                                  size: 18),
+                              onPressed: () => setState(() =>
+                                  _obscureConfirmPassword =
+                                      !_obscureConfirmPassword),
+                            ),
                             validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter state';
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: CustomTextField(
-                            controller: _zipCodeController,
-                            label: 'ZIP Code',
-                            keyboardType: TextInputType.number,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter ZIP code';
-                              }
+                              if (value != _passwordController.text)
+                                return 'Passwords do not match';
                               return null;
                             },
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 32),
 
-                    // Verification Documents
+                    const SizedBox(height: 48),
+                    _buildSectionHeader('Institutional Profile',
+                        'Official data for distribution trust'),
+                    const SizedBox(height: 24),
 
-                    const SizedBox(height: 32),
-
-                    // Contact Information
-                    const Text(
-                      'Contact Information',
-                      style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white),
+                    // NGO Type Dropdown
+                    _buildDropdownLabel('ORGANIZATION TYPE'),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: theme.inputDecorationTheme.fillColor,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: AppTheme.slate200),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButtonFormField<NGOType>(
+                          value: _selectedNGOType,
+                          items: NGOType.values
+                              .map((type) => DropdownMenuItem(
+                                    value: type,
+                                    child: Text(_getNGOTypeDisplayName(type),
+                                        style: theme.textTheme.bodyLarge),
+                                  ))
+                              .toList(),
+                          onChanged: (v) =>
+                              setState(() => _selectedNGOType = v!),
+                          decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.zero),
+                        ),
+                      ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
 
+                    CustomTextField(
+                      controller: _orgNameController,
+                      label: 'LEGAL ENTITY NAME',
+                      hintText: 'Official NGO Name',
+                      validator: (value) =>
+                          (value == null || value.isEmpty) ? 'Required' : null,
+                    ),
+                    const SizedBox(height: 20),
+                    CustomTextField(
+                      controller: _regNumberController,
+                      label: 'NON-PROFIT REG. NUMBER',
+                      hintText: 'Registration ID',
+                      validator: (value) =>
+                          (value == null || value.isEmpty) ? 'Required' : null,
+                    ),
+                    const SizedBox(height: 20),
+                    CustomTextField(
+                      controller: _descriptionController,
+                      label: 'MISSION DESCRIPTION',
+                      hintText: 'Describe your food distribution goals...',
+                      maxLines: 3,
+                    ),
+
+                    const SizedBox(height: 48),
+                    _buildSectionHeader(
+                        'Location & Contact', 'Your operational logistics'),
+                    const SizedBox(height: 24),
+                    CustomTextField(
+                      controller: _addressController,
+                      label: 'OFFICE / SHELTER ADDRESS',
+                      maxLines: 2,
+                      validator: (value) =>
+                          (value == null || value.isEmpty) ? 'Required' : null,
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Expanded(
+                            flex: 2,
+                            child: CustomTextField(
+                                controller: _cityController,
+                                label: 'CITY',
+                                validator: (v) => (v == null || v.isEmpty)
+                                    ? 'Required'
+                                    : null)),
+                        const SizedBox(width: 12),
+                        Expanded(
+                            child: CustomTextField(
+                                controller: _stateController, label: 'STATE')),
+                        const SizedBox(width: 12),
+                        Expanded(
+                            child: CustomTextField(
+                                controller: _zipCodeController,
+                                label: 'ZIP',
+                                keyboardType: TextInputType.number)),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
                     CustomTextField(
                       controller: _contactPersonController,
-                      label: 'Contact Person Name',
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter contact person name';
-                        }
-                        return null;
-                      },
+                      label: 'CONTACT PERSON',
+                      hintText: 'Primary contact name',
+                      validator: (value) =>
+                          (value == null || value.isEmpty) ? 'Required' : null,
                     ),
-                    const SizedBox(height: 16),
-
+                    const SizedBox(height: 20),
                     CustomTextField(
                       controller: _contactPhoneController,
-                      label: 'Contact Phone Number',
+                      label: 'CONTACT PHONE',
                       keyboardType: TextInputType.phone,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter contact phone number';
-                        }
-                        return null;
-                      },
+                      validator: (value) =>
+                          (value == null || value.isEmpty) ? 'Required' : null,
                     ),
-                    const SizedBox(height: 16),
-
+                    const SizedBox(height: 20),
                     CustomTextField(
                       controller: _operatingHoursController,
-                      label: 'Operating Hours',
+                      label: 'OPERATING HOURS',
                       hintText: 'e.g., Mon-Fri 9:00-18:00',
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter operating hours';
-                        }
-                        return null;
-                      },
+                      validator: (value) =>
+                          (value == null || value.isEmpty) ? 'Required' : null,
                     ),
-                    const SizedBox(height: 32),
 
-                    // Capacity Information
-                    const Text(
-                      'Capacity Information',
-                      style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white),
-                    ),
-                    const SizedBox(height: 16),
-
+                    const SizedBox(height: 48),
+                    _buildSectionHeader('Capacity & Storage',
+                        'Define your redistribution capability'),
+                    const SizedBox(height: 24),
                     Row(
                       children: [
                         Expanded(
                           child: CustomTextField(
                             controller: _capacityController,
-                            label: 'Daily Capacity (people)',
+                            label: 'DAILY CAPACITY (PEOPLE)',
                             keyboardType: TextInputType.number,
                             validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter capacity';
-                              }
-                              if (int.tryParse(value) == null) {
-                                return 'Please enter a valid number';
-                              }
+                              if (value == null || value.isEmpty)
+                                return 'Required';
+                              if (int.tryParse(value) == null)
+                                return 'Enter a number';
                               return null;
                             },
                           ),
@@ -508,163 +389,104 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
                         Expanded(
                           child: CustomTextField(
                             controller: _storagCapacityController,
-                            label: 'Storage Capacity (kg)',
+                            label: 'STORAGE CAPACITY (KG)',
                             keyboardType: TextInputType.number,
                             validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter storage capacity';
-                              }
-                              if (int.tryParse(value) == null) {
-                                return 'Please enter a valid number';
-                              }
+                              if (value == null || value.isEmpty)
+                                return 'Required';
+                              if (int.tryParse(value) == null)
+                                return 'Enter a number';
                               return null;
                             },
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
-
-                    CheckboxListTile(
-                      title: const Text('Refrigeration Available',
-                          style: TextStyle(color: Colors.white)),
-                      subtitle: Text(
-                          'We have refrigeration facilities for storage',
-                          style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.6))),
-                      value: _refrigerationAvailable,
-                      activeColor: AppTheme.accentTeal,
-                      checkColor: Colors.white,
-                      tileColor: Colors.white.withValues(alpha: 0.05),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                      onChanged: (value) {
-                        setState(() {
-                          _refrigerationAvailable = value ?? false;
-                        });
-                      },
+                    const SizedBox(height: 20),
+                    _buildCapabilityToggle(
+                      'Refrigeration Available',
+                      'We have refrigeration facilities for storage',
+                      _refrigerationAvailable,
+                      (v) => setState(() => _refrigerationAvailable = v),
                     ),
-                    const SizedBox(height: 32),
 
-                    // Serving Population
-                    const Text(
-                      'Serving Population',
-                      style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white),
-                    ),
+                    const SizedBox(height: 48),
+                    _buildSectionHeader('Serving Population',
+                        'Who does your organization serve?'),
                     const SizedBox(height: 16),
-
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
-                      children: _servingPopulationOptions.map((population) {
+                      children: _servingPopulationOptions.map((pop) {
                         final isSelected =
-                            _selectedServingPopulation.contains(population);
+                            _selectedServingPopulation.contains(pop);
                         return FilterChip(
-                          label: Text(population,
-                              style: TextStyle(
-                                  color: isSelected
-                                      ? Colors.white
-                                      : Colors.white.withValues(alpha: 0.9))),
+                          label: Text(pop),
                           selected: isSelected,
-                          selectedColor: AppTheme.accentTeal,
-                          backgroundColor: Colors.white.withValues(alpha: 0.1),
-                          checkmarkColor: Colors.white,
-                          onSelected: (selected) {
-                            setState(() {
-                              if (selected) {
-                                _selectedServingPopulation.add(population);
-                              } else {
-                                _selectedServingPopulation.remove(population);
-                              }
-                            });
-                          },
-                        );
-                      }).toList(),
-                    ),
-                    const SizedBox(height: 32),
-
-                    // Preferred Food Types
-                    const Text(
-                      'Preferred Food Types',
-                      style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white),
-                    ),
-                    const SizedBox(height: 16),
-
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: _foodTypes.map((foodType) {
-                        final isSelected =
-                            _selectedFoodTypes.contains(foodType);
-                        return FilterChip(
-                          label: Text(foodType,
-                              style: TextStyle(
-                                  color: isSelected
-                                      ? Colors.white
-                                      : Colors.white.withValues(alpha: 0.9))),
-                          selected: isSelected,
-                          selectedColor: AppTheme.accentTeal,
-                          backgroundColor: Colors.white.withValues(alpha: 0.1),
-                          checkmarkColor: Colors.white,
-                          onSelected: (selected) {
-                            setState(() {
-                              if (selected) {
-                                _selectedFoodTypes.add(foodType);
-                              } else {
-                                _selectedFoodTypes.remove(foodType);
-                              }
-                            });
-                          },
-                        );
-                      }).toList(),
-                    ),
-                    const SizedBox(height: 32),
-
-                    // Register Button
-                    GradientButton(
-                      onPressed: _register,
-                      text: 'Create NGO Account',
-                      icon: Icons.person_add,
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Login Link
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Already have an account? ',
-                          style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.7)),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.pushReplacementNamed(
-                                context, AppRouter.login);
-                          },
-                          child: ShaderMask(
-                            shaderCallback: (bounds) => const LinearGradient(
-                              colors: [
-                                AppTheme.accentTeal,
-                                AppTheme.accentCyan
-                              ],
-                            ).createShader(bounds),
-                            child: const Text(
-                              'Sign In',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold),
-                            ),
+                          onSelected: (s) => setState(() => s
+                              ? _selectedServingPopulation.add(pop)
+                              : _selectedServingPopulation.remove(pop)),
+                          backgroundColor: Colors.transparent,
+                          selectedColor: colorScheme.primary.withOpacity(0.12),
+                          checkmarkColor: colorScheme.primary,
+                          labelStyle: theme.textTheme.bodyMedium?.copyWith(
+                            color: isSelected
+                                ? colorScheme.primary
+                                : theme.textTheme.bodyMedium?.color,
+                            fontWeight:
+                                isSelected ? FontWeight.w700 : FontWeight.w400,
                           ),
-                        ),
-                      ],
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            side: BorderSide(
+                                color: isSelected
+                                    ? colorScheme.primary
+                                    : AppTheme.slate200),
+                          ),
+                        );
+                      }).toList(),
                     ),
+
+                    const SizedBox(height: 32),
+                    _buildDropdownLabel('PREFERRED FOOD TYPES'),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: _foodTypes.map((type) {
+                        final isSelected = _selectedFoodTypes.contains(type);
+                        return FilterChip(
+                          label: Text(type),
+                          selected: isSelected,
+                          onSelected: (s) => setState(() => s
+                              ? _selectedFoodTypes.add(type)
+                              : _selectedFoodTypes.remove(type)),
+                          backgroundColor: Colors.transparent,
+                          selectedColor: colorScheme.primary.withOpacity(0.12),
+                          checkmarkColor: colorScheme.primary,
+                          labelStyle: theme.textTheme.bodyMedium?.copyWith(
+                            color: isSelected
+                                ? colorScheme.primary
+                                : theme.textTheme.bodyMedium?.color,
+                            fontWeight:
+                                isSelected ? FontWeight.w700 : FontWeight.w400,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            side: BorderSide(
+                                color: isSelected
+                                    ? colorScheme.primary
+                                    : AppTheme.slate200),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+
+                    const SizedBox(height: 80),
+                    ElevatedButton(
+                      onPressed: _register,
+                      child: const Text('Submit for Accreditation'),
+                    ),
+                    const SizedBox(height: 40),
                   ],
                 ),
               ),
@@ -675,24 +497,57 @@ class _NGORegistrationScreenState extends State<NGORegistrationScreen> {
     );
   }
 
+  Widget _buildSectionHeader(String title, String subtitle) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title,
+            style: Theme.of(context)
+                .textTheme
+                .headlineMedium
+                ?.copyWith(fontSize: 22, fontWeight: FontWeight.w800)),
+        const SizedBox(height: 4),
+        Text(subtitle, style: Theme.of(context).textTheme.bodyMedium),
+      ],
+    );
+  }
+
+  Widget _buildDropdownLabel(String label) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4, bottom: 10),
+      child: Text(label,
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+              fontSize: 12,
+              letterSpacing: 1.1,
+              fontWeight: FontWeight.w700,
+              color: Colors.grey[600])),
+    );
+  }
+
+  Widget _buildCapabilityToggle(
+      String title, String sub, bool val, Function(bool) onC) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardTheme.color,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.slate200),
+      ),
+      child: SwitchListTile(
+        title: Text(title,
+            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+        subtitle: Text(sub, style: const TextStyle(fontSize: 12)),
+        value: val,
+        onChanged: onC,
+        activeColor: AppTheme.primaryEmerald,
+      ),
+    );
+  }
+
   String _getNGOTypeDisplayName(NGOType type) {
-    switch (type) {
-      case NGOType.orphanage:
-        return 'Orphanage';
-      case NGOType.oldAgeHome:
-        return 'Old Age Home';
-      case NGOType.school:
-        return 'School';
-      case NGOType.hospital:
-        return 'Hospital';
-      case NGOType.communityCenter:
-        return 'Community Center';
-      case NGOType.foodBank:
-        return 'Food Bank';
-      case NGOType.shelter:
-        return 'Shelter';
-      case NGOType.other:
-        return 'Other';
-    }
+    return type.name[0].toUpperCase() +
+        type.name
+            .substring(1)
+            .replaceAllMapped(RegExp(r'([A-Z])'), (m) => ' ${m[1]}');
   }
 }
