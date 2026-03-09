@@ -44,12 +44,28 @@ class RoleSelectionScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              Text(
+              const Text(
                 'Select your role to get started',
                 style: TextStyle(
                   fontSize: 16,
                   color: AppTheme.textSecondary,
                 ),
+              ),
+              const SizedBox(height: 16),
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.lock_outline,
+                      size: 20, color: AppTheme.textSecondary),
+                  SizedBox(width: 8),
+                  Text(
+                    'Secure matching & automated verification',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: AppTheme.textMuted,
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 40),
 
@@ -110,7 +126,7 @@ class RoleSelectionScreen extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
+                  const Text(
                     'Already have an account? ',
                     style: TextStyle(
                       color: AppTheme.textSecondary,
@@ -207,7 +223,7 @@ class _RoleCard extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: AppTheme.textMuted,
                       fontSize: 13,
                     ),
@@ -215,7 +231,7 @@ class _RoleCard extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     description,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: AppTheme.textSecondary,
                       fontSize: 14,
                     ),

@@ -95,7 +95,7 @@ class _VolunteerUnsafeCancelScreenState
         ),
         content: Text(
           context.l10n.stakeholdersNotified,
-          style: TextStyle(color: Colors.black54, fontSize: 14),
+          style: const TextStyle(color: Colors.black54, fontSize: 14),
         ),
         actions: [
           ElevatedButton(

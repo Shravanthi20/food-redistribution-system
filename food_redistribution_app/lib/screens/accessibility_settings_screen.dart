@@ -47,18 +47,31 @@ class AccessibilitySettingsScreen extends StatelessWidget {
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 16),
-              Semantics(
-                  label: context.l10n.highContrastMode,
-                  toggled: accessibilityProvider.highContrastMode,
-                  child: SwitchListTile(
-                    title: Text(context.l10n.highContrastMode),
-                    subtitle: Text(context.l10n.enhanceVisibility),
-                    value: accessibilityProvider.highContrastMode,
-                    onChanged: (bool value) {
-                      accessibilityProvider.toggleHighContrastMode(value);
-                      // Theme adaptation for high contrast is handled in main.dart
-                    },
-                  )),
+              // Replaced SwitchListTile with RadioListTiles for High Contrast Mode
+              RadioListTile<bool>(
+                title: Text(context.l10n.highContrastMode,
+                    style: const TextStyle(color: AppTheme.textPrimary)),
+                value: true,
+                groupValue: accessibilityProvider.highContrastMode,
+                onChanged: (bool? value) {
+                  if (value != null) {
+                    accessibilityProvider.toggleHighContrastMode(value);
+                  }
+                },
+              ),
+              const Divider(color: AppTheme.iosGray4),
+              RadioListTile<bool>(
+                title: Text(context.l10n.standardContrast,
+                    style: const TextStyle(color: AppTheme.textPrimary)),
+                value: false,
+                groupValue: accessibilityProvider.highContrastMode,
+                onChanged: (bool? value) {
+                  if (value != null) {
+                    accessibilityProvider.toggleHighContrastMode(value);
+                  }
+                },
+              ),
+              // Theme adaptation for high contrast is handled in main.dart
               const Divider(),
               Text(context.l10n.textSize,
                   style: Theme.of(context).textTheme.titleMedium),

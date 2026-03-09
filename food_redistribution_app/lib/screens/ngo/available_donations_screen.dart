@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../providers/ngo_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../models/food_donation.dart';
+import '../../utils/app_router.dart';
 
 class AvailableDonationsScreen extends StatefulWidget {
   const AvailableDonationsScreen({super.key});
@@ -477,7 +478,7 @@ class _AvailableDonationsScreenState extends State<AvailableDonationsScreen> {
     // Navigate to create request screen with pre-filled data based on the donation
     Navigator.pushNamed(
       context,
-      '/ngo/create-request',
+      AppRouter.ngoCreateRequest,
       arguments: {
         'prefillFromDonation': donation,
       },

@@ -494,8 +494,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.verified_user_outlined,
-                size: 64, color: AppTheme.textMuted.withValues(alpha: 0.4)),
+            const Icon(Icons.verified_user_outlined,
+                size: 48, color: AppTheme.accentTeal),
             const SizedBox(height: 16),
             Text(
               context.l10n.noPendingVerifications,
@@ -655,8 +655,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.check_circle_outline,
-                size: 64, color: AppTheme.textMuted.withValues(alpha: 0.4)),
+            const Icon(Icons.shield_outlined,
+                size: 48, color: AppTheme.accentTeal),
             const SizedBox(height: 16),
             Text(
               context.l10n.allDonationsMatched,
@@ -867,7 +867,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   fontWeight: FontWeight.bold,
                   color: AppTheme.textPrimary)),
           const SizedBox(height: 4),
-          Text(title, style: TextStyle(color: AppTheme.textMuted)),
+          Text(title, style: const TextStyle(color: AppTheme.textMuted)),
         ],
       ),
     );
@@ -918,7 +918,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 ),
                 Text(
                   'User: ${log['userId'] ?? 'System'} • IP: ${log['ipAddress'] ?? 'N/A'}',
-                  style: TextStyle(color: AppTheme.textMuted, fontSize: 12),
+                  style:
+                      const TextStyle(color: AppTheme.textMuted, fontSize: 12),
                 ),
               ],
             ),
@@ -1032,7 +1033,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 const SizedBox(height: 4),
                 Text(
                   'Role: ${user['role']} • Status: ${user['status']}',
-                  style: TextStyle(color: AppTheme.textMuted, fontSize: 13),
+                  style:
+                      const TextStyle(color: AppTheme.textMuted, fontSize: 13),
                 ),
               ],
             ),
@@ -1162,7 +1164,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         'Flagged for policy violation',
         DateTime.now().add(const Duration(days: 7)),
       );
-      if (context.mounted && success) {
+      if (!mounted) return;
+      if (success) {
         _showSnackbar(context.l10n.userSuspended);
       }
     }

@@ -1,1 +1,15 @@
-{}
+{
+  "hi": [
+    "standardUI",
+    "standardContrast",
+    "textScaling",
+    "accessibilityDisclaimer"
+  ],
+
+  "ta": [
+    "standardUI",
+    "standardContrast",
+    "textScaling",
+    "accessibilityDisclaimer"
+  ]
+}

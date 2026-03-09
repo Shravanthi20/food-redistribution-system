@@ -942,9 +942,16 @@
 
   "simplifiedUiMode": "Simplified UI Mode",
   "@simplifiedUiMode": { "description": "Simplified UI toggle" },
-
+  "standardUI": "Standard UI",
+  "@standardUI": { "description": "Standard UI label" },
   "reduceClutter": "Reduce clutter and focus on essential actions",
   "@reduceClutter": { "description": "Simplified mode description" },
+  "standardContrast": "Standard Contrast",
+  "@standardContrast": { "description": "Standard contrast level" },
+  "textScaling": "Text Scaling",
+  "@textScaling": { "description": "Text scaling slider label" },
+  "accessibilityDisclaimer": "These settings help make the app more usable for everyone.",
+  "@accessibilityDisclaimer": { "description": "Disclaimer at bottom of accessibility settings" },
 
   "enableDarkTheme": "Enable dark theme",
   "@enableDarkTheme": { "description": "Dark mode description" },

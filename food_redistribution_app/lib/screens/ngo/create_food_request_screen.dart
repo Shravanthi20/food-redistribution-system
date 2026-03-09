@@ -4,6 +4,7 @@ import '../../providers/ngo_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../models/food_request.dart';
 import '../../services/location_service.dart';
+import '../../models/food_donation.dart';
 
 class CreateFoodRequestScreen extends StatefulWidget {
   const CreateFoodRequestScreen({super.key});
@@ -32,6 +33,63 @@ class _CreateFoodRequestScreenState extends State<CreateFoodRequestScreen> {
 
   Map<String, dynamic>? _deliveryLocation;
   final LocationService _locationService = LocationService();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final args = ModalRoute.of(context)?.settings.arguments;
+      if (args is Map<String, dynamic> &&
+          args.containsKey('prefillFromDonation')) {
+        final donation = args['prefillFromDonation'] as FoodDonation;
+        _prefillFromDonation(donation);
+      }
+    });
+  }
+
+  void _prefillFromDonation(FoodDonation donation) {
+    setState(() {
+      _titleController.text = 'Request: ${donation.title}';
+      _descriptionController.text =
+          'Automatically generated request for donation: ${donation.description}';
+      _quantityController.text = donation.quantity.toString();
+      _selectedUnit = donation.unit;
+      _selectedFoodTypes.clear();
+      _selectedFoodTypes.addAll(
+        donation.foodTypes.map((t) => _mapFoodTypeToCategory(t)),
+      );
+      _requiresRefrigeration = donation.requiresRefrigeration;
+      // Pre-select dietary restrictions based on donation flags
+      _selectedDietaryRestrictions.clear();
+      if (donation.isVegetarian) _selectedDietaryRestrictions.add('vegetarian');
+      if (donation.isVegan) _selectedDietaryRestrictions.add('vegan');
+      if (donation.isHalal) _selectedDietaryRestrictions.add('halal');
+    });
+  }
+
+  FoodCategory _mapFoodTypeToCategory(FoodType type) {
+    switch (type) {
+      case FoodType.vegetables:
+        return FoodCategory.vegetables;
+      case FoodType.fruits:
+        return FoodCategory.fruits;
+      case FoodType.grains:
+        return FoodCategory.grains;
+      case FoodType.dairy:
+        return FoodCategory.dairy;
+      case FoodType.meat:
+      case FoodType.seafood:
+        return FoodCategory.meat;
+      case FoodType.bakery:
+        return FoodCategory.bakery;
+      case FoodType.beverages:
+        return FoodCategory.beverages;
+      case FoodType.cooked:
+        return FoodCategory.readyToEat;
+      default:
+        return FoodCategory.other;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

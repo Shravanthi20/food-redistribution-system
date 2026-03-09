@@ -926,6 +926,7 @@ class DeliveryCoordinationScreenState
         'status': 'pending',
         'updatedAt': FieldValue.serverTimestamp(),
       });
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
             content: Text('Task unassigned. Awaiting new volunteer.')),
@@ -957,6 +958,7 @@ class DeliveryCoordinationScreenState
         'deliveredAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
       });
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Task marked as completed')),
       );
@@ -992,6 +994,7 @@ class DeliveryCoordinationScreenState
         deliveryLocation: {'lat': 0.0, 'lng': 0.0},
         scheduledTime: DateTime.now().add(const Duration(hours: 1)),
       );
+      if (!mounted) return;
       _donationIdController.clear();
       _pickupAddressController.clear();
       _deliveryAddressController.clear();
@@ -1000,6 +1003,7 @@ class DeliveryCoordinationScreenState
       );
       _loadActiveTasks();
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error creating task: $e')),
       );
