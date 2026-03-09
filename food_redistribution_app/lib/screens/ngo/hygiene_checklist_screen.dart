@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:food_redistribution_app/utils/app_theme.dart';
 import '../../models/hygiene_checklist.dart';
 import '../../services/hygiene_service.dart';
+import '../../utils/app_localizations_ext.dart';
 import 'ngo_reject_donation_screen.dart';
 import 'ngo_clarify_request_screen.dart';
 
@@ -123,8 +124,8 @@ class _HygieneChecklistScreenState extends State<HygieneChecklistScreen> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Hygiene Checklist',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text(context.l10n.hygieneChecklist,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             Text(widget.donationTitle,
                 style: const TextStyle(fontSize: 12, color: Colors.black45)),
           ],
@@ -162,8 +163,8 @@ class _HygieneChecklistScreenState extends State<HygieneChecklistScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Mandatory Items',
-                  style: TextStyle(color: Colors.black54, fontSize: 13)),
+              Text(context.l10n.mandatory,
+                  style: const TextStyle(color: Colors.black54, fontSize: 13)),
               Text('$checked / $total checked',
                   style: TextStyle(
                       color: _allMandatoryChecked
@@ -228,10 +229,10 @@ class _HygieneChecklistScreenState extends State<HygieneChecklistScreen> {
               ),
             ),
             subtitle: item.isMandatory
-                ? const Text('Mandatory',
-                    style: TextStyle(color: Colors.redAccent, fontSize: 11))
-                : const Text('Optional',
-                    style: TextStyle(color: Colors.black38, fontSize: 11)),
+                ? Text(context.l10n.mandatory,
+                    style: const TextStyle(color: Colors.redAccent, fontSize: 11))
+                : Text(context.l10n.optional,
+                    style: const TextStyle(color: Colors.black38, fontSize: 11)),
             controlAffinity: ListTileControlAffinity.leading,
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -280,29 +281,33 @@ class _HygieneChecklistScreenState extends State<HygieneChecklistScreen> {
       child: Column(
         children: [
           // Accept button — enabled only when all mandatory items are checked
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: (_allMandatoryChecked && !_isSubmitting)
-                  ? _acceptDonation
-                  : null,
-              icon: _isSubmitting
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(
-                          strokeWidth: 2, color: Colors.white))
-                  : const Icon(Icons.check_circle_outline),
-              label: const Text('Accept Donation',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF4CAF50),
-                foregroundColor: Colors.white,
-                disabledBackgroundColor: AppTheme.iosGray5,
-                disabledForegroundColor: AppTheme.textMuted,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
+          Semantics(
+            button: true,
+            label: context.l10n.acceptDonation,
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: (_allMandatoryChecked && !_isSubmitting)
+                    ? _acceptDonation
+                    : null,
+                icon: _isSubmitting
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: Colors.white))
+                    : const Icon(Icons.check_circle_outline),
+                label: Text(context.l10n.acceptDonation,
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF4CAF50),
+                  foregroundColor: Colors.white,
+                  disabledBackgroundColor: AppTheme.iosGray5,
+                  disabledForegroundColor: AppTheme.textMuted,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
               ),
             ),
           ),
@@ -314,7 +319,7 @@ class _HygieneChecklistScreenState extends State<HygieneChecklistScreen> {
                 child: OutlinedButton.icon(
                   onPressed: _requestClarification,
                   icon: const Icon(Icons.help_outline, size: 16),
-                  label: const Text('Clarify', style: TextStyle(fontSize: 12)),
+                  label: Text(context.l10n.clarifyRequest, style: const TextStyle(fontSize: 12)),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.orange,
                     side: const BorderSide(color: Colors.orange),
@@ -330,7 +335,7 @@ class _HygieneChecklistScreenState extends State<HygieneChecklistScreen> {
                 child: OutlinedButton.icon(
                   onPressed: _rejectDonation,
                   icon: const Icon(Icons.cancel_outlined, size: 16),
-                  label: const Text('Reject', style: TextStyle(fontSize: 12)),
+                  label: Text(context.l10n.rejectDonation, style: const TextStyle(fontSize: 12)),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.redAccent,
                     side: const BorderSide(color: Colors.redAccent),

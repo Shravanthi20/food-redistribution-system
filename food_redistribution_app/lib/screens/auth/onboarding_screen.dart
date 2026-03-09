@@ -89,7 +89,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             )
           ],
         ),
-        body: Padding(
+        body: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -154,7 +154,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ),
                 ),
 
-              const Spacer(),
+              const SizedBox(height: 40),
 
               ElevatedButton(
                 onPressed: _selectedFile != null

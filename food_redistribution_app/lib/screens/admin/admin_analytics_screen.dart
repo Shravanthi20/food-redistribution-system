@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../services/tracking/analytics_aggregation_service.dart';
+import '../../utils/app_localizations_ext.dart';
 
 /// Admin Analytics & Predictions Screen
 class AdminAnalyticsScreen extends StatefulWidget {
@@ -49,7 +50,7 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Analytics & Predictions'),
+        title: Text(context.l10n.analyticsPredictions),
         elevation: 0,
       ),
       body: SingleChildScrollView(

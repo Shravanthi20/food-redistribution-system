@@ -80,7 +80,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
         builder: (context, authProvider, child) {
           return LoadingOverlay(
             isLoading: authProvider.isLoading || _isCheckingVerification,
-            child: Padding(
+            child: SingleChildScrollView(
               padding: const EdgeInsets.all(24.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,

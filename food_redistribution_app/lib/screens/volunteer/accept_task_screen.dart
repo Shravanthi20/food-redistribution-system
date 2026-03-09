@@ -1,11 +1,25 @@
 import 'package:flutter/material.dart';
+import '../../models/food_donation.dart';
 import '../../utils/app_router.dart';
 
 class AcceptTaskScreen extends StatelessWidget {
-  const AcceptTaskScreen({super.key});
+  final FoodDonation? donation;
+
+  const AcceptTaskScreen({super.key, this.donation});
 
   @override
   Widget build(BuildContext context) {
+    // Get donation from constructor or route arguments
+    final task = donation ??
+        (ModalRoute.of(context)?.settings.arguments as FoodDonation?);
+
+    if (task == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Error')),
+        body: const Center(child: Text('No task data available.')),
+      );
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFFF7F9FC),
       appBar: AppBar(
@@ -17,7 +31,7 @@ class AcceptTaskScreen extends StatelessWidget {
         ),
         iconTheme: const IconThemeData(color: Colors.black),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -53,21 +67,35 @@ class AcceptTaskScreen extends StatelessWidget {
             _infoCard(
               icon: Icons.store,
               title: "Pickup Location",
-              value: "CityMarket Express, Downtown",
+              value: task.pickupAddress.isNotEmpty
+                  ? task.pickupAddress
+                  : "Contact donor for address",
             ),
             _infoCard(
               icon: Icons.restaurant,
               title: "Food Type",
-              value: "Prepared Meals • 25 packs",
+              value:
+                  "${task.foodTypes.map((e) => e.name).join(', ')} • ${task.quantity} ${task.unit}",
             ),
             _infoCard(
               icon: Icons.timer,
               title: "Time Window",
-              value: "Within 30 mins",
+              value: _formatTimeWindow(task),
             ),
+            if (task.specialInstructions != null &&
+                task.specialInstructions!.isNotEmpty)
+              _infoCard(
+                icon: Icons.info_outline,
+                title: "Special Instructions",
+                value: task.specialInstructions!,
+              ),
+            if (task.donorContactPhone.isNotEmpty)
+              _infoCard(
+                icon: Icons.phone,
+                title: "Donor Contact",
+                value: task.donorContactPhone,
+              ),
             const SizedBox(height: 20),
-
-            // ✅ UPDATED BUTTON
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -79,15 +107,18 @@ class AcceptTaskScreen extends StatelessWidget {
                   ),
                 ),
                 onPressed: () {
-                  Navigator.pushNamed(context, AppRouter.taskExecution);
+                  Navigator.pushNamed(
+                    context,
+                    AppRouter.taskExecution,
+                    arguments: {'donationId': task.id},
+                  );
                 },
                 child: const Text(
-                  "Confirm Pickup",
-                  style: TextStyle(fontSize: 16),
+                  "Start Pickup",
+                  style: TextStyle(fontSize: 16, color: Colors.white),
                 ),
               ),
             ),
-
             const SizedBox(height: 12),
             SizedBox(
               width: double.infinity,
@@ -113,6 +144,21 @@ class AcceptTaskScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _formatTimeWindow(FoodDonation task) {
+    final now = DateTime.now();
+    final remaining = task.availableUntil.difference(now);
+
+    if (remaining.isNegative) {
+      return "Pickup window expired";
+    } else if (remaining.inMinutes < 60) {
+      return "Within ${remaining.inMinutes} mins";
+    } else if (remaining.inHours < 24) {
+      return "Within ${remaining.inHours}h ${remaining.inMinutes % 60}m";
+    } else {
+      return "Available until ${task.availableUntil.day}/${task.availableUntil.month} ${task.availableUntil.hour}:${task.availableUntil.minute.toString().padLeft(2, '0')}";
+    }
   }
 
   Widget _infoCard({

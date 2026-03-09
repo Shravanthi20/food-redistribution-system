@@ -12,11 +12,43 @@ class PredictiveAnalyticsService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // ============================================================
+  // CLIENT-SIDE PREDICTION CACHE (TTL-based)
+  // ============================================================
+  static final Map<String, _CacheEntry> _cache = {};
+  static const Duration _cacheTtl = Duration(minutes: 15);
+
+  /// Get a cached value or compute it. Keyed by [cacheKey].
+  Future<T> _cached<T>(String cacheKey, Future<T> Function() compute) async {
+    final entry = _cache[cacheKey];
+    if (entry != null && DateTime.now().isBefore(entry.expiresAt)) {
+      return entry.value as T;
+    }
+    final result = await compute();
+    _cache[cacheKey] = _CacheEntry(
+      value: result,
+      expiresAt: DateTime.now().add(_cacheTtl),
+    );
+    return result;
+  }
+
+  /// Clear all cached predictions (e.g. after a major data change).
+  void clearCache() => _cache.clear();
+
+  // ============================================================
   // VOLUNTEER DEMAND PREDICTION
   // ============================================================
 
   /// Predict volunteer demand for the next N days based on historical data
   Future<VolunteerDemandForecast> predictVolunteerDemand({
+    int forecastDays = 7,
+    String? region,
+  }) {
+    final key = 'volunteerDemand_${forecastDays}_${region ?? 'all'}';
+    return _cached(key, () => _predictVolunteerDemandImpl(
+      forecastDays: forecastDays, region: region));
+  }
+
+  Future<VolunteerDemandForecast> _predictVolunteerDemandImpl({
     int forecastDays = 7,
     String? region,
   }) async {
@@ -98,6 +130,15 @@ class PredictiveAnalyticsService {
 
   /// Analyze food surplus trends by type, time, and region
   Future<SurplusTrendAnalysis> analyzeSurplusTrends({
+    int historicalDays = 90,
+    String? region,
+  }) {
+    final key = 'surplusTrends_${historicalDays}_${region ?? 'all'}';
+    return _cached(key, () => _analyzeSurplusTrendsImpl(
+      historicalDays: historicalDays, region: region));
+  }
+
+  Future<SurplusTrendAnalysis> _analyzeSurplusTrendsImpl({
     int historicalDays = 90,
     String? region,
   }) async {
@@ -193,7 +234,11 @@ class PredictiveAnalyticsService {
   /// - Average delivery times
   /// - Volunteer availability
   /// - Food waste rates
-  Future<List<RegionalRiskIndicator>> getRegionalRiskIndicators() async {
+  Future<List<RegionalRiskIndicator>> getRegionalRiskIndicators() {
+    return _cached('regionalRisk', () => _getRegionalRiskIndicatorsImpl());
+  }
+
+  Future<List<RegionalRiskIndicator>> _getRegionalRiskIndicatorsImpl() async {
     try {
       // Get recent deliveries by region
       final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));
@@ -297,6 +342,14 @@ class PredictiveAnalyticsService {
 
   /// Predict delivery performance for upcoming period
   Future<DeliveryPerformanceForecast> forecastDeliveryPerformance({
+    int forecastDays = 7,
+  }) {
+    final key = 'deliveryPerf_$forecastDays';
+    return _cached(key, () => _forecastDeliveryPerformanceImpl(
+      forecastDays: forecastDays));
+  }
+
+  Future<DeliveryPerformanceForecast> _forecastDeliveryPerformanceImpl({
     int forecastDays = 7,
   }) async {
     try {
@@ -636,4 +689,11 @@ class RegionStats {
   int successfulDeliveries = 0;
   int failedDeliveries = 0;
   int availableVolunteers = 0;
+}
+
+/// Internal cache entry with TTL support
+class _CacheEntry {
+  final dynamic value;
+  final DateTime expiresAt;
+  _CacheEntry({required this.value, required this.expiresAt});
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:food_redistribution_app/utils/app_theme.dart';
 import '../../services/hygiene_service.dart';
 import '../../models/hygiene_checklist.dart';
+import '../../utils/app_localizations_ext.dart';
 
 /// Screen for the DONOR to view and reply to NGO clarification requests.
 class DonorClarificationReplyScreen extends StatefulWidget {
@@ -69,8 +70,8 @@ class _DonorClarificationReplyScreenState
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Clarification Requests',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text(context.l10n.clarificationRequests,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             Text(widget.donationTitle,
                 style: const TextStyle(fontSize: 11, color: Colors.black45)),
           ],
@@ -101,16 +102,16 @@ class _DonorClarificationReplyScreenState
   }
 
   Widget _buildEmptyState() {
-    return const Center(
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.mark_email_read_outlined, color: Colors.black26, size: 60),
-          SizedBox(height: 12),
-          Text('No clarification requests yet',
-              style: TextStyle(color: Colors.black38, fontSize: 16)),
-          SizedBox(height: 4),
-          Text('The NGO will contact you here if they need more info.',
+          const Icon(Icons.mark_email_read_outlined, color: Colors.black26, size: 60),
+          const SizedBox(height: 12),
+          Text(context.l10n.noRequestsYet,
+              style: const TextStyle(color: Colors.black38, fontSize: 16)),
+          const SizedBox(height: 4),
+          const Text('The NGO will contact you here if they need more info.',
               style: TextStyle(color: Colors.black26, fontSize: 13)),
         ],
       ),
@@ -269,7 +270,7 @@ class _DonorClarificationReplyScreenState
                         child: CircularProgressIndicator(
                             strokeWidth: 2, color: Colors.white))
                     : const Icon(Icons.send, size: 16),
-                label: const Text('Send Reply'),
+                label: Text(context.l10n.writeReply),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orange,
                   foregroundColor: Colors.white,

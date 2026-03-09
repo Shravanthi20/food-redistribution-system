@@ -12,6 +12,82 @@ class AdminSystemStatusScreen extends StatefulWidget {
 
 class _AdminSystemStatusScreenState extends State<AdminSystemStatusScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  Map<String, Map<String, dynamic>> _serviceHealth = {};
+  bool _checkingHealth = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkServiceHealth();
+  }
+
+  Future<void> _checkServiceHealth() async {
+    setState(() => _checkingHealth = true);
+    final results = <String, Map<String, dynamic>>{};
+
+    // Database check
+    try {
+      await _firestore.collection('users').limit(1).get();
+      results['Database'] = {'status': 'Operational', 'color': Colors.green};
+    } catch (e) {
+      results['Database'] = {'status': 'Error: $e', 'color': Colors.red};
+    }
+
+    // Auth check (if user is logged in, auth works)
+    results['Firebase Authentication'] = {
+      'status': 'Operational',
+      'color': Colors.green,
+    };
+
+    // Tracking check
+    try {
+      await _firestore.collection('tracking').limit(1).get();
+      results['Real-time Tracking'] = {
+        'status': 'Operational',
+        'color': Colors.green,
+      };
+    } catch (e) {
+      results['Real-time Tracking'] = {
+        'status': 'Degraded',
+        'color': Colors.orange,
+      };
+    }
+
+    // Notifications check
+    try {
+      await _firestore.collection('notifications').limit(1).get();
+      results['Notification Service'] = {
+        'status': 'Operational',
+        'color': Colors.green,
+      };
+    } catch (e) {
+      results['Notification Service'] = {
+        'status': 'Degraded',
+        'color': Colors.orange,
+      };
+    }
+
+    // Delivery tasks check
+    try {
+      await _firestore.collection('delivery_tasks').limit(1).get();
+      results['Delivery System'] = {
+        'status': 'Operational',
+        'color': Colors.green,
+      };
+    } catch (e) {
+      results['Delivery System'] = {
+        'status': 'Error',
+        'color': Colors.red,
+      };
+    }
+
+    if (mounted) {
+      setState(() {
+        _serviceHealth = results;
+        _checkingHealth = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,36 +108,36 @@ class _AdminSystemStatusScreenState extends State<AdminSystemStatusScreen> {
             ),
             const SizedBox(height: 12),
 
-            _buildStatusCard(
-              title: 'Database Status',
-              status: 'Operational',
-              icon: Icons.storage,
-              color: Colors.green,
-            ),
-            _buildStatusCard(
-              title: 'Firebase Authentication',
-              status: 'Operational',
-              icon: Icons.security,
-              color: Colors.green,
-            ),
-            _buildStatusCard(
-              title: 'Real-time Tracking Service',
-              status: 'Operational',
-              icon: Icons.location_on,
-              color: Colors.green,
-            ),
-            _buildStatusCard(
-              title: 'Notification Service',
-              status: 'Operational',
-              icon: Icons.notifications,
-              color: Colors.green,
-            ),
-            _buildStatusCard(
-              title: 'Cloud Functions',
-              status: 'Operational',
-              icon: Icons.cloud,
-              color: Colors.green,
-            ),
+            _checkingHealth
+                ? const Center(child: CircularProgressIndicator())
+                : Column(
+                    children: _serviceHealth.entries.map((entry) {
+                      final data = entry.value;
+                      IconData icon;
+                      switch (entry.key) {
+                        case 'Database':
+                          icon = Icons.storage;
+                          break;
+                        case 'Firebase Authentication':
+                          icon = Icons.security;
+                          break;
+                        case 'Real-time Tracking':
+                          icon = Icons.location_on;
+                          break;
+                        case 'Notification Service':
+                          icon = Icons.notifications;
+                          break;
+                        default:
+                          icon = Icons.cloud;
+                      }
+                      return _buildStatusCard(
+                        title: entry.key,
+                        status: data['status'] as String,
+                        icon: icon,
+                        color: data['color'] as Color,
+                      );
+                    }).toList(),
+                  ),
 
             const SizedBox(height: 24),
 

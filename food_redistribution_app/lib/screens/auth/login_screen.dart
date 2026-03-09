@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/locale_provider.dart';
+import '../../utils/app_localizations_ext.dart';
 import '../../utils/app_router.dart';
 import '../../utils/app_theme.dart';
 import '../../models/user.dart';
@@ -69,7 +71,7 @@ class _LoginScreenState extends State<LoginScreen>
         _navigateBasedOnUser(authProvider.appUser!);
       } else {
         // appUser is null after successful sign-in — show feedback
-        _showErrorSnackBar('Login succeeded but failed to load user profile. Please try again.');
+        _showErrorSnackBar(context.l10n.loginProfileLoadError);
       }
     } else if (mounted && authProvider.errorMessage != null) {
       _showErrorSnackBar(authProvider.errorMessage!);
@@ -177,6 +179,9 @@ class _LoginScreenState extends State<LoginScreen>
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
+                          // Language picker
+                          _buildLanguagePicker(context),
+                          const SizedBox(height: 24),
                           // Logo with glow effect
                           Container(
                             padding: const EdgeInsets.all(20),
@@ -220,9 +225,9 @@ class _LoginScreenState extends State<LoginScreen>
                                 AppTheme.accentCyanSoft
                               ],
                             ).createShader(bounds),
-                            child: const Text(
-                              'Welcome Back',
-                              style: TextStyle(
+                            child: Text(
+                              context.l10n.loginTitle,
+                              style: const TextStyle(
                                 fontSize: 32,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
@@ -231,9 +236,9 @@ class _LoginScreenState extends State<LoginScreen>
                             ),
                           ),
                           const SizedBox(height: 8),
-                          const Text(
-                            'Sign in to continue your mission',
-                            style: TextStyle(
+                          Text(
+                            context.l10n.signInToContinue,
+                            style: const TextStyle(
                               fontSize: 16,
                               color: AppTheme.textSecondary,
                             ),
@@ -250,17 +255,17 @@ class _LoginScreenState extends State<LoginScreen>
                                 children: [
                                   GlassTextField(
                                     controller: _emailController,
-                                    label: 'Email',
-                                    hintText: 'your@email.com',
+                                    label: context.l10n.email,
+                                    hintText: context.l10n.emailPlaceholder,
                                     prefixIcon: const Icon(Icons.email_outlined,
                                         color: AppTheme.textSecondary),
                                     keyboardType: TextInputType.emailAddress,
                                     validator: (v) {
                                       if (v == null || v.isEmpty) {
-                                        return 'Email is required';
+                                        return context.l10n.emailRequired;
                                       }
                                       if (!v.contains('@')) {
-                                        return 'Enter a valid email';
+                                        return context.l10n.invalidEmail;
                                       }
                                       return null;
                                     },
@@ -268,7 +273,7 @@ class _LoginScreenState extends State<LoginScreen>
                                   const SizedBox(height: 20),
                                   GlassTextField(
                                     controller: _passwordController,
-                                    label: 'Password',
+                                    label: context.l10n.password,
                                     hintText: '••••••••',
                                     prefixIcon: const Icon(Icons.lock_outline,
                                         color: AppTheme.textSecondary),
@@ -284,7 +289,7 @@ class _LoginScreenState extends State<LoginScreen>
                                           _obscurePassword = !_obscurePassword),
                                     ),
                                     validator: (v) => v!.isEmpty
-                                        ? 'Password is required'
+                                        ? context.l10n.passwordRequired
                                         : null,
                                   ),
                                   const SizedBox(height: 12),
@@ -292,16 +297,16 @@ class _LoginScreenState extends State<LoginScreen>
                                     alignment: Alignment.centerRight,
                                     child: TextButton(
                                       onPressed: _navigateToForgotPassword,
-                                      child: const Text(
-                                        'Forgot Password?',
-                                        style: TextStyle(
+                                      child: Text(
+                                        context.l10n.forgotPassword,
+                                        style: const TextStyle(
                                             color: AppTheme.accentTeal),
                                       ),
                                     ),
                                   ),
                                   const SizedBox(height: 24),
                                   GradientButton(
-                                    text: 'Sign In',
+                                    text: context.l10n.signIn,
                                     onPressed: _signIn,
                                     icon: Icons.login_rounded,
                                     isLoading: authProvider.isLoading,
@@ -324,9 +329,9 @@ class _LoginScreenState extends State<LoginScreen>
                                 TextButton(
                                   onPressed: () => Navigator.pushNamed(
                                       context, AppRouter.roleSelection),
-                                  child: const Text(
-                                    'Create Account',
-                                    style: TextStyle(
+                                  child: Text(
+                                    context.l10n.createAccount,
+                                    style: const TextStyle(
                                       color: AppTheme.accentTeal,
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -345,6 +350,120 @@ class _LoginScreenState extends State<LoginScreen>
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildLanguagePicker(BuildContext context) {
+    final localeProvider = Provider.of<LocaleProvider>(context);
+    final currentCode = localeProvider.locale.languageCode.toUpperCase();
+
+    return GestureDetector(
+      onTap: () {
+        showModalBottomSheet(
+          context: context,
+          backgroundColor: Colors.transparent,
+          builder: (_) => Container(
+            padding:
+                const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+            decoration: BoxDecoration(
+              color: AppTheme.primaryNavy,
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(20)),
+              border: Border.all(
+                  color: AppTheme.accentTeal.withValues(alpha: 0.3)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppTheme.textMuted,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Choose Language / भाषा चुनें / மொழி தேர்வு',
+                  style: TextStyle(
+                    color: AppTheme.textPrimary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                ...LocaleProvider.supportedLocaleOptions.map((opt) {
+                  final isSelected =
+                      localeProvider.locale.languageCode ==
+                          opt.locale.languageCode;
+                  return ListTile(
+                    leading: Icon(
+                      isSelected
+                          ? Icons.radio_button_checked
+                          : Icons.radio_button_off,
+                      color: isSelected
+                          ? AppTheme.accentTeal
+                          : AppTheme.textMuted,
+                    ),
+                    title: Text(
+                      opt.displayName,
+                      style: TextStyle(
+                        color: isSelected
+                            ? AppTheme.accentTeal
+                            : AppTheme.textPrimary,
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                      ),
+                    ),
+                    onTap: () {
+                      localeProvider.setLocale(opt.locale);
+                      Navigator.pop(context);
+                    },
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                    tileColor: isSelected
+                        ? AppTheme.accentTeal.withValues(alpha: 0.1)
+                        : null,
+                  );
+                }),
+                const SizedBox(height: 8),
+              ],
+            ),
+          ),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: AppTheme.accentTeal.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: AppTheme.accentTeal.withValues(alpha: 0.3),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.language_rounded,
+                color: AppTheme.accentTeal, size: 18),
+            const SizedBox(width: 6),
+            Text(
+              currentCode,
+              style: const TextStyle(
+                color: AppTheme.accentTeal,
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+              ),
+            ),
+            const SizedBox(width: 2),
+            const Icon(Icons.arrow_drop_down,
+                color: AppTheme.accentTeal, size: 18),
+          ],
+        ),
       ),
     );
   }
@@ -379,7 +498,7 @@ class _ForgotPasswordFormState extends State<_ForgotPasswordForm> {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Reset link sent! Check your email.'),
+            content: Text(context.l10n.resetLinkSent),
             backgroundColor: AppTheme.successTeal,
             behavior: SnackBarBehavior.floating,
             shape:
@@ -410,18 +529,18 @@ class _ForgotPasswordFormState extends State<_ForgotPasswordForm> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Reset Password',
-          style: TextStyle(
+        Text(
+          context.l10n.resetPassword,
+          style: const TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,
             color: AppTheme.textPrimary,
           ),
         ),
         const SizedBox(height: 8),
-        const Text(
-          'Enter your email to receive a password reset link.',
-          style: TextStyle(
+        Text(
+          context.l10n.resetPasswordInstructions,
+          style: const TextStyle(
             color: AppTheme.textSecondary,
           ),
         ),
@@ -430,20 +549,20 @@ class _ForgotPasswordFormState extends State<_ForgotPasswordForm> {
           key: _resetFormKey,
           child: GlassTextField(
             controller: _emailResetController,
-            label: 'Email Address',
+            label: context.l10n.emailAddress,
             prefixIcon:
                 const Icon(Icons.email_outlined, color: AppTheme.textSecondary),
             keyboardType: TextInputType.emailAddress,
             validator: (v) {
-              if (v == null || v.isEmpty) return 'Email is required';
-              if (!v.contains('@')) return 'Enter a valid email';
+              if (v == null || v.isEmpty) return context.l10n.emailRequired;
+              if (!v.contains('@')) return context.l10n.invalidEmail;
               return null;
             },
           ),
         ),
         const SizedBox(height: 24),
         GradientButton(
-          text: 'Send Reset Link',
+          text: context.l10n.sendResetLink,
           isLoading: _isLoading,
           width: double.infinity,
           onPressed: _sendResetLink,

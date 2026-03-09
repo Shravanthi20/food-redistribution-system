@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:food_redistribution_app/utils/app_theme.dart';
 import '../../services/hygiene_service.dart';
+import '../../utils/app_localizations_ext.dart';
 
 class VolunteerUnsafeCancelScreen extends StatefulWidget {
   final String donationId;
@@ -83,16 +84,16 @@ class _VolunteerUnsafeCancelScreenState
       builder: (_) => AlertDialog(
         backgroundColor: AppTheme.surfaceOffWhite,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.check_circle, color: Color(0xFF4CAF50)),
-            SizedBox(width: 8),
-            Text('Cancellation Logged',
-                style: TextStyle(color: AppTheme.textPrimary, fontSize: 18)),
+            const Icon(Icons.check_circle, color: Color(0xFF4CAF50)),
+            const SizedBox(width: 8),
+            Text(context.l10n.cancellationLogged,
+                style: const TextStyle(color: AppTheme.textPrimary, fontSize: 18)),
           ],
         ),
-        content: const Text(
-          'The pickup cancellation has been recorded.\n\nThe NGO, Donor, and Admin have been notified of the unsafe food condition.',
+        content: Text(
+          context.l10n.stakeholdersNotified,
           style: TextStyle(color: Colors.black54, fontSize: 14),
         ),
         actions: [
@@ -120,8 +121,8 @@ class _VolunteerUnsafeCancelScreenState
       appBar: AppBar(
         backgroundColor: AppTheme.surfaceOffWhite,
         foregroundColor: AppTheme.textPrimary,
-        title: const Text('Cancel – Unsafe Food',
-            style: TextStyle(
+        title: Text(context.l10n.cancelUnsafeFood,
+            style: const TextStyle(
                 fontWeight: FontWeight.bold, color: Colors.redAccent)),
         elevation: 0,
       ),
@@ -134,16 +135,16 @@ class _VolunteerUnsafeCancelScreenState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Why is the food unsafe? *',
-                      style: TextStyle(
+                  Text('${context.l10n.whyFoodUnsafe} *',
+                      style: const TextStyle(
                           color: AppTheme.textPrimary,
                           fontWeight: FontWeight.bold,
                           fontSize: 15)),
                   const SizedBox(height: 12),
                   ..._unsafeReasons.map((r) => _buildReasonTile(r)),
                   const SizedBox(height: 20),
-                  const Text('Detailed Description *',
-                      style: TextStyle(
+                  Text('${context.l10n.detailedDescription} *',
+                      style: const TextStyle(
                           color: AppTheme.textPrimary,
                           fontWeight: FontWeight.bold,
                           fontSize: 15)),
@@ -287,16 +288,20 @@ class _VolunteerUnsafeCancelScreenState
       );
 
   Widget _buildConfirmationCheckbox() {
-    return CheckboxListTile(
-      value: _hasConfirmed,
-      onChanged: (v) => setState(() => _hasConfirmed = v ?? false),
-      activeColor: Colors.redAccent,
-      title: const Text(
-        'I confirm that the food was unsafe and I have a valid reason for this cancellation.',
-        style: TextStyle(color: Colors.black54, fontSize: 13),
+    return Semantics(
+      label: context.l10n.confirmCancellation,
+      checked: _hasConfirmed,
+      child: CheckboxListTile(
+        value: _hasConfirmed,
+        onChanged: (v) => setState(() => _hasConfirmed = v ?? false),
+        activeColor: Colors.redAccent,
+        title: const Text(
+          'I confirm that the food was unsafe and I have a valid reason for this cancellation.',
+          style: TextStyle(color: Colors.black54, fontSize: 13),
+        ),
+        controlAffinity: ListTileControlAffinity.leading,
+        contentPadding: EdgeInsets.zero,
       ),
-      controlAffinity: ListTileControlAffinity.leading,
-      contentPadding: EdgeInsets.zero,
     );
   }
 

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../providers/donation_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../models/food_donation.dart';
+import '../../utils/app_localizations_ext.dart';
 
 class ImpactReportsScreen extends StatefulWidget {
   const ImpactReportsScreen({super.key});
@@ -91,7 +92,7 @@ class _ImpactReportsScreenState extends State<ImpactReportsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Impact Reports'),
+        title: Text(context.l10n.impactReportsTitle),
         elevation: 0,
       ),
       body: Consumer<DonationProvider>(
@@ -129,7 +130,7 @@ class _ImpactReportsScreenState extends State<ImpactReportsScreen> {
 
                 _buildStatCard(
                   context,
-                  'Completed Deliveries',
+                  context.l10n.completedDeliveries,
                   stats['completedDonations'].toString(),
                   Icons.check_circle,
                   Colors.green,
@@ -147,7 +148,7 @@ class _ImpactReportsScreenState extends State<ImpactReportsScreen> {
 
                 _buildStatCard(
                   context,
-                  'People Served',
+                  context.l10n.peopleServed,
                   stats['totalPeople'].toString(),
                   Icons.people,
                   Colors.purple,
@@ -174,7 +175,7 @@ class _ImpactReportsScreenState extends State<ImpactReportsScreen> {
 
                 _buildStatCard(
                   context,
-                  'Completion Rate',
+                  context.l10n.completionRate,
                   '${stats['completionRate'].toStringAsFixed(1)}%',
                   Icons.show_chart,
                   Colors.indigo,

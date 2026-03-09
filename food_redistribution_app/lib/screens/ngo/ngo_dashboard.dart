@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../../providers/ngo_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../models/food_request.dart';
+import '../../utils/app_localizations_ext.dart';
+import '../../utils/app_router.dart';
 import 'create_food_request_screen.dart';
 import 'food_request_detail_screen.dart';
 import 'available_donations_screen.dart';
@@ -46,8 +48,14 @@ class _NGODashboardState extends State<NGODashboard>
       builder: (context, ngoProvider, authProvider, child) {
         return Scaffold(
           appBar: AppBar(
-            title: const Text('NGO Dashboard'),
+            title: Text(context.l10n.ngoDashboard),
             actions: [
+              IconButton(
+                icon: const Icon(Icons.settings),
+                onPressed: () => Navigator.pushNamed(
+                    context, AppRouter.accessibilitySettings),
+                tooltip: context.l10n.settingsLanguage,
+              ),
               IconButton(
                 icon: const Icon(Icons.refresh),
                 onPressed: () {
@@ -63,11 +71,11 @@ class _NGODashboardState extends State<NGODashboard>
             ],
             bottom: TabBar(
               controller: _tabController,
-              tabs: const [
-                Tab(icon: Icon(Icons.dashboard), text: 'Overview'),
-                Tab(icon: Icon(Icons.restaurant), text: 'My Requests'),
-                Tab(icon: Icon(Icons.local_shipping), text: 'Available'),
-                Tab(icon: Icon(Icons.help), text: 'Queries'),
+              tabs: [
+                Tab(icon: const Icon(Icons.dashboard), text: context.l10n.overview),
+                Tab(icon: const Icon(Icons.restaurant), text: context.l10n.myRequests),
+                Tab(icon: const Icon(Icons.local_shipping), text: context.l10n.available),
+                Tab(icon: const Icon(Icons.help), text: context.l10n.queries),
               ],
             ),
           ),
@@ -85,7 +93,7 @@ class _NGODashboardState extends State<NGODashboard>
           floatingActionButton: FloatingActionButton.extended(
             onPressed: () => _createFoodRequest(context, authProvider),
             icon: const Icon(Icons.add),
-            label: const Text('Create Request'),
+            label: Text(context.l10n.createRequest),
           ),
         );
       },
@@ -110,12 +118,12 @@ class _NGODashboardState extends State<NGODashboard>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Welcome back!',
+                      context.l10n.welcomeBack,
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Manage your food requests and track donations.',
+                      context.l10n.manageFoodRequests,
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   ],
@@ -127,7 +135,7 @@ class _NGODashboardState extends State<NGODashboard>
 
             // Statistics cards
             Text(
-              'Request Statistics',
+              context.l10n.requestStatistics,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 12),
@@ -136,7 +144,7 @@ class _NGODashboardState extends State<NGODashboard>
               children: [
                 Expanded(
                   child: _buildStatCard(
-                    'Total Requests',
+                    context.l10n.totalRequests,
                     '${stats['totalRequests'] ?? 0}',
                     Icons.restaurant_menu,
                     Colors.blue,
@@ -145,7 +153,7 @@ class _NGODashboardState extends State<NGODashboard>
                 const SizedBox(width: 12),
                 Expanded(
                   child: _buildStatCard(
-                    'Pending',
+                    context.l10n.statusPending,
                     '${stats['pendingRequests'] ?? 0}',
                     Icons.pending,
                     Colors.orange,
@@ -160,7 +168,7 @@ class _NGODashboardState extends State<NGODashboard>
               children: [
                 Expanded(
                   child: _buildStatCard(
-                    'Matched',
+                    context.l10n.statusMatched,
                     '${stats['matchedRequests'] ?? 0}',
                     Icons.check_circle,
                     Colors.green,
@@ -169,7 +177,7 @@ class _NGODashboardState extends State<NGODashboard>
                 const SizedBox(width: 12),
                 Expanded(
                   child: _buildStatCard(
-                    'Critical',
+                    context.l10n.urgencyCritical,
                     '${stats['criticalRequests'] ?? 0}',
                     Icons.warning,
                     Colors.red,
@@ -181,7 +189,7 @@ class _NGODashboardState extends State<NGODashboard>
             const SizedBox(height: 12),
 
             _buildStatCard(
-              'Total Beneficiaries',
+              context.l10n.totalBeneficiaries,
               '${stats['totalBeneficiaries'] ?? 0}',
               Icons.people,
               Colors.purple,
@@ -191,7 +199,7 @@ class _NGODashboardState extends State<NGODashboard>
 
             // Recent requests
             Text(
-              'Recent Requests',
+              context.l10n.recentRequests,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 12),
@@ -202,7 +210,7 @@ class _NGODashboardState extends State<NGODashboard>
             if (ngoProvider.myRequests.length > 3)
               TextButton(
                 onPressed: () => _tabController.animateTo(1),
-                child: const Text('View All Requests'),
+                child: Text(context.l10n.viewAllRequests),
               ),
           ],
         ),
@@ -216,12 +224,12 @@ class _NGODashboardState extends State<NGODashboard>
       length: 4,
       child: Column(
         children: [
-          const TabBar(
+          TabBar(
             tabs: [
-              Tab(text: 'All'),
-              Tab(text: 'Pending'),
-              Tab(text: 'Matched'),
-              Tab(text: 'Urgent'),
+              Tab(text: context.l10n.all),
+              Tab(text: context.l10n.statusPending),
+              Tab(text: context.l10n.statusMatched),
+              Tab(text: context.l10n.urgent),
             ],
           ),
           Expanded(
@@ -255,15 +263,15 @@ class _NGODashboardState extends State<NGODashboard>
   Widget _buildRequestsList(List<FoodRequest> requests, NGOProvider ngoProvider,
       AuthProvider authProvider) {
     if (requests.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.restaurant_menu, size: 64, color: Colors.grey),
-            SizedBox(height: 16),
-            Text('No food requests found'),
-            SizedBox(height: 8),
-            Text('Create a request to get started'),
+            const Icon(Icons.restaurant_menu, size: 64, color: Colors.grey),
+            const SizedBox(height: 16),
+            Text(context.l10n.noFoodRequestsFound),
+            const SizedBox(height: 8),
+            Text(context.l10n.createRequestToStart),
           ],
         ),
       );
@@ -422,19 +430,26 @@ class _NGODashboardState extends State<NGODashboard>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to logout?'),
+        title: Text(context.l10n.logout),
+        content: Text(context.l10n.confirmLogoutQuestion),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.cancel),
           ),
           TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              authProvider.signOut();
+            onPressed: () async {
+              Navigator.pop(context); // Close dialog
+              await authProvider.signOut();
+              if (context.mounted) {
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  AppRouter.login,
+                  (route) => false,
+                );
+              }
             },
-            child: const Text('Logout'),
+            child: Text(context.l10n.logout),
           ),
         ],
       ),

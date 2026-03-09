@@ -144,15 +144,23 @@ class AdminDashboardProvider extends ChangeNotifier {
   }
 
   Future<void> searchUsers(String query) async {
-    // Basic search implementation
-    // In a real app, this might be a server-side search
-    // For now, we fetch some users or filter existing ones if allUsers is populated
-    // Let's assume we fetch by role or a general search method in UserService
+    if (query.trim().isEmpty) return;
     _isLoading = true;
     notifyListeners();
     try {
-      // Dummy logic for now: fetching all donors as a sample for search
-      _allUsers = await _userService.getUsersByRole(UserRole.donor);
+      // Fetch all users and filter client-side by name/email
+      final allRoles = [UserRole.donor, UserRole.ngo, UserRole.volunteer, UserRole.admin];
+      List<Map<String, dynamic>> results = [];
+      for (final role in allRoles) {
+        final users = await _userService.getUsersByRole(role);
+        results.addAll(users);
+      }
+      final lowerQuery = query.toLowerCase();
+      _allUsers = results.where((u) {
+        final name = (u['fullName'] ?? u['firstName'] ?? '').toString().toLowerCase();
+        final email = (u['email'] ?? '').toString().toLowerCase();
+        return name.contains(lowerQuery) || email.contains(lowerQuery);
+      }).toList();
     } catch (e) {
       _errorMessage = 'Search failed: $e';
     } finally {

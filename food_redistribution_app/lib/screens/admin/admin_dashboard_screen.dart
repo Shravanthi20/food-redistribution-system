@@ -10,6 +10,8 @@ import '../../services/verification_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../utils/app_theme.dart';
 import '../../widgets/glass_widgets.dart';
+import '../../utils/app_router.dart';
+import '../../utils/app_localizations_ext.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -78,6 +80,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   ),
                   iconTheme: const IconThemeData(color: AppTheme.textPrimary),
                   actions: [
+                    IconButton(
+                      icon: Icon(Icons.settings,
+                          color: AppTheme.textSecondary),
+                      onPressed: () => Navigator.pushNamed(
+                          context, AppRouter.accessibilitySettings),
+                      tooltip: context.l10n.settingsLanguage,
+                    ),
                     Consumer<ThemeProvider>(
                       builder: (context, themeProvider, child) {
                         return IconButton(
@@ -88,7 +97,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                             color: AppTheme.textSecondary,
                           ),
                           onPressed: () => themeProvider.toggleTheme(),
-                          tooltip: 'Toggle Theme',
+                          tooltip: context.l10n.toggleTheme,
                         );
                       },
                     ),
@@ -96,13 +105,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       icon: Icon(Icons.refresh,
                           color: AppTheme.textSecondary),
                       onPressed: () => provider.loadDashboardData(),
-                      tooltip: 'Refresh Data',
+                      tooltip: context.l10n.refreshData,
                     ),
                     IconButton(
                       icon: Icon(Icons.logout,
                           color: AppTheme.textSecondary),
                       onPressed: () => _handleSignOut(context),
-                      tooltip: 'Sign Out',
+                      tooltip: context.l10n.signOut,
                     ),
                     const SizedBox(width: 8),
                   ],
@@ -134,22 +143,22 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                               AppTheme.textMuted,
                           selectedLabelStyle: const TextStyle(fontSize: 10),
                           unselectedLabelStyle: const TextStyle(fontSize: 10),
-                          items: const [
+                          items: [
                             BottomNavigationBarItem(
-                                icon: Icon(Icons.dashboard), label: 'Overview'),
+                                icon: const Icon(Icons.dashboard), label: context.l10n.overview),
                             BottomNavigationBarItem(
-                                icon: Icon(Icons.verified_user),
-                                label: 'Verify'),
+                                icon: const Icon(Icons.verified_user),
+                                label: context.l10n.verify),
                             BottomNavigationBarItem(
-                                icon: Icon(Icons.people), label: 'Gov'),
+                                icon: const Icon(Icons.people), label: context.l10n.gov),
                             BottomNavigationBarItem(
-                                icon: Icon(Icons.swap_calls), label: 'Manual'),
+                                icon: const Icon(Icons.swap_calls), label: context.l10n.manual),
                             BottomNavigationBarItem(
-                                icon: Icon(Icons.analytics), label: 'Stats'),
+                                icon: const Icon(Icons.analytics), label: context.l10n.stats),
                             BottomNavigationBarItem(
-                                icon: Icon(Icons.hub), label: 'Matching'),
+                                icon: const Icon(Icons.hub), label: context.l10n.matching),
                             BottomNavigationBarItem(
-                                icon: Icon(Icons.history_edu), label: 'Audit'),
+                                icon: const Icon(Icons.history_edu), label: context.l10n.audit),
                           ],
                         ),
                       )
@@ -165,21 +174,21 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   String _getTitle() {
     switch (_selectedIndex) {
       case 0:
-        return 'System Overview';
+        return context.l10n.systemOverview;
       case 1:
-        return 'Certificate Verifications';
+        return context.l10n.certificateVerifications;
       case 2:
-        return 'User Governance';
+        return context.l10n.userGovernance;
       case 3:
-        return 'Manual Overrides';
+        return context.l10n.manualOverrides;
       case 4:
-        return 'Analytics & Reporting';
+        return context.l10n.analyticsReporting;
       case 5:
-        return 'Algorithm Matching';
+        return context.l10n.algorithmMatching;
       case 6:
-        return 'Audit & Compliance';
+        return context.l10n.auditCompliance;
       default:
-        return 'Admin Dashboard';
+        return context.l10n.adminDashboard;
     }
   }
 
@@ -200,7 +209,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       case 6:
         return _buildAuditTab(provider);
       default:
-        return const Center(child: Text('Coming Soon'));
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.dashboard_customize, size: 64, color: Colors.grey[400]),
+              const SizedBox(height: 16),
+              Text('Tab $_selectedIndex', style: TextStyle(color: Colors.grey[600])),
+            ],
+          ),
+        );
     }
   }
 
@@ -214,7 +232,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           children: [
             Icon(Icons.hub_outlined, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
-            const Text('No matching sessions recorded yet'),
+            Text(context.l10n.noMatchingSessions),
           ],
         ),
       );
@@ -241,8 +259,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Top Matches:',
-                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text(context.l10n.topMatches,
+                        style: const TextStyle(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
                     ...matches.map((match) => _buildMatchDetail(match)),
                   ],
@@ -292,8 +310,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               style:
                   const TextStyle(fontSize: 12, fontStyle: FontStyle.italic)),
           const SizedBox(height: 12),
-          const Text('Criteria Breakdown:',
-              style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+          Text(context.l10n.criteriaBreakdown,
+              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
           Wrap(
             spacing: 8,
@@ -326,23 +344,23 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               runSpacing: 16,
               children: [
                 _buildMetricCard(
-                    'Total Users',
+                    context.l10n.totalUsersLabel,
                     (provider.systemMetrics['totalUsers'] ?? 0).toString(),
                     Icons.people,
                     Colors.blue),
                 _buildMetricCard(
-                    'Recent Donations',
+                    context.l10n.recentDonations,
                     (provider.systemMetrics['totalDonationsThisMonth'] ?? 0)
                         .toString(),
                     Icons.fastfood,
                     Colors.green),
                 _buildMetricCard(
-                    'Waste Prevented',
+                    context.l10n.wastePrevented,
                     '${(provider.systemMetrics['wasteReduced'] ?? 0).toStringAsFixed(1)}kg',
                     Icons.delete_outline,
                     Colors.orange),
                 _buildMetricCard(
-                    'Active Matches',
+                    context.l10n.activeMatches,
                     provider.unmatchedDonations.length.toString(),
                     Icons.handshake,
                     Colors.purple),
@@ -357,7 +375,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             Expanded(
               flex: 2,
               child: _buildSectionCard(
-                title: 'Recent System Activity',
+                title: context.l10n.recentSystemActivity,
                 icon: Icons.history,
                 child: Column(
                   children: provider.auditLogs
@@ -370,23 +388,41 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             const SizedBox(width: 24),
             Expanded(
               child: _buildSectionCard(
-                title: 'System Health',
+                title: context.l10n.systemHealth,
                 icon: Icons.health_and_safety,
-                child: Column(
-                  children: [
-                    _buildHealthItem('Database', 'Operational', Colors.green),
-                    _buildHealthItem(
-                        'Auth Service', 'Operational', Colors.green),
-                    _buildHealthItem('Storage', 'Operational', Colors.green),
-                    _buildHealthItem(
-                        'Regional Analytics',
-                        provider.regionalStats.isEmpty
-                            ? 'Waiting for Data'
-                            : 'Operational',
-                        provider.regionalStats.isEmpty
-                            ? Colors.orange
-                            : Colors.green),
-                  ],
+                child: FutureBuilder<Map<String, bool>>(
+                  future: _checkRealHealth(),
+                  builder: (context, snapshot) {
+                    final health = snapshot.data ?? {};
+                    return Column(
+                      children: [
+                        _buildHealthItem(
+                          context.l10n.database,
+                          health['database'] == true ? context.l10n.operational : context.l10n.checking,
+                          health['database'] == true ? Colors.green : Colors.orange,
+                        ),
+                        _buildHealthItem(
+                          context.l10n.authService,
+                          health['auth'] == true ? context.l10n.operational : context.l10n.checking,
+                          health['auth'] == true ? Colors.green : Colors.orange,
+                        ),
+                        _buildHealthItem(
+                          context.l10n.deliveries,
+                          health['deliveries'] == true ? context.l10n.operational : context.l10n.checking,
+                          health['deliveries'] == true ? Colors.green : Colors.orange,
+                        ),
+                        _buildHealthItem(
+                          context.l10n.regionalAnalytics,
+                          provider.regionalStats.isEmpty
+                              ? context.l10n.waitingForData
+                              : context.l10n.operational,
+                          provider.regionalStats.isEmpty
+                              ? Colors.orange
+                              : Colors.green,
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ),
             ),
@@ -409,9 +445,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               borderRadius: BorderRadius.circular(12),
             ),
             child: TabBar(
-              tabs: const [
-                Tab(text: 'NGO Certificates'),
-                Tab(text: 'High-Volume Donors'),
+              tabs: [
+                Tab(text: context.l10n.ngoCertificates),
+                Tab(text: context.l10n.highVolumeDonors),
               ],
               labelColor: AppTheme.accentTeal,
               unselectedLabelColor: AppTheme.textMuted,
@@ -447,7 +483,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 size: 64, color: AppTheme.textMuted.withValues(alpha: 0.4)),
             const SizedBox(height: 16),
             Text(
-              'No pending verifications for this role',
+              context.l10n.noPendingVerifications,
               style: TextStyle(color: AppTheme.textMuted),
             ),
           ],
@@ -480,7 +516,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      item['user']['email'] ?? 'No Email',
+                      item['user']['email'] ?? context.l10n.noEmail,
                       style: const TextStyle(
                         color: AppTheme.textPrimary,
                         fontWeight: FontWeight.bold,
@@ -533,7 +569,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     controller: _searchController,
                     style: const TextStyle(color: AppTheme.textPrimary),
                     decoration: InputDecoration(
-                      hintText: 'Search by email or name...',
+                      hintText: context.l10n.searchByEmailOrName,
                       hintStyle:
                           TextStyle(color: AppTheme.textMuted),
                       prefixIcon: Icon(Icons.search,
@@ -562,7 +598,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 const SizedBox(width: 16),
                 GradientButton(
                   onPressed: () => provider.searchUsers(_searchController.text),
-                  text: 'Search',
+                  text: context.l10n.search,
                   icon: Icons.search,
                 ),
               ],
@@ -580,7 +616,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                             color: AppTheme.textMuted.withValues(alpha: 0.4)),
                         const SizedBox(height: 16),
                         Text(
-                          'Search for users to manage roles and restrictions',
+                          context.l10n.searchUsersToManage,
                           style: TextStyle(
                               color: AppTheme.textMuted),
                         ),
@@ -611,7 +647,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 size: 64, color: AppTheme.textMuted.withValues(alpha: 0.4)),
             const SizedBox(height: 16),
             Text(
-              'All donations are currently matched or non-pending.',
+              context.l10n.allDonationsMatched,
               style: TextStyle(color: AppTheme.textMuted),
             ),
           ],
@@ -662,13 +698,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           ElevatedButton.icon(
                             onPressed: () => _handleForceAssignNGO(donation.id),
                             icon: const Icon(Icons.business),
-                            label: const Text('Force NGO'),
+                            label: Text(context.l10n.forceNgo),
                           ),
                           ElevatedButton.icon(
                             onPressed: () =>
                                 _handleForceAssignVolunteer(donation.id),
                             icon: const Icon(Icons.person),
-                            label: const Text('Assign Volunteer'),
+                            label: Text(context.l10n.assignVolunteer),
                           ),
                         ],
                       ),
@@ -689,15 +725,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       padding: const EdgeInsets.all(24),
       children: [
         _buildSectionCard(
-          title: 'Regional Activity Overview',
+          title: context.l10n.regionalActivityOverview,
           icon: Icons.map,
           child: Column(
             children: provider.regionalStats.isEmpty
                 ? [
-                    const Center(
+                    Center(
                         child: Padding(
-                            padding: EdgeInsets.all(16),
-                            child: Text('Gathering regional data...')))
+                            padding: const EdgeInsets.all(16),
+                            child: Text(context.l10n.gatheringRegionalData)))
                   ]
                 : provider.regionalStats.entries
                     .map((entry) => _buildProgressItem(
@@ -707,7 +743,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         ),
         const SizedBox(height: 24),
         _buildSectionCard(
-          title: 'Delivery Performance',
+          title: context.l10n.deliveryPerformance,
           icon: Icons.delivery_dining,
           child: Column(
             children: [
@@ -738,25 +774,25 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                const Text('Filter: '),
+                Text(context.l10n.filter),
                 const SizedBox(width: 8),
                 ChoiceChip(
-                    label: const Text('Security'),
+                    label: Text(context.l10n.security),
                     selected: true,
                     onSelected: (val) {}),
                 const SizedBox(width: 8),
                 ChoiceChip(
-                    label: const Text('Hygiene'),
+                    label: Text(context.l10n.hygiene),
                     selected: false,
                     onSelected: (val) {}),
                 const SizedBox(width: 8),
                 ChoiceChip(
-                    label: const Text('Matching'),
+                    label: Text(context.l10n.matching),
                     selected: false,
                     onSelected: (val) {}),
                 const SizedBox(width: 8),
                 ChoiceChip(
-                    label: const Text('Governance'),
+                    label: Text(context.l10n.governance),
                     selected: false,
                     onSelected: (val) {}),
               ],
@@ -765,8 +801,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         ),
         Expanded(
           child: provider.auditLogs.isEmpty
-              ? const Center(
-                  child: Text('No audit logs found matching criteria'))
+              ? Center(
+                  child: Text(context.l10n.noAuditLogs))
               : ListView.builder(
                   itemCount: provider.auditLogs.length,
                   itemBuilder: (context, index) {
@@ -866,7 +902,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  log['eventType'] ?? log['action'] ?? 'System Event',
+                  log['eventType'] ?? log['action'] ?? context.l10n.systemEvent,
                   style: const TextStyle(
                       color: AppTheme.textPrimary, fontWeight: FontWeight.w500),
                 ),
@@ -897,6 +933,26 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         ],
       ),
     );
+  }
+
+  Future<Map<String, bool>> _checkRealHealth() async {
+    final firestore = FirebaseFirestore.instance;
+    final results = <String, bool>{};
+    try {
+      await firestore.collection('users').limit(1).get();
+      results['database'] = true;
+    } catch (_) {
+      results['database'] = false;
+    }
+    // Auth is operational if we reached this screen
+    results['auth'] = true;
+    try {
+      await firestore.collection('delivery_tasks').limit(1).get();
+      results['deliveries'] = true;
+    } catch (_) {
+      results['deliveries'] = false;
+    }
+    return results;
   }
 
   Widget _buildHealthItem(String name, String status, Color color) {
@@ -985,19 +1041,19 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             itemBuilder: (context) => [
               PopupMenuItem(
                 value: 'suspend',
-                child: Text('Suspend (7 Days)',
+                child: Text(context.l10n.suspend7Days,
                     style:
                         TextStyle(color: AppTheme.textSecondary)),
               ),
               PopupMenuItem(
                 value: 'restrict',
-                child: Text('Restrict Role',
+                child: Text(context.l10n.restrictRole,
                     style:
                         TextStyle(color: AppTheme.textSecondary)),
               ),
               PopupMenuItem(
                 value: 'history',
-                child: Text('Audit History',
+                child: Text(context.l10n.auditHistory,
                     style:
                         TextStyle(color: AppTheme.textSecondary)),
               ),
@@ -1030,15 +1086,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Sign Out'),
-        content: const Text('Are you sure you want to sign out?'),
+        title: Text(context.l10n.signOut),
+        content: Text(context.l10n.confirmLogout),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel')),
+              child: Text(context.l10n.cancel)),
           TextButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('Sign Out')),
+              child: Text(context.l10n.signOut)),
         ],
       ),
     );
@@ -1069,7 +1125,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             );
 
     if (context.mounted && success) {
-      _showSnackbar('Verification Successful');
+      _showSnackbar(context.l10n.verificationSuccessful);
     } else if (context.mounted) {
       _showSnackbar(
           'Review failed: ${context.read<AdminDashboardProvider>().errorMessage}');
@@ -1084,16 +1140,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Confirm Suspension'),
-        content: const Text(
-            'Are you sure you want to suspend this user for 7 days? This will revoke their access immediately.'),
+        title: Text(context.l10n.confirmSuspension),
+        content: Text(context.l10n.suspendConfirmMessage),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel')),
+              child: Text(context.l10n.cancel)),
           TextButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('Suspend')),
+              child: Text(context.l10n.suspend)),
         ],
       ),
     );
@@ -1106,7 +1161,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         DateTime.now().add(const Duration(days: 7)),
       );
       if (context.mounted && success) {
-        _showSnackbar('User status updated to SUSPENDED');
+        _showSnackbar(context.l10n.userSuspended);
       }
     }
   }
