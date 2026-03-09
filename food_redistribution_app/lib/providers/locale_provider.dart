@@ -127,6 +127,8 @@ class LocaleProvider extends ChangeNotifier {
         return 'English';
       case 'hi':
         return 'हिन्दी (Hindi)';
+      case 'ta':
+        return 'தமிழ் (Tamil)';
       default:
         return locale.languageCode.toUpperCase();
     }

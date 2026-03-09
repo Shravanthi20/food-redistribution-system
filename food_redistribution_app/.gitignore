@@ -42,6 +42,7 @@ lib/generated/
 .pub-cache/
 .pub/
 /build/
+lib/generated/
 .metadata
 pubspec.lock
 **/doc/api/

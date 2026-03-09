@@ -224,7 +224,9 @@ abstract final class LocaleKeys {
   // ── Language / Settings ────────────────────────────────────────────────────
   static const String language = 'language';
   static const String languageEnglish = 'languageEnglish';
-  static const String languageHindi = 'languageHindi';  static const String languageTamil = 'languageTamil';  static const String changeLanguage = 'changeLanguage';
+  static const String languageHindi = 'languageHindi';
+  static const String languageTamil = 'languageTamil';
+  static const String changeLanguage = 'changeLanguage';
   static const String preferredLanguage = 'preferredLanguage';
   static const String settingsTitle = 'settingsTitle';
   static const String darkMode = 'darkMode';
