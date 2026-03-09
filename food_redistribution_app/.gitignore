@@ -170,3 +170,4 @@ _archive/
 run_safe.bat
 clean_safe.bat
 pub_cache/
+.vercel
