@@ -103,12 +103,10 @@ class TranslationValidator {
           .toSet();
 
       // Missing keys — will fall back to template locale at runtime
-      final missing =
-          templateKeys.difference(localeKeys).toList()..sort();
+      final missing = templateKeys.difference(localeKeys).toList()..sort();
 
       // Extra keys — present in locale but not in template (may be orphaned)
-      final extra =
-          localeKeys.difference(templateKeys).toList()..sort();
+      final extra = localeKeys.difference(templateKeys).toList()..sort();
 
       // Safety-critical completeness check
       final criticalIssues = <String>[];
@@ -251,10 +249,8 @@ class ValidationReport {
         issues.where((i) => i.type == IssueType.missingSafetyCritical).toList();
     final missing =
         issues.where((i) => i.type == IssueType.missingKey).toList();
-    final extra =
-        issues.where((i) => i.type == IssueType.extraKey).toList();
-    final files =
-        issues.where((i) => i.type == IssueType.missingFile).toList();
+    final extra = issues.where((i) => i.type == IssueType.extraKey).toList();
+    final files = issues.where((i) => i.type == IssueType.missingFile).toList();
 
     if (files.isNotEmpty) {
       print('\n  [MISSING FILES]');

@@ -135,8 +135,8 @@ class LocaleProvider extends ChangeNotifier {
   }
 
   /// Convenience: returns a display-name list sorted like [supportedLocales].
-  static List<({Locale locale, String displayName})> get supportedLocaleOptions =>
-      supportedLocales
+  static List<({Locale locale, String displayName})>
+      get supportedLocaleOptions => supportedLocales
           .map((l) => (locale: l, displayName: localeDisplayName(l)))
           .toList();
 
