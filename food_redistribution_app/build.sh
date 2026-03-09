@@ -8,7 +8,7 @@ echo "Downloading Dependencies..."
 flutter pub get
 
 echo "Building App for Web..."
-flutter build web
+flutter build web --no-wasm-dry-run
 
 echo "Copying Routing Configuration..."
 cp vercel.json build/web/
