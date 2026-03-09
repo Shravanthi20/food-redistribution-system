@@ -58,19 +58,6 @@ void main() {
              findsAtLeastNWidgets(1));
     });
 
-    testWidgets('should display coordinator dashboard', (WidgetTester tester) async {
-      app.main();
-      await tester.pumpAndSettle();
-
-      // Select coordinator role
-      await tester.tap(find.text('Coordinator'));
-      await tester.pumpAndSettle();
-
-      // Should show coordinator-related content
-      expect(find.textContaining('coordinator').or(find.textContaining('Coordinator')), 
-             findsAtLeastNWidgets(1));
-    });
-
     testWidgets('should handle scroll behavior in welcome screen', (WidgetTester tester) async {
       app.main();
       await tester.pumpAndSettle();
@@ -152,7 +139,6 @@ void main() {
       expect(find.bySemanticsLabel('Select Food Donor role'), findsOneWidget);
       expect(find.bySemanticsLabel('Select NGO Organization role'), findsOneWidget);
       expect(find.bySemanticsLabel('Select Volunteer role'), findsOneWidget);
-      expect(find.bySemanticsLabel('Select Coordinator role'), findsOneWidget);
 
       // Test focus management
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);

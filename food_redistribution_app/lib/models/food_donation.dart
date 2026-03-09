@@ -61,6 +61,14 @@ class FoodDonation {
   final DateTime? updatedAt;
   final Map<String, dynamic>? hygieneCertification;
   final bool isUrgent;
+  
+  // Additional fields for tracking
+  final int estimatedMeals;
+  final int estimatedPeopleServed;
+  final DateTime? deliveredAt;
+  final String? claimedByNGO;
+  final String? ngoName;
+  final String? volunteerName;
 
   FoodDonation({
     required this.id,
@@ -92,6 +100,12 @@ class FoodDonation {
     this.updatedAt,
     this.hygieneCertification,
     this.isUrgent = false,
+    this.estimatedMeals = 0,
+    this.estimatedPeopleServed = 0,
+    this.deliveredAt,
+    this.claimedByNGO,
+    this.ngoName,
+    this.volunteerName,
   });
 
   factory FoodDonation.fromFirestore(DocumentSnapshot doc) {
@@ -141,6 +155,14 @@ class FoodDonation {
           : null,
       hygieneCertification: data['hygieneCertification'],
       isUrgent: data['isUrgent'] ?? false,
+      estimatedMeals: data['estimatedMeals'] ?? 0,
+      estimatedPeopleServed: data['estimatedPeopleServed'] ?? 0,
+      deliveredAt: data['deliveredAt'] != null
+          ? (data['deliveredAt'] as Timestamp).toDate()
+          : null,
+      claimedByNGO: data['claimedByNGO'],
+      ngoName: data['ngoName'],
+      volunteerName: data['volunteerName'],
     );
   }
 
@@ -166,6 +188,12 @@ class FoodDonation {
       'images': images,
       'pickupLocation': pickupLocation,
       'pickupAddress': pickupAddress,
+      'estimatedMeals': estimatedMeals,
+      'estimatedPeopleServed': estimatedPeopleServed,
+      'deliveredAt': deliveredAt != null ? Timestamp.fromDate(deliveredAt!) : null,
+      'claimedByNGO': claimedByNGO,
+      'ngoName': ngoName,
+      'volunteerName': volunteerName,
       'donorContactPhone': donorContactPhone,
       'status': status.name,
       'assignedVolunteerId': assignedVolunteerId,

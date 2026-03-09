@@ -103,8 +103,6 @@ class AppUser {
         return 'NGO Partner';
       case UserRole.volunteer:
         return 'Volunteer';
-      case UserRole.coordinator:
-        return 'Coordinator';
       case UserRole.admin:
         return 'Administrator';
     }

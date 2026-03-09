@@ -25,7 +25,6 @@ class AppColors {
   static const Color donorColor = Color(0xFF2196F3);
   static const Color ngoColor = Color(0xFFFF9800);
   static const Color volunteerColor = Color(0xFF4CAF50);
-  static const Color coordinatorColor = Color(0xFF9C27B0);
   
   // Status Colors
   static const Color successColor = Color(0xFF4CAF50);
@@ -116,7 +115,6 @@ enum UserRole {
   donor,
   ngo,
   volunteer,
-  coordinator,
   admin,
 }
 
@@ -165,7 +163,6 @@ class AppAssets {
   static const String donorIcon = 'assets/icons/donor.png';
   static const String ngoIcon = 'assets/icons/ngo.png';
   static const String volunteerIcon = 'assets/icons/volunteer.png';
-  static const String coordinatorIcon = 'assets/icons/coordinator.png';
 }
 
 // API Response Keys

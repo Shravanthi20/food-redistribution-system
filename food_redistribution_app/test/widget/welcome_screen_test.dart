@@ -29,7 +29,6 @@ void main() {
       expect(find.text('Food Donor'), findsOneWidget);
       expect(find.text('NGO/Organization'), findsOneWidget);
       expect(find.text('Volunteer'), findsOneWidget);
-      expect(find.text('Coordinator'), findsOneWidget);
     });
 
     testWidgets('should display role descriptions', (WidgetTester tester) async {
@@ -43,7 +42,6 @@ void main() {
       expect(find.text('Share surplus food from restaurants, events, and households'), findsOneWidget);
       expect(find.text('Manage food distribution programs and community outreach'), findsOneWidget);
       expect(find.text('Help with food collection, sorting, and distribution efforts'), findsOneWidget);
-      expect(find.text('Coordinate logistics and optimize food redistribution networks'), findsOneWidget);
     });
 
     testWidgets('should handle role card taps', (WidgetTester tester) async {
@@ -87,7 +85,6 @@ void main() {
       expect(find.bySemanticsLabel('Select Food Donor role'), findsOneWidget);
       expect(find.bySemanticsLabel('Select NGO Organization role'), findsOneWidget);
       expect(find.bySemanticsLabel('Select Volunteer role'), findsOneWidget);
-      expect(find.bySemanticsLabel('Select Coordinator role'), findsOneWidget);
     });
 
     testWidgets('should display feature highlights', (WidgetTester tester) async {
