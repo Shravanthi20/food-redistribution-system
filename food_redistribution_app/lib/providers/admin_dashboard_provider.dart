@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -61,6 +63,9 @@ class AdminDashboardProvider extends ChangeNotifier {
 
   List<Map<String, dynamic>> _matchingSessions = [];
   List<Map<String, dynamic>> get matchingSessions => _matchingSessions;
+  final List<StreamSubscription<QuerySnapshot>> _subscriptions = [];
+  bool _realtimeInitialized = false;
+  bool _realtimeRefreshInFlight = false;
 
   Future<void> loadDashboardData() async {
     _isLoading = true;
@@ -80,12 +85,61 @@ class AdminDashboardProvider extends ChangeNotifier {
         _fetchDeliveryPerformance(),
         _fetchMatchingSessions(),
       ]);
+      _startRealtimeUpdates();
     } catch (e) {
       _errorMessage = 'Failed to load dashboard data: $e';
       debugPrint(_errorMessage);
     } finally {
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  void _startRealtimeUpdates() {
+    if (_realtimeInitialized) return;
+    _realtimeInitialized = true;
+
+    _subscriptions.addAll([
+      FirebaseFirestore.instance
+          .collection('matching_sessions')
+          .limit(10)
+          .snapshots()
+          .listen((_) => _refreshRealtimeData()),
+      FirebaseFirestore.instance
+          .collection('request_matching_sessions')
+          .limit(10)
+          .snapshots()
+          .listen((_) => _refreshRealtimeData()),
+      FirebaseFirestore.instance
+          .collection('donation_assignments')
+          .limit(10)
+          .snapshots()
+          .listen((_) => _refreshRealtimeData()),
+      FirebaseFirestore.instance
+          .collection('donations')
+          .snapshots()
+          .listen((_) => _refreshRealtimeData()),
+      FirebaseFirestore.instance
+          .collection('requests')
+          .snapshots()
+          .listen((_) => _refreshRealtimeData()),
+    ]);
+  }
+
+  Future<void> _refreshRealtimeData() async {
+    if (_realtimeRefreshInFlight) return;
+    _realtimeRefreshInFlight = true;
+
+    try {
+      await Future.wait([
+        _fetchUnmatchedDonations(),
+        _fetchMatchingSessions(),
+      ]);
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Admin realtime refresh failed: $e');
+    } finally {
+      _realtimeRefreshInFlight = false;
     }
   }
 
@@ -257,5 +311,13 @@ class AdminDashboardProvider extends ChangeNotifier {
       notifyListeners();
       return false;
     }
+  }
+
+  @override
+  void dispose() {
+    for (final subscription in _subscriptions) {
+      subscription.cancel();
+    }
+    super.dispose();
   }
 }

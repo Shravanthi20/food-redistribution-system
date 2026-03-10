@@ -81,6 +81,25 @@ class _DonorDashboardState extends State<DonorDashboard> {
           ),
           const SizedBox(width: 4),
           GlassIconButton(
+            icon: Icons.auto_fix_high_rounded,
+            size: 40,
+            onPressed: () async {
+              final donationProvider =
+                  Provider.of<DonationProvider>(context, listen: false);
+              await donationProvider.rerunAutomaticMatching();
+              if (!context.mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    donationProvider.errorMessage ??
+                        'Automatic matching rerun completed',
+                  ),
+                ),
+              );
+            },
+          ),
+          const SizedBox(width: 4),
+          GlassIconButton(
             icon: Icons.logout_rounded,
             size: 40,
             onPressed: () async {

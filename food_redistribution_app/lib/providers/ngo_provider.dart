@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../models/food_request.dart';
@@ -11,6 +14,8 @@ import '../services/firestore_service.dart';
 import '../services/location_service.dart';
 import '../services/notification_service.dart';
 import '../services/audit_service.dart';
+import '../services/auth_service.dart';
+import '../config/firebase_schema.dart';
 
 class NGOProvider extends ChangeNotifier {
   final FoodRequestService _requestService = FoodRequestService();
@@ -36,6 +41,11 @@ class NGOProvider extends ChangeNotifier {
 
   // Queries/disputes
   List<query_model.Query> _myQueries = [];
+  final List<StreamSubscription<QuerySnapshot>> _requestSubscriptions = [];
+  final List<StreamSubscription<QuerySnapshot>> _querySubscriptions = [];
+  StreamSubscription<QuerySnapshot>? _donationsSubscription;
+  String? _currentUserId;
+  String? _currentOrganizationId;
 
   // Getters
   bool get isLoading => _isLoading;
@@ -59,22 +69,53 @@ class NGOProvider extends ChangeNotifier {
   List<FoodRequest> get criticalRequests =>
       _myRequests.where((r) => r.urgency == RequestUrgency.critical).toList();
 
+  Future<List<String>> _resolveNgoIdentifiers(String uid) async {
+    final identifiers = <String>{uid};
+    final authService = AuthService();
+    final appUser = await authService.getCurrentAppUser();
+
+    if (appUser == null) {
+      throw Exception('User profile not found.');
+    }
+
+    final organizationId = appUser.profile.organizationId;
+    if (organizationId != null && organizationId.isNotEmpty) {
+      identifiers.add(organizationId);
+    }
+
+    return identifiers.toList();
+  }
+
   // Load all NGO data
-  Future<void> loadNGOData(String ngoId) async {
+  Future<void> loadNGOData(String uid) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
+      final ngoIds = await _resolveNgoIdentifiers(uid);
+      await _matchingService.maybeRunInitialBackfill(ngoIds);
+
+      _currentUserId = uid;
+      final organizationId = ngoIds.firstWhere(
+        (id) => id != uid,
+        orElse: () => '',
+      );
+      _currentOrganizationId = organizationId.isEmpty ? null : organizationId;
+
       // Load requests and donations first (in parallel)
       await Future.wait([
-        _loadMyRequests(ngoId),
-        _loadAvailableDonations(ngoId),
-        _loadMyQueries(ngoId),
+        _loadMyRequests(ngoIds),
+        _loadAvailableDonations(
+          userId: uid,
+          organizationId: organizationId.isEmpty ? null : organizationId,
+        ),
+        _loadMyQueries(ngoIds),
       ]);
 
       // Then calculate dashboard stats (depends on _myRequests being loaded)
-      await _loadDashboardStats(ngoId);
+      await _loadDashboardStats();
+      _startRealtimeListeners(ngoIds);
     } catch (e) {
       _errorMessage = 'Failed to load NGO data: $e';
       debugPrint('NGO Provider Error: $e');
@@ -84,20 +125,81 @@ class NGOProvider extends ChangeNotifier {
     }
   }
 
+  void _startRealtimeListeners(List<String> ngoIds) {
+    for (final subscription in _requestSubscriptions) {
+      subscription.cancel();
+    }
+    _requestSubscriptions.clear();
+
+    for (final subscription in _querySubscriptions) {
+      subscription.cancel();
+    }
+    _querySubscriptions.clear();
+
+    _donationsSubscription?.cancel();
+
+    for (final ngoId in ngoIds) {
+      _requestSubscriptions.add(
+        FirebaseFirestore.instance
+            .collection(Collections.requests)
+            .where('ngoId', isEqualTo: ngoId)
+            .snapshots()
+            .listen((_) async {
+          await _loadMyRequests(ngoIds);
+          await _loadDashboardStats();
+          notifyListeners();
+        }),
+      );
+
+      _querySubscriptions.add(
+        FirebaseFirestore.instance
+            .collection(Collections.adminTasks)
+            .where('raiserUserId', isEqualTo: ngoId)
+            .snapshots()
+            .listen((_) async {
+          await _loadMyQueries(ngoIds);
+          notifyListeners();
+        }),
+      );
+    }
+
+    _donationsSubscription = FirebaseFirestore.instance
+        .collection(Collections.donations)
+        .where('status', whereIn: [
+          DonationStatus.listed.name,
+          DonationStatus.matched.name,
+        ])
+        .snapshots()
+        .listen((_) async {
+          if (_currentUserId == null) return;
+          await _loadAvailableDonations(
+            userId: _currentUserId!,
+            organizationId: _currentOrganizationId,
+          );
+          notifyListeners();
+        });
+  }
+
   // Load NGO's food requests
-  Future<void> _loadMyRequests(String ngoId) async {
+  Future<void> _loadMyRequests(List<String> ngoIds) async {
     try {
-      _myRequests = await _requestService.getNGORequests(ngoId);
+      _myRequests = await _requestService.getNGORequestsForIds(ngoIds);
     } catch (e) {
       throw Exception('Failed to load food requests: $e');
     }
   }
 
   // Load available donations (for manual matching) and matched donations
-  Future<void> _loadAvailableDonations(String ngoId) async {
+  Future<void> _loadAvailableDonations({
+    required String userId,
+    String? organizationId,
+  }) async {
     try {
       final available = await _donationService.getAvailableDonations();
-      final matched = await _donationService.getAvailableDonationsForNGO(ngoId);
+      final matched = await _donationService.getAvailableDonationsForNGO(
+        userId: userId,
+        organizationId: organizationId,
+      );
 
       // Combine them so that the UI can find matched donations using getDonationById
       _availableDonations = [...available, ...matched];
@@ -107,7 +209,7 @@ class NGOProvider extends ChangeNotifier {
   }
 
   // Load dashboard statistics
-  Future<void> _loadDashboardStats(String ngoId) async {
+  Future<void> _loadDashboardStats() async {
     try {
       _dashboardStats = {
         'totalRequests': _myRequests.length,
@@ -115,8 +217,8 @@ class NGOProvider extends ChangeNotifier {
         'matchedRequests': matchedRequests.length,
         'fulfilledRequests': fulfilledRequests.length,
         'criticalRequests': criticalRequests.length,
-        'totalBeneficiaries':
-            _myRequests.fold<int>(0, (sum, r) => sum + r.expectedBeneficiaries),
+        'totalBeneficiaries': _myRequests.fold<int>(
+            0, (total, r) => total + r.expectedBeneficiaries),
       };
     } catch (e) {
       throw Exception('Failed to load dashboard stats: $e');
@@ -124,9 +226,9 @@ class NGOProvider extends ChangeNotifier {
   }
 
   // Load NGO's queries
-  Future<void> _loadMyQueries(String ngoId) async {
+  Future<void> _loadMyQueries(List<String> ngoIds) async {
     try {
-      _myQueries = await _queryService.getUserQueries(ngoId);
+      _myQueries = await _queryService.getUserQueriesForIds(ngoIds);
     } catch (e) {
       throw Exception('Failed to load queries: $e');
     }
@@ -134,7 +236,7 @@ class NGOProvider extends ChangeNotifier {
 
   // Create new food request
   Future<String?> createFoodRequest({
-    required String ngoId,
+    required String uid,
     required String title,
     required String description,
     required List<FoodCategory> requiredFoodTypes,
@@ -153,9 +255,13 @@ class NGOProvider extends ChangeNotifier {
       _errorMessage = null;
       notifyListeners();
 
+      final ngoIds = await _resolveNgoIdentifiers(uid);
+      final organizationId =
+          ngoIds.firstWhere((id) => id != uid, orElse: () => '');
+
       final request = FoodRequest(
         id: '',
-        ngoId: ngoId,
+        ngoId: uid,
         title: title,
         description: description,
         requiredFoodTypes: requiredFoodTypes,
@@ -170,16 +276,20 @@ class NGOProvider extends ChangeNotifier {
         requiresRefrigeration: requiresRefrigeration,
         dietaryRestrictions: dietaryRestrictions,
         createdAt: DateTime.now(),
+        metadata: {
+          if (organizationId.isNotEmpty) 'organizationId': organizationId,
+        },
       );
 
       final requestId = await _requestService.createFoodRequest(
-        ngoId: ngoId,
+        ngoId: uid,
+        organizationId: organizationId.isEmpty ? null : organizationId,
         request: request,
       );
 
       // Reload requests
-      await _loadMyRequests(ngoId);
-      await _loadDashboardStats(ngoId);
+      await _loadMyRequests(ngoIds);
+      await _loadDashboardStats();
 
       return requestId;
     } catch (e) {
@@ -205,8 +315,8 @@ class NGOProvider extends ChangeNotifier {
       await _requestService.updateFoodRequest(requestId, updates);
 
       // Reload requests
-      await _loadMyRequests(ngoId);
-      await _loadDashboardStats(ngoId);
+      await _loadMyRequests([ngoId]);
+      await _loadDashboardStats();
 
       return true;
     } catch (e) {
@@ -232,8 +342,8 @@ class NGOProvider extends ChangeNotifier {
       await _requestService.cancelFoodRequest(requestId, ngoId, reason);
 
       // Reload requests
-      await _loadMyRequests(ngoId);
-      await _loadDashboardStats(ngoId);
+      await _loadMyRequests([ngoId]);
+      await _loadDashboardStats();
 
       return true;
     } catch (e) {
@@ -278,8 +388,8 @@ class NGOProvider extends ChangeNotifier {
       await _requestService.matchRequestWithDonation(requestId, donationId);
 
       // Reload requests
-      await _loadMyRequests(ngoId);
-      await _loadDashboardStats(ngoId);
+      await _loadMyRequests([ngoId]);
+      await _loadDashboardStats();
 
       return true;
     } catch (e) {
@@ -320,7 +430,7 @@ class NGOProvider extends ChangeNotifier {
       );
 
       // Reload queries
-      await _loadMyQueries(ngoId);
+      await _loadMyQueries([ngoId]);
 
       return queryId;
     } catch (e) {
@@ -353,6 +463,25 @@ class NGOProvider extends ChangeNotifier {
   // Refresh data
   Future<void> refreshData(String ngoId) async {
     await loadNGOData(ngoId);
+  }
+
+  Future<bool> rerunAutomaticMatching(String uid) async {
+    try {
+      _isLoading = true;
+      _errorMessage = null;
+      notifyListeners();
+
+      final ngoIds = await _resolveNgoIdentifiers(uid);
+      await _matchingService.backfillMatchesForNGO(ngoIds);
+      await loadNGOData(uid);
+      return true;
+    } catch (e) {
+      _errorMessage = 'Failed to rerun automatic matching: $e';
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   // Clear error message
@@ -398,12 +527,24 @@ class NGOProvider extends ChangeNotifier {
       );
 
       // Reload queries to get the updated data
-      await _loadMyQueries(query.raiserUserId);
+      await _loadMyQueries([query.raiserUserId]);
     } catch (e) {
       _errorMessage = 'Failed to add query update: $e';
     } finally {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  @override
+  void dispose() {
+    for (final subscription in _requestSubscriptions) {
+      subscription.cancel();
+    }
+    for (final subscription in _querySubscriptions) {
+      subscription.cancel();
+    }
+    _donationsSubscription?.cancel();
+    super.dispose();
   }
 }

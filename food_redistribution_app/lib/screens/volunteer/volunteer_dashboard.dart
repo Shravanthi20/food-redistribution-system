@@ -38,6 +38,15 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
   void initState() {
     super.initState();
     _loadOnlineStatus();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final donationProvider =
+          Provider.of<DonationProvider>(context, listen: false);
+      final uid = authProvider.appUser?.uid;
+      if (uid != null) {
+        donationProvider.rerunVolunteerAssignmentsForVolunteer(uid);
+      }
+    });
   }
 
   Future<void> _loadOnlineStatus() async {
@@ -60,11 +69,16 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
 
   Future<void> _toggleOnlineStatus(bool value) async {
     final user = Provider.of<AuthProvider>(context, listen: false).appUser;
+    final donationProvider =
+        Provider.of<DonationProvider>(context, listen: false);
     if (user == null) return;
     setState(() => isOnline = value);
     try {
       await FirebaseFirestore.instance.collection('users').doc(user.uid).update(
           {'isOnline': value, 'updatedAt': FieldValue.serverTimestamp()});
+      if (value) {
+        await donationProvider.rerunVolunteerAssignmentsForVolunteer(user.uid);
+      }
     } catch (e) {
       debugPrint('Error toggling online status: $e');
     }

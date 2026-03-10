@@ -429,10 +429,23 @@ class UserService {
           throw Exception('Invalid user role');
       }
 
-      await _firestore.collection(collection).doc(userId).update({
-        ...profileData,
-        'updatedAt': Timestamp.now(),
-      });
+      if (collection == Collections.users) {
+        final existingProfile =
+            (userData[Fields.profile] as Map<String, dynamic>?) ?? {};
+
+        await _firestore.collection(collection).doc(userId).update({
+          Fields.profile: {
+            ...existingProfile,
+            ...profileData,
+          },
+          'updatedAt': Timestamp.now(),
+        });
+      } else {
+        await _firestore.collection(collection).doc(userId).update({
+          ...profileData,
+          'updatedAt': Timestamp.now(),
+        });
+      }
 
       // Update onboarding state if profile is complete
       if (_isProfileComplete(profileData, role)) {

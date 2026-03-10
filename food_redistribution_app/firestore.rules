@@ -38,6 +38,23 @@ service cloud.firestore {
     function isNGO() {
       return hasRole('ngo');
     }
+    function isOrgOwner(orgId) {
+      return isAuth() && get(/databases/$(database)/documents/organizations/$(orgId)).data.ownerId == request.auth.uid;
+    }
+    
+    function getCurrentOrganizationId() {
+      let userData = getUserData();
+      let profile = userData != null ? userData.profile : null;
+      return profile != null ? profile.organizationId : null;
+    }
+    
+    function isOrgMember(orgId) {
+      return isAuth() && (
+        orgId == request.auth.uid ||
+        getCurrentOrganizationId() == orgId ||
+        isOrgOwner(orgId)
+      );
+    }
     
     function isVolunteer() {
       return hasRole('volunteer');
@@ -75,7 +92,11 @@ service cloud.firestore {
     match /organizations/{orgId} {
       allow read: if isAuth();
       allow create: if isAuth() && isNGO();
-      allow update: if isAuth() && (resource.data.ownerId == request.auth.uid || isAdmin());
+      allow update: if isAuth() && (
+        resource.data.ownerId == request.auth.uid ||
+        isOrgMember(orgId) ||
+        isAdmin()
+      );
       allow delete: if isAdmin();
       
       // Branches subcollection
@@ -100,6 +121,19 @@ service cloud.firestore {
         resource.data.donorId == request.auth.uid ||
         resource.data.ngoId == request.auth.uid ||
         resource.data.volunteerId == request.auth.uid ||
+        resource.data.assignedNGOId == request.auth.uid ||
+        isOrgMember(resource.data.claimedByNGO) ||
+        isOrgMember(request.resource.data.claimedByNGO) ||
+        resource.data.assignedVolunteerId == request.auth.uid ||
+        (
+          isNGO() &&
+          resource.data.status == 'listed' &&
+          request.resource.data.status == 'matched' &&
+          (
+            request.resource.data.assignedNGOId == request.auth.uid ||
+            isOrgMember(request.resource.data.claimedByNGO)
+          )
+        ) ||
         isAdmin()
       );
       allow delete: if isAuth() && (resource.data.donorId == request.auth.uid || isAdmin());
@@ -148,9 +182,30 @@ service cloud.firestore {
     // ============================================================
     match /requests/{requestId} {
       allow read: if isAuth();
-      allow create: if isAuth() && isNGO();
-      allow update: if isAuth() && (resource.data.ngoId == request.auth.uid || isAdmin());
-      allow delete: if isAuth() && (resource.data.ngoId == request.auth.uid || isAdmin());
+      allow create: if isAuth() && isNGO() && (
+        request.resource.data.ngoId == request.auth.uid ||
+        isOrgMember(request.resource.data.ngoId) ||
+        isOrgMember(request.resource.data.metadata.organizationId)
+      );
+      allow update: if isAuth() && (
+        resource.data.ngoId == request.auth.uid ||
+        isOrgMember(resource.data.ngoId) ||
+        isOrgMember(resource.data.metadata.organizationId) ||
+        (
+          request.resource.data.matchedDonationId != null &&
+          exists(/databases/$(database)/documents/donations/$(request.resource.data.matchedDonationId)) &&
+          get(/databases/$(database)/documents/donations/$(request.resource.data.matchedDonationId)).data.donorId == request.auth.uid &&
+          resource.data.status == 'pending' &&
+          request.resource.data.status == 'matched'
+        ) ||
+        isAdmin()
+      );
+      allow delete: if isAuth() && (
+        resource.data.ngoId == request.auth.uid ||
+        isOrgMember(resource.data.ngoId) ||
+        isOrgMember(resource.data.metadata.organizationId) ||
+        isAdmin()
+      );
     }
 
     // ============================================================
@@ -161,6 +216,41 @@ service cloud.firestore {
       allow read: if isAuth() && (resource.data.assigneeId == request.auth.uid || isAdmin());
       allow create: if isAdmin();
       allow update: if isAuth() && (resource.data.assigneeId == request.auth.uid || isAdmin());
+    }
+
+    match /donation_assignments/{assignmentId} {
+      allow read: if isAuth() && (
+        resource.data.assigneeId == request.auth.uid ||
+        isAdmin()
+      );
+      allow create: if isAuth() && (
+        isAdmin() ||
+        (
+          request.resource.data.requestId != null &&
+          exists(/databases/$(database)/documents/requests/$(request.resource.data.requestId)) &&
+          (
+            get(/databases/$(database)/documents/requests/$(request.resource.data.requestId)).data.ngoId == request.auth.uid ||
+            get(/databases/$(database)/documents/organizations/$(get(/databases/$(database)/documents/requests/$(request.resource.data.requestId)).data.ngoId)).data.ownerId == request.auth.uid ||
+            get(/databases/$(database)/documents/donations/$(request.resource.data.donationId)).data.donorId == request.auth.uid
+          )
+        ) ||
+        (
+          isVolunteer() &&
+          request.resource.data.assigneeId == request.auth.uid &&
+          request.resource.data.type == 'volunteer_task' &&
+          request.resource.data.requestId != null &&
+          exists(/databases/$(database)/documents/requests/$(request.resource.data.requestId)) &&
+          exists(/databases/$(database)/documents/donations/$(request.resource.data.donationId)) &&
+          get(/databases/$(database)/documents/requests/$(request.resource.data.requestId)).data.status == 'matched' &&
+          get(/databases/$(database)/documents/donations/$(request.resource.data.donationId)).data.status == 'matched' &&
+          get(/databases/$(database)/documents/donations/$(request.resource.data.donationId)).data.assignedVolunteerId == null
+        )
+      );
+      allow update: if isAuth() && (
+        resource.data.assigneeId == request.auth.uid ||
+        isAdmin()
+      );
+      allow delete: if isAdmin();
     }
 
     // ============================================================
@@ -182,9 +272,21 @@ service cloud.firestore {
     // User notifications (flat collection pattern)
     // ============================================================
     match /notifications/{notificationId} {
-      allow read: if isAuth() && (resource.data.donorId == request.auth.uid || resource.data.ngoId == request.auth.uid || resource.data.volunteerId == request.auth.uid || isAdmin());
+      allow read: if isAuth() && (
+        resource.data.userId == request.auth.uid ||
+        resource.data.donorId == request.auth.uid ||
+        resource.data.ngoId == request.auth.uid ||
+        resource.data.volunteerId == request.auth.uid ||
+        isAdmin()
+      );
       allow create: if isAuth();
-      allow update: if isAuth() && (resource.data.donorId == request.auth.uid || resource.data.ngoId == request.auth.uid || resource.data.volunteerId == request.auth.uid || isAdmin());
+      allow update: if isAuth() && (
+        resource.data.userId == request.auth.uid ||
+        resource.data.donorId == request.auth.uid ||
+        resource.data.ngoId == request.auth.uid ||
+        resource.data.volunteerId == request.auth.uid ||
+        isAdmin()
+      );
       allow delete: if isAdmin();
     }
 
@@ -250,11 +352,34 @@ service cloud.firestore {
       }
     }
 
+    match /matching_sessions/{sessionId} {
+      allow read: if isAuth();
+      allow create: if isAuth();
+      allow update, delete: if isAdmin();
+    }
+
+    match /request_matching_sessions/{sessionId} {
+      allow read: if isAuth();
+      allow create: if isAuth();
+      allow update, delete: if isAdmin();
+    }
+
     // ============================================================
     // ADMIN TASKS
     // ============================================================
     match /admin_tasks/{taskId} {
-      allow read, write: if isAdmin();
+      allow read: if isAuth() && (
+        isAdmin() ||
+        resource.data.userId == request.auth.uid ||
+        resource.data.raiserUserId == request.auth.uid ||
+        isOrgOwner(resource.data.raiserUserId) ||
+        resource.data.assignedAdminId == request.auth.uid
+      );
+      allow update: if isAuth() && (
+        isAdmin() ||
+        resource.data.raiserUserId == request.auth.uid ||
+        isOrgOwner(resource.data.raiserUserId)
+      );
       allow create: if isAuth();
     }
 

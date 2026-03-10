@@ -538,14 +538,20 @@ class VerificationService {
       final query = await _firestore
           .collection(Collections.verifications)
           .where('userId', isEqualTo: userId)
-          .orderBy('submittedAt', descending: true)
-          .limit(1)
           .get();
 
-      if (query.docs.isNotEmpty) {
-        return query.docs.first.data();
-      }
-      return null;
+      if (query.docs.isEmpty) return null;
+
+      final docs = query.docs.toList()
+        ..sort((a, b) {
+          final aSubmittedAt = a.data()['submittedAt'] as Timestamp?;
+          final bSubmittedAt = b.data()['submittedAt'] as Timestamp?;
+          final aMillis = aSubmittedAt?.millisecondsSinceEpoch ?? 0;
+          final bMillis = bSubmittedAt?.millisecondsSinceEpoch ?? 0;
+          return bMillis.compareTo(aMillis);
+        });
+
+      return docs.first.data();
     } catch (e) {
       debugPrint('Error checking verification status: $e');
       return null;

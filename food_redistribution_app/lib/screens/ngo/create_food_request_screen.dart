@@ -20,6 +20,7 @@ class _CreateFoodRequestScreenState extends State<CreateFoodRequestScreen> {
   final _descriptionController = TextEditingController();
   final _quantityController = TextEditingController();
   final _beneficiariesController = TextEditingController();
+  final _deliveryAddressController = TextEditingController();
 
   final List<FoodCategory> _selectedFoodTypes = [];
   final List<String> _selectedServingPopulation = [];
@@ -59,6 +60,7 @@ class _CreateFoodRequestScreenState extends State<CreateFoodRequestScreen> {
         donation.foodTypes.map((t) => _mapFoodTypeToCategory(t)),
       );
       _requiresRefrigeration = donation.requiresRefrigeration;
+      _deliveryAddressController.text = donation.pickupAddress;
       // Pre-select dietary restrictions based on donation flags
       _selectedDietaryRestrictions.clear();
       if (donation.isVegetarian) _selectedDietaryRestrictions.add('vegetarian');
@@ -399,11 +401,24 @@ class _CreateFoodRequestScreenState extends State<CreateFoodRequestScreen> {
               ),
               const SizedBox(height: 16),
 
+              TextFormField(
+                controller: _deliveryAddressController,
+                decoration: const InputDecoration(
+                  labelText: 'Delivery Address',
+                  hintText: 'Enter the NGO delivery address',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 2,
+              ),
+
+              const SizedBox(height: 12),
+
               ListTile(
-                title: const Text('Set Delivery Location'),
+                title: const Text('Use Current Location'),
                 subtitle: Text(_deliveryLocation != null
-                    ? 'Location set'
-                    : 'Tap to set your delivery location'),
+                    ? (_deliveryLocation!['address'] as String? ??
+                        'Location set')
+                    : 'Tap to use this device location'),
                 trailing: const Icon(Icons.location_on),
                 onTap: _setDeliveryLocation,
               ),
@@ -448,12 +463,31 @@ class _CreateFoodRequestScreenState extends State<CreateFoodRequestScreen> {
   void _setDeliveryLocation() async {
     try {
       final location = await _locationService.getCurrentLocation();
+      if (location == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Unable to fetch a valid delivery location'),
+            ),
+          );
+        }
+        return;
+      }
+
+      final address = await _locationService.reverseGeocode(
+            location.latitude,
+            location.longitude,
+          ) ??
+          'Current Location';
+
+      if (!mounted) return;
       setState(() {
-        _deliveryLocation = {
-          'latitude': location?.latitude ?? 0.0,
-          'longitude': location?.longitude ?? 0.0,
-          'address': 'Current Location', // In a real app, reverse geocode this
-        };
+        _deliveryAddressController.text = address;
+        _deliveryLocation = _locationService.buildLocationData(
+          latitude: location.latitude,
+          longitude: location.longitude,
+          address: address,
+        );
       });
     } catch (e) {
       if (mounted) {
@@ -466,6 +500,9 @@ class _CreateFoodRequestScreenState extends State<CreateFoodRequestScreen> {
 
   void _submitRequest() async {
     if (!_formKey.currentState!.validate()) return;
+
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final ngoProvider = Provider.of<NGOProvider>(context, listen: false);
 
     if (_selectedFoodTypes.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -481,9 +518,38 @@ class _CreateFoodRequestScreenState extends State<CreateFoodRequestScreen> {
       return;
     }
 
-    if (_deliveryLocation == null) {
+    final enteredAddress = _deliveryAddressController.text.trim();
+    if (enteredAddress.isNotEmpty) {
+      final geocoded = await _locationService.geocodeAddress(enteredAddress);
+      if (geocoded == null) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Unable to locate the delivery address')),
+        );
+        return;
+      }
+
+      _deliveryLocation = {
+        ...geocoded,
+        'address': enteredAddress,
+      };
+    } else if (_deliveryLocation == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please set delivery location')),
+        const SnackBar(
+            content: Text('Enter a delivery address or use current location')),
+      );
+      return;
+    }
+
+    final latitude = (_deliveryLocation!['latitude'] as num?)?.toDouble();
+    final longitude = (_deliveryLocation!['longitude'] as num?)?.toDouble();
+    if (latitude == null ||
+        longitude == null ||
+        (latitude == 0.0 && longitude == 0.0)) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please set a valid delivery location')),
       );
       return;
     }
@@ -491,11 +557,8 @@ class _CreateFoodRequestScreenState extends State<CreateFoodRequestScreen> {
     setState(() => _isSubmitting = true);
 
     try {
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final ngoProvider = Provider.of<NGOProvider>(context, listen: false);
-
       final requestId = await ngoProvider.createFoodRequest(
-        ngoId: authProvider.firebaseUser!.uid,
+        uid: authProvider.firebaseUser!.uid,
         title: _titleController.text,
         description: _descriptionController.text,
         requiredFoodTypes: _selectedFoodTypes,
@@ -545,6 +608,7 @@ class _CreateFoodRequestScreenState extends State<CreateFoodRequestScreen> {
     _descriptionController.dispose();
     _quantityController.dispose();
     _beneficiariesController.dispose();
+    _deliveryAddressController.dispose();
     super.dispose();
   }
 }

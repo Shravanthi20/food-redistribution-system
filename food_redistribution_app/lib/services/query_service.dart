@@ -135,15 +135,7 @@ class QueryService {
   /// Get queries raised by a user
   Future<List<query_model.Query>> getUserQueries(String userId) async {
     try {
-      final snapshot = await _firestore
-          .collection(Collections.adminTasks)
-          .where('raiserUserId', isEqualTo: userId)
-          .orderBy('createdAt', descending: true)
-          .get();
-
-      return snapshot.docs
-          .map((doc) => query_model.Query.fromFirestore(doc))
-          .toList();
+      return getUserQueriesForIds([userId]);
     } catch (e) {
       await _auditService.logEvent(
         eventType: AuditEventType.dataAccess,
@@ -153,6 +145,52 @@ class QueryService {
           'action': 'get_user_queries_failed',
           'description': 'Failed to get queries for user $userId: $e',
           'userId': userId,
+          'error': e.toString(),
+        },
+      );
+      return [];
+    }
+  }
+
+  /// Get queries raised by any of the provided user identifiers.
+  Future<List<query_model.Query>> getUserQueriesForIds(
+      List<String> userIds) async {
+    final sanitizedIds =
+        userIds.where((id) => id.trim().isNotEmpty).toSet().toList();
+    if (sanitizedIds.isEmpty) return [];
+
+    try {
+      final queries = <query_model.Query>[];
+
+      for (final userId in sanitizedIds) {
+        final snapshot = await _firestore
+            .collection(Collections.adminTasks)
+            .where('raiserUserId', isEqualTo: userId)
+            .get();
+
+        queries.addAll(
+          snapshot.docs.map((doc) => query_model.Query.fromFirestore(doc)),
+        );
+      }
+
+      final deduped = <String, query_model.Query>{};
+      for (final query in queries) {
+        deduped[query.id] = query;
+      }
+
+      final sorted = deduped.values.toList()
+        ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      return sorted;
+    } catch (e) {
+      await _auditService.logEvent(
+        eventType: AuditEventType.dataAccess,
+        userId: sanitizedIds.first,
+        riskLevel: AuditRiskLevel.medium,
+        additionalData: {
+          'action': 'get_user_queries_for_ids_failed',
+          'description':
+              'Failed to get queries for user identifiers $sanitizedIds: $e',
+          'userIds': sanitizedIds,
           'error': e.toString(),
         },
       );

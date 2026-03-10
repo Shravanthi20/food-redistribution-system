@@ -2,10 +2,21 @@ import 'package:flutter/material.dart';
 import '../models/food_donation.dart';
 import '../services/food_donation_service.dart';
 import '../services/connectivity_service.dart';
+import '../services/matching_service.dart';
+import '../services/firestore_service.dart';
+import '../services/location_service.dart';
+import '../services/notification_service.dart';
+import '../services/audit_service.dart';
 import 'dart:async';
 
 class DonationProvider extends ChangeNotifier {
   final FoodDonationService _donationService = FoodDonationService();
+  final EnhancedMatchingService _matchingService = EnhancedMatchingService(
+    firestoreService: FirestoreService(),
+    locationService: LocationService(),
+    notificationService: NotificationService(),
+    auditService: AuditService(),
+  );
 
   List<FoodDonation> _donations = [];
   List<FoodDonation> _myDonations = [];
@@ -79,9 +90,60 @@ class DonationProvider extends ChangeNotifier {
       _errorMessage = null;
       notifyListeners();
 
+      await _matchingService.backfillPendingMatches();
       _myDonations = await _donationService.getDonorDonations(donorId);
     } catch (e) {
       _errorMessage = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> rerunAutomaticMatching() async {
+    try {
+      _isLoading = true;
+      _errorMessage = null;
+      notifyListeners();
+      await _matchingService.backfillPendingMatches();
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> rerunVolunteerAssignments() async {
+    try {
+      _isLoading = true;
+      _errorMessage = null;
+      notifyListeners();
+      await _matchingService.backfillVolunteerAssignments();
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> rerunVolunteerAssignmentsForVolunteer(String volunteerId) async {
+    try {
+      _isLoading = true;
+      _errorMessage = null;
+      notifyListeners();
+      await _matchingService.backfillVolunteerAssignmentsForVolunteer(
+        volunteerId,
+      );
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      return false;
     } finally {
       _isLoading = false;
       notifyListeners();

@@ -5,11 +5,22 @@ import '../models/food_donation.dart';
 import '../models/ngo_profile.dart';
 import '../config/firebase_schema.dart';
 import 'user_service.dart';
+import 'matching_service.dart';
+import 'firestore_service.dart';
+import 'location_service.dart';
+import 'notification_service.dart';
+import 'audit_service.dart';
 
 class FoodDonationService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final UserService _userService = UserService();
   final Uuid _uuid = const Uuid();
+  late final EnhancedMatchingService _matchingService = EnhancedMatchingService(
+    firestoreService: FirestoreService(),
+    locationService: LocationService(),
+    notificationService: NotificationService(),
+    auditService: AuditService(),
+  );
 
   // US8: Post Surplus Food (Donor)
   Future<String> createFoodDonation({
@@ -72,8 +83,7 @@ class FoodDonationService {
       await _logDonationAction('donation_created', donationId, donorId);
 
       // [REMOVED] Client-Side Matching
-      // Relying on Cloud Functions (functions/index.js) as requested.
-      // _triggerClientSideMatching(donationId, donationWithId);
+      await _matchingService.executeAutomaticMatching(donationId: donationId);
 
       return donationId;
     } catch (e) {
@@ -524,11 +534,15 @@ class FoodDonationService {
   }
 
   // Get donations for NGO (based on preferences and location)
-  Future<List<FoodDonation>> getAvailableDonationsForNGO(String ngoId) async {
+  Future<List<FoodDonation>> getAvailableDonationsForNGO({
+    required String userId,
+    String? organizationId,
+  }) async {
     try {
-      // Get NGO profile to understand preferences
-      final ngoProfile =
-          await _userService.getUserProfile(ngoId) as NGOProfile?;
+      final ngoProfile = await _getNGOProfile(
+        userId: userId,
+        organizationId: organizationId,
+      );
       if (ngoProfile == null) return [];
 
       Query query = _firestore
@@ -541,15 +555,51 @@ class FoodDonationService {
             arrayContainsAny: ngoProfile.preferredFoodTypes);
       }
 
-      final result = await query.orderBy('createdAt', descending: true).get();
+      final result = await query.get();
 
-      return result.docs
+      final donations = result.docs
           .map((doc) => FoodDonation.fromFirestore(doc))
           .where((donation) => donation.isAvailable)
-          .toList();
+          .toList()
+        ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+      return donations;
     } catch (e) {
       debugPrint('Error getting available donations for NGO: $e');
       return [];
+    }
+  }
+
+  Future<NGOProfile?> _getNGOProfile({
+    required String userId,
+    String? organizationId,
+  }) async {
+    try {
+      String? resolvedOrganizationId = organizationId;
+
+      if (resolvedOrganizationId == null || resolvedOrganizationId.isEmpty) {
+        final userDoc =
+            await _firestore.collection(Collections.users).doc(userId).get();
+        final profile =
+            (userDoc.data()?['profile'] as Map<String, dynamic>?) ?? {};
+        resolvedOrganizationId = profile['organizationId'] as String?;
+      }
+
+      if (resolvedOrganizationId != null && resolvedOrganizationId.isNotEmpty) {
+        final orgDoc = await _firestore
+            .collection(Collections.organizations)
+            .doc(resolvedOrganizationId)
+            .get();
+        if (orgDoc.exists) {
+          return NGOProfile.fromFirestore(orgDoc);
+        }
+      }
+
+      final directProfile = await _userService.getUserProfile(userId);
+      return directProfile is NGOProfile ? directProfile : null;
+    } catch (e) {
+      debugPrint('Error resolving NGO profile: $e');
+      return null;
     }
   }
 
@@ -740,15 +790,15 @@ class FoodDonationService {
   Stream<List<FoodDonation>> getAvailableDonationsStream() {
     return _firestore
         .collection(Collections.donations)
-        .where('status',
-            whereIn: [DonationStatus.listed.name, DonationStatus.matched.name])
-        .orderBy('createdAt', descending: true)
+        .where('status', isEqualTo: DonationStatus.listed.name)
         .snapshots()
         .map((snapshot) {
-          return snapshot.docs
-              .map((doc) => FoodDonation.fromFirestore(doc))
-              .toList();
-        });
+      final donations = snapshot.docs
+          .map((doc) => FoodDonation.fromFirestore(doc))
+          .toList()
+        ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      return donations;
+    });
   }
 
   // Get tasks assigned to a specific volunteer
@@ -789,6 +839,12 @@ class FoodDonationService {
   Future<void> acceptAssignment(
       String assignmentId, String donationId, String volunteerId) async {
     final batch = _firestore.batch();
+    final assignmentSnapshot = await _firestore
+        .collection('donation_assignments')
+        .doc(assignmentId)
+        .get();
+    final assignmentData = assignmentSnapshot.data() ?? <String, dynamic>{};
+    final requestId = assignmentData['requestId'] as String?;
 
     // 1. Update Assignment Status
     final assignmentRef =
@@ -809,6 +865,15 @@ class FoodDonationService {
       // But we might want to flag it.
       'updatedAt': Timestamp.now(),
     });
+
+    if (requestId != null && requestId.isNotEmpty) {
+      final requestRef =
+          _firestore.collection(Collections.requests).doc(requestId);
+      batch.update(requestRef, {
+        'assignedVolunteerId': volunteerId,
+        'updatedAt': Timestamp.now(),
+      });
+    }
 
     await batch.commit();
     await _logDonationAction(

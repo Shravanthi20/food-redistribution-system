@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:math' as math;
 import '../models/food_donation.dart';
 import '../models/food_request.dart';
@@ -433,8 +434,12 @@ class FoodDonationMatchingService {
     };
 
     final sessionId = 'matching_${DateTime.now().millisecondsSinceEpoch}';
-    await _firestoreService.create(
-        'matching_sessions', sessionId, matchingSession);
+    try {
+      await _firestoreService.create(
+          'matching_sessions', sessionId, matchingSession);
+    } catch (_) {
+      // Analytics writes must not block user-facing matching.
+    }
   }
 
   /// Notify matched NGOs about available donation
@@ -514,6 +519,10 @@ class EnhancedMatchingService {
   final LocationService _locationService;
   final NotificationService _notificationService;
   final AuditService _auditService;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  static const double _autoMatchMaxDistanceKm = 25.0;
+  static const double _autoMatchScoreThreshold = 0.45;
+  static bool _sessionBackfillRan = false;
 
   EnhancedMatchingService({
     required FirestoreService firestoreService,
@@ -646,6 +655,230 @@ class EnhancedMatchingService {
     }
   }
 
+  Future<void> backfillPendingMatches({
+    int donationLimit = 50,
+    int requestLimit = 50,
+  }) async {
+    try {
+      final pendingRequests = await FirebaseFirestore.instance
+          .collection(Collections.requests)
+          .where('status', isEqualTo: RequestStatus.pending.name)
+          .limit(requestLimit)
+          .get();
+
+      for (final doc in pendingRequests.docs) {
+        await _autoMatchRequest(doc.id);
+      }
+
+      final listedDonations = await FirebaseFirestore.instance
+          .collection(Collections.donations)
+          .where('status', isEqualTo: DonationStatus.listed.name)
+          .limit(donationLimit)
+          .get();
+
+      for (final doc in listedDonations.docs) {
+        await _autoMatchDonation(doc.id);
+      }
+
+      await backfillVolunteerAssignments();
+    } catch (e) {
+      await _auditService.logEvent(
+        eventType: AuditEventType.adminAction,
+        userId: 'system',
+        riskLevel: AuditRiskLevel.medium,
+        additionalData: {
+          'event': 'matching_backfill_error',
+          'description': 'Error while backfilling pending matches: $e',
+          'error': e.toString(),
+        },
+      );
+    }
+  }
+
+  Future<void> backfillVolunteerAssignments({
+    int matchedLimit = 50,
+  }) async {
+    try {
+      final matchedDonations = await FirebaseFirestore.instance
+          .collection(Collections.donations)
+          .where('status', isEqualTo: DonationStatus.matched.name)
+          .limit(matchedLimit)
+          .get();
+
+      for (final doc in matchedDonations.docs) {
+        final donation = FoodDonation.fromFirestore(doc);
+        final requestId = doc.data()['matchedRequestId'] as String?;
+
+        if (requestId == null || requestId.isEmpty) continue;
+        if (donation.assignedVolunteerId != null &&
+            donation.assignedVolunteerId!.isNotEmpty) {
+          continue;
+        }
+
+        await _triggerVolunteerAssignment(doc.id, requestId);
+      }
+    } catch (e) {
+      await _auditService.logEvent(
+        eventType: AuditEventType.adminAction,
+        userId: 'system',
+        riskLevel: AuditRiskLevel.medium,
+        additionalData: {
+          'event': 'volunteer_assignment_backfill_error',
+          'description': 'Error while backfilling volunteer assignments: $e',
+          'error': e.toString(),
+        },
+      );
+    }
+  }
+
+  Future<void> backfillVolunteerAssignmentsForVolunteer(
+    String volunteerId, {
+    int matchedLimit = 50,
+  }) async {
+    try {
+      final volunteerDoc = await FirebaseFirestore.instance
+          .collection(Collections.users)
+          .doc(volunteerId)
+          .get();
+      if (!volunteerDoc.exists) return;
+
+      final volunteerData = volunteerDoc.data() ?? <String, dynamic>{};
+      final profile =
+          (volunteerData[Fields.profile] as Map<String, dynamic>?) ?? {};
+      final status = volunteerData[Fields.status] as String?;
+      final isOnline = volunteerData['isOnline'] == true;
+      final location = profile['location'] as Map<String, dynamic>?;
+      final maxRadius = (profile['maxRadius'] as num?)?.toDouble() ?? 25.0;
+
+      if (status != UserStatus.active.name || !isOnline || location == null) {
+        return;
+      }
+
+      final volunteerLat = (location['latitude'] as num?)?.toDouble();
+      final volunteerLng = (location['longitude'] as num?)?.toDouble();
+      if (volunteerLat == null || volunteerLng == null) return;
+
+      final matchedDonations = await FirebaseFirestore.instance
+          .collection(Collections.donations)
+          .where('status', isEqualTo: DonationStatus.matched.name)
+          .limit(matchedLimit)
+          .get();
+
+      for (final doc in matchedDonations.docs) {
+        final donation = FoodDonation.fromFirestore(doc);
+        final requestId = doc.data()['matchedRequestId'] as String?;
+
+        if (requestId == null || requestId.isEmpty) continue;
+        if (donation.assignedVolunteerId != null &&
+            donation.assignedVolunteerId!.isNotEmpty) {
+          continue;
+        }
+
+        final existingAssignments = await FirebaseFirestore.instance
+            .collection('donation_assignments')
+            .where('donationId', isEqualTo: doc.id)
+            .where('requestId', isEqualTo: requestId)
+            .where('status', whereIn: ['pending', 'accepted'])
+            .limit(1)
+            .get();
+
+        if (existingAssignments.docs.isNotEmpty) continue;
+
+        final requestDoc = await FirebaseFirestore.instance
+            .collection(Collections.requests)
+            .doc(requestId)
+            .get();
+        if (!requestDoc.exists) continue;
+        final request = FoodRequest.fromFirestore(requestDoc);
+
+        final pickupDistance = _locationService.calculateDistance(
+          volunteerLat,
+          volunteerLng,
+          donation.pickupLocation['latitude']?.toDouble() ?? 0.0,
+          donation.pickupLocation['longitude']?.toDouble() ?? 0.0,
+        );
+
+        if (pickupDistance > maxRadius) continue;
+
+        final assignmentRef =
+            FirebaseFirestore.instance.collection('donation_assignments').doc();
+        await assignmentRef.set({
+          'donationId': doc.id,
+          'requestId': requestId,
+          'assigneeId': volunteerId,
+          'type': 'volunteer_task',
+          'status': 'pending',
+          'createdAt': Timestamp.now(),
+          'updatedAt': Timestamp.now(),
+          'distanceKm': pickupDistance +
+              _locationService.calculateDistance(
+                donation.pickupLocation['latitude']?.toDouble() ?? 0.0,
+                donation.pickupLocation['longitude']?.toDouble() ?? 0.0,
+                request.deliveryLocation['latitude']?.toDouble() ?? 0.0,
+                request.deliveryLocation['longitude']?.toDouble() ?? 0.0,
+              ),
+        });
+      }
+    } catch (e) {
+      await _auditService.logEvent(
+        eventType: AuditEventType.adminAction,
+        userId: volunteerId,
+        riskLevel: AuditRiskLevel.medium,
+        additionalData: {
+          'event': 'volunteer_self_assignment_backfill_error',
+          'description':
+              'Volunteer assignment self-backfill failed for $volunteerId: $e',
+          'volunteerId': volunteerId,
+          'error': e.toString(),
+        },
+      );
+    }
+  }
+
+  Future<void> backfillMatchesForNGO(List<String> ngoIds) async {
+    try {
+      for (final ngoId in ngoIds) {
+        final pendingRequests = await FirebaseFirestore.instance
+            .collection(Collections.requests)
+            .where('ngoId', isEqualTo: ngoId)
+            .where('status', isEqualTo: RequestStatus.pending.name)
+            .get();
+
+        for (final doc in pendingRequests.docs) {
+          await _autoMatchRequest(doc.id);
+        }
+      }
+
+      // Also try to match listed donations with these NGOs
+      final listedDonations = await FirebaseFirestore.instance
+          .collection(Collections.donations)
+          .where('status', isEqualTo: DonationStatus.listed.name)
+          .limit(20)
+          .get();
+
+      for (final doc in listedDonations.docs) {
+        await _autoMatchDonation(doc.id);
+      }
+    } catch (e) {
+      await _auditService.logEvent(
+        eventType: AuditEventType.adminAction,
+        userId: 'system',
+        riskLevel: AuditRiskLevel.medium,
+        additionalData: {
+          'event': 'matching_ngo_backfill_error',
+          'description': 'Error while backfilling matches for NGOs $ngoIds: $e',
+          'error': e.toString(),
+        },
+      );
+    }
+  }
+
+  Future<void> maybeRunInitialBackfill(List<String> ngoIds) async {
+    if (_sessionBackfillRan) return;
+    _sessionBackfillRan = true;
+    await backfillMatchesForNGO(ngoIds);
+  }
+
   /// Auto-match a donation with existing requests
   Future<void> _autoMatchDonation(String donationId) async {
     try {
@@ -663,8 +896,7 @@ class EnhancedMatchingService {
       for (final request in requests) {
         final score =
             await _calculateDonationRequestCompatibility(donation, request);
-        if (score > bestScore && score >= 0.7) {
-          // 70% threshold
+        if (score > bestScore && score >= _autoMatchScoreThreshold) {
           bestScore = score;
           bestRequest = request;
         }
@@ -705,8 +937,7 @@ class EnhancedMatchingService {
       for (final donation in donations) {
         final score =
             await _calculateDonationRequestCompatibility(donation, request);
-        if (score > bestScore && score >= 0.7) {
-          // 70% threshold
+        if (score > bestScore && score >= _autoMatchScoreThreshold) {
           bestScore = score;
           bestDonation = donation;
         }
@@ -734,6 +965,22 @@ class EnhancedMatchingService {
   Future<void> _executeBidirectionalMatch(
       String donationId, String requestId) async {
     try {
+      final requestDoc = await FirebaseFirestore.instance
+          .collection(Collections.requests)
+          .doc(requestId)
+          .get();
+      final donationDoc = await FirebaseFirestore.instance
+          .collection(Collections.donations)
+          .doc(donationId)
+          .get();
+
+      if (!requestDoc.exists || !donationDoc.exists) {
+        throw Exception('Donation or request not found for auto-match');
+      }
+
+      final request = FoodRequest.fromFirestore(requestDoc);
+      final ngoContext = await _resolveNgoContext(request.ngoId);
+
       final batch = FirebaseFirestore.instance.batch();
 
       // Update donation
@@ -744,9 +991,13 @@ class EnhancedMatchingService {
         {
           'status': DonationStatus.matched.name,
           'matchedRequestId': requestId,
+          'assignedNGOId': ngoContext.userId,
+          'ngoName': ngoContext.organizationName,
+          'claimedByNGO': ngoContext.organizationId,
           'updatedAt': Timestamp.now(),
           'metadata.autoMatched': true,
           'metadata.matchedAt': Timestamp.now(),
+          'metadata.organizationId': ngoContext.organizationId,
         },
       );
 
@@ -761,10 +1012,32 @@ class EnhancedMatchingService {
           'updatedAt': Timestamp.now(),
           'metadata.autoMatched': true,
           'metadata.matchedAt': Timestamp.now(),
+          'metadata.ngoUserId': ngoContext.userId,
         },
       );
 
       await batch.commit();
+
+      try {
+        await FirebaseFirestore.instance.collection('matching_sessions').add({
+          'donationId': donationId,
+          'requestId': requestId,
+          'algorithm': 'location_auto_match',
+          'timestamp': Timestamp.now(),
+          'matchCount': 1,
+          'matches': [
+            {
+              'donationId': donationId,
+              'requestId': requestId,
+              'ngoUserId': ngoContext.userId,
+              'organizationId': ngoContext.organizationId,
+              'autoMatched': true,
+            }
+          ],
+        });
+      } catch (_) {
+        // Analytics writes must not block user-facing matching.
+      }
 
       // Log the match
       await _auditService.logEvent(
@@ -824,7 +1097,7 @@ class EnhancedMatchingService {
         }
         if (foodTypeScore > 0) break;
       }
-      score += foodTypeScore * 0.35;
+      score += foodTypeScore * 0.25;
 
       // Quantity match (25%) - with better handling
       final requestQuantity = request.requiredQuantity.toDouble();
@@ -850,7 +1123,7 @@ class EnhancedMatchingService {
         quantityScore = quantityRatio; // Poor match for severe under-supply
       }
 
-      score += quantityScore * 0.25;
+      score += quantityScore * 0.20;
 
       // Distance score (20%)
       try {
@@ -862,20 +1135,21 @@ class EnhancedMatchingService {
         );
 
         double distanceScore;
-        if (distance <= 5) {
+        if (distance <= 3) {
           distanceScore = 1.0;
-        } else if (distance <= 15) {
-          distanceScore = 0.8;
-        } else if (distance <= 30) {
-          distanceScore = (40.0 - distance) / 25.0;
+        } else if (distance <= 10) {
+          distanceScore = 0.9;
+        } else if (distance <= _autoMatchMaxDistanceKm) {
+          distanceScore =
+              (_autoMatchMaxDistanceKm - distance) / _autoMatchMaxDistanceKm;
         } else {
-          distanceScore = 0.1;
+          distanceScore = 0.0;
         }
 
-        score += (distanceScore > 0 ? distanceScore : 0) * 0.2;
+        score += (distanceScore > 0 ? distanceScore : 0) * 0.35;
       } catch (e) {
         // If distance calculation fails, use medium score
-        score += 0.5 * 0.2;
+        score += 0.3 * 0.35;
       }
 
       // Time compatibility (15%)
@@ -884,14 +1158,13 @@ class EnhancedMatchingService {
       final timeToNeeded = request.neededBy.difference(now).inHours;
 
       double timeScore;
-      if (timeToExpiry <= 0) {
+      if (timeToExpiry <= 0 || timeToNeeded <= -2) {
         timeScore = 0.0; // Expired
-      } else if (timeToNeeded > 0 && timeToExpiry > timeToNeeded + 2) {
-        timeScore = 1.0; // Perfect timing
-      } else if (timeToNeeded > 0 && timeToExpiry > timeToNeeded) {
-        timeScore = 0.8; // Good timing
-      } else if (timeToExpiry > 6) {
-        timeScore = 0.6; // Acceptable
+      } else if (donation.expiresAt
+          .isAfter(request.neededBy.subtract(const Duration(hours: 2)))) {
+        timeScore = 1.0; // Donation stays valid through the requested window
+      } else if (timeToExpiry >= 4) {
+        timeScore = 0.7; // Still usable soon
       } else {
         timeScore = 0.3; // Poor timing
       }
@@ -908,7 +1181,11 @@ class EnhancedMatchingService {
       }
       score += dietaryScore * 0.05;
 
-      // Ensure score is between 0 and 1
+      if (!_hasValidCoordinates(donation.pickupLocation) ||
+          !_hasValidCoordinates(request.deliveryLocation)) {
+        return 0.0;
+      }
+
       return score.clamp(0.0, 1.0);
     } catch (e) {
       // Return low score for any calculation errors
@@ -985,11 +1262,24 @@ class EnhancedMatchingService {
     final requests = <FoodRequest>[];
     for (final doc in snapshot.docs) {
       final request = FoodRequest.fromFirestore(doc);
+      if (!_hasValidCoordinates(donation.pickupLocation) ||
+          !_hasValidCoordinates(request.deliveryLocation)) {
+        continue;
+      }
+
+      final distance = _locationService.calculateDistance(
+        donation.pickupLocation['latitude']?.toDouble() ?? 0.0,
+        donation.pickupLocation['longitude']?.toDouble() ?? 0.0,
+        request.deliveryLocation['latitude']?.toDouble() ?? 0.0,
+        request.deliveryLocation['longitude']?.toDouble() ?? 0.0,
+      );
 
       // Basic compatibility checks
       if (request.neededBy.isAfter(DateTime.now()) &&
-          request.neededBy
-              .isAfter(donation.expiresAt.subtract(const Duration(hours: 2)))) {
+          distance <= _autoMatchMaxDistanceKm &&
+          donation.expiresAt.isAfter(DateTime.now()) &&
+          donation.expiresAt
+              .isAfter(request.neededBy.subtract(const Duration(hours: 2)))) {
         requests.add(request);
       }
     }
@@ -1008,9 +1298,22 @@ class EnhancedMatchingService {
     final donations = <FoodDonation>[];
     for (final doc in snapshot.docs) {
       final donation = FoodDonation.fromFirestore(doc);
+      if (!_hasValidCoordinates(donation.pickupLocation) ||
+          !_hasValidCoordinates(request.deliveryLocation)) {
+        continue;
+      }
+
+      final distance = _locationService.calculateDistance(
+        donation.pickupLocation['latitude']?.toDouble() ?? 0.0,
+        donation.pickupLocation['longitude']?.toDouble() ?? 0.0,
+        request.deliveryLocation['latitude']?.toDouble() ?? 0.0,
+        request.deliveryLocation['longitude']?.toDouble() ?? 0.0,
+      );
 
       // Basic compatibility checks
       if (donation.expiresAt.isAfter(DateTime.now()) &&
+          distance <= _autoMatchMaxDistanceKm &&
+          request.neededBy.isAfter(DateTime.now()) &&
           donation.expiresAt
               .isAfter(request.neededBy.subtract(const Duration(hours: 2)))) {
         donations.add(donation);
@@ -1020,14 +1323,25 @@ class EnhancedMatchingService {
     return donations;
   }
 
+  bool _hasValidCoordinates(Map<String, dynamic> location) {
+    final lat = (location['latitude'] as num?)?.toDouble();
+    final lng = (location['longitude'] as num?)?.toDouble();
+
+    if (lat == null || lng == null) return false;
+    if (lat == 0.0 && lng == 0.0) return false;
+    return true;
+  }
+
   /// Helper methods for the enhanced matching
   Future<FoodRequest?> _getRequest(String requestId) async {
-    final doc = await _firestoreService.get('food_requests', requestId);
-    return FoodRequest.fromMap(doc.data()! as Map<String, dynamic>);
+    final doc = await _firestoreService.get(Collections.requests, requestId);
+    if (!doc.exists || doc.data() == null) return null;
+    return FoodRequest.fromFirestore(doc);
   }
 
   Future<FoodDonation?> _getDonation(String donationId) async {
-    final doc = await _firestoreService.get('food_donations', donationId);
+    final doc = await _firestoreService.get(Collections.donations, donationId);
+    if (!doc.exists || doc.data() == null) return null;
     return FoodDonation.fromFirestore(doc);
   }
 
@@ -1036,7 +1350,7 @@ class EnhancedMatchingService {
     required double maxDistance,
   }) async {
     final donationDocs = await _firestoreService.query(
-      'food_donations',
+      Collections.donations,
       where: {
         'status': DonationStatus.listed.name,
       },
@@ -1237,8 +1551,12 @@ class EnhancedMatchingService {
 
     final sessionId =
         'request_matching_${DateTime.now().millisecondsSinceEpoch}';
-    await _firestoreService.create(
-        'request_matching_sessions', sessionId, matchingSession);
+    try {
+      await _firestoreService.create(
+          'request_matching_sessions', sessionId, matchingSession);
+    } catch (_) {
+      // Analytics writes must not block user-facing matching.
+    }
   }
 
   Future<void> _notifyBidirectionalMatch(
@@ -1257,6 +1575,7 @@ class EnhancedMatchingService {
 
       final donation = FoodDonation.fromFirestore(donationDoc);
       final request = FoodRequest.fromFirestore(requestDoc);
+      final ngoContext = await _resolveNgoContext(request.ngoId);
 
       // Notify donor
       await _notificationService.sendNotification(
@@ -1273,7 +1592,7 @@ class EnhancedMatchingService {
 
       // Notify NGO
       await _notificationService.sendNotification(
-        userId: request.ngoId,
+        userId: ngoContext.userId,
         title: 'Request Matched!',
         message:
             'Your food request has been matched with a donation of ${donation.quantity} ${donation.unit}.',
@@ -1301,19 +1620,231 @@ class EnhancedMatchingService {
 
   Future<void> _triggerVolunteerAssignment(
       String donationId, String requestId) async {
-    // This will be implemented as part of the volunteer assignment system
-    // For now, we'll just log the event
-    await _auditService.logEvent(
-      eventType: AuditEventType.adminAction,
-      userId: 'system',
-      riskLevel: AuditRiskLevel.low,
-      additionalData: {
-        'event': 'volunteer_assignment_triggered',
-        'description':
-            'Volunteer assignment triggered for donation $donationId and request $requestId',
+    try {
+      final existingAssignments = await FirebaseFirestore.instance
+          .collection('donation_assignments')
+          .where('donationId', isEqualTo: donationId)
+          .where('requestId', isEqualTo: requestId)
+          .where('status', whereIn: ['pending', 'accepted'])
+          .limit(1)
+          .get();
+
+      if (existingAssignments.docs.isNotEmpty) {
+        return;
+      }
+
+      final donationDoc = await FirebaseFirestore.instance
+          .collection(Collections.donations)
+          .doc(donationId)
+          .get();
+      final requestDoc = await FirebaseFirestore.instance
+          .collection(Collections.requests)
+          .doc(requestId)
+          .get();
+
+      if (!donationDoc.exists || !requestDoc.exists) return;
+
+      final donation = FoodDonation.fromFirestore(donationDoc);
+      final request = FoodRequest.fromFirestore(requestDoc);
+      final volunteer = await _findNearestVolunteer(donation, request);
+
+      if (volunteer == null) {
+        await _auditService.logEvent(
+          eventType: AuditEventType.adminAction,
+          userId: 'system',
+          riskLevel: AuditRiskLevel.medium,
+          additionalData: {
+            'event': 'volunteer_assignment_skipped',
+            'description':
+                'No eligible volunteer found for donation $donationId and request $requestId',
+            'donationId': donationId,
+            'requestId': requestId,
+          },
+        );
+        return;
+      }
+
+      final assignmentRef =
+          FirebaseFirestore.instance.collection('donation_assignments').doc();
+      await assignmentRef.set({
         'donationId': donationId,
         'requestId': requestId,
-      },
+        'assigneeId': volunteer.id,
+        'type': 'volunteer_task',
+        'status': 'pending',
+        'createdAt': Timestamp.now(),
+        'updatedAt': Timestamp.now(),
+        'distanceKm': volunteer.distanceKm,
+      });
+
+      await _notificationService.sendNotification(
+        userId: volunteer.id,
+        title: 'New Delivery Assignment',
+        message: 'A nearby donation-request match needs pickup and delivery.',
+        type: 'volunteer_assignment',
+        data: {
+          'assignmentId': assignmentRef.id,
+          'donationId': donationId,
+          'requestId': requestId,
+        },
+      );
+
+      await _auditService.logEvent(
+        eventType: AuditEventType.adminAction,
+        userId: 'system',
+        riskLevel: AuditRiskLevel.low,
+        additionalData: {
+          'event': 'volunteer_assignment_triggered',
+          'description':
+              'Volunteer ${volunteer.id} assigned for donation $donationId and request $requestId',
+          'donationId': donationId,
+          'requestId': requestId,
+          'volunteerId': volunteer.id,
+          'distanceKm': volunteer.distanceKm,
+        },
+      );
+    } catch (e) {
+      await _auditService.logEvent(
+        eventType: AuditEventType.adminAction,
+        userId: 'system',
+        riskLevel: AuditRiskLevel.medium,
+        additionalData: {
+          'event': 'volunteer_assignment_error',
+          'description':
+              'Volunteer assignment failed for donation $donationId and request $requestId: $e',
+          'donationId': donationId,
+          'requestId': requestId,
+          'error': e.toString(),
+        },
+      );
+    }
+  }
+
+  Future<_NgoContext> _resolveNgoContext(String requestNgoId) async {
+    final organizations =
+        FirebaseFirestore.instance.collection(Collections.organizations);
+    final users = FirebaseFirestore.instance.collection(Collections.users);
+    final currentUserId = _auth.currentUser?.uid;
+
+    final orgDoc = await organizations.doc(requestNgoId).get();
+    if (orgDoc.exists) {
+      final orgData = orgDoc.data() ?? <String, dynamic>{};
+      final currentUserDoc =
+          currentUserId == null ? null : await users.doc(currentUserId).get();
+      final currentProfile =
+          (currentUserDoc?.data()?[Fields.profile] as Map<String, dynamic>?) ??
+              {};
+      final currentOrganizationId = currentProfile['organizationId'] as String?;
+      final resolvedUserId = currentOrganizationId == orgDoc.id
+          ? currentUserId
+          : orgData[Fields.ownerId] as String? ?? requestNgoId;
+      return _NgoContext(
+        organizationId: orgDoc.id,
+        userId: resolvedUserId ?? requestNgoId,
+        organizationName:
+            (orgData['organizationName'] ?? orgData['name'] ?? 'NGO')
+                .toString(),
+      );
+    }
+
+    final userDoc = await users.doc(requestNgoId).get();
+    final userData = userDoc.data() ?? <String, dynamic>{};
+    final profile = (userData[Fields.profile] as Map<String, dynamic>?) ?? {};
+    final organizationId = profile['organizationId'] as String?;
+
+    if (organizationId != null && organizationId.isNotEmpty) {
+      final fallbackOrgDoc = await organizations.doc(organizationId).get();
+      final fallbackData = fallbackOrgDoc.data() ?? <String, dynamic>{};
+      return _NgoContext(
+        organizationId: organizationId,
+        userId: requestNgoId,
+        organizationName: (fallbackData['organizationName'] ??
+                fallbackData['name'] ??
+                profile['firstName'] ??
+                'NGO')
+            .toString(),
+      );
+    }
+
+    return _NgoContext(
+      organizationId: requestNgoId,
+      userId: requestNgoId,
+      organizationName: (profile['firstName'] ?? 'NGO').toString(),
     );
   }
+
+  Future<_VolunteerCandidate?> _findNearestVolunteer(
+    FoodDonation donation,
+    FoodRequest request,
+  ) async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection(Collections.users)
+        .where(Fields.role, isEqualTo: UserRole.volunteer.name)
+        .get();
+
+    _VolunteerCandidate? bestCandidate;
+
+    for (final doc in snapshot.docs) {
+      final data = doc.data();
+      final profile = (data[Fields.profile] as Map<String, dynamic>?) ?? {};
+      final status = data[Fields.status] as String?;
+      final isOnline = data['isOnline'] == true;
+      final maxRadius = (profile['maxRadius'] as num?)?.toDouble() ?? 25.0;
+      final location = profile['location'] as Map<String, dynamic>?;
+
+      if (status != UserStatus.active.name || !isOnline || location == null) {
+        continue;
+      }
+
+      final volunteerLat = (location['latitude'] as num?)?.toDouble();
+      final volunteerLng = (location['longitude'] as num?)?.toDouble();
+      if (volunteerLat == null || volunteerLng == null) continue;
+
+      final pickupDistance = _locationService.calculateDistance(
+        volunteerLat,
+        volunteerLng,
+        donation.pickupLocation['latitude']?.toDouble() ?? 0.0,
+        donation.pickupLocation['longitude']?.toDouble() ?? 0.0,
+      );
+
+      if (pickupDistance > maxRadius) continue;
+
+      final dropDistance = _locationService.calculateDistance(
+        donation.pickupLocation['latitude']?.toDouble() ?? 0.0,
+        donation.pickupLocation['longitude']?.toDouble() ?? 0.0,
+        request.deliveryLocation['latitude']?.toDouble() ?? 0.0,
+        request.deliveryLocation['longitude']?.toDouble() ?? 0.0,
+      );
+
+      final totalDistance = pickupDistance + dropDistance;
+      if (bestCandidate == null || totalDistance < bestCandidate.distanceKm) {
+        bestCandidate =
+            _VolunteerCandidate(id: doc.id, distanceKm: totalDistance);
+      }
+    }
+
+    return bestCandidate;
+  }
+}
+
+class _NgoContext {
+  final String organizationId;
+  final String userId;
+  final String organizationName;
+
+  _NgoContext({
+    required this.organizationId,
+    required this.userId,
+    required this.organizationName,
+  });
+}
+
+class _VolunteerCandidate {
+  final String id;
+  final double distanceKm;
+
+  _VolunteerCandidate({
+    required this.id,
+    required this.distanceKm,
+  });
 }

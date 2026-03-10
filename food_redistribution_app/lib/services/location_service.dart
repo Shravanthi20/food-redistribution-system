@@ -53,40 +53,107 @@ class LocationService {
 
   // Convert address to coordinates
   Future<Map<String, dynamic>?> geocodeAddress(String address) async {
+    final parsedCoordinates = _tryParseCoordinates(address);
+    if (parsedCoordinates != null) {
+      return buildLocationData(
+        latitude: parsedCoordinates.$1,
+        longitude: parsedCoordinates.$2,
+        address: address,
+      );
+    }
+
     try {
       List<Location> locations = await locationFromAddress(address);
       if (locations.isNotEmpty) {
         final location = locations.first;
-        final geohash =
-            _geoHasher.encode(location.latitude, location.longitude);
-        return {
-          'latitude': location.latitude,
-          'longitude': location.longitude,
-          'geopoint': GeoPoint(location.latitude, location.longitude),
-          'geohash': geohash,
-        };
+        return buildLocationData(
+          latitude: location.latitude,
+          longitude: location.longitude,
+        );
       }
       return null;
     } catch (e) {
-      debugPrint('Error geocoding address: $e');
+      // Web geocoding can fail with opaque null errors; callers handle null.
       return null;
     }
   }
 
   // Convert coordinates to address
   Future<String?> reverseGeocode(double latitude, double longitude) async {
+    if (latitude.isNaN ||
+        longitude.isNaN ||
+        latitude < -90 ||
+        latitude > 90 ||
+        longitude < -180 ||
+        longitude > 180) {
+      return null;
+    }
+
     try {
       List<Placemark> placemarks =
           await placemarkFromCoordinates(latitude, longitude);
       if (placemarks.isNotEmpty) {
         final place = placemarks.first;
-        return '${place.street}, ${place.locality}, ${place.administrativeArea} ${place.postalCode}';
+        final addressParts = <String?>[
+          place.street,
+          place.subLocality,
+          place.locality,
+          place.administrativeArea,
+          place.postalCode,
+          place.country,
+        ]
+            .whereType<String>()
+            .map((part) => part.trim())
+            .where((part) => part.isNotEmpty)
+            .toList();
+
+        if (addressParts.isNotEmpty) {
+          return addressParts.join(', ');
+        }
       }
-      return null;
+      return _formatCoordinates(latitude, longitude);
     } catch (e) {
-      debugPrint('Error reverse geocoding: $e');
-      return null;
+      // Reverse geocoding is optional; fall back to coordinates without noisy logs.
+      return _formatCoordinates(latitude, longitude);
     }
+  }
+
+  Map<String, dynamic> buildLocationData({
+    required double latitude,
+    required double longitude,
+    String? address,
+  }) {
+    final geohash = _geoHasher.encode(latitude, longitude);
+    return {
+      'latitude': latitude,
+      'longitude': longitude,
+      'geopoint': GeoPoint(latitude, longitude),
+      'geohash': geohash,
+      if (address != null && address.trim().isNotEmpty)
+        'address': address.trim(),
+    };
+  }
+
+  String _formatCoordinates(double latitude, double longitude) {
+    return '${latitude.toStringAsFixed(6)}, ${longitude.toStringAsFixed(6)}';
+  }
+
+  (double, double)? _tryParseCoordinates(String input) {
+    final normalized = input.trim();
+    final match = RegExp(
+      r'^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$',
+    ).firstMatch(normalized);
+
+    if (match == null) return null;
+
+    final latitude = double.tryParse(match.group(1)!);
+    final longitude = double.tryParse(match.group(2)!);
+
+    if (latitude == null || longitude == null) return null;
+    if (latitude < -90 || latitude > 90) return null;
+    if (longitude < -180 || longitude > 180) return null;
+
+    return (latitude, longitude);
   }
 
   // Calculate distance between two points

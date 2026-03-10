@@ -6,37 +6,70 @@ import '../services/notification_service.dart';
 import '../services/audit_service.dart';
 import '../services/location_service.dart';
 import '../config/firebase_schema.dart';
+import 'matching_service.dart';
+import 'firestore_service.dart';
 
 class FoodRequestService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final NotificationService _notificationService = NotificationService();
   final AuditService _auditService = AuditService();
   final LocationService _locationService = LocationService();
+  late final EnhancedMatchingService _matchingService = EnhancedMatchingService(
+    firestoreService: FirestoreService(),
+    locationService: _locationService,
+    notificationService: _notificationService,
+    auditService: _auditService,
+  );
 
   /// Create a new food request
   Future<String> createFoodRequest({
     required String ngoId,
+    String? organizationId,
     required FoodRequest request,
   }) async {
     try {
-      // Validate NGO exists and is verified
-      final ngoDoc = await _firestore
-          .collection(Collections.organizations)
-          .doc(ngoId)
-          .get();
-      if (!ngoDoc.exists) {
+      final resolvedOrganizationId = organizationId ??
+          ((request.metadata['organizationId'] as String?)?.trim().isNotEmpty ==
+                  true
+              ? (request.metadata['organizationId'] as String).trim()
+              : null);
+
+      // Validate NGO organization exists and is verified when available
+      final ngoDoc = resolvedOrganizationId == null
+          ? null
+          : await _firestore
+              .collection(Collections.organizations)
+              .doc(resolvedOrganizationId)
+              .get();
+      if (resolvedOrganizationId != null &&
+          (ngoDoc == null || !ngoDoc.exists)) {
         throw Exception('NGO profile not found');
       }
 
-      final ngo = NGOProfile.fromFirestore(ngoDoc);
-      if (!ngo.isVerified) {
-        throw Exception('NGO must be verified to create food requests');
+      if (ngoDoc != null) {
+        final ngo = NGOProfile.fromFirestore(ngoDoc);
+        if (!ngo.isVerified) {
+          throw Exception('NGO must be verified to create food requests');
+        }
+      }
+
+      final requestToSave = request.copyWith(
+        metadata: {
+          ...request.metadata,
+          if (resolvedOrganizationId != null)
+            'organizationId': resolvedOrganizationId,
+          'createdByUserId': ngoId,
+        },
+      );
+
+      if (resolvedOrganizationId == null && requestToSave.ngoId != ngoId) {
+        throw Exception('Unauthorized NGO request owner');
       }
 
       // Create request document
       final docRef = await _firestore
           .collection(Collections.requests)
-          .add(request.toMap());
+          .add(requestToSave.toMap());
 
       // Log action
       await _auditService.logEvent(
@@ -49,6 +82,8 @@ class FoodRequestService {
               'NGO $ngoId created food request for ${request.requiredQuantity} ${request.unit} of ${request.requiredFoodTypes.join(", ")}',
           'requestId': docRef.id,
           'ngoId': ngoId,
+          if (resolvedOrganizationId != null)
+            'organizationId': resolvedOrganizationId,
           'urgency': request.urgency.name,
           'expectedBeneficiaries': request.expectedBeneficiaries,
         },
@@ -78,19 +113,7 @@ class FoodRequestService {
   Future<List<FoodRequest>> getNGORequests(String ngoId,
       {RequestStatus? status}) async {
     try {
-      Query query = _firestore
-          .collection(Collections.requests)
-          .where('ngoId', isEqualTo: ngoId)
-          .orderBy('createdAt', descending: true);
-
-      if (status != null) {
-        query = query.where('status', isEqualTo: status.name);
-      }
-
-      final snapshot = await query.get();
-      return snapshot.docs
-          .map((doc) => FoodRequest.fromFirestore(doc))
-          .toList();
+      return getNGORequestsForIds([ngoId], status: status);
     } catch (e) {
       await _auditService.logEvent(
         eventType: AuditEventType.dataAccess,
@@ -100,6 +123,59 @@ class FoodRequestService {
           'action': 'get_ngo_requests_failed',
           'description': 'Failed to get requests for NGO $ngoId: $e',
           'ngoId': ngoId,
+          'error': e.toString(),
+        },
+      );
+      return [];
+    }
+  }
+
+  /// Get food requests for any of the provided NGO identifiers.
+  /// This supports both user IDs and organization IDs and avoids composite-index-only queries.
+  Future<List<FoodRequest>> getNGORequestsForIds(
+    List<String> ngoIds, {
+    RequestStatus? status,
+  }) async {
+    final sanitizedIds =
+        ngoIds.where((id) => id.trim().isNotEmpty).toSet().toList();
+    if (sanitizedIds.isEmpty) return [];
+
+    try {
+      final requests = <FoodRequest>[];
+
+      for (final ngoId in sanitizedIds) {
+        Query query = _firestore
+            .collection(Collections.requests)
+            .where('ngoId', isEqualTo: ngoId);
+
+        if (status != null) {
+          query = query.where('status', isEqualTo: status.name);
+        }
+
+        final snapshot = await query.get();
+        requests.addAll(
+          snapshot.docs.map((doc) => FoodRequest.fromFirestore(doc)),
+        );
+      }
+
+      final deduped = <String, FoodRequest>{};
+      for (final request in requests) {
+        deduped[request.id] = request;
+      }
+
+      final sorted = deduped.values.toList()
+        ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      return sorted;
+    } catch (e) {
+      await _auditService.logEvent(
+        eventType: AuditEventType.dataAccess,
+        userId: sanitizedIds.first,
+        riskLevel: AuditRiskLevel.medium,
+        additionalData: {
+          'action': 'get_ngo_requests_for_ids_failed',
+          'description':
+              'Failed to get requests for NGO identifiers $sanitizedIds: $e',
+          'ngoIds': sanitizedIds,
           'error': e.toString(),
         },
       );
@@ -464,25 +540,7 @@ class FoodRequestService {
   /// Trigger automatic matching for a new request
   Future<void> _triggerMatching(String requestId) async {
     try {
-      // Find potential donations
-      final potentialDonations = await findPotentialDonations(requestId);
-
-      if (potentialDonations.isNotEmpty) {
-        // Get the best match (first in sorted list)
-        final bestDonation = potentialDonations.first;
-        final requestDoc = await _firestore
-            .collection(Collections.requests)
-            .doc(requestId)
-            .get();
-        final request = FoodRequest.fromFirestore(requestDoc);
-
-        // Check compatibility score threshold
-        final score = _calculateCompatibilityScore(request, bestDonation);
-        if (score >= 0.7) {
-          // 70% compatibility threshold for auto-match
-          await matchRequestWithDonation(requestId, bestDonation.id);
-        }
-      }
+      await _matchingService.executeAutomaticMatching(requestId: requestId);
     } catch (e) {
       await _auditService.logEvent(
         eventType: AuditEventType.dataModification,

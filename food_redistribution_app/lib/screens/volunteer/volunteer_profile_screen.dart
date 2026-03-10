@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../services/location_service.dart';
 import '../../services/user_service.dart';
 import '../../models/volunteer_profile.dart'; // [NEW]
 
@@ -15,9 +16,15 @@ class _VolunteerProfileScreenState extends State<VolunteerProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   final _userService = UserService();
 
-  late TextEditingController _firstNameController;
-  late TextEditingController _lastNameController;
-  late TextEditingController _phoneController;
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
+  final TextEditingController _latitudeController = TextEditingController();
+  final TextEditingController _longitudeController = TextEditingController();
+  final TextEditingController _maxRadiusController =
+      TextEditingController(text: '25');
+  final _locationService = LocationService();
 
   bool _isLoading = false;
   bool _isLoadingProfile = true; // [NEW]
@@ -37,9 +44,15 @@ class _VolunteerProfileScreenState extends State<VolunteerProfileScreen> {
     final user = Provider.of<AuthProvider>(context, listen: false).appUser;
 
     // Initialize with AppUser data first (fast)
-    _firstNameController = TextEditingController(text: user?.firstName ?? '');
-    _lastNameController = TextEditingController(text: user?.lastName ?? '');
-    _phoneController = TextEditingController(text: user?.phone ?? '');
+    _firstNameController.text = user?.firstName ?? '';
+    _lastNameController.text = user?.lastName ?? '';
+    _phoneController.text = user?.phone ?? '';
+    _addressController.text = user?.profile.address ?? '';
+    _latitudeController.text =
+        user?.profile.location?.latitude.toString() ?? '';
+    _longitudeController.text =
+        user?.profile.location?.longitude.toString() ?? '';
+    _maxRadiusController.text = user?.profile.maxRadius?.toString() ?? '25';
 
     // Fetch full volunteer profile for availability
     if (user != null) {
@@ -55,6 +68,12 @@ class _VolunteerProfileScreenState extends State<VolunteerProfileScreen> {
       if (profile is VolunteerProfile && mounted) {
         setState(() {
           _selectedAvailability = List.from(profile.availabilityHours);
+          _addressController.text = profile.address;
+          _latitudeController.text =
+              (profile.location['latitude'] as num?)?.toString() ?? '';
+          _longitudeController.text =
+              (profile.location['longitude'] as num?)?.toString() ?? '';
+          _maxRadiusController.text = profile.maxRadius.toString();
         });
       }
     } catch (e) {
@@ -69,7 +88,36 @@ class _VolunteerProfileScreenState extends State<VolunteerProfileScreen> {
     _firstNameController.dispose();
     _lastNameController.dispose();
     _phoneController.dispose();
+    _addressController.dispose();
+    _latitudeController.dispose();
+    _longitudeController.dispose();
+    _maxRadiusController.dispose();
     super.dispose();
+  }
+
+  Future<void> _useCurrentLocation() async {
+    final position = await _locationService.getCurrentLocation();
+    if (position == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Unable to fetch current location')),
+        );
+      }
+      return;
+    }
+
+    final address = await _locationService.reverseGeocode(
+          position.latitude,
+          position.longitude,
+        ) ??
+        '${position.latitude.toStringAsFixed(6)}, ${position.longitude.toStringAsFixed(6)}';
+
+    if (!mounted) return;
+    setState(() {
+      _latitudeController.text = position.latitude.toStringAsFixed(6);
+      _longitudeController.text = position.longitude.toStringAsFixed(6);
+      _addressController.text = address;
+    });
   }
 
   Future<void> _updateProfile() async {
@@ -83,6 +131,28 @@ class _VolunteerProfileScreenState extends State<VolunteerProfileScreen> {
 
       if (uid == null) throw Exception("User not found");
 
+      final latitude = double.tryParse(_latitudeController.text.trim());
+      final longitude = double.tryParse(_longitudeController.text.trim());
+      final maxRadius = int.tryParse(_maxRadiusController.text.trim()) ?? 25;
+
+      Map<String, dynamic>? locationData;
+      final enteredAddress = _addressController.text.trim();
+      if (latitude != null && longitude != null) {
+        locationData = _locationService.buildLocationData(
+          latitude: latitude,
+          longitude: longitude,
+          address: enteredAddress,
+        );
+      } else if (enteredAddress.isNotEmpty) {
+        final geocoded = await _locationService.geocodeAddress(enteredAddress);
+        if (geocoded != null) {
+          locationData = {
+            ...geocoded,
+            'address': enteredAddress,
+          };
+        }
+      }
+
       await _userService.updateUserProfile(
         userId: uid,
         profileData: {
@@ -90,6 +160,9 @@ class _VolunteerProfileScreenState extends State<VolunteerProfileScreen> {
           'lastName': _lastNameController.text.trim(),
           'phone': _phoneController.text.trim(),
           'availabilityHours': _selectedAvailability,
+          'address': enteredAddress,
+          'maxRadius': maxRadius,
+          if (locationData != null) 'location': locationData,
         },
       );
 
@@ -155,6 +228,68 @@ class _VolunteerProfileScreenState extends State<VolunteerProfileScreen> {
                 ),
                 keyboardType: TextInputType.phone,
                 validator: (v) => v?.isEmpty == true ? "Required" : null,
+              ),
+              const SizedBox(height: 24),
+
+              TextFormField(
+                controller: _addressController,
+                decoration: const InputDecoration(
+                  labelText: "Base Address",
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.location_on),
+                ),
+                maxLines: 2,
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _latitudeController,
+                      decoration: const InputDecoration(
+                        labelText: "Latitude",
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                        signed: true,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _longitudeController,
+                      decoration: const InputDecoration(
+                        labelText: "Longitude",
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                        signed: true,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  onPressed: _useCurrentLocation,
+                  icon: const Icon(Icons.my_location),
+                  label: const Text("Use Current Location"),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _maxRadiusController,
+                decoration: const InputDecoration(
+                  labelText: "Max Radius (km)",
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.route),
+                ),
+                keyboardType: TextInputType.number,
               ),
               const SizedBox(height: 24),
 

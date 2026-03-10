@@ -65,6 +65,27 @@ class _NGODashboardState extends State<NGODashboard>
                 },
               ),
               IconButton(
+                icon: const Icon(Icons.auto_fix_high),
+                onPressed: () async {
+                  if (authProvider.firebaseUser != null) {
+                    final success = await ngoProvider.rerunAutomaticMatching(
+                      authProvider.firebaseUser!.uid,
+                    );
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          success
+                              ? 'Automatic matching rerun completed'
+                              : (ngoProvider.errorMessage ??
+                                  'Automatic matching rerun failed'),
+                        ),
+                      ),
+                    );
+                  }
+                },
+              ),
+              IconButton(
                 icon: const Icon(Icons.logout),
                 onPressed: () => _showLogoutDialog(context, authProvider),
               ),
