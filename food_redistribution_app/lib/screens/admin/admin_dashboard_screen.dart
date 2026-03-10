@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 import '../../providers/admin_dashboard_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/auth_provider.dart';
@@ -251,15 +253,40 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       itemBuilder: (context, index) {
         final session = sessions[index];
         final matches = (session['matches'] as List? ?? []);
+        final sourceHeading =
+            session['sourceHeading']?.toString() ?? 'Matching Session';
+        final sourceTitle = session['sourceTitle']?.toString() ?? 'Unknown';
+        final sourceId = session['sourceId']?.toString() ?? '';
+        final algorithm = session['algorithm']?.toString() ?? 'unknown';
+        final counterpartTitle = session['counterpartTitle']?.toString();
+        final counterpartId = session['counterpartId']?.toString();
+        final counterpartHeading = session['sourceType'] == 'ngo_request'
+            ? 'Matched Donation'
+            : 'Matched Request';
 
         return Card(
           margin: const EdgeInsets.only(bottom: 16),
           child: ExpansionTile(
             leading: const Icon(Icons.auto_awesome, color: Colors.orange),
-            title:
-                Text('Session: ${session['id'].toString().substring(0, 8)}...'),
-            subtitle: Text(
-                'Donation: ${session['donationId']} • Algorithm: ${session['algorithm']}'),
+            title: Text('$sourceHeading: $sourceTitle'),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (sourceId.isNotEmpty)
+                  Text(
+                    'ID: $sourceId',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                if (counterpartId != null && counterpartId.isNotEmpty)
+                  Text(
+                    '$counterpartHeading: ${counterpartTitle ?? counterpartId}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                Text('Algorithm: $algorithm'),
+              ],
+            ),
             children: [
               Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -282,6 +309,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
   Widget _buildMatchDetail(dynamic match) {
     final scores = (match['criteriaScores'] as Map? ?? {});
+    final overallScore = (match['score'] as num?)?.toDouble();
+    final targetLabel = match['targetLabel']?.toString() ?? 'Target';
+    final targetTitle = match['targetTitle']?.toString() ?? 'Unknown';
+    final targetId = match['targetId']?.toString();
+    final reasoning = match['reasoning']?.toString();
+    final hasScore = overallScore != null;
+    final hasReasoning = reasoning != null && reasoning.trim().isNotEmpty;
+    final isAutoMatched = match['autoMatched'] == true;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -296,8 +331,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('NGO ID: ${match['ngoId']}',
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
+              Expanded(
+                child: Text(
+                  '$targetLabel: $targetTitle${targetId != null && targetId.isNotEmpty && targetId != targetTitle ? ' ($targetId)' : ''}',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 12),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
@@ -305,7 +346,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  'Score: ${(match['score'] as num).toStringAsFixed(2)}',
+                  hasScore
+                      ? 'Score: ${overallScore.toStringAsFixed(2)}'
+                      : (isAutoMatched ? 'Auto Matched' : 'No Score'),
                   style: const TextStyle(
                       color: Colors.green, fontWeight: FontWeight.bold),
                 ),
@@ -313,28 +356,36 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             ],
           ),
           const SizedBox(height: 8),
-          Text('Reasoning: ${match['reasoning']}',
-              style:
-                  const TextStyle(fontSize: 12, fontStyle: FontStyle.italic)),
-          const SizedBox(height: 12),
-          Text(context.l10n.criteriaBreakdown,
-              style:
-                  const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 4),
-          Wrap(
-            spacing: 8,
-            runSpacing: 4,
-            children: scores.entries.map<Widget>((e) {
-              final label = e.key.split('.').last;
-              return Chip(
-                label: Text('$label: ${(e.value as num).toStringAsFixed(1)}',
-                    style: const TextStyle(fontSize: 10)),
-                backgroundColor: Colors.blue.withValues(alpha: 0.05),
-                padding: EdgeInsets.zero,
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              );
-            }).toList(),
+          Text(
+            hasReasoning
+                ? 'Reasoning: $reasoning'
+                : (isAutoMatched
+                    ? 'Reasoning: Automatically matched by live location and compatibility rules.'
+                    : 'Reasoning: No reasoning available'),
+            style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
           ),
+          if (scores.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Text(context.l10n.criteriaBreakdown,
+                style:
+                    const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 4),
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              children: scores.entries.map<Widget>((e) {
+                final label = e.key.split('.').last;
+                final score = (e.value as num?) ?? 0;
+                return Chip(
+                  label: Text('$label: ${score.toStringAsFixed(1)}',
+                      style: const TextStyle(fontSize: 10)),
+                  backgroundColor: Colors.blue.withValues(alpha: 0.05),
+                  padding: EdgeInsets.zero,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                );
+              }).toList(),
+            ),
+          ],
         ],
       ),
     );
@@ -738,44 +789,153 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
   // --- TAB 5: ANALYTICS ---
   Widget _buildAnalyticsTab(AdminDashboardProvider provider) {
+    final monthlyHistory = _extractMapList(provider.monthlyTrends, 'history');
+    final forecast = _extractMapList(provider.demandForecast, 'forecast');
+    final successRate =
+        _extractNum(provider.deliveryPerformance, 'successRate').toDouble();
+    final failureRate =
+        _extractNum(provider.deliveryPerformance, 'failureRate').toDouble();
+    final totalCompleted =
+        _extractNum(provider.deliveryPerformance, 'totalCompleted').toInt();
+
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
         _buildSectionCard(
-          title: context.l10n.regionalActivityOverview,
-          icon: Icons.map,
+          title: 'Monthly Platform Activity',
+          icon: Icons.show_chart,
           child: Column(
-            children: provider.regionalStats.isEmpty
-                ? [
-                    Center(
-                        child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Text(context.l10n.gatheringRegionalData)))
-                  ]
-                : provider.regionalStats.entries
-                    .map((entry) => _buildProgressItem(
-                        entry.key, entry.value, _getRegionColor(entry.key)))
-                    .toList(),
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Donations and NGO requests created over the last ${monthlyHistory.length} months',
+                style: const TextStyle(color: AppTheme.textMuted),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                height: 280,
+                child: monthlyHistory.isEmpty
+                    ? Center(child: Text(context.l10n.gatheringRegionalData))
+                    : _buildMonthlyTrendChart(monthlyHistory),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 24),
         _buildSectionCard(
-          title: context.l10n.deliveryPerformance,
-          icon: Icons.delivery_dining,
+          title: 'Regional Contribution',
+          icon: Icons.map,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ListTile(
-                title: Text(
-                    'Success Rate: ${provider.deliveryPerformance['successRate']?.toStringAsFixed(1) ?? '0.0'}%'),
-                subtitle: Text(
-                    'Failure Rate: ${provider.deliveryPerformance['failureRate']?.toStringAsFixed(1) ?? '0.0'}%'),
-              ),
-              const Divider(),
-              Text(
-                  'Total Completed Transactions: ${provider.deliveryPerformance['totalCompleted'] ?? 0}',
-                  style: Theme.of(context).textTheme.bodyMedium),
+              if (provider.regionalStats.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(context.l10n.gatheringRegionalData),
+                )
+              else ...[
+                SizedBox(
+                  height: 220,
+                  child: _buildRegionalBarChart(provider.regionalStats),
+                ),
+                const SizedBox(height: 12),
+                ...provider.regionalStats.entries.map((entry) =>
+                    _buildProgressItem(
+                        entry.key, entry.value, _getRegionColor(entry.key))),
+              ],
             ],
           ),
+        ),
+        const SizedBox(height: 24),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final stacked = constraints.maxWidth < 1100;
+            final deliveryCard = _buildSectionCard(
+              title: context.l10n.deliveryPerformance,
+              icon: Icons.delivery_dining,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    height: 220,
+                    child: _buildDeliveryBreakdownChart(
+                      successRate: successRate,
+                      failureRate: failureRate,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Success Rate: ${successRate.toStringAsFixed(1)}%',
+                    style: const TextStyle(
+                      color: AppTheme.textPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    'Failure Rate: ${failureRate.toStringAsFixed(1)}%',
+                    style: const TextStyle(color: AppTheme.textMuted),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Completed / closed donation flows: $totalCompleted',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ],
+              ),
+            );
+            final forecastCard = _buildSectionCard(
+              title: '6-Month Forecast',
+              icon: Icons.trending_up,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Simple trend forecast based on recent monthly donation and request volumes',
+                    style: TextStyle(color: AppTheme.textMuted),
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    height: 220,
+                    child: forecast.isEmpty
+                        ? const Center(child: Text('Loading forecast...'))
+                        : _buildForecastChart(forecast),
+                  ),
+                  const SizedBox(height: 12),
+                  ...forecast.take(3).map(
+                        (entry) => Padding(
+                          padding: const EdgeInsets.only(bottom: 6),
+                          child: Text(
+                            '${_formatMonth(entry['monthStart'])}: '
+                            '${entry['predictedDonations']} donations, '
+                            '${entry['predictedRequests']} requests',
+                            style:
+                                const TextStyle(color: AppTheme.textSecondary),
+                          ),
+                        ),
+                      ),
+                ],
+              ),
+            );
+
+            if (stacked) {
+              return Column(
+                children: [
+                  deliveryCard,
+                  const SizedBox(height: 24),
+                  forecastCard,
+                ],
+              );
+            }
+
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: deliveryCard),
+                const SizedBox(width: 24),
+                Expanded(child: forecastCard),
+              ],
+            );
+          },
         ),
       ],
     );
@@ -832,6 +992,321 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   }
 
   // --- HELPER WIDGETS ---
+
+  List<Map<String, dynamic>> _extractMapList(
+    dynamic source,
+    String key,
+  ) {
+    if (source is! Map) return const [];
+    final raw = source[key];
+    if (raw is! List) return const [];
+    return raw
+        .whereType<Map>()
+        .map((item) => Map<String, dynamic>.from(item))
+        .toList();
+  }
+
+  num _extractNum(dynamic source, String key) {
+    if (source is! Map) return 0;
+    final value = source[key];
+    return value is num ? value : 0;
+  }
+
+  Widget _buildMonthlyTrendChart(List<Map<String, dynamic>> history) {
+    final donationSpots = <FlSpot>[];
+    final requestSpots = <FlSpot>[];
+
+    for (var i = 0; i < history.length; i++) {
+      donationSpots.add(FlSpot(
+        i.toDouble(),
+        ((history[i]['donations'] as num?) ?? 0).toDouble(),
+      ));
+      requestSpots.add(FlSpot(
+        i.toDouble(),
+        ((history[i]['requests'] as num?) ?? 0).toDouble(),
+      ));
+    }
+
+    final maxY = [
+      ...donationSpots.map((e) => e.y),
+      ...requestSpots.map((e) => e.y),
+      1.0,
+    ].reduce((a, b) => a > b ? a : b);
+
+    return LineChart(
+      LineChartData(
+        minY: 0,
+        maxY: maxY + 1,
+        gridData: const FlGridData(show: true, drawVerticalLine: false),
+        borderData: FlBorderData(show: false),
+        titlesData: FlTitlesData(
+          rightTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          leftTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 32,
+              getTitlesWidget: (value, meta) => Text(
+                value.toInt().toString(),
+                style: const TextStyle(
+                  color: AppTheme.textMuted,
+                  fontSize: 11,
+                ),
+              ),
+            ),
+          ),
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              interval: 1,
+              getTitlesWidget: (value, meta) {
+                final index = value.toInt();
+                if (index < 0 || index >= history.length) {
+                  return const SizedBox.shrink();
+                }
+                return Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    _formatMonth(history[index]['monthStart']),
+                    style: const TextStyle(
+                      color: AppTheme.textMuted,
+                      fontSize: 10,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+        lineBarsData: [
+          LineChartBarData(
+            spots: donationSpots,
+            isCurved: true,
+            color: AppTheme.accentTeal,
+            barWidth: 3,
+            dotData: const FlDotData(show: true),
+          ),
+          LineChartBarData(
+            spots: requestSpots,
+            isCurved: true,
+            color: AppTheme.warningAmber,
+            barWidth: 3,
+            dotData: const FlDotData(show: true),
+          ),
+        ],
+        lineTouchData: LineTouchData(
+          touchTooltipData: LineTouchTooltipData(
+            getTooltipItems: (spots) => spots
+                .map(
+                  (spot) => LineTooltipItem(
+                    '${spot.barIndex == 0 ? 'Donations' : 'Requests'}: ${spot.y.toInt()}',
+                    const TextStyle(color: Colors.white),
+                  ),
+                )
+                .toList(),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRegionalBarChart(Map<String, double> regionalStats) {
+    final entries = regionalStats.entries.toList();
+    return BarChart(
+      BarChartData(
+        minY: 0,
+        maxY: 1,
+        gridData: const FlGridData(show: true, drawVerticalLine: false),
+        borderData: FlBorderData(show: false),
+        titlesData: FlTitlesData(
+          rightTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          leftTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              interval: 0.25,
+              reservedSize: 32,
+              getTitlesWidget: (value, meta) => Text(
+                '${(value * 100).toInt()}%',
+                style: const TextStyle(
+                  color: AppTheme.textMuted,
+                  fontSize: 10,
+                ),
+              ),
+            ),
+          ),
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              getTitlesWidget: (value, meta) {
+                final index = value.toInt();
+                if (index < 0 || index >= entries.length) {
+                  return const SizedBox.shrink();
+                }
+                return Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    entries[index].key,
+                    style: const TextStyle(
+                      color: AppTheme.textMuted,
+                      fontSize: 10,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+        barGroups: [
+          for (var i = 0; i < entries.length; i++)
+            BarChartGroupData(
+              x: i,
+              barRods: [
+                BarChartRodData(
+                  toY: entries[i].value,
+                  color: _getRegionColor(entries[i].key),
+                  width: 22,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDeliveryBreakdownChart({
+    required double successRate,
+    required double failureRate,
+  }) {
+    final pendingRate =
+        (100 - successRate - failureRate).clamp(0, 100).toDouble();
+    return PieChart(
+      PieChartData(
+        sectionsSpace: 3,
+        centerSpaceRadius: 42,
+        sections: [
+          PieChartSectionData(
+            value: successRate,
+            color: AppTheme.successTeal,
+            title: '${successRate.toStringAsFixed(0)}%',
+            radius: 48,
+          ),
+          PieChartSectionData(
+            value: failureRate,
+            color: AppTheme.errorCoral,
+            title: '${failureRate.toStringAsFixed(0)}%',
+            radius: 48,
+          ),
+          PieChartSectionData(
+            value: pendingRate,
+            color: AppTheme.textMuted.withValues(alpha: 0.35),
+            title: '${pendingRate.toStringAsFixed(0)}%',
+            radius: 40,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildForecastChart(List<Map<String, dynamic>> forecast) {
+    final donationGroups = <BarChartGroupData>[];
+    for (var i = 0; i < forecast.length; i++) {
+      final item = forecast[i];
+      donationGroups.add(
+        BarChartGroupData(
+          x: i,
+          barsSpace: 6,
+          barRods: [
+            BarChartRodData(
+              toY: ((item['predictedDonations'] as num?) ?? 0).toDouble(),
+              color: AppTheme.accentTeal,
+              width: 10,
+              borderRadius: BorderRadius.circular(4),
+            ),
+            BarChartRodData(
+              toY: ((item['predictedRequests'] as num?) ?? 0).toDouble(),
+              color: AppTheme.warningAmber,
+              width: 10,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final maxY = forecast
+        .expand<double>((item) => [
+              ((item['predictedDonations'] as num?) ?? 0).toDouble(),
+              ((item['predictedRequests'] as num?) ?? 0).toDouble(),
+            ])
+        .fold<double>(1, (max, value) => value > max ? value : max);
+
+    return BarChart(
+      BarChartData(
+        minY: 0,
+        maxY: maxY + 1,
+        gridData: const FlGridData(show: true, drawVerticalLine: false),
+        borderData: FlBorderData(show: false),
+        titlesData: FlTitlesData(
+          rightTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          leftTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 30,
+              getTitlesWidget: (value, meta) => Text(
+                value.toInt().toString(),
+                style: const TextStyle(
+                  color: AppTheme.textMuted,
+                  fontSize: 10,
+                ),
+              ),
+            ),
+          ),
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              getTitlesWidget: (value, meta) {
+                final index = value.toInt();
+                if (index < 0 || index >= forecast.length) {
+                  return const SizedBox.shrink();
+                }
+                return Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    _formatMonth(forecast[index]['monthStart']),
+                    style: const TextStyle(
+                      color: AppTheme.textMuted,
+                      fontSize: 10,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+        barGroups: donationGroups,
+      ),
+    );
+  }
+
+  String _formatMonth(dynamic value) {
+    DateTime? date;
+    if (value is Timestamp) {
+      date = value.toDate();
+    } else if (value is DateTime) {
+      date = value;
+    }
+    if (date == null) return '';
+    return DateFormat('MMM').format(date);
+  }
 
   Color _getRegionColor(String region) {
     switch (region) {
@@ -976,11 +1451,26 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         children: [
           CircleAvatar(radius: 4, backgroundColor: color),
           const SizedBox(width: 12),
-          Text(name, style: const TextStyle(color: AppTheme.textPrimary)),
-          const Spacer(),
-          Text(status,
+          Expanded(
+            child: Text(
+              name,
+              style: const TextStyle(color: AppTheme.textPrimary),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Flexible(
+            child: Text(
+              status,
+              textAlign: TextAlign.end,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                  color: color, fontWeight: FontWeight.bold, fontSize: 13)),
+                color: color,
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+              ),
+            ),
+          ),
         ],
       ),
     );
