@@ -1,5 +1,0 @@
-<<<<<<< HEAD:firebase.json
-{"flutter":{"platforms":{"android":{"default":{"projectId":"freshsave-55cb3","appId":"1:882385785123:android:ca53436597a25187c27c96","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"freshsave-55cb3","configurations":{"android":"1:882385785123:android:ca53436597a25187c27c96","ios":"1:882385785123:ios:e6ddc6b953afb6a6c27c96","macos":"1:882385785123:ios:e6ddc6b953afb6a6c27c96","web":"1:882385785123:web:8e71ca2d87d7fdc0c27c96","windows":"1:882385785123:web:751b412e6dbef0f6c27c96"}}}}}}
-=======
-{"flutter":{"platforms":{"android":{"default":{"projectId":"food-redistribution-plat-86785","appId":"1:185924884011:android:b4bfb376fbc84fb8313c6e","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"food-redistribution-plat-86785","configurations":{"android":"1:185924884011:android:b4bfb376fbc84fb8313c6e","ios":"1:185924884011:ios:3d1a4576739990ec313c6e","web":"1:185924884011:web:184ea2c162490c34313c6e","windows":"1:185924884011:web:785e7d60ed457faf313c6e"}}}}}}
->>>>>>> feature/flutter-migration-complete:food_redistribution_app/firebase.json
