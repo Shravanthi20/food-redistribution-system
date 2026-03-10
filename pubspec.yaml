@@ -56,6 +56,8 @@ dependencies:
   permission_handler: ^11.3.1
   path_provider: ^2.1.4
   shared_preferences: ^2.3.2
+  file_picker: ^10.3.10
+  firebase_storage: ^12.4.10
 
 dev_dependencies:
   flutter_test:
@@ -67,6 +69,7 @@ flutter:
   
   assets:
     - assets/images/
+<<<<<<< HEAD:pubspec.yaml
     - assets/icons/
     
 #   fonts:
@@ -75,3 +78,6 @@ flutter:
 #         - asset: fonts/Roboto-Regular.ttf
 #         - asset: fonts/Roboto-Bold.ttf
 #           weight: 700
+=======
+    - assets/icons/
+>>>>>>> feature/flutter-migration-complete:food_redistribution_app/pubspec.yaml
