@@ -12,7 +12,6 @@ import '../services/audit_service.dart';
 import '../services/security_service.dart';
 import '../services/food_donation_service.dart';
 import '../models/food_donation.dart';
-import '../models/user.dart';
 
 typedef GetUsersByRoleFn = Future<List<Map<String, dynamic>>> Function(
     UserRole role);
@@ -41,7 +40,8 @@ typedef ForceAssignVolunteerFn = Future<void> Function({
   required String volunteerId,
   String? reason,
 });
-typedef GetPendingVerificationsFn = Future<List<Map<String, dynamic>>> Function();
+typedef GetPendingVerificationsFn = Future<List<Map<String, dynamic>>>
+    Function();
 typedef GetVerificationStatsFn = Future<Map<String, dynamic>> Function();
 typedef GetDonationsByStatusFn = Future<List<FoodDonation>> Function(
     DonationStatus status);
@@ -552,8 +552,8 @@ class AdminDashboardProvider extends ChangeNotifier {
       ];
       List<Map<String, dynamic>> results = [];
       for (final role in allRoles) {
-        final users =
-            await (_getUsersByRoleOverride?.call(role) ?? _users.getUsersByRole(role));
+        final users = await (_getUsersByRoleOverride?.call(role) ??
+            _users.getUsersByRole(role));
         results.addAll(users);
       }
       final lowerQuery = query.toLowerCase();

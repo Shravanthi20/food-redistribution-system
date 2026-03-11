@@ -59,8 +59,9 @@ void main() {
         {
           ...baseAdminData,
           'status': UserStatus.active.name,
-          'restrictionEndDate':
-              DateTime.now().subtract(const Duration(days: 1)).toIso8601String(),
+          'restrictionEndDate': DateTime.now()
+              .subtract(const Duration(days: 1))
+              .toIso8601String(),
           'restrictions': {'all': true},
         },
         id: 'admin-archived',
@@ -187,10 +188,15 @@ void main() {
       );
     });
 
-    test('searchUsers queries all governance roles and filters by name', () async {
+    test('searchUsers queries all governance roles and filters by name',
+        () async {
       usersByRole = {
         UserRole.donor: [
-          {'id': 'donor-1', 'fullName': 'Alice Donor', 'email': 'alice@test.dev'}
+          {
+            'id': 'donor-1',
+            'fullName': 'Alice Donor',
+            'email': 'alice@test.dev'
+          }
         ],
         UserRole.ngo: [
           {'id': 'ngo-1', 'fullName': 'Care NGO', 'email': 'contact@care.test'}
@@ -322,7 +328,8 @@ void main() {
       expect(provider.unmatchedDonations, [donation]);
     });
 
-    test('forceAssignVolunteer delegates override and refreshes unmatched donations',
+    test(
+        'forceAssignVolunteer delegates override and refreshes unmatched donations',
         () async {
       final donation = _buildDonation(id: 'donation-queued');
       unmatchedDonations = [donation];
