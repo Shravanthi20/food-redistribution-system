@@ -191,12 +191,12 @@ jobs:
 
       # --- Build APK (always) ---
       - name: Build release APK
-        run: flutter build apk --release
+        run: flutter build apk --release -t lib/main.dart
 
       # --- Build AAB (for production releases only) ---
       - name: Build release AAB (App Bundle)
         if: github.event_name == 'release'
-        run: flutter build appbundle --release
+        run: flutter build appbundle --release -t lib/main.dart
 
       # --- Upload Build Artifacts ---
       - name: Upload release APK
@@ -280,3 +280,4 @@ jobs:
             ./artifacts/app-release.aab
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
