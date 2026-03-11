@@ -43,7 +43,7 @@ Document verification is implemented via `lib/services/verification_service.dart
 - **Verification status UI** (example screenshot): `assets/screenshots/flutter_04.png` (shows “Verification in Progress”)
 - **Admin review** updates `verifications` + user onboarding state (see `VerificationService.reviewSubmission`)
 
-Screenshot (from `assets/screenshots/flutter_04.png`):
+Screenshot (from `assets/screenshots/flutter_04.png`):-
 
 ![Verification Status - in progress](food_redistribution_app/assets/screenshots/flutter_04.png)
 
