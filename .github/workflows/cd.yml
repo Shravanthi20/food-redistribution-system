@@ -1,12 +1,12 @@
 # =============================================================================
-# CD Pipeline — Continuous Deployment
+# CD Pipeline � Continuous Deployment
 # Triggers on:
 #   - Push to main/master (staging deployment)
 #   - Release tags v*.*.* (production deployment)
-# Deploys: Android APK/AAB, Firebase Rules, and web build
+# Deploys: Android APK/AAB and Firebase Rules
 # =============================================================================
 
-name: CD — Deploy
+name: CD � Deploy
 
 on:
   push:
@@ -35,11 +35,11 @@ env:
   WORKING_DIR: ./food_redistribution_app
 
 jobs:
-  # ─────────────────────────────────────────────────────────────────
+  # -----------------------------------------------------------------
   # JOB 1: Run CI checks first (gate)
-  # ─────────────────────────────────────────────────────────────────
+  # -----------------------------------------------------------------
   ci-gate:
-    name: CI Gate — Verify Build
+    name: CI Gate � Verify Build
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -92,9 +92,9 @@ jobs:
       - name: Run tests
         run: flutter test
 
-  # ─────────────────────────────────────────────────────────────────
+  # -----------------------------------------------------------------
   # JOB 2: Build Release APK & AAB
-  # ─────────────────────────────────────────────────────────────────
+  # -----------------------------------------------------------------
   build-release:
     name: Build Release Artifacts
     runs-on: ubuntu-latest
@@ -160,6 +160,12 @@ jobs:
           }
           EOF
 
+      - name: Decode Android google-services.json
+        env:
+          GOOGLE_SERVICES_JSON_BASE64: ${{ secrets.ANDROID_GOOGLE_SERVICES_JSON_BASE64 }}
+        run: |
+          echo "$GOOGLE_SERVICES_JSON_BASE64" | base64 --decode > android/app/google-services.json
+
       # --- Signing Configuration ---
       # For production, decode a base64-encoded keystore from secrets
       - name: Decode Android keystore
@@ -208,9 +214,9 @@ jobs:
           path: ${{ env.WORKING_DIR }}/build/app/outputs/bundle/release/app-release.aab
           retention-days: 90
 
-  # ─────────────────────────────────────────────────────────────────
+  # -----------------------------------------------------------------
   # JOB 3: Deploy Firebase Rules & Configuration
-  # ─────────────────────────────────────────────────────────────────
+  # -----------------------------------------------------------------
   deploy-firebase:
     name: Deploy Firebase Rules
     runs-on: ubuntu-latest
@@ -242,67 +248,9 @@ jobs:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
         run: firebase deploy --only firestore:indexes --token "$FIREBASE_TOKEN" --project food-redistribution-plat-86785
 
-  # ─────────────────────────────────────────────────────────────────
-  # JOB 4: Build & Deploy Flutter Web (Firebase Hosting)
-  # ─────────────────────────────────────────────────────────────────
-  deploy-web:
-    name: Deploy Web to Firebase Hosting
-    runs-on: ubuntu-latest
-    needs: ci-gate
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-    defaults:
-      run:
-        working-directory: ${{ env.WORKING_DIR }}
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: 'stable'
-          cache: true
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Create CI firebase_options.dart
-        run: |
-          cat <<'EOF' > lib/firebase_options.dart
-          import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
-
-          class DefaultFirebaseOptions {
-            static FirebaseOptions get currentPlatform {
-              return const FirebaseOptions(
-                apiKey: 'ci-dummy-key',
-                appId: '1:000000000000:android:0000000000000000',
-                messagingSenderId: '000000000000',
-                projectId: 'ci-dummy-project',
-              );
-            }
-          }
-          EOF
-
-      - name: Build Flutter Web
-        run: flutter build web --release
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install Firebase CLI
-        run: npm install -g firebase-tools
-
-      - name: Deploy to Firebase Hosting
-        env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-        run: firebase deploy --only hosting --token "$FIREBASE_TOKEN" --project food-redistribution-plat-86785
-
-  # ─────────────────────────────────────────────────────────────────
-  # JOB 5: Create GitHub Release with APK (on tag push)
-  # ─────────────────────────────────────────────────────────────────
+  # -----------------------------------------------------------------
+  # JOB 4: Create GitHub Release with APK (on tag push)
+  # -----------------------------------------------------------------
   github-release:
     name: Attach APK to GitHub Release
     runs-on: ubuntu-latest

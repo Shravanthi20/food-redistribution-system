@@ -12,14 +12,101 @@ import '../services/audit_service.dart';
 import '../services/security_service.dart';
 import '../services/food_donation_service.dart';
 import '../models/food_donation.dart';
+import '../models/user.dart';
+
+typedef GetUsersByRoleFn = Future<List<Map<String, dynamic>>> Function(
+    UserRole role);
+typedef ReviewVerificationFn = Future<void> Function({
+  required String submissionId,
+  required String adminId,
+  required VerificationStatus decision,
+  String? notes,
+});
+typedef RestrictUserFn = Future<void> Function({
+  required String userId,
+  required String adminId,
+  required Map<String, dynamic> restrictions,
+  required DateTime endDate,
+  String? reason,
+});
+typedef ForceAssignNgoFn = Future<void> Function({
+  required String donationId,
+  required String adminId,
+  required String ngoId,
+  String? reason,
+});
+typedef ForceAssignVolunteerFn = Future<void> Function({
+  required String donationId,
+  required String adminId,
+  required String volunteerId,
+  String? reason,
+});
+typedef GetPendingVerificationsFn = Future<List<Map<String, dynamic>>> Function();
+typedef GetVerificationStatsFn = Future<Map<String, dynamic>> Function();
+typedef GetDonationsByStatusFn = Future<List<FoodDonation>> Function(
+    DonationStatus status);
 
 class AdminDashboardProvider extends ChangeNotifier {
-  final AnalyticsService _analyticsService = AnalyticsService();
-  final VerificationService _verificationService = VerificationService();
-  final UserService _userService = UserService();
-  final IssueService _issueService = IssueService();
-  final AuditService _auditService = AuditService();
-  final SecurityService _securityService = SecurityService();
+  AnalyticsService? _analyticsService;
+  VerificationService? _verificationService;
+  UserService? _userService;
+  IssueService? _issueService;
+  AuditService? _auditService;
+  SecurityService? _securityService;
+  FoodDonationService? _foodDonationService;
+  final bool _enableRealtime;
+  final GetUsersByRoleFn? _getUsersByRoleOverride;
+  final ReviewVerificationFn? _reviewVerificationOverride;
+  final RestrictUserFn? _restrictUserOverride;
+  final ForceAssignNgoFn? _forceAssignNgoOverride;
+  final ForceAssignVolunteerFn? _forceAssignVolunteerOverride;
+  final GetPendingVerificationsFn? _getPendingVerificationsOverride;
+  final GetVerificationStatsFn? _getVerificationStatsOverride;
+  final GetDonationsByStatusFn? _getDonationsByStatusOverride;
+
+  AdminDashboardProvider({
+    AnalyticsService? analyticsService,
+    VerificationService? verificationService,
+    UserService? userService,
+    IssueService? issueService,
+    AuditService? auditService,
+    SecurityService? securityService,
+    FoodDonationService? foodDonationService,
+    bool enableRealtime = true,
+    GetUsersByRoleFn? getUsersByRole,
+    ReviewVerificationFn? reviewVerification,
+    RestrictUserFn? restrictUser,
+    ForceAssignNgoFn? forceAssignNgo,
+    ForceAssignVolunteerFn? forceAssignVolunteer,
+    GetPendingVerificationsFn? getPendingVerifications,
+    GetVerificationStatsFn? getVerificationStats,
+    GetDonationsByStatusFn? getDonationsByStatus,
+  })  : _analyticsService = analyticsService,
+        _verificationService = verificationService,
+        _userService = userService,
+        _issueService = issueService,
+        _auditService = auditService,
+        _securityService = securityService,
+        _foodDonationService = foodDonationService,
+        _enableRealtime = enableRealtime,
+        _getUsersByRoleOverride = getUsersByRole,
+        _reviewVerificationOverride = reviewVerification,
+        _restrictUserOverride = restrictUser,
+        _forceAssignNgoOverride = forceAssignNgo,
+        _forceAssignVolunteerOverride = forceAssignVolunteer,
+        _getPendingVerificationsOverride = getPendingVerifications,
+        _getVerificationStatsOverride = getVerificationStats,
+        _getDonationsByStatusOverride = getDonationsByStatus;
+
+  AnalyticsService get _analytics => _analyticsService ??= AnalyticsService();
+  VerificationService get _verification =>
+      _verificationService ??= VerificationService();
+  UserService get _users => _userService ??= UserService();
+  IssueService get _issues => _issueService ??= IssueService();
+  AuditService get _audit => _auditService ??= AuditService();
+  SecurityService get _security => _securityService ??= SecurityService();
+  FoodDonationService get _donations =>
+      _foodDonationService ??= FoodDonationService();
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
@@ -94,7 +181,9 @@ class AdminDashboardProvider extends ChangeNotifier {
         _fetchDemandForecast(),
         _fetchMatchingSessions(),
       ]);
-      _startRealtimeUpdates();
+      if (_enableRealtime) {
+        _startRealtimeUpdates();
+      }
     } catch (e) {
       _errorMessage = 'Failed to load dashboard data: $e';
       debugPrint(_errorMessage);
@@ -157,50 +246,52 @@ class AdminDashboardProvider extends ChangeNotifier {
   }
 
   Future<void> _fetchSystemMetrics() async {
-    _systemMetrics = await _analyticsService.getSystemAnalytics();
+    _systemMetrics = await _analytics.getSystemAnalytics();
   }
 
   Future<void> _fetchVerificationStats() async {
-    _verificationStats = await _verificationService.getVerificationStats();
+    _verificationStats = await (_getVerificationStatsOverride?.call() ??
+        _verification.getVerificationStats());
   }
 
   Future<void> _fetchPendingVerifications() async {
-    _pendingVerifications =
-        await _verificationService.getPendingVerifications();
+    _pendingVerifications = await (_getPendingVerificationsOverride?.call() ??
+        _verification.getPendingVerifications());
   }
 
   Future<void> _fetchOpenIssues() async {
-    _openIssues = await _issueService.getFutureOpenIssues();
+    _openIssues = await _issues.getFutureOpenIssues();
   }
 
   Future<void> _fetchAuditLogs() async {
-    _auditLogs = await _auditService.getAuditLogs(limit: 20);
+    _auditLogs = await _audit.getAuditLogs(limit: 20);
   }
 
   Future<void> _fetchSecurityStats() async {
-    _securityStats = await _securityService.getSecurityStats();
+    _securityStats = await _security.getSecurityStats();
   }
 
   Future<void> _fetchUnmatchedDonations() async {
-    final foodDonationService = FoodDonationService();
-    _unmatchedDonations =
-        await foodDonationService.getDonationsByStatus(DonationStatus.listed);
+    _unmatchedDonations = await (_getDonationsByStatusOverride?.call(
+          DonationStatus.listed,
+        ) ??
+        _donations.getDonationsByStatus(DonationStatus.listed));
   }
 
   Future<void> _fetchRegionalStats() async {
-    _regionalStats = await _analyticsService.getRegionalAnalytics();
+    _regionalStats = await _analytics.getRegionalAnalytics();
   }
 
   Future<void> _fetchDeliveryPerformance() async {
-    _deliveryPerformance = await _analyticsService.getDeliveryPerformance();
+    _deliveryPerformance = await _analytics.getDeliveryPerformance();
   }
 
   Future<void> _fetchMonthlyTrends() async {
-    _monthlyTrends = await _analyticsService.getMonthlyPlatformTrends();
+    _monthlyTrends = await _analytics.getMonthlyPlatformTrends();
   }
 
   Future<void> _fetchDemandForecast() async {
-    _demandForecast = await _analyticsService.getDemandForecast();
+    _demandForecast = await _analytics.getDemandForecast();
   }
 
   Future<void> _fetchMatchingSessions() async {
@@ -461,7 +552,8 @@ class AdminDashboardProvider extends ChangeNotifier {
       ];
       List<Map<String, dynamic>> results = [];
       for (final role in allRoles) {
-        final users = await _userService.getUsersByRole(role);
+        final users =
+            await (_getUsersByRoleOverride?.call(role) ?? _users.getUsersByRole(role));
         results.addAll(users);
       }
       final lowerQuery = query.toLowerCase();
@@ -483,12 +575,18 @@ class AdminDashboardProvider extends ChangeNotifier {
   Future<bool> reviewVerification(String submissionId, String adminId,
       VerificationStatus decision, String? notes) async {
     try {
-      await _verificationService.reviewSubmission(
-        submissionId: submissionId,
-        adminId: adminId,
-        decision: decision,
-        notes: notes,
-      );
+      await (_reviewVerificationOverride?.call(
+            submissionId: submissionId,
+            adminId: adminId,
+            decision: decision,
+            notes: notes,
+          ) ??
+          _verification.reviewSubmission(
+            submissionId: submissionId,
+            adminId: adminId,
+            decision: decision,
+            notes: notes,
+          ));
 
       // Refresh list
       await _fetchPendingVerifications();
@@ -506,13 +604,20 @@ class AdminDashboardProvider extends ChangeNotifier {
   Future<bool> suspendUser(
       String userId, String adminId, String reason, DateTime endDate) async {
     try {
-      await _userService.restrictUser(
-        userId: userId,
-        adminId: adminId,
-        restrictions: {'all': true}, // Full suspension
-        endDate: endDate,
-        reason: reason,
-      );
+      await (_restrictUserOverride?.call(
+            userId: userId,
+            adminId: adminId,
+            restrictions: {'all': true},
+            endDate: endDate,
+            reason: reason,
+          ) ??
+          _users.restrictUser(
+            userId: userId,
+            adminId: adminId,
+            restrictions: {'all': true}, // Full suspension
+            endDate: endDate,
+            reason: reason,
+          ));
       return true;
     } catch (e) {
       _errorMessage = 'Suspension failed: $e';
@@ -525,13 +630,18 @@ class AdminDashboardProvider extends ChangeNotifier {
   Future<bool> forceAssignNGO(
       String donationId, String adminId, String ngoId, String reason) async {
     try {
-      final foodDonationService = FoodDonationService();
-      await foodDonationService.forceAssignNGO(
-        donationId: donationId,
-        adminId: adminId,
-        ngoId: ngoId,
-        reason: reason,
-      );
+      await (_forceAssignNgoOverride?.call(
+            donationId: donationId,
+            adminId: adminId,
+            ngoId: ngoId,
+            reason: reason,
+          ) ??
+          _donations.forceAssignNGO(
+            donationId: donationId,
+            adminId: adminId,
+            ngoId: ngoId,
+            reason: reason,
+          ));
       await _fetchUnmatchedDonations();
       notifyListeners();
       return true;
@@ -546,13 +656,18 @@ class AdminDashboardProvider extends ChangeNotifier {
   Future<bool> forceAssignVolunteer(String donationId, String adminId,
       String volunteerId, String reason) async {
     try {
-      final foodDonationService = FoodDonationService();
-      await foodDonationService.forceAssignVolunteer(
-        donationId: donationId,
-        adminId: adminId,
-        volunteerId: volunteerId,
-        reason: reason,
-      );
+      await (_forceAssignVolunteerOverride?.call(
+            donationId: donationId,
+            adminId: adminId,
+            volunteerId: volunteerId,
+            reason: reason,
+          ) ??
+          _donations.forceAssignVolunteer(
+            donationId: donationId,
+            adminId: adminId,
+            volunteerId: volunteerId,
+            reason: reason,
+          ));
       await _fetchUnmatchedDonations();
       notifyListeners();
       return true;
