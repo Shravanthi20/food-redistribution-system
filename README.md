@@ -73,5 +73,5 @@ Optional menu-driven test runner:
 
 ## Project structure map
 
-See `docs/STRUCTURE.txt` for a concise folder-by-folder guide.
+See `docs/STRUCTURE.txt` for a concise folder-by-folder guide
 
