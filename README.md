@@ -33,7 +33,7 @@ This repo intentionally ignores machine-specific Firebase files (see `.gitignore
 - **Android**: `android/app/google-services.json`
 - **iOS**: `ios/Runner/GoogleService-Info.plist`
 
-If you use FlutterFire, generate `lib/firebase_options.dart` with the FlutterFire CLI (or add your own file with the same symbol used in `lib/main.dart`: `DefaultFirebaseOptions.currentPlatform`).
+If you use FlutterFire, generate `lib/firebase_options.dart` with the FlutterFire CLI (or add your own file with the same symbol used in `lib/main.dart`: `DefaultFirebaseOptions.currentPlatform`)
 
 ## Verification flow (example)
 
@@ -43,7 +43,7 @@ Document verification is implemented via `lib/services/verification_service.dart
 - **Verification status UI** (example screenshot): `assets/screenshots/flutter_04.png` (shows “Verification in Progress”)
 - **Admin review** updates `verifications` + user onboarding state (see `VerificationService.reviewSubmission`)
 
-Screenshot (from `assets/screenshots/flutter_04.png`):
+Screenshot (from `assets/screenshots/flutter_04.png`):-
 
 ![Verification Status - in progress](food_redistribution_app/assets/screenshots/flutter_04.png)
 
@@ -73,5 +73,5 @@ Optional menu-driven test runner:
 
 ## Project structure map
 
-See `docs/STRUCTURE.txt` for a concise folder-by-folder guide.
+See `docs/STRUCTURE.txt` for a concise folder-by-folder guide..
 
