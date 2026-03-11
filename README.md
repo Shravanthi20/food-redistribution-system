@@ -33,7 +33,7 @@ This repo intentionally ignores machine-specific Firebase files (see `.gitignore
 - **Android**: `android/app/google-services.json`
 - **iOS**: `ios/Runner/GoogleService-Info.plist`
 
-If you use FlutterFire, generate `lib/firebase_options.dart` with the FlutterFire CLI (or add your own file with the same symbol used in `lib/main.dart`: `DefaultFirebaseOptions.currentPlatform`).
+If you use FlutterFire, generate `lib/firebase_options.dart` with the FlutterFire CLI (or add your own file with the same symbol used in `lib/main.dart`: `DefaultFirebaseOptions.currentPlatform`)
 
 ## Verification flow (example)
 
