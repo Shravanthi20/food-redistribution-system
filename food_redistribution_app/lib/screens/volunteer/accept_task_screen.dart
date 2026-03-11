@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../models/food_donation.dart';
+import '../../providers/auth_provider.dart';
 import '../../utils/app_router.dart';
 
 class AcceptTaskScreen extends StatelessWidget {
@@ -20,13 +22,18 @@ class AcceptTaskScreen extends StatelessWidget {
       );
     }
 
+    final currentUserId =
+        Provider.of<AuthProvider>(context, listen: false).appUser?.uid;
+    final isAssignedToCurrentVolunteer =
+        task.assignedVolunteerId == currentUserId;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF7F9FC),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         title: const Text(
-          "Task Accepted",
+          "Task Details",
           style: TextStyle(color: Colors.black),
         ),
         iconTheme: const IconThemeData(color: Colors.black),
@@ -39,17 +46,30 @@ class AcceptTaskScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.green.withValues(alpha: 0.12),
+                color: (isAssignedToCurrentVolunteer
+                        ? Colors.green
+                        : Colors.orange)
+                    .withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(Icons.check_circle, color: Colors.green, size: 32),
-                  SizedBox(width: 12),
+                  Icon(
+                    isAssignedToCurrentVolunteer
+                        ? Icons.check_circle
+                        : Icons.info_outline,
+                    color: isAssignedToCurrentVolunteer
+                        ? Colors.green
+                        : Colors.orange,
+                    size: 32,
+                  ),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      "You have successfully accepted the task.\nProceed to pickup location.",
-                      style: TextStyle(
+                      isAssignedToCurrentVolunteer
+                          ? "This task is assigned to you.\nProceed to pickup location."
+                          : "This task is not assigned to you yet.\nAccept it from New Requests before starting pickup.",
+                      style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                       ),
@@ -100,22 +120,35 @@ class AcceptTaskScreen extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
+                  backgroundColor:
+                      isAssignedToCurrentVolunteer ? Colors.green : Colors.grey,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
                 ),
                 onPressed: () {
+                  if (!isAssignedToCurrentVolunteer) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          "This donation is not assigned to you. Accept it from New Requests before starting pickup.",
+                        ),
+                      ),
+                    );
+                    return;
+                  }
                   Navigator.pushNamed(
                     context,
                     AppRouter.taskExecution,
                     arguments: {'donationId': task.id},
                   );
                 },
-                child: const Text(
-                  "Start Pickup",
-                  style: TextStyle(fontSize: 16, color: Colors.white),
+                child: Text(
+                  isAssignedToCurrentVolunteer
+                      ? "Start Pickup"
+                      : "Await Assignment",
+                  style: const TextStyle(fontSize: 16, color: Colors.white),
                 ),
               ),
             ),

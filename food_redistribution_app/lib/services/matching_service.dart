@@ -709,13 +709,17 @@ class EnhancedMatchingService {
         final donation = FoodDonation.fromFirestore(doc);
         final requestId = doc.data()['matchedRequestId'] as String?;
 
-        if (requestId == null || requestId.isEmpty) continue;
         if (donation.assignedVolunteerId != null &&
             donation.assignedVolunteerId!.isNotEmpty) {
           continue;
         }
 
-        await _triggerVolunteerAssignment(doc.id, requestId);
+        if (requestId != null && requestId.isNotEmpty) {
+          await _triggerVolunteerAssignment(doc.id, requestId);
+          continue;
+        }
+
+        await _triggerVolunteerAssignmentForDirectMatch(doc.id);
       }
     } catch (e) {
       await _auditService.logEvent(
@@ -768,28 +772,10 @@ class EnhancedMatchingService {
         final donation = FoodDonation.fromFirestore(doc);
         final requestId = doc.data()['matchedRequestId'] as String?;
 
-        if (requestId == null || requestId.isEmpty) continue;
         if (donation.assignedVolunteerId != null &&
             donation.assignedVolunteerId!.isNotEmpty) {
           continue;
         }
-
-        final existingAssignments = await FirebaseFirestore.instance
-            .collection('donation_assignments')
-            .where('donationId', isEqualTo: doc.id)
-            .where('requestId', isEqualTo: requestId)
-            .where('status', whereIn: ['pending', 'accepted'])
-            .limit(1)
-            .get();
-
-        if (existingAssignments.docs.isNotEmpty) continue;
-
-        final requestDoc = await FirebaseFirestore.instance
-            .collection(Collections.requests)
-            .doc(requestId)
-            .get();
-        if (!requestDoc.exists) continue;
-        final request = FoodRequest.fromFirestore(requestDoc);
 
         final pickupDistance = _locationService.calculateDistance(
           volunteerLat,
@@ -800,8 +786,31 @@ class EnhancedMatchingService {
 
         if (pickupDistance > maxRadius) continue;
 
-        final assignmentRef =
-            FirebaseFirestore.instance.collection('donation_assignments').doc();
+        double totalDistanceKm = pickupDistance;
+
+        if (requestId != null && requestId.isNotEmpty) {
+          final requestDoc = await FirebaseFirestore.instance
+              .collection(Collections.requests)
+              .doc(requestId)
+              .get();
+          if (!requestDoc.exists) continue;
+          final request = FoodRequest.fromFirestore(requestDoc);
+
+          totalDistanceKm += _locationService.calculateDistance(
+            donation.pickupLocation['latitude']?.toDouble() ?? 0.0,
+            donation.pickupLocation['longitude']?.toDouble() ?? 0.0,
+            request.deliveryLocation['latitude']?.toDouble() ?? 0.0,
+            request.deliveryLocation['longitude']?.toDouble() ?? 0.0,
+          );
+        }
+
+        final assignmentRef = FirebaseFirestore.instance
+            .collection('donation_assignments')
+            .doc(_volunteerAssignmentId(
+              volunteerId: volunteerId,
+              donationId: doc.id,
+              requestId: requestId,
+            ));
         await assignmentRef.set({
           'donationId': doc.id,
           'requestId': requestId,
@@ -810,13 +819,7 @@ class EnhancedMatchingService {
           'status': 'pending',
           'createdAt': Timestamp.now(),
           'updatedAt': Timestamp.now(),
-          'distanceKm': pickupDistance +
-              _locationService.calculateDistance(
-                donation.pickupLocation['latitude']?.toDouble() ?? 0.0,
-                donation.pickupLocation['longitude']?.toDouble() ?? 0.0,
-                request.deliveryLocation['latitude']?.toDouble() ?? 0.0,
-                request.deliveryLocation['longitude']?.toDouble() ?? 0.0,
-              ),
+          'distanceKm': totalDistanceKm,
         });
       }
     } catch (e) {
@@ -1621,18 +1624,6 @@ class EnhancedMatchingService {
   Future<void> _triggerVolunteerAssignment(
       String donationId, String requestId) async {
     try {
-      final existingAssignments = await FirebaseFirestore.instance
-          .collection('donation_assignments')
-          .where('donationId', isEqualTo: donationId)
-          .where('requestId', isEqualTo: requestId)
-          .where('status', whereIn: ['pending', 'accepted'])
-          .limit(1)
-          .get();
-
-      if (existingAssignments.docs.isNotEmpty) {
-        return;
-      }
-
       final donationDoc = await FirebaseFirestore.instance
           .collection(Collections.donations)
           .doc(donationId)
@@ -1664,8 +1655,13 @@ class EnhancedMatchingService {
         return;
       }
 
-      final assignmentRef =
-          FirebaseFirestore.instance.collection('donation_assignments').doc();
+      final assignmentRef = FirebaseFirestore.instance
+          .collection('donation_assignments')
+          .doc(_volunteerAssignmentId(
+            volunteerId: volunteer.id,
+            donationId: donationId,
+            requestId: requestId,
+          ));
       await assignmentRef.set({
         'donationId': donationId,
         'requestId': requestId,
@@ -1718,6 +1714,159 @@ class EnhancedMatchingService {
         },
       );
     }
+  }
+
+  Future<void> _triggerVolunteerAssignmentForDirectMatch(
+      String donationId) async {
+    try {
+      final donationDoc = await FirebaseFirestore.instance
+          .collection(Collections.donations)
+          .doc(donationId)
+          .get();
+      if (!donationDoc.exists) return;
+
+      final donation = FoodDonation.fromFirestore(donationDoc);
+      final ngoLocation = await _resolveNgoLocationForDonation(donation);
+      if (ngoLocation == null) return;
+
+      final volunteer = await _findNearestVolunteerForDirectMatch(
+        donation: donation,
+        dropLocation: ngoLocation,
+      );
+
+      if (volunteer == null) {
+        return;
+      }
+
+      final assignmentRef = FirebaseFirestore.instance
+          .collection('donation_assignments')
+          .doc(_volunteerAssignmentId(
+            volunteerId: volunteer.id,
+            donationId: donationId,
+            requestId: null,
+          ));
+      await assignmentRef.set({
+        'donationId': donationId,
+        'requestId': null,
+        'assigneeId': volunteer.id,
+        'type': 'volunteer_task',
+        'status': 'pending',
+        'createdAt': Timestamp.now(),
+        'updatedAt': Timestamp.now(),
+        'distanceKm': volunteer.distanceKm,
+      });
+    } catch (e) {
+      await _auditService.logEvent(
+        eventType: AuditEventType.adminAction,
+        userId: 'system',
+        riskLevel: AuditRiskLevel.medium,
+        additionalData: {
+          'event': 'direct_match_volunteer_assignment_error',
+          'description':
+              'Volunteer assignment failed for direct matched donation $donationId: $e',
+          'donationId': donationId,
+          'error': e.toString(),
+        },
+      );
+    }
+  }
+
+  String _volunteerAssignmentId({
+    required String volunteerId,
+    required String donationId,
+    required String? requestId,
+  }) {
+    final requestPart =
+        requestId != null && requestId.isNotEmpty ? requestId : 'direct';
+    return '${volunteerId}_${donationId}_$requestPart';
+  }
+
+  Future<Map<String, double>?> _resolveNgoLocationForDonation(
+    FoodDonation donation,
+  ) async {
+    final ngoId = donation.claimedByNGO ?? donation.assignedNGOId;
+    if (ngoId == null || ngoId.isEmpty) return null;
+
+    final orgDoc = await FirebaseFirestore.instance
+        .collection(Collections.organizations)
+        .doc(ngoId)
+        .get();
+    if (orgDoc.exists) {
+      final location = orgDoc.data()?['location'] as Map<String, dynamic>?;
+      final lat = (location?['latitude'] as num?)?.toDouble();
+      final lng = (location?['longitude'] as num?)?.toDouble();
+      if (lat != null && lng != null) {
+        return {'latitude': lat, 'longitude': lng};
+      }
+    }
+
+    final userDoc = await FirebaseFirestore.instance
+        .collection(Collections.users)
+        .doc(ngoId)
+        .get();
+    final profile =
+        (userDoc.data()?[Fields.profile] as Map<String, dynamic>?) ?? {};
+    final location = profile['location'] as Map<String, dynamic>?;
+    final lat = (location?['latitude'] as num?)?.toDouble();
+    final lng = (location?['longitude'] as num?)?.toDouble();
+    if (lat != null && lng != null) {
+      return {'latitude': lat, 'longitude': lng};
+    }
+
+    return null;
+  }
+
+  Future<_VolunteerCandidate?> _findNearestVolunteerForDirectMatch({
+    required FoodDonation donation,
+    required Map<String, double> dropLocation,
+  }) async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection(Collections.users)
+        .where(Fields.role, isEqualTo: UserRole.volunteer.name)
+        .get();
+
+    _VolunteerCandidate? bestCandidate;
+
+    for (final doc in snapshot.docs) {
+      final data = doc.data();
+      final profile = (data[Fields.profile] as Map<String, dynamic>?) ?? {};
+      final status = data[Fields.status] as String?;
+      final isOnline = data['isOnline'] == true;
+      final maxRadius = (profile['maxRadius'] as num?)?.toDouble() ?? 25.0;
+      final location = profile['location'] as Map<String, dynamic>?;
+
+      if (status != UserStatus.active.name || !isOnline || location == null) {
+        continue;
+      }
+
+      final volunteerLat = (location['latitude'] as num?)?.toDouble();
+      final volunteerLng = (location['longitude'] as num?)?.toDouble();
+      if (volunteerLat == null || volunteerLng == null) continue;
+
+      final pickupDistance = _locationService.calculateDistance(
+        volunteerLat,
+        volunteerLng,
+        donation.pickupLocation['latitude']?.toDouble() ?? 0.0,
+        donation.pickupLocation['longitude']?.toDouble() ?? 0.0,
+      );
+
+      if (pickupDistance > maxRadius) continue;
+
+      final dropDistance = _locationService.calculateDistance(
+        donation.pickupLocation['latitude']?.toDouble() ?? 0.0,
+        donation.pickupLocation['longitude']?.toDouble() ?? 0.0,
+        dropLocation['latitude'] ?? 0.0,
+        dropLocation['longitude'] ?? 0.0,
+      );
+
+      final totalDistance = pickupDistance + dropDistance;
+      if (bestCandidate == null || totalDistance < bestCandidate.distanceKm) {
+        bestCandidate =
+            _VolunteerCandidate(id: doc.id, distanceKm: totalDistance);
+      }
+    }
+
+    return bestCandidate;
   }
 
   Future<_NgoContext> _resolveNgoContext(String requestNgoId) async {

@@ -126,6 +126,13 @@ service cloud.firestore {
         isOrgMember(request.resource.data.claimedByNGO) ||
         resource.data.assignedVolunteerId == request.auth.uid ||
         (
+          isVolunteer() &&
+          resource.data.status == 'matched' &&
+          resource.data.assignedVolunteerId == null &&
+          request.resource.data.assignedVolunteerId == request.auth.uid &&
+          request.resource.data.status == resource.data.status
+        ) ||
+        (
           isNGO() &&
           resource.data.status == 'listed' &&
           request.resource.data.status == 'matched' &&
@@ -192,6 +199,13 @@ service cloud.firestore {
         isOrgMember(resource.data.ngoId) ||
         isOrgMember(resource.data.metadata.organizationId) ||
         (
+          isVolunteer() &&
+          resource.data.status == 'matched' &&
+          resource.data.assignedVolunteerId == null &&
+          request.resource.data.assignedVolunteerId == request.auth.uid &&
+          request.resource.data.status == resource.data.status
+        ) ||
+        (
           request.resource.data.matchedDonationId != null &&
           exists(/databases/$(database)/documents/donations/$(request.resource.data.matchedDonationId)) &&
           get(/databases/$(database)/documents/donations/$(request.resource.data.matchedDonationId)).data.donorId == request.auth.uid &&
@@ -244,6 +258,19 @@ service cloud.firestore {
           get(/databases/$(database)/documents/requests/$(request.resource.data.requestId)).data.status == 'matched' &&
           get(/databases/$(database)/documents/donations/$(request.resource.data.donationId)).data.status == 'matched' &&
           get(/databases/$(database)/documents/donations/$(request.resource.data.donationId)).data.assignedVolunteerId == null
+        ) ||
+        (
+          isVolunteer() &&
+          request.resource.data.assigneeId == request.auth.uid &&
+          request.resource.data.type == 'volunteer_task' &&
+          request.resource.data.requestId == null &&
+          exists(/databases/$(database)/documents/donations/$(request.resource.data.donationId)) &&
+          get(/databases/$(database)/documents/donations/$(request.resource.data.donationId)).data.status == 'matched' &&
+          get(/databases/$(database)/documents/donations/$(request.resource.data.donationId)).data.assignedVolunteerId == null &&
+          (
+            get(/databases/$(database)/documents/donations/$(request.resource.data.donationId)).data.assignedNGOId != null ||
+            get(/databases/$(database)/documents/donations/$(request.resource.data.donationId)).data.claimedByNGO != null
+          )
         )
       );
       allow update: if isAuth() && (

@@ -225,6 +225,9 @@ class DonationProvider extends ChangeNotifier {
           String volunteerId) =>
       _donationService.getPendingAssignments(volunteerId);
 
+  Stream<List<FoodDonation>> getUnassignedMatchedDonationsStream() =>
+      _donationService.getUnassignedMatchedDonationsStream();
+
   // Accept Assignment
   Future<bool> acceptAssignment(
       String assignmentId, String donationId, String volunteerId) async {
@@ -234,6 +237,26 @@ class DonationProvider extends ChangeNotifier {
       notifyListeners();
       await _donationService.acceptAssignment(
           assignmentId, donationId, volunteerId);
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> claimMatchedDonation(
+      String donationId, String volunteerId) async {
+    try {
+      _isLoading = true;
+      _errorMessage = null;
+      notifyListeners();
+      await _donationService.claimMatchedDonation(
+        donationId: donationId,
+        volunteerId: volunteerId,
+      );
       return true;
     } catch (e) {
       _errorMessage = e.toString();

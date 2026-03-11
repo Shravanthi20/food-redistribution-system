@@ -28,14 +28,18 @@ class AuditService {
     String? ipAddress,
   }) async {
     try {
-      final deviceInfo = await _getDeviceInfo();
       final currentUser = _auth.currentUser;
+      if (currentUser == null) {
+        return;
+      }
+
+      final deviceInfo = await _getDeviceInfo();
 
       final auditLog = {
         'eventType': eventType.name,
         'riskLevel': riskLevel.name,
         'userId': userId,
-        'currentUserId': currentUser?.uid,
+        'currentUserId': currentUser.uid,
         'targetUserId': targetUserId,
         'resourceId': resourceId,
         'resourceType': resourceType,
@@ -52,6 +56,10 @@ class AuditService {
       if (riskLevel == AuditRiskLevel.high ||
           riskLevel == AuditRiskLevel.critical) {
         await _createSecurityAlert(auditLog);
+      }
+    } on FirebaseException catch (e) {
+      if (e.code != 'permission-denied') {
+        debugPrint('Error logging audit event: $e');
       }
     } catch (e) {
       debugPrint('Error logging audit event: $e');

@@ -5,6 +5,7 @@ import '../../services/food_donation_service.dart';
 import '../../services/location_service.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/accessibility_provider.dart';
+import '../../utils/app_router.dart';
 
 class TaskExecutionScreen extends StatefulWidget {
   final String donationId;
@@ -144,6 +145,20 @@ class _TaskExecutionScreenState extends State<TaskExecutionScreen> {
         children: [
           if (!simplified) _statusCard(status),
           if (!simplified) const SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: OutlinedButton.icon(
+              onPressed: () {
+                Navigator.pushNamed(
+                  context,
+                  AppRouter.volunteerLiveMap,
+                  arguments: {'donationId': donation.id},
+                );
+              },
+              icon: const Icon(Icons.map_outlined),
+              label: const Text('Open Live Map'),
+            ),
+          ),
 
           // Simplified Step-by-Step UI
           Expanded(
@@ -343,6 +358,24 @@ class _TaskExecutionScreenState extends State<TaskExecutionScreen> {
   Future<void> _updateStatus(DonationStatus newStatus) async {
     setState(() => _isLoading = true);
     try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final currentUserId = authProvider.appUser?.uid;
+      final donation = await _donationService.getDonation(widget.donationId);
+
+      if (currentUserId == null) {
+        throw Exception("You must be signed in to update this task");
+      }
+
+      if (donation == null) {
+        throw Exception("Task not found");
+      }
+
+      if (donation.assignedVolunteerId != currentUserId) {
+        throw Exception(
+          "This task is not assigned to your account. Accept it from New Requests before updating pickup status.",
+        );
+      }
+
       await _donationService.updateDonationStatus(
         donationId: widget.donationId,
         status: newStatus,

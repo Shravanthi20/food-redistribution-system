@@ -22,6 +22,7 @@ class VolunteerDashboard extends StatefulWidget {
 
 class _VolunteerDashboardState extends State<VolunteerDashboard> {
   bool isOnline = false;
+  String? _assignmentBootstrapUid;
 
   int selectedIndex = 0;
 
@@ -38,14 +39,17 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
   void initState() {
     super.initState();
     _loadOnlineStatus();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+  }
+
+  void _maybeBootstrapVolunteerAssignments(String userId) {
+    if (_assignmentBootstrapUid == userId) return;
+    _assignmentBootstrapUid = userId;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
       final donationProvider =
           Provider.of<DonationProvider>(context, listen: false);
-      final uid = authProvider.appUser?.uid;
-      if (uid != null) {
-        donationProvider.rerunVolunteerAssignmentsForVolunteer(uid);
-      }
+      await donationProvider.rerunVolunteerAssignmentsForVolunteer(userId);
     });
   }
 
@@ -100,6 +104,8 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
       );
     }
 
+    _maybeBootstrapVolunteerAssignments(user.uid);
+
     return GradientScaffold(
       showAnimatedBackground: true,
       body: SafeArea(
@@ -135,22 +141,147 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
       stream: provider.getPendingAssignmentsStream(userId),
       builder: (context, snapshot) {
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return GlassContainer(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Icon(Icons.assignment_outlined,
-                    color: AppTheme.accentTeal.withValues(alpha: 0.4)),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    context.l10n.noNewPickupRequests,
-                    style: const TextStyle(
-                        color: AppTheme.textMuted, fontSize: 13),
+          return StreamBuilder<List<FoodDonation>>(
+            stream: provider.getUnassignedMatchedDonationsStream(),
+            builder: (context, matchedSnapshot) {
+              final fallbackTasks =
+                  matchedSnapshot.data ?? const <FoodDonation>[];
+              if (fallbackTasks.isEmpty) {
+                return GlassContainer(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      Icon(Icons.assignment_outlined,
+                          color: AppTheme.accentTeal.withValues(alpha: 0.4)),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          context.l10n.noNewPickupRequests,
+                          style: const TextStyle(
+                              color: AppTheme.textMuted, fontSize: 13),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
-            ),
+                );
+              }
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: AppTheme.warningAmber.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: AppTheme.warningAmber.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.notification_important_rounded,
+                          size: 16,
+                          color: AppTheme.warningAmber,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          context.l10n.newAssignments,
+                          style: const TextStyle(
+                            color: AppTheme.warningAmber,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  ...fallbackTasks.map(
+                    (donation) => GlassContainer(
+                      margin: const EdgeInsets.only(bottom: 14),
+                      padding: const EdgeInsets.all(18),
+                      tintColor: AppTheme.warningAmber,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 5,
+                            ),
+                            decoration: BoxDecoration(
+                              color:
+                                  AppTheme.warningAmber.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              context.l10n.matchedActionRequired,
+                              style: const TextStyle(
+                                color: AppTheme.warningAmber,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 11,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            donation.title,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 17,
+                              color: AppTheme.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            "${donation.quantity} ${donation.unit} from Anonymous Donor",
+                            style: const TextStyle(
+                              color: AppTheme.textSecondary,
+                              fontSize: 13,
+                            ),
+                          ),
+                          const SizedBox(height: 18),
+                          GradientButton(
+                            text: context.l10n.accept,
+                            icon: Icons.check_rounded,
+                            onPressed: () async {
+                              final success =
+                                  await provider.claimMatchedDonation(
+                                donation.id,
+                                userId,
+                              );
+                              if (!context.mounted) return;
+                              if (success) {
+                                Navigator.pushNamed(
+                                  context,
+                                  AppRouter.taskExecution,
+                                  arguments: {'donationId': donation.id},
+                                );
+                                return;
+                              }
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    provider.errorMessage ??
+                                        'Failed to claim matched donation',
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
           );
         }
 
@@ -251,10 +382,28 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                                 text: context.l10n.accept,
                                 icon: Icons.check_rounded,
                                 onPressed: () async {
-                                  await provider.acceptAssignment(
+                                  final success =
+                                      await provider.acceptAssignment(
                                     assignmentId,
                                     donationId,
                                     userId,
+                                  );
+                                  if (!context.mounted) return;
+                                  if (success) {
+                                    Navigator.pushNamed(
+                                      context,
+                                      AppRouter.taskExecution,
+                                      arguments: {'donationId': donationId},
+                                    );
+                                    return;
+                                  }
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        provider.errorMessage ??
+                                            'Failed to accept assignment',
+                                      ),
+                                    ),
                                   );
                                 },
                               ),

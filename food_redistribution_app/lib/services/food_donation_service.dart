@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:uuid/uuid.dart';
 import '../models/food_donation.dart';
 import '../models/ngo_profile.dart';
@@ -13,6 +14,7 @@ import 'audit_service.dart';
 
 class FoodDonationService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   final UserService _userService = UserService();
   final Uuid _uuid = const Uuid();
   late final EnhancedMatchingService _matchingService = EnhancedMatchingService(
@@ -606,6 +608,10 @@ class FoodDonationService {
   // Get donor's donations
   Future<List<FoodDonation>> getDonorDonations(String donorId) async {
     try {
+      if (_auth.currentUser == null) {
+        return [];
+      }
+
       final query = await _firestore
           .collection(Collections.donations)
           .where('donorId', isEqualTo: donorId)
@@ -737,6 +743,10 @@ class FoodDonationService {
     String? userId, {
     Map<String, dynamic>? additionalData,
   }) async {
+    if (_auth.currentUser == null) {
+      return;
+    }
+
     await _firestore.collection('audit_logs').add({
       'action': action,
       'donationId': donationId,
@@ -774,6 +784,10 @@ class FoodDonationService {
 
   // Get all donations for a donor as a stream
   Stream<List<FoodDonation>> getDonorDonationsStream(String donorId) {
+    if (_auth.currentUser == null) {
+      return Stream.value([]);
+    }
+
     return _firestore
         .collection(Collections.donations)
         .where('donorId', isEqualTo: donorId)
@@ -833,6 +847,89 @@ class FoodDonationService {
               })
           .toList();
     });
+  }
+
+  Stream<List<FoodDonation>> getUnassignedMatchedDonationsStream() {
+    return _firestore
+        .collection(Collections.donations)
+        .where('status', isEqualTo: DonationStatus.matched.name)
+        .where('assignedVolunteerId', isNull: true)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs
+          .map((doc) => FoodDonation.fromFirestore(doc))
+          .toList()
+        ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    });
+  }
+
+  Future<void> claimMatchedDonation({
+    required String donationId,
+    required String volunteerId,
+  }) async {
+    final batch = _firestore.batch();
+    final donationRef =
+        _firestore.collection(Collections.donations).doc(donationId);
+    final donationSnapshot = await donationRef.get();
+    if (!donationSnapshot.exists) {
+      throw Exception('Donation not found');
+    }
+
+    final donationData = donationSnapshot.data() ?? <String, dynamic>{};
+    final requestId = donationData['matchedRequestId'] as String?;
+
+    batch.update(donationRef, {
+      'assignedVolunteerId': volunteerId,
+      'matchingStatus': 'volunteer_claimed',
+      'updatedAt': Timestamp.now(),
+    });
+
+    if (requestId != null && requestId.isNotEmpty) {
+      final requestRef =
+          _firestore.collection(Collections.requests).doc(requestId);
+      batch.update(requestRef, {
+        'assignedVolunteerId': volunteerId,
+        'updatedAt': Timestamp.now(),
+      });
+    }
+
+    final assignmentRef = _firestore
+        .collection('donation_assignments')
+        .doc('${volunteerId}_${donationId}_${requestId ?? 'direct'}');
+    batch.set(
+        assignmentRef,
+        {
+          'donationId': donationId,
+          'requestId': requestId,
+          'assigneeId': volunteerId,
+          'type': 'volunteer_task',
+          'status': 'accepted',
+          'createdAt': Timestamp.now(),
+          'acceptedAt': Timestamp.now(),
+          'updatedAt': Timestamp.now(),
+        },
+        SetOptions(merge: true));
+
+    await batch.commit();
+  }
+
+  Future<String?> resolveMatchedNgoIdForDonation(String donationId) async {
+    final donationDoc = await _firestore
+        .collection(Collections.donations)
+        .doc(donationId)
+        .get();
+    if (!donationDoc.exists) return null;
+
+    final donation = FoodDonation.fromFirestore(donationDoc);
+    if (donation.assignedNGOId != null && donation.assignedNGOId!.isNotEmpty) {
+      return donation.assignedNGOId;
+    }
+
+    if (donation.claimedByNGO != null && donation.claimedByNGO!.isNotEmpty) {
+      return donation.claimedByNGO;
+    }
+
+    return null;
   }
 
   // Accept an assignment

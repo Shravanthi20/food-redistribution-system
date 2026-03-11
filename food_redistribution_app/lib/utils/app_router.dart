@@ -42,6 +42,7 @@ import '../screens/accessibility_settings_screen.dart'; // [NEW]
 import '../screens/volunteer/accept_task_screen.dart';
 import '../screens/volunteer/reject_task_screen.dart';
 import '../screens/volunteer/task_execution_screen.dart';
+import '../screens/volunteer/volunteer_live_map_screen.dart';
 import '../screens/coordination/issue_reporting_screen.dart';
 import '../screens/volunteer/volunteer_profile_screen.dart';
 
@@ -83,6 +84,7 @@ class AppRouter {
   static const String acceptTask = '/accept-task';
   static const String rejectTask = '/reject-task';
   static const String taskExecution = '/task-execution';
+  static const String volunteerLiveMap = '/volunteer-live-map';
 
   // NGO Onboarding
   static const String documentSubmission = '/document-submission';
@@ -220,6 +222,16 @@ class AppRouter {
           return MaterialPageRoute(
             builder: (_) =>
                 TaskExecutionScreen(donationId: args['donationId']!),
+          );
+        }
+        return _errorRoute();
+
+      case volunteerLiveMap:
+        final args = settings.arguments as Map<String, dynamic>?;
+        if (args != null && args.containsKey('donationId')) {
+          return MaterialPageRoute(
+            builder: (_) =>
+                VolunteerLiveMapScreen(donationId: args['donationId']!),
           );
         }
         return _errorRoute();
