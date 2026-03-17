@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_redistribution_app/models/app_user.dart';
+import 'package:food_redistribution_app/models/enums.dart';
 import 'package:food_redistribution_app/constants/app_constants.dart';
 
 void main() {

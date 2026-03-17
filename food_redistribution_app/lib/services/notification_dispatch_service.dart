@@ -464,7 +464,8 @@ class NotificationDispatchService {
         return await _notificationService.sendNotification(
           userId: recipientId,
           title: title,
-          body: body,
+          message: body,
+          type: 'push',
           data: data,
         );
         
@@ -488,7 +489,7 @@ class NotificationDispatchService {
   /// Schedule notification for future delivery
   Future<bool> _scheduleNotification(ScheduledNotification notification) async {
     try {
-      await _firestoreService.addDocument('scheduled_notifications', notification.toMap());
+      await _firestoreService.create('scheduled_notifications', 'auto_${DateTime.now().millisecondsSinceEpoch}', notification.toMap());
       
       await _auditService.logEvent(
         eventType: AuditEventType.adminAction,
@@ -523,7 +524,7 @@ class NotificationDispatchService {
   Future<void> processScheduledNotifications() async {
     try {
       final now = DateTime.now();
-      final docs = await _firestoreService.queryCollection(
+      final docs = await _firestoreService.query(
         'scheduled_notifications',
         where: [
           {'field': 'status', 'operator': '==', 'value': 'pending'},
@@ -532,7 +533,7 @@ class NotificationDispatchService {
         limit: 100, // Process in batches
       );
       
-      for (final doc in docs) {
+      for (final doc in docs.docs) {
         final data = doc.data() as Map<String, dynamic>;
         final notification = ScheduledNotification(
           id: data['id'],
@@ -551,7 +552,7 @@ class NotificationDispatchService {
           final success = await _sendNotification(notification, template, 'en');
           
           // Update notification status
-          await _firestoreService.updateDocument('scheduled_notifications', doc.id, {
+          await _firestoreService.update('scheduled_notifications', doc.id, {
             'status': success ? 'sent' : 'failed',
             'processedAt': DateTime.now(),
           });
@@ -591,7 +592,7 @@ class NotificationDispatchService {
       );
       
       // Store batch metadata
-      await _firestoreService.addDocument('notification_batches', {
+      await _firestoreService.create('notification_batches', 'batch_${DateTime.now().millisecondsSinceEpoch}', {
         'id': batch.id,
         'name': batch.name,
         'description': batch.description,
@@ -633,20 +634,25 @@ class NotificationDispatchService {
   
   /// Helper methods for different notification channels
   Future<bool> _sendInAppNotification(String recipientId, String title, String body, Map<String, dynamic> data) async {
-    return await _firestoreService.addDocument('in_app_notifications', {
-      'recipientId': recipientId,
-      'title': title,
-      'body': body,
-      'data': data,
-      'createdAt': DateTime.now(),
-      'isRead': false,
-    });
+    try {
+      await _firestoreService.create('in_app_notifications', 'notif_${DateTime.now().millisecondsSinceEpoch}', {
+        'recipientId': recipientId,
+        'title': title,
+        'body': body,
+        'data': data,
+        'createdAt': DateTime.now(),
+        'isRead': false,
+      });
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
   
   Future<bool> _sendEmailNotification(String recipientId, String title, String body, Map<String, dynamic> data) async {
     // Integration with email service (SendGrid, AWS SES, etc.)
     // This is a placeholder implementation
-    await _firestoreService.addDocument('email_queue', {
+    await _firestoreService.create('email_queue', 'email_${DateTime.now().millisecondsSinceEpoch}', {
       'recipientId': recipientId,
       'subject': title,
       'body': body,
@@ -660,7 +666,7 @@ class NotificationDispatchService {
   Future<bool> _sendSMSNotification(String recipientId, String message, NotificationPriority priority) async {
     // Integration with SMS service (Twilio, AWS SNS, etc.)
     // This is a placeholder implementation
-    await _firestoreService.addDocument('sms_queue', {
+    await _firestoreService.create('sms_queue', 'sms_${DateTime.now().millisecondsSinceEpoch}', {
       'recipientId': recipientId,
       'message': message,
       'priority': priority.toString(),
@@ -673,7 +679,7 @@ class NotificationDispatchService {
   Future<bool> _sendWhatsAppNotification(String recipientId, String message, Map<String, dynamic> data) async {
     // Integration with WhatsApp Business API
     // This is a placeholder implementation
-    await _firestoreService.addDocument('whatsapp_queue', {
+    await _firestoreService.create('whatsapp_queue', 'whatsapp_${DateTime.now().millisecondsSinceEpoch}', {
       'recipientId': recipientId,
       'message': message,
       'data': data,
@@ -730,7 +736,7 @@ class NotificationDispatchService {
   }
   
   Future<Map<String, dynamic>> _getUserNotificationPreferences(String userId) async {
-    final doc = await _firestoreService.getDocument('user_preferences', userId);
+    final doc = await _firestoreService.get('user_preferences', userId);
     return doc?.data() as Map<String, dynamic>? ?? {
       'push': true,
       'email': true,
@@ -765,18 +771,23 @@ class NotificationDispatchService {
     NotificationTemplate template,
     int successCount,
   ) async {
-    return await _firestoreService.addDocument('notification_records', {
-      'notificationId': notification.id,
-      'templateId': template.id,
-      'templateName': template.name,
-      'category': template.category.name,
-      'recipientCount': notification.recipientIds.length,
-      'successCount': successCount,
-      'channels': template.channels.map((c) => c.name).toList(),
-      'priority': template.priority.name,
-      'sentAt': DateTime.now(),
-      'data': notification.data,
-    });
+    try {
+      await _firestoreService.create('notification_records', 'record_${DateTime.now().millisecondsSinceEpoch}', {
+        'notificationId': notification.id,
+        'templateId': template.id,
+        'templateName': template.name,
+        'category': template.category.name,
+        'recipientCount': notification.recipientIds.length,
+        'successCount': successCount,
+        'channels': template.channels.map((c) => c.name).toList(),
+        'priority': template.priority.name,
+        'sentAt': DateTime.now(),
+        'data': notification.data,
+      });
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
   
   String _generateNotificationId() {
@@ -795,7 +806,7 @@ class NotificationDispatchService {
     final start = startDate ?? DateTime.now().subtract(Duration(days: 7));
     final end = endDate ?? DateTime.now();
     
-    final records = await _firestoreService.queryCollection(
+    final records = await _firestoreService.query(
       'notification_records',
       where: [
         {'field': 'sentAt', 'operator': '>=', 'value': start},

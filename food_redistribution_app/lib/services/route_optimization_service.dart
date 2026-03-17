@@ -733,6 +733,6 @@ class RouteOptimizationEngine {
   
   /// Store optimization result for analytics
   Future<void> _storeOptimizationResult(OptimizedRoute route) async {
-    await _firestoreService.addDocument('route_optimizations', route.toMap());
+    await _firestoreService.create('route_optimizations', route.toMap());
   }
 }

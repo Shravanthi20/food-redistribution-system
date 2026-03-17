@@ -50,10 +50,7 @@ dependencies:
 
   # Utilities
   http: ^1.2.2
-<<<<<<< HEAD:pubspec.yaml
-=======
   intl: ^0.20.2
->>>>>>> main:food_redistribution_app/pubspec.yaml
   uuid: ^4.5.1
   share_plus: ^10.1.1
   url_launcher: ^6.3.1
@@ -63,7 +60,6 @@ dependencies:
   file_picker: ^10.3.10
   firebase_storage: ^12.4.10
   flutter_image_compress: ^2.4.0
-  intl: any
   fl_chart: ^0.66.2
 
 dev_dependencies:
@@ -79,15 +75,6 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
-<<<<<<< HEAD:pubspec.yaml
-
-#   fonts:
-#     - family: Roboto
-#       fonts:
-#         - asset: fonts/Roboto-Regular.ttf
-#         - asset: fonts/Roboto-Bold.ttf
-#           weight: 700
-=======
     
   # fonts:
   #   - family: Roboto
@@ -95,4 +82,3 @@ flutter:
   #       - asset: fonts/Roboto-Regular.ttf
   #       - asset: fonts/Roboto-Bold.ttf
   #         weight: 700
->>>>>>> main:food_redistribution_app/pubspec.yaml
