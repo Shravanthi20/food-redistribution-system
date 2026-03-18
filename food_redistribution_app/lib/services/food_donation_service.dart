@@ -1,15 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:geolocator/geolocator.dart'; // [NEW]
+﻿import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uuid/uuid.dart';
 import '../models/food_donation.dart';
 import '../models/ngo_profile.dart';
 import '../models/user.dart';
+import '../config/firebase_schema.dart';
 import 'user_service.dart';
-// import 'matching_service.dart'; // [REMOVED]
-import 'firestore_service.dart'; // [NEW]
-import 'location_service.dart'; // [NEW]
-import 'notification_service.dart'; // [NEW]
-import 'audit_service.dart'; // [NEW]
 
 class FoodDonationService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -68,7 +63,7 @@ class FoodDonationService {
 
       // Store in Firestore
       await _firestore
-          .collection('food_donations')
+          .collection(Collections.donations)
           .doc(donationId)
           .set(donationWithId.toFirestore());
 
@@ -86,14 +81,10 @@ class FoodDonationService {
     }
   }
 
-  double _calculateDistance(double lat1, double lon1, double lat2, double lon2) {
-    return Geolocator.distanceBetween(lat1, lon1, lat2, lon2);
-  }
-
   // Retrieve a single donation by ID
   Future<FoodDonation?> getDonation(String donationId) async {
     try {
-      final doc = await _firestore.collection('food_donations').doc(donationId).get();
+      final doc = await _firestore.collection(Collections.donations).doc(donationId).get();
       if (doc.exists) {
         return FoodDonation.fromFirestore(doc);
       }
@@ -112,7 +103,7 @@ class FoodDonationService {
   }) async {
     try {
       final donationDoc = await _firestore
-          .collection('food_donations')
+          .collection(Collections.donations)
           .doc(donationId)
           .get();
 
@@ -156,7 +147,7 @@ class FoodDonationService {
 
       // Update donation
       await _firestore
-          .collection('food_donations')
+          .collection(Collections.donations)
           .doc(donationId)
           .update({
         ...updates,
@@ -182,7 +173,7 @@ class FoodDonationService {
     required DonationStatus status,
   }) async {
     try {
-      await _firestore.collection('food_donations').doc(donationId).update({
+      await _firestore.collection(Collections.donations).doc(donationId).update({
         'status': status.name, // Assuming enum name matches string in DB
         'updatedAt': FieldValue.serverTimestamp(),
       });
@@ -202,7 +193,7 @@ class FoodDonationService {
   }) async {
     try {
       final donationDoc = await _firestore
-          .collection('food_donations')
+          .collection(Collections.donations)
           .doc(donationId)
           .get();
 
@@ -225,7 +216,7 @@ class FoodDonationService {
 
       // Update status to cancelled
       await _firestore
-          .collection('food_donations')
+          .collection(Collections.donations)
           .doc(donationId)
           .update({
         'status': DonationStatus.cancelled.name,
@@ -257,7 +248,7 @@ class FoodDonationService {
         throw Exception('Only NGOs can create food requests');
       }
 
-      await _firestore.collection('food_requests').add({
+      await _firestore.collection(Collections.requests).add({
         'ngoId': ngoId,
         'foodTypes': requirements['foodTypes'] ?? [],
         'quantityRange': requirements['quantityRange'] ?? {},
@@ -289,7 +280,7 @@ class FoodDonationService {
       final isAdmin = await _userService.hasAnyRole(adminId, [UserRole.admin]);
       if (!isAdmin) throw Exception('Unauthorized: Only admins can force assignment');
 
-      await _firestore.collection('food_donations').doc(donationId).update({
+      await _firestore.collection(Collections.donations).doc(donationId).update({
         'assignedNGOId': ngoId,
         'status': DonationStatus.matched.name,
         'matchingStatus': 'forced_admin',
@@ -321,7 +312,7 @@ class FoodDonationService {
       final isAdmin = await _userService.hasAnyRole(adminId, [UserRole.admin]);
       if (!isAdmin) throw Exception('Unauthorized: Only admins can force assignment');
       
-      await _firestore.collection('food_donations').doc(donationId).update({
+      await _firestore.collection(Collections.donations).doc(donationId).update({
         'assignedVolunteerId': volunteerId,
         'updatedAt': Timestamp.now(),
       });
@@ -355,7 +346,7 @@ class FoodDonationService {
       }
 
       final donationDoc = await _firestore
-          .collection('food_donations')
+          .collection(Collections.donations)
           .doc(donationId)
           .get();
 
@@ -377,7 +368,7 @@ class FoodDonationService {
       if (accept) {
         // Accept donation
         await _firestore
-            .collection('food_donations')
+            .collection(Collections.donations)
             .doc(donationId)
             .update({
           'status': DonationStatus.matched.name,
@@ -387,7 +378,7 @@ class FoodDonationService {
         });
 
         // Create donation acceptance record
-        await _firestore.collection('donation_acceptances').add({
+        await _firestore.collection(Collections.assignments).add({
           'donationId': donationId,
           'ngoId': ngoId,
           'hygieneChecklist': hygieneChecklist,
@@ -404,7 +395,7 @@ class FoodDonationService {
         await _triggerVolunteerAssignment(donationId);
       } else {
         // Record rejection for tracking
-        await _firestore.collection('donation_rejections').add({
+        await _firestore.collection(Collections.assignments).add({
           'donationId': donationId,
           'ngoId': ngoId,
           'reason': reason,
@@ -428,7 +419,7 @@ class FoodDonationService {
     required String clarificationRequest,
   }) async {
     try {
-      await _firestore.collection('clarification_requests').add({
+      await _firestore.collection(Collections.requests).add({
         'donationId': donationId,
         'ngoId': ngoId,
         'request': clarificationRequest,
@@ -457,7 +448,7 @@ class FoodDonationService {
     try {
       // Update clarification request
       await _firestore
-          .collection('clarification_requests')
+          .collection(Collections.requests)
           .doc(clarificationId)
           .update({
         'response': response,
@@ -468,7 +459,7 @@ class FoodDonationService {
       // Update donation if additional info provided
       if (updatedInfo != null) {
         final clarificationDoc = await _firestore
-            .collection('clarification_requests')
+            .collection(Collections.requests)
             .doc(clarificationId)
             .get();
         
@@ -477,7 +468,7 @@ class FoodDonationService {
           final donationId = data['donationId'];
           
           await _firestore
-              .collection('food_donations')
+              .collection(Collections.donations)
               .doc(donationId)
               .update({
             ...updatedInfo,
@@ -498,7 +489,7 @@ class FoodDonationService {
   Future<List<FoodDonation>> getDonationsByStatus(DonationStatus status) async {
     try {
       final query = await _firestore
-          .collection('food_donations')
+          .collection(Collections.donations)
           .where('status', isEqualTo: status.name)
           .orderBy('createdAt', descending: true)
           .get();
@@ -520,7 +511,7 @@ class FoodDonationService {
       if (ngoProfile == null) return [];
 
       Query query = _firestore
-          .collection('food_donations')
+          .collection(Collections.donations)
           .where('status', isEqualTo: DonationStatus.listed.name);
 
       // Filter by preferred food types if specified
@@ -544,7 +535,7 @@ class FoodDonationService {
   Future<List<FoodDonation>> getDonorDonations(String donorId) async {
     try {
       final query = await _firestore
-          .collection('food_donations')
+          .collection(Collections.donations)
           .where('donorId', isEqualTo: donorId)
           .orderBy('createdAt', descending: true)
           .get();
@@ -564,7 +555,7 @@ class FoodDonationService {
   }) async {
     try {
       Query query = _firestore
-          .collection('food_donations')
+          .collection(Collections.donations)
           .where('status', isEqualTo: DonationStatus.listed.name);
 
       // Apply filters if provided
@@ -646,7 +637,7 @@ class FoodDonationService {
     // In a real implementation, this would send notifications
     // For now, we'll create notification records
     final donationDoc = await _firestore
-        .collection('food_donations')
+        .collection(Collections.donations)
         .doc(donationId)
         .get();
 
@@ -682,7 +673,7 @@ class FoodDonationService {
   // Real-time Streams
   Stream<FoodDonation?> getDonationStream(String donationId) {
     return _firestore
-        .collection('food_donations')
+        .collection(Collections.donations)
         .doc(donationId)
         .snapshots()
         .map((doc) {
@@ -693,7 +684,7 @@ class FoodDonationService {
 
   Stream<List<FoodDonation>> getDonationStreamByStatus(String donorId, DonationStatus status) {
      return _firestore
-        .collection('food_donations')
+        .collection(Collections.donations)
         .where('donorId', isEqualTo: donorId)
         .where('status', isEqualTo: status.name)
         .snapshots()
@@ -707,7 +698,7 @@ class FoodDonationService {
   // Get all donations for a donor as a stream
   Stream<List<FoodDonation>> getDonorDonationsStream(String donorId) {
     return _firestore
-        .collection('food_donations')
+        .collection(Collections.donations)
         .where('donorId', isEqualTo: donorId)
         .orderBy('createdAt', descending: true)
         .snapshots()
@@ -721,7 +712,7 @@ class FoodDonationService {
   // Get available donations for volunteers (listed OR matched)
   Stream<List<FoodDonation>> getAvailableDonationsStream() {
     return _firestore
-        .collection('food_donations')
+        .collection(Collections.donations)
         .where('status', whereIn: [DonationStatus.listed.name, DonationStatus.matched.name])
         .orderBy('createdAt', descending: true)
         .snapshots()
@@ -735,7 +726,7 @@ class FoodDonationService {
   // Get tasks assigned to a specific volunteer
   Stream<List<FoodDonation>> getVolunteerTasksStream(String volunteerId) {
     return _firestore
-        .collection('food_donations')
+        .collection(Collections.donations)
         .where('assignedVolunteerId', isEqualTo: volunteerId)
         .where('status', whereIn: ['matched', 'pickedUp', 'inTransit', 'delivered'])
         .orderBy('updatedAt', descending: true)
@@ -775,7 +766,7 @@ class FoodDonationService {
     });
 
     // 2. Update Donation Status
-    final donationRef = _firestore.collection('food_donations').doc(donationId);
+    final donationRef = _firestore.collection(Collections.donations).doc(donationId);
     batch.update(donationRef, {
       'assignedVolunteerId': volunteerId,
       'matchingStatus': 'volunteer_accepted',

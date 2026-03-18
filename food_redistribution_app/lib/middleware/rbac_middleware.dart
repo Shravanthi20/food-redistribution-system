@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import '../models/user.dart';
-import '../services/user_service.dart';
 import '../services/auth_service.dart';
+import '../services/user_service.dart';
 
 // RBAC Middleware for protecting routes and widgets
 class RBACMiddleware {
-  static final UserService _userService = UserService();
   static final AuthService _authService = AuthService();
 
   // Route guard - check if user can access route

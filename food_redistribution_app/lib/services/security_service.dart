@@ -3,11 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
-import 'firestore_service.dart';
-import '../config/firestore_schema.dart';
+import '../config/firebase_schema.dart';
 
 class SecurityService {
-  final FirestoreService _firestoreService = FirestoreService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
@@ -21,7 +19,7 @@ class SecurityService {
   Future<bool> isAccountLocked(String email) async {
     try {
       final doc = await _firestore
-          .collection('security_logs')
+          .collection(Collections.security)
           .doc(_hashEmail(email))
           .get();
       
@@ -47,7 +45,7 @@ class SecurityService {
   Future<void> recordFailedLogin(String email, String? ipAddress) async {
     try {
       final emailHash = _hashEmail(email);
-      final securityRef = _firestore.collection('security_logs').doc(emailHash);
+      final securityRef = _firestore.collection(Collections.security).doc(emailHash);
       
       await _firestore.runTransaction((transaction) async {
         final doc = await transaction.get(securityRef);
@@ -92,7 +90,7 @@ class SecurityService {
       if (user != null) {
         // Clear failed attempts
         final emailHash = _hashEmail(user.email!);
-        await _firestore.collection('security_logs').doc(emailHash).delete();
+        await _firestore.collection(Collections.security).doc(emailHash).delete();
         
         // Create session record
         await _createUserSession(userId, ipAddress);
@@ -123,7 +121,7 @@ class SecurityService {
       };
       
       // Store in Firestore
-      await _firestore.collection('user_sessions').doc(sessionId).set(sessionData);
+      await _firestore.collection(Collections.security).doc(sessionId).set(sessionData);
       
       // Store session ID securely on device
       await _secureStorage.write(key: 'session_id', value: sessionId);
@@ -148,7 +146,7 @@ class SecurityService {
       }
       
       // Check if session exists in Firestore
-      final doc = await _firestore.collection('user_sessions').doc(sessionId).get();
+      final doc = await _firestore.collection(Collections.security).doc(sessionId).get();
       if (!doc.exists) {
         await invalidateSession();
         return false;
@@ -169,7 +167,7 @@ class SecurityService {
       
       if (sessionId != null) {
         // Mark session as inactive in Firestore
-        await _firestore.collection('user_sessions').doc(sessionId).update({
+        await _firestore.collection(Collections.security).doc(sessionId).update({
           'isActive': false,
           'invalidatedAt': Timestamp.now(),
         });
@@ -189,7 +187,7 @@ class SecurityService {
       final cutoffTime = DateTime.now().subtract(const Duration(hours: 24));
       
       final expiredSessions = await _firestore
-          .collection('user_sessions')
+          .collection(Collections.security)
           .where('expiresAt', isLessThan: Timestamp.fromDate(cutoffTime))
           .get();
       
@@ -208,7 +206,7 @@ class SecurityService {
   Future<List<Map<String, dynamic>>> getUserActiveSessions(String userId) async {
     try {
       final query = await _firestore
-          .collection('user_sessions')
+          .collection(Collections.security)
           .where('userId', isEqualTo: userId)
           .where('isActive', isEqualTo: true)
           .where('expiresAt', isGreaterThan: Timestamp.now())
@@ -228,7 +226,7 @@ class SecurityService {
   // Terminate specific session
   Future<void> terminateSession(String sessionId) async {
     try {
-      await _firestore.collection('user_sessions').doc(sessionId).update({
+      await _firestore.collection(Collections.security).doc(sessionId).update({
         'isActive': false,
         'terminatedAt': Timestamp.now(),
       });
@@ -240,7 +238,7 @@ class SecurityService {
   // Log security events
   Future<void> _logSecurityEvent(String event, Map<String, dynamic> data) async {
     try {
-      await _firestore.collection('security_events').add({
+      await _firestore.collection(Collections.security).add({
         'event': event,
         'timestamp': Timestamp.now(),
         ...data,
@@ -265,7 +263,7 @@ class SecurityService {
   Future<void> unlockAccount(String email, String adminId) async {
     try {
       final emailHash = _hashEmail(email);
-      await _firestore.collection('security_logs').doc(emailHash).delete();
+      await _firestore.collection(Collections.security).doc(emailHash).delete();
       
       await _logSecurityEvent('account_unlocked', {
         'emailHash': emailHash,
@@ -285,19 +283,19 @@ class SecurityService {
       final dayAgo = now.subtract(const Duration(days: 1));
       
       final failedLogins = await _firestore
-          .collection('security_events')
+          .collection(Collections.security)
           .where('event', isEqualTo: 'failed_login')
           .where('timestamp', isGreaterThan: Timestamp.fromDate(dayAgo))
           .get();
       
       final successfulLogins = await _firestore
-          .collection('security_events')
+          .collection(Collections.security)
           .where('event', isEqualTo: 'successful_login')
           .where('timestamp', isGreaterThan: Timestamp.fromDate(dayAgo))
           .get();
       
       final lockedAccounts = await _firestore
-          .collection('security_logs')
+          .collection(Collections.security)
           .where('failedAttempts', isGreaterThanOrEqualTo: maxLoginAttempts)
           .get();
       

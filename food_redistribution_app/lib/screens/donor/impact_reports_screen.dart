@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import '../../providers/donation_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../models/food_donation.dart';
-import '../../widgets/loading_overlay.dart';
 
 class ImpactReportsScreen extends StatefulWidget {
   const ImpactReportsScreen({Key? key}) : super(key: key);

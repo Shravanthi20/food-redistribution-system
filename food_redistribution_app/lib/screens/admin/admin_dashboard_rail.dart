@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utils/app_theme.dart';
 
 class AdminDashboardRail extends StatelessWidget {
   final int selectedIndex;
@@ -12,21 +13,41 @@ class AdminDashboardRail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return NavigationRail(
-      selectedIndex: selectedIndex,
-      onDestinationSelected: onDestinationSelected,
-      labelType: NavigationRailLabelType.all,
-      backgroundColor: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
-      selectedIconTheme: IconThemeData(color: Theme.of(context).colorScheme.primary),
-      unselectedIconTheme: IconThemeData(color: Theme.of(context).colorScheme.onSurfaceVariant),
-      selectedLabelTextStyle: TextStyle(
-        color: Theme.of(context).colorScheme.primary,
-        fontWeight: FontWeight.bold,
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            AppTheme.primaryNavy,
+            AppTheme.primaryNavyLight,
+          ],
+        ),
+        border: Border(
+          right: BorderSide(
+            color: AppTheme.accentTeal.withOpacity(0.3),
+            width: 1,
+          ),
+        ),
       ),
-      unselectedLabelTextStyle: TextStyle(
-        color: Theme.of(context).colorScheme.onSurfaceVariant,
-      ),
-      destinations: const [
+      child: NavigationRail(
+        selectedIndex: selectedIndex,
+        onDestinationSelected: onDestinationSelected,
+        labelType: NavigationRailLabelType.all,
+        backgroundColor: Colors.transparent,
+        selectedIconTheme: const IconThemeData(color: AppTheme.accentTeal),
+        unselectedIconTheme: IconThemeData(color: Colors.white.withOpacity(0.6)),
+        selectedLabelTextStyle: const TextStyle(
+          color: AppTheme.accentTeal,
+          fontWeight: FontWeight.bold,
+          fontSize: 12,
+        ),
+        unselectedLabelTextStyle: TextStyle(
+          color: Colors.white.withOpacity(0.6),
+          fontSize: 11,
+        ),
+        indicatorColor: AppTheme.accentTeal.withOpacity(0.2),
+        destinations: const [
         NavigationRailDestination(
           icon: Icon(Icons.dashboard_outlined),
           selectedIcon: Icon(Icons.dashboard),
@@ -63,6 +84,7 @@ class AdminDashboardRail extends StatelessWidget {
           label: Text('Logs'),
         ),
       ],
+      ),
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/food_donation.dart';
+import '../config/firebase_schema.dart';
 
 class TrackingService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -7,7 +8,7 @@ class TrackingService {
   // Real-time donation status updates
   Stream<DonationStatus> trackDonationStatus(String donationId) {
     return _firestore
-        .collection('food_donations')
+        .collection(Collections.donations)
         .doc(donationId)
         .snapshots()
         .map((doc) {
@@ -35,14 +36,14 @@ class TrackingService {
       final batch = _firestore.batch();
 
       // Update donation status
-      final donationRef = _firestore.collection('food_donations').doc(donationId);
+      final donationRef = _firestore.collection(Collections.donations).doc(donationId);
       batch.update(donationRef, {
         'status': status.name,
         'updatedAt': Timestamp.now(),
       });
 
       // Create tracking entry
-      final trackingRef = _firestore.collection('donation_tracking').doc();
+      final trackingRef = _firestore.collection(Collections.tracking).doc();
       batch.set(trackingRef, {
         'donationId': donationId,
         'status': status.name,
@@ -66,7 +67,7 @@ class TrackingService {
   Future<List<Map<String, dynamic>>> getDonationTrackingHistory(String donationId) async {
     try {
       final query = await _firestore
-          .collection('donation_tracking')
+          .collection(Collections.tracking)
           .where('donationId', isEqualTo: donationId)
           .orderBy('timestamp')
           .get();
@@ -88,7 +89,7 @@ class TrackingService {
     required double longitude,
   }) async {
     try {
-      await _firestore.collection('volunteer_tracking').doc(volunteerId).set({
+      await _firestore.collection(Collections.tracking).doc(volunteerId).set({
         'donationId': donationId,
         'latitude': latitude,
         'longitude': longitude,
@@ -102,7 +103,7 @@ class TrackingService {
   // Get real-time volunteer location
   Stream<Map<String, dynamic>?> trackVolunteerLocation(String volunteerId) {
     return _firestore
-        .collection('volunteer_tracking')
+        .collection(Collections.tracking)
         .doc(volunteerId)
         .snapshots()
         .map((doc) => doc.exists ? doc.data() : null);
@@ -111,7 +112,7 @@ class TrackingService {
   // Get all active deliveries for admin monitoring
   Stream<List<Map<String, dynamic>>> trackActiveDeliveries() {
     return _firestore
-        .collection('food_donations')
+        .collection(Collections.donations)
         .where('status', whereIn: ['matched', 'pickedUp', 'inTransit'])
         .snapshots()
         .map((snapshot) => snapshot.docs
@@ -125,7 +126,7 @@ class TrackingService {
       final cutoffTime = DateTime.now().subtract(const Duration(hours: 2));
       
       final query = await _firestore
-          .collection('food_donations')
+          .collection(Collections.donations)
           .where('status', whereIn: ['matched', 'pickedUp', 'inTransit'])
           .where('updatedAt', isLessThan: Timestamp.fromDate(cutoffTime))
           .get();
@@ -148,7 +149,7 @@ class TrackingService {
       List<Map<String, dynamic>> donations = [];
       
       for (String donationId in donationIds) {
-        final doc = await _firestore.collection('food_donations').doc(donationId).get();
+        final doc = await _firestore.collection(Collections.donations).doc(donationId).get();
         if (doc.exists) {
           donations.add({'id': doc.id, ...doc.data() as Map<String, dynamic>});
         }
@@ -170,13 +171,13 @@ class TrackingService {
   // Send real-time updates to stakeholders
   Future<void> _notifyStakeholders(String donationId, DonationStatus status) async {
     try {
-      final donationDoc = await _firestore.collection('food_donations').doc(donationId).get();
+      final donationDoc = await _firestore.collection(Collections.donations).doc(donationId).get();
       if (!donationDoc.exists) return;
 
       final donation = donationDoc.data() as Map<String, dynamic>;
       
       // Create real-time notification document
-      await _firestore.collection('real_time_updates').add({
+      await _firestore.collection(Collections.tracking).add({
         'donationId': donationId,
         'status': status.name,
         'donorId': donation['donorId'],

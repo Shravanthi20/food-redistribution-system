@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../models/tracking/location_tracking_model.dart';
 
 // Collect data from all deliveries to see patterns
 class AnalyticsAggregationService {

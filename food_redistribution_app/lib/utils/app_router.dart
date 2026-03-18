@@ -10,6 +10,7 @@ import '../screens/auth/volunteer_registration_screen.dart';
 import '../screens/auth/email_verification_screen.dart';
 import '../screens/auth/onboarding_screen.dart';
 import '../screens/auth/forgot_password_screen.dart'; // [NEW] Import
+import '../screens/auth/otp_verification_screen.dart'; // Phone OTP verification
 import '../screens/donor/donor_dashboard.dart';
 import '../screens/donor/create_donation_screen.dart';
 import '../screens/donor/donation_list_screen.dart';
@@ -34,7 +35,6 @@ import '../screens/ngo/document_submission_screen.dart';
 import '../screens/ngo/verification_pending_screen.dart';
 import '../screens/ngo/verification_rejected_screen.dart';
 
-import '../models/food_donation.dart';
 // Donor flow
 import '../screens/volunteer/accept_task_screen.dart';
 import '../screens/volunteer/reject_task_screen.dart';
@@ -53,6 +53,7 @@ class AppRouter {
   static const String onboarding = '/onboarding';
 
   static const String forgotPassword = '/forgot-password'; // [NEW] Route
+  static const String otpVerification = '/otp-verification'; // Phone OTP verification
 
   static const String donorDashboard = '/donor-dashboard';
   static const String donorVerification = '/donor-verification'; // [NEW] Donor verification route
@@ -96,6 +97,19 @@ class AppRouter {
       // [NEW] Forgot Password Route
       case forgotPassword:
         return MaterialPageRoute(builder: (_) => const ForgotPasswordScreen());
+
+      // Phone OTP Verification Route
+      case otpVerification:
+        final args = settings.arguments as Map<String, dynamic>;
+        return MaterialPageRoute(
+          builder: (_) => OTPVerificationScreen(
+            phoneNumber: args['phoneNumber'],
+            verificationId: args['verificationId'],
+            resendToken: args['resendToken'],
+            onVerificationComplete: args['onVerificationComplete'],
+            onResendOTP: args['onResendOTP'],
+          ),
+        );
 
       case roleSelection:
         return MaterialPageRoute(builder: (_) => const RoleSelectionScreen());

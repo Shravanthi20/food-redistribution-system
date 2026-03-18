@@ -1,25 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart' as auth;
 import '../models/user.dart';
 import '../models/donor_profile.dart';
 import '../models/ngo_profile.dart';
 import '../models/volunteer_profile.dart';
-import 'audit_service.dart';
-import 'notification_service.dart';
-import 'firestore_service.dart';
-import '../config/firestore_schema.dart';
+import '../config/firebase_schema.dart';
 
 class UserService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirestoreService _firestoreService = FirestoreService();
-  final auth.FirebaseAuth _auth = auth.FirebaseAuth.instance;
-  final AuditService _auditService = AuditService();
-  final NotificationService _notificationService = NotificationService();
 
   // RBAC Middleware - Check if user has required role
   Future<bool> hasRole(String userId, UserRole requiredRole) async {
     try {
-      final userDoc = await _firestore.collection('users').doc(userId).get();
+      final userDoc = await _firestore.collection(Collections.users).doc(userId).get();
       if (!userDoc.exists) return false;
       
       final userData = userDoc.data() as Map<String, dynamic>;
@@ -46,7 +38,7 @@ class UserService {
   // RBAC Middleware - Check if user has any of the required roles
   Future<bool> hasAnyRole(String userId, List<UserRole> requiredRoles) async {
     try {
-      final userDoc = await _firestore.collection('users').doc(userId).get();
+      final userDoc = await _firestore.collection(Collections.users).doc(userId).get();
       if (!userDoc.exists) return false;
       
       final userData = userDoc.data() as Map<String, dynamic>;
@@ -73,7 +65,7 @@ class UserService {
   // Check if user is currently suspended
   Future<bool> isUserSuspended(String userId) async {
     try {
-      final userDoc = await _firestore.collection('users').doc(userId).get();
+      final userDoc = await _firestore.collection(Collections.users).doc(userId).get();
       if (!userDoc.exists) return false;
       
       final userData = userDoc.data() as Map<String, dynamic>;
@@ -87,7 +79,7 @@ class UserService {
         final suspensionEnd = suspendedUntil.toDate();
         if (DateTime.now().isAfter(suspensionEnd)) {
           // Auto-reactivate expired suspension
-          await _firestore.collection('users').doc(userId).update({
+          await _firestore.collection(Collections.users).doc(userId).update({
             'status': UserStatus.verified.name,
             'suspendedAt': FieldValue.delete(),
             'suspendedBy': FieldValue.delete(),
@@ -111,7 +103,7 @@ class UserService {
   Future<List<Map<String, dynamic>>> getUsersByRole(UserRole role) async {
     try {
       final query = await _firestore
-          .collection('users')
+          .collection(Collections.users)
           .where('role', isEqualTo: role.name)
           .where('status', isEqualTo: UserStatus.verified.name)
           .get();
@@ -134,7 +126,7 @@ class UserService {
       final batch = _firestore.batch();
 
       // Update User State
-      batch.update(_firestore.collection('users').doc(userId), {
+      batch.update(_firestore.collection(Collections.users).doc(userId), {
         'onboardingState': OnboardingState.documentSubmitted.name,
         'updatedAt': Timestamp.now(),
       });
@@ -142,10 +134,10 @@ class UserService {
       // Update specific profile with certificate URL
       String collection;
       switch (role) {
-        case UserRole.donor: collection = 'donor_profiles'; break;
-        case UserRole.ngo: collection = 'ngo_profiles'; break;
-        case UserRole.volunteer: collection = 'volunteer_profiles'; break;
-        default: collection = 'donor_profiles';
+        case UserRole.donor: collection = Collections.users; break;
+        case UserRole.ngo: collection = Collections.organizations; break;
+        case UserRole.volunteer: collection = Collections.users; break;
+        default: collection = Collections.users;
       }
       
       batch.update(_firestore.collection(collection).doc(userId), {
@@ -154,7 +146,7 @@ class UserService {
       });
 
       // Add to Review Queue
-      final reviewRef = _firestore.collection('review_queue').doc();
+      final reviewRef = _firestore.collection(Collections.adminTasks).doc();
       batch.set(reviewRef, {
         'userId': userId,
         'userRole': role.name,
@@ -182,7 +174,7 @@ class UserService {
       final batch = _firestore.batch();
 
       // Update user status
-      final userRef = _firestore.collection('users').doc(userId);
+      final userRef = _firestore.collection(Collections.users).doc(userId);
       batch.update(userRef, {
         'status': approved ? UserStatus.verified.name : UserStatus.pending.name,
         'onboardingState': approved 
@@ -198,19 +190,19 @@ class UserService {
         final role = userData['role'];
         
         if (role == UserRole.donor.name) {
-          final profileRef = _firestore.collection('donor_profiles').doc(userId);
+          final profileRef = _firestore.collection(Collections.users).doc(userId);
           batch.update(profileRef, {
             'isVerified': approved,
             'updatedAt': Timestamp.now(),
           });
         } else if (role == UserRole.ngo.name) {
-          final profileRef = _firestore.collection('ngo_profiles').doc(userId);
+          final profileRef = _firestore.collection(Collections.organizations).doc(userId);
           batch.update(profileRef, {
             'isVerified': approved,
             'updatedAt': Timestamp.now(),
           });
         } else if (role == UserRole.volunteer.name) {
-          final profileRef = _firestore.collection('volunteer_profiles').doc(userId);
+          final profileRef = _firestore.collection(Collections.users).doc(userId);
           batch.update(profileRef, {
             'isVerified': approved,
             'updatedAt': Timestamp.now(),
@@ -220,7 +212,7 @@ class UserService {
 
       // Update review queue
       final reviewQuery = await _firestore
-          .collection('review_queue')
+          .collection(Collections.adminTasks)
           .where('userId', isEqualTo: userId)
           .where('status', isEqualTo: 'pending')
           .get();
@@ -235,7 +227,7 @@ class UserService {
       }
 
       // Log verification action
-      final logRef = _firestore.collection('audit_logs').doc();
+      final logRef = _firestore.collection(Collections.audit).doc();
       batch.set(logRef, {
         'action': 'user_verification',
         'adminId': adminId,
@@ -261,7 +253,7 @@ class UserService {
     String? reason,
   }) async {
     try {
-      await _firestore.collection('users').doc(userId).update({
+      await _firestore.collection(Collections.users).doc(userId).update({
         'status': UserStatus.restricted.name,
         'restrictions': restrictions,
         'restrictionEndDate': Timestamp.fromDate(endDate),
@@ -269,7 +261,7 @@ class UserService {
       });
 
       // Log restriction action
-      await _firestore.collection('audit_logs').add({
+      await _firestore.collection(Collections.audit).add({
         'action': 'user_restriction',
         'adminId': adminId,
         'userId': userId,
@@ -293,7 +285,7 @@ class UserService {
     required String adminId,
   }) async {
     try {
-      await _firestore.collection('users').doc(userId).update({
+      await _firestore.collection(Collections.users).doc(userId).update({
         'status': UserStatus.active.name,
         'restrictions': FieldValue.delete(),
         'restrictionEndDate': FieldValue.delete(),
@@ -301,7 +293,7 @@ class UserService {
       });
 
       // Log restriction removal
-      await _firestore.collection('audit_logs').add({
+      await _firestore.collection(Collections.audit).add({
         'action': 'restriction_removed',
         'adminId': adminId,
         'userId': userId,
@@ -319,7 +311,7 @@ class UserService {
     required String permission,
   }) async {
     try {
-      final userDoc = await _firestore.collection('users').doc(userId).get();
+      final userDoc = await _firestore.collection(Collections.users).doc(userId).get();
       if (!userDoc.exists) return false;
 
       final userData = userDoc.data() as Map<String, dynamic>;
@@ -355,7 +347,7 @@ class UserService {
   // Get user profile based on role
   Future<dynamic> getUserProfile(String userId) async {
     try {
-      final userDoc = await _firestore.collection('users').doc(userId).get();
+      final userDoc = await _firestore.collection(Collections.users).doc(userId).get();
       if (!userDoc.exists) return null;
 
       final userData = userDoc.data() as Map<String, dynamic>;
@@ -364,21 +356,21 @@ class UserService {
       switch (role) {
         case 'donor':
           final profileDoc = await _firestore
-              .collection('donor_profiles')
+              .collection(Collections.users)
               .doc(userId)
               .get();
           return profileDoc.exists ? DonorProfile.fromFirestore(profileDoc) : null;
         
         case 'ngo':
           final profileDoc = await _firestore
-              .collection('ngo_profiles')
+              .collection(Collections.organizations)
               .doc(userId)
               .get();
           return profileDoc.exists ? NGOProfile.fromFirestore(profileDoc) : null;
         
         case 'volunteer':
           final profileDoc = await _firestore
-              .collection('volunteer_profiles')
+              .collection(Collections.users)
               .doc(userId)
               .get();
           return profileDoc.exists ? VolunteerProfile.fromFirestore(profileDoc) : null;
@@ -398,7 +390,7 @@ class UserService {
     required Map<String, dynamic> profileData,
   }) async {
     try {
-      final userDoc = await _firestore.collection('users').doc(userId).get();
+      final userDoc = await _firestore.collection(Collections.users).doc(userId).get();
       if (!userDoc.exists) throw Exception('User not found');
 
       final userData = userDoc.data() as Map<String, dynamic>;
@@ -407,13 +399,13 @@ class UserService {
       String collection;
       switch (role) {
         case 'donor':
-          collection = 'donor_profiles';
+          collection = Collections.users;
           break;
         case 'ngo':
-          collection = 'ngo_profiles';
+          collection = Collections.organizations;
           break;
         case 'volunteer':
-          collection = 'volunteer_profiles';
+          collection = Collections.users;
           break;
         default:
           throw Exception('Invalid user role');
@@ -426,7 +418,7 @@ class UserService {
 
       // Update onboarding state if profile is complete
       if (_isProfileComplete(profileData, role)) {
-        await _firestore.collection('users').doc(userId).update({
+        await _firestore.collection(Collections.users).doc(userId).update({
           'onboardingState': OnboardingState.profileComplete.name,
           'updatedAt': Timestamp.now(),
         });
@@ -441,7 +433,7 @@ class UserService {
   Future<List<Map<String, dynamic>>> getPendingUsers() async {
     try {
       final query = await _firestore
-          .collection('review_queue')
+          .collection(Collections.adminTasks)
           .where('status', isEqualTo: 'pending')
           .orderBy('createdAt')
           .get();
@@ -453,7 +445,7 @@ class UserService {
         final userId = data['userId'];
         
         // Get user details
-        final userDoc = await _firestore.collection('users').doc(userId).get();
+        final userDoc = await _firestore.collection(Collections.users).doc(userId).get();
         if (userDoc.exists) {
           final userData = userDoc.data() as Map<String, dynamic>;
           final profile = await getUserProfile(userId);
@@ -482,7 +474,7 @@ class UserService {
 
       // We can use multiple queries to get the counts
       // Note: In a production app with many users, we should use aggregation queries or maintain counters.
-      final allUsers = await _firestore.collection('users').get();
+      final allUsers = await _firestore.collection(Collections.users).get();
       final docs = allUsers.docs;
 
       int donors = 0;
@@ -607,7 +599,7 @@ class UserService {
   Future<void> _scheduleRestrictionEnd(String userId, DateTime endDate) async {
     // In a real implementation, this would use Cloud Functions or a job scheduler
     // For now, we'll just add a document that can be processed by a background job
-    await _firestore.collection('scheduled_tasks').add({
+    await _firestore.collection(Collections.adminTasks).add({
       'type': 'remove_restriction',
       'userId': userId,
       'executeAt': Timestamp.fromDate(endDate),

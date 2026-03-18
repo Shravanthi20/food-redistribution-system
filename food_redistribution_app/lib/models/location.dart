@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 class Location {
   final double latitude;
   final double longitude;
@@ -55,5 +57,25 @@ class Location {
       'latitude': latitude,
       'longitude': longitude,
     };
+  }
+
+  /// Calculate distance to another location using the Haversine formula
+  /// Returns distance in kilometers
+  double distanceTo(Location other) {
+    const double earthRadius = 6371.0; // km
+    
+    // Convert to radians
+    final lat1Rad = latitude * math.pi / 180;
+    final lat2Rad = other.latitude * math.pi / 180;
+    final deltaLat = (other.latitude - latitude) * math.pi / 180;
+    final deltaLon = (other.longitude - longitude) * math.pi / 180;
+    
+    // Haversine formula
+    final a = math.sin(deltaLat / 2) * math.sin(deltaLat / 2) +
+              math.cos(lat1Rad) * math.cos(lat2Rad) *
+              math.sin(deltaLon / 2) * math.sin(deltaLon / 2);
+    final c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
+    
+    return earthRadius * c;
   }
 }

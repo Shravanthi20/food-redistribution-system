@@ -4,8 +4,10 @@ import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/verification_service.dart';
-import '../../models/user.dart';
 import '../../utils/app_router.dart';
+import '../../utils/app_theme.dart';
+import '../../widgets/gradient_scaffold.dart';
+import '../../widgets/glass_widgets.dart';
 import 'dart:io';
 
 class DonorVerificationScreen extends StatefulWidget {
@@ -182,7 +184,7 @@ class _DonorVerificationScreenState extends State<DonorVerificationScreen> {
       await _verificationService.submitDonorVerification(userId, submissionData);
 
       if (mounted) {
-        _showSuccessSnackBar('Documents submitted successfully! Your account is under review.');
+        _showSuccessSnackBar('Documents submitted successfully!');
         Navigator.pushReplacementNamed(context, AppRouter.donorDashboard);
       }
     } catch (e) {
@@ -200,8 +202,9 @@ class _DonorVerificationScreenState extends State<DonorVerificationScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: Colors.green,
+        backgroundColor: AppTheme.successTeal,
         behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
@@ -210,34 +213,42 @@ class _DonorVerificationScreenState extends State<DonorVerificationScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: Colors.red,
+        backgroundColor: AppTheme.errorRed,
         behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return GradientScaffold(
+      showAnimatedBackground: true,
       appBar: AppBar(
         title: const Text('Document Verification'),
-        backgroundColor: Colors.green.shade700,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        foregroundColor: AppTheme.textPrimary,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildHeader(),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               _buildDocumentInfo(),
-              const SizedBox(height: 24),
+              const SizedBox(height: 28),
               _buildRequiredDocuments(),
               const SizedBox(height: 32),
               _buildSubmitButton(),
+              const SizedBox(height: 32),
             ],
           ),
         ),
@@ -246,84 +257,89 @@ class _DonorVerificationScreenState extends State<DonorVerificationScreen> {
   }
 
   Widget _buildHeader() {
-    return Card(
-      elevation: 2,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.green.shade50,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Column(
-          children: [
-            Icon(
-              Icons.verified_user,
-              size: 48,
-              color: Colors.green.shade600,
+    return GlassCard(
+      isAccent: true,
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppTheme.accentTeal.withOpacity(0.2),
+              shape: BoxShape.circle,
             ),
-            const SizedBox(height: 12),
-            Text(
-              'Account Verification',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Colors.green.shade800,
-              ),
+            child: Icon(
+              Icons.verified_user_rounded,
+              size: 40,
+              color: AppTheme.accentTeal,
             ),
-            const SizedBox(height: 8),
-            Text(
-              'Please provide the required documents to verify your donor account',
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.green.shade600,
-              ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Account Verification',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: AppTheme.textPrimary,
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Please provide the required documents to verify your donor account',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: AppTheme.textSecondary,
+              fontSize: 14,
+              height: 1.4,
+            ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildDocumentInfo() {
-    return Card(
-      elevation: 2,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.blue.shade50,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+    return GlassContainer(
+      tintColor: AppTheme.infoCyan,
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppTheme.infoCyan.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              Icons.info_outline_rounded,
+              color: AppTheme.infoCyan,
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(
-                  Icons.info_outline,
-                  color: Colors.blue.shade600,
+                Text(
+                  'Document Information',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.textPrimary,
+                    fontSize: 15,
+                  ),
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Document Information',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.blue.shade800,
-                    ),
+                const SizedBox(height: 4),
+                Text(
+                  'Upload documents securely. Supported formats: JPG, PNG, PDF',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppTheme.textSecondary,
+                    height: 1.4,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              'For security, please provide document details (numbers, references) rather than uploading files. All information is encrypted and secure.',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.blue.shade600,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -332,103 +348,211 @@ class _DonorVerificationScreenState extends State<DonorVerificationScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Required Documents',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+        Row(
+          children: [
+            Container(
+              width: 4,
+              height: 24,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [AppTheme.accentTeal, AppTheme.accentCyan],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'Required Documents',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.textPrimary,
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 8),
-        Text(
-          'Please fill out the information for each required document:',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Colors.grey.shade600,
+        Padding(
+          padding: const EdgeInsets.only(left: 16),
+          child: Text(
+            'Upload and provide information for each document:',
+            style: TextStyle(
+              color: AppTheme.textSecondary,
+              fontSize: 14,
+            ),
           ),
         ),
-        const SizedBox(height: 16),
-        ..._documentRequirements.map((doc) => _buildDocumentCard(doc)).toList(),
+        const SizedBox(height: 20),
+        ..._documentRequirements.asMap().entries.map(
+            (entry) => _buildDocumentCard(entry.value, entry.key + 1)).toList(),
       ],
     );
   }
 
-  Widget _buildDocumentCard(Map<String, String> doc) {
+  Widget _buildDocumentCard(Map<String, String> doc, int index) {
     final type = doc['type']!;
     final isRequired = doc['required'] == 'true';
     final isUploading = _uploading[type] ?? false;
     final hasFile = _selectedFiles[type] != null;
     final isUploaded = _uploadedUrls[type] != null && _uploadedUrls[type]!.isNotEmpty;
 
-    return Card(
-      elevation: 2,
-      margin: const EdgeInsets.only(bottom: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
+    Color statusColor = AppTheme.textTertiary;
+    if (isUploaded) {
+      statusColor = AppTheme.successTeal;
+    } else if (hasFile) {
+      statusColor = AppTheme.warningAmber;
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: GlassContainer(
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(
-                  isRequired ? Icons.circle : Icons.circle_outlined,
-                  size: 8,
-                  color: isRequired ? Colors.red : Colors.grey,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    type,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
+                Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [AppTheme.accentTeal, AppTheme.accentCyan],
+                    ),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppTheme.accentTeal.withOpacity(0.4),
+                        blurRadius: 8,
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: Text(
+                      index.toString(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                 ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    type,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.textPrimary,
+                    ),
+                  ),
+                ),
+                if (isRequired)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: AppTheme.errorRed.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      'Required',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: AppTheme.errorRed,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  )
+                else
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: AppTheme.textTertiary.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      'Optional',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: AppTheme.textTertiary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
               ],
             ),
-            const SizedBox(height: 4),
-            Text(
-              doc['description']!,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey.shade600,
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.only(left: 40),
+              child: Text(
+                doc['description']!,
+                style: TextStyle(
+                  color: AppTheme.textSecondary,
+                  fontSize: 13,
+                ),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             
             // File upload section
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: isUploaded ? Colors.green : (hasFile ? Colors.orange : Colors.grey.shade300),
-                  width: 2,
+                  color: statusColor.withOpacity(0.5),
+                  width: 1.5,
                 ),
-                borderRadius: BorderRadius.circular(8),
-                color: isUploaded ? Colors.green.shade50 : (hasFile ? Colors.orange.shade50 : Colors.grey.shade50),
+                borderRadius: BorderRadius.circular(12),
+                color: statusColor.withOpacity(0.1),
               ),
               child: Column(
                 children: [
                   if (isUploading)
                     Column(
                       children: [
-                        const CircularProgressIndicator(),
-                        const SizedBox(height: 8),
+                        SizedBox(
+                          width: 32,
+                          height: 32,
+                          child: CircularProgressIndicator(
+                            color: AppTheme.accentTeal,
+                            strokeWidth: 3,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
                         Text(
                           'Uploading...',
-                          style: TextStyle(color: Colors.grey.shade600),
+                          style: TextStyle(color: AppTheme.textSecondary),
                         ),
                       ],
                     )
                   else if (isUploaded)
                     Column(
                       children: [
-                        Icon(Icons.check_circle, color: Colors.green.shade600, size: 32),
-                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppTheme.successTeal.withOpacity(0.2),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.check_rounded,
+                            color: AppTheme.successTeal,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
                         Text(
-                          '${_selectedFiles[type]?.name ?? 'Document'} uploaded successfully',
+                          '${_selectedFiles[type]?.name ?? 'Document'} uploaded',
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: Colors.green.shade700,
-                            fontWeight: FontWeight.w500,
+                            color: AppTheme.successTeal,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
                           ),
                         ),
                       ],
@@ -437,17 +561,20 @@ class _DonorVerificationScreenState extends State<DonorVerificationScreen> {
                     Column(
                       children: [
                         Icon(
-                          hasFile ? Icons.upload_file : Icons.cloud_upload_outlined,
+                          hasFile ? Icons.upload_file_rounded : Icons.cloud_upload_outlined,
                           size: 32,
-                          color: hasFile ? Colors.orange.shade600 : Colors.grey.shade600,
+                          color: hasFile ? AppTheme.warningAmber : AppTheme.textTertiary,
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 10),
                         Text(
-                          hasFile ? 'Tap to upload ${_selectedFiles[type]?.name}' : doc['hint']!,
+                          hasFile 
+                              ? 'Tap to upload ${_selectedFiles[type]?.name}' 
+                              : doc['hint']!,
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: hasFile ? Colors.orange.shade700 : Colors.grey.shade600,
-                            fontWeight: hasFile ? FontWeight.w500 : FontWeight.normal,
+                            color: hasFile ? AppTheme.warningAmber : AppTheme.textSecondary,
+                            fontWeight: hasFile ? FontWeight.w600 : FontWeight.normal,
+                            fontSize: 13,
                           ),
                         ),
                       ],
@@ -455,44 +582,58 @@ class _DonorVerificationScreenState extends State<DonorVerificationScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             
             // Action buttons
             Row(
               children: [
                 Expanded(
-                  child: ElevatedButton.icon(
+                  child: GradientButton(
+                    text: hasFile ? 'Change File' : 'Choose File',
+                    icon: hasFile ? Icons.refresh_rounded : Icons.attach_file_rounded,
+                    outlined: !isUploaded,
                     onPressed: isUploading ? null : () => _pickFile(type),
-                    icon: Icon(hasFile ? Icons.refresh : Icons.attach_file),
-                    label: Text(hasFile ? 'Choose Different File' : 'Choose File'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: isUploaded ? Colors.green : null,
-                      foregroundColor: isUploaded ? Colors.white : null,
-                    ),
                   ),
                 ),
                 if (hasFile && !isUploaded && !isUploading) ...[
-                  const SizedBox(width: 8),
-                  ElevatedButton(
-                    onPressed: () => _uploadFile(type),
-                    child: const Text('Upload'),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: GradientButton(
+                      text: 'Upload',
+                      icon: Icons.cloud_upload_rounded,
+                      onPressed: () => _uploadFile(type),
+                    ),
                   ),
                 ],
               ],
             ),
             
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             
             // Additional info text field
             TextFormField(
               controller: _documentControllers[type],
+              style: TextStyle(color: AppTheme.textPrimary),
               decoration: InputDecoration(
-                labelText: 'Additional Information (Optional)',
+                labelText: 'Additional Information',
+                labelStyle: TextStyle(color: AppTheme.textSecondary),
                 hintText: 'Document number, expiry date, or other details...',
+                hintStyle: TextStyle(color: AppTheme.textTertiary, fontSize: 13),
+                filled: true,
+                fillColor: AppTheme.surfaceGlass,
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: AppTheme.surfaceGlassBorder),
                 ),
-                contentPadding: const EdgeInsets.all(12),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: AppTheme.surfaceGlassBorder),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: AppTheme.accentTeal, width: 1.5),
+                ),
+                contentPadding: const EdgeInsets.all(14),
               ),
               maxLines: 2,
             ),
@@ -503,29 +644,11 @@ class _DonorVerificationScreenState extends State<DonorVerificationScreen> {
   }
 
   Widget _buildSubmitButton() {
-    return SizedBox(
-      width: double.infinity,
-      height: 50,
-      child: ElevatedButton(
-        onPressed: _isSubmitting ? null : _submitDocuments,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.green.shade600,
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-        child: _isSubmitting
-            ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-              )
-            : const Text(
-                'Submit Documents for Verification',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-      ),
+    return GradientButton(
+      text: _isSubmitting ? 'Submitting...' : 'Submit for Verification',
+      icon: _isSubmitting ? null : Icons.send_rounded,
+      onPressed: _isSubmitting ? null : _submitDocuments,
+      isLoading: _isSubmitting,
     );
   }
 }

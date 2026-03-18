@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:geolocator/geolocator.dart';
 import '../models/volunteer_profile.dart';
 import '../models/food_donation.dart';
 import '../models/dispatch.dart';
-import '../models/enums.dart';
 import '../services/firestore_service.dart';
 import '../services/location_service.dart';
 import '../services/notification_service.dart';

@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../config/firestore_schema.dart';
+import '../config/firebase_schema.dart';
 
-// Firestore Database Service for centralized Firestore operations
+/// Firestore Database Service for centralized Firestore operations
+/// Updated for Firebase Schema v2.0
 class FirestoreService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   
@@ -12,8 +14,8 @@ class FirestoreService {
   // Generic CRUD operations for any collection
   Future<void> create(String collection, String docId, Map<String, dynamic> data) async {
     try {
-      data['createdAt'] = Timestamp.now();
-      data['updatedAt'] = Timestamp.now();
+      data[Fields.createdAt] = Timestamp.now();
+      data[Fields.updatedAt] = Timestamp.now();
       await _firestore.collection(collection).doc(docId).set(data);
     } catch (e) {
       print('Error creating document in $collection: $e');
@@ -23,7 +25,7 @@ class FirestoreService {
 
   Future<void> update(String collection, String docId, Map<String, dynamic> data) async {
     try {
-      data['updatedAt'] = Timestamp.now();
+      data[Fields.updatedAt] = Timestamp.now();
       await _firestore.collection(collection).doc(docId).update(data);
     } catch (e) {
       print('Error updating document in $collection: $e');
@@ -74,73 +76,171 @@ class FirestoreService {
     }
   }
 
-  // User Operations
+  // ============================================================
+  // USER OPERATIONS (new schema - embedded profiles)
+  // ============================================================
+  
   Future<void> createUser(String userId, Map<String, dynamic> userData) async {
-    await create(FirestoreCollections.users, userId, userData);
+    await create(Collections.users, userId, userData);
   }
 
   Future<DocumentSnapshot> getUser(String userId) async {
-    return await get(FirestoreCollections.users, userId);
+    return await get(Collections.users, userId);
   }
 
   Future<void> updateUser(String userId, Map<String, dynamic> updates) async {
-    await update(FirestoreCollections.users, userId, updates);
+    await update(Collections.users, userId, updates);
+  }
+  
+  Future<void> updateUserProfile(String userId, Map<String, dynamic> profileUpdates) async {
+    // Update the embedded profile object
+    final updates = <String, dynamic>{};
+    profileUpdates.forEach((key, value) {
+      updates['${Fields.profile}.$key'] = value;
+    });
+    await update(Collections.users, userId, updates);
   }
 
-  // Profile Operations
-  Future<void> createDonorProfile(String userId, Map<String, dynamic> profileData) async {
-    profileData['userId'] = userId;
-    await create(FirestoreCollections.donorProfiles, userId, profileData);
+  // ============================================================
+  // ORGANIZATION OPERATIONS (replaces ngo_profiles)
+  // ============================================================
+  
+  Future<void> createOrganization(String orgId, Map<String, dynamic> orgData) async {
+    await create(Collections.organizations, orgId, orgData);
+  }
+  
+  Future<DocumentSnapshot> getOrganization(String orgId) async {
+    return await get(Collections.organizations, orgId);
+  }
+  
+  Future<void> updateOrganization(String orgId, Map<String, dynamic> updates) async {
+    await update(Collections.organizations, orgId, updates);
+  }
+  
+  Future<QuerySnapshot> getVerifiedOrganizations() async {
+    return await query(Collections.organizations, where: {Fields.isVerified: true});
   }
 
-  Future<void> createNGOProfile(String userId, Map<String, dynamic> profileData) async {
-    profileData['userId'] = userId;
-    await create(FirestoreCollections.ngoProfiles, userId, profileData);
+  // ============================================================
+  // DONATION OPERATIONS (replaces food_donations)
+  // ============================================================
+  
+  Future<void> createDonation(String donationId, Map<String, dynamic> donationData) async {
+    await create(Collections.donations, donationId, donationData);
   }
 
-  Future<void> createVolunteerProfile(String userId, Map<String, dynamic> profileData) async {
-    profileData['userId'] = userId;
-    await create(FirestoreCollections.volunteerProfiles, userId, profileData);
+  Future<QuerySnapshot> getDonationsByStatus(String status) async {
+    return await query(Collections.donations, 
+      where: {Fields.status: status}, 
+      orderBy: Fields.createdAt, 
+      isDescending: true
+    );
   }
 
-  Future<void> createAdminProfile(String userId, Map<String, dynamic> profileData) async {
-    profileData['userId'] = userId;
-    await create(FirestoreCollections.adminProfiles, userId, profileData);
+  Future<QuerySnapshot> getUserDonations(String userId) async {
+    return await query(Collections.donations, 
+      where: {Fields.donorId: userId}, 
+      orderBy: Fields.createdAt, 
+      isDescending: true
+    );
+  }
+  
+  Future<void> addDonationHistory(String donationId, Map<String, dynamic> historyData) async {
+    historyData['timestamp'] = Timestamp.now();
+    await _firestore
+        .collection(Collections.donations)
+        .doc(donationId)
+        .collection(Subcollections.history)
+        .add(historyData);
   }
 
-  // Food Donation Operations
-  Future<void> createFoodDonation(String donationId, Map<String, dynamic> donationData) async {
-    await create(FirestoreCollections.foodDonations, donationId, donationData);
+  // ============================================================
+  // DELIVERY OPERATIONS (new collection)
+  // ============================================================
+  
+  Future<void> createDelivery(String deliveryId, Map<String, dynamic> deliveryData) async {
+    await create(Collections.deliveries, deliveryId, deliveryData);
+  }
+  
+  Future<QuerySnapshot> getVolunteerDeliveries(String volunteerId) async {
+    return await query(Collections.deliveries, 
+      where: {Fields.volunteerId: volunteerId}, 
+      orderBy: Fields.createdAt, 
+      isDescending: true
+    );
+  }
+  
+  Future<void> addDeliveryCheckpoint(String deliveryId, Map<String, dynamic> checkpointData) async {
+    checkpointData['timestamp'] = Timestamp.now();
+    await _firestore
+        .collection(Collections.deliveries)
+        .doc(deliveryId)
+        .collection(Subcollections.checkpoints)
+        .add(checkpointData);
   }
 
-  Future<QuerySnapshot> getFoodDonationsByStatus(String status) async {
-    return await query(FirestoreCollections.foodDonations, where: {'status': status}, orderBy: 'createdAt', isDescending: true);
+  // ============================================================
+  // REQUEST OPERATIONS (NGO food requests)
+  // ============================================================
+  
+  Future<void> createRequest(String requestId, Map<String, dynamic> requestData) async {
+    await create(Collections.requests, requestId, requestData);
+  }
+  
+  Future<QuerySnapshot> getNGORequests(String ngoId) async {
+    return await query(Collections.requests, 
+      where: {Fields.ngoId: ngoId}, 
+      orderBy: Fields.createdAt, 
+      isDescending: true
+    );
   }
 
-  Future<QuerySnapshot> getUserFoodDonations(String userId) async {
-    return await query(FirestoreCollections.foodDonations, where: {'donorId': userId}, orderBy: 'createdAt', isDescending: true);
+  // ============================================================
+  // ASSIGNMENT OPERATIONS
+  // ============================================================
+  
+  Future<void> createAssignment(String assignmentId, Map<String, dynamic> assignmentData) async {
+    await create(Collections.assignments, assignmentId, assignmentData);
+  }
+  
+  Future<QuerySnapshot> getAssigneeAssignments(String assigneeId, {String? status}) async {
+    final where = <String, dynamic>{Fields.assigneeId: assigneeId};
+    if (status != null) where[Fields.status] = status;
+    return await query(Collections.assignments, where: where, orderBy: Fields.createdAt, isDescending: true);
   }
 
-  // Verification Operations
-  Future<void> createVerificationSubmission(String submissionId, Map<String, dynamic> submissionData) async {
-    await create(FirestoreCollections.verificationSubmissions, submissionId, submissionData);
+  // ============================================================
+  // VERIFICATION OPERATIONS
+  // ============================================================
+  
+  Future<void> createVerification(String verificationId, Map<String, dynamic> verificationData) async {
+    await create(Collections.verifications, verificationId, verificationData);
   }
 
   Future<QuerySnapshot> getPendingVerifications() async {
-    return await query(FirestoreCollections.verificationSubmissions, where: {'status': 'pending'}, orderBy: 'submittedAt');
+    return await query(Collections.verifications, 
+      where: {Fields.status: 'pending'}, 
+      orderBy: Fields.createdAt
+    );
   }
 
-  // Admin Task Operations
+  // ============================================================
+  // ADMIN TASK OPERATIONS
+  // ============================================================
+  
   Future<void> createAdminTask(Map<String, dynamic> taskData) async {
-    final docRef = _firestore.collection(FirestoreCollections.adminTasks).doc();
-    taskData['createdAt'] = Timestamp.now();
+    final docRef = _firestore.collection(Collections.adminTasks).doc();
+    taskData[Fields.createdAt] = Timestamp.now();
     await docRef.set(taskData);
   }
 
-  // Audit Log Operations
+  // ============================================================
+  // AUDIT OPERATIONS
+  // ============================================================
+  
   Future<void> createAuditLog(Map<String, dynamic> logData) async {
     logData['timestamp'] = Timestamp.now();
-    await _firestore.collection(FirestoreCollections.auditLogs).add(logData);
+    await _firestore.collection(Collections.audit).add(logData);
   }
 
   Future<QuerySnapshot> getAuditLogs({String? userId, String? eventType, int limit = 50}) async {
@@ -148,62 +248,158 @@ class FirestoreService {
     if (userId != null) whereClause = {'userId': userId};
     if (eventType != null) whereClause = {...?whereClause, 'eventType': eventType};
     
-    return await query(FirestoreCollections.auditLogs, where: whereClause, orderBy: 'timestamp', isDescending: true, limit: limit);
+    return await query(Collections.audit, 
+      where: whereClause, 
+      orderBy: 'timestamp', 
+      isDescending: true, 
+      limit: limit
+    );
   }
 
-  // Security Operations
-  Future<void> createSecurityLog(String emailHash, Map<String, dynamic> securityData) async {
-    await create(FirestoreCollections.securityLogs, emailHash, securityData);
-  }
-
-  Future<void> updateSecurityLog(String emailHash, Map<String, dynamic> updates) async {
-    await update(FirestoreCollections.securityLogs, emailHash, updates);
-  }
-
+  // ============================================================
+  // SECURITY OPERATIONS
+  // ============================================================
+  
   Future<void> createSecurityEvent(Map<String, dynamic> eventData) async {
     eventData['timestamp'] = Timestamp.now();
-    await _firestore.collection(FirestoreCollections.securityEvents).add(eventData);
+    await _firestore.collection(Collections.security).add(eventData);
   }
 
-  // Session Operations
+  // ============================================================
+  // TRACKING OPERATIONS
+  // ============================================================
+  
+  Future<void> updateVolunteerLocation(String volunteerId, Map<String, dynamic> locationData) async {
+    locationData['timestamp'] = Timestamp.now();
+    await _firestore
+        .collection(Collections.tracking)
+        .doc(volunteerId)
+        .collection(Subcollections.locations)
+        .add(locationData);
+  }
+  
+  Stream<QuerySnapshot> getVolunteerLocationStream(String volunteerId) {
+    return _firestore
+        .collection(Collections.tracking)
+        .doc(volunteerId)
+        .collection(Subcollections.locations)
+        .orderBy('timestamp', descending: true)
+        .limit(1)
+        .snapshots();
+  }
+
+  // ============================================================
+  // NOTIFICATION OPERATIONS (subcollection pattern)
+  // ============================================================
+  
+  Future<void> sendNotification(String userId, Map<String, dynamic> notificationData) async {
+    await _firestore
+        .collection(Collections.notifications)
+        .doc(userId)
+        .collection(Subcollections.items)
+        .add({
+      ...notificationData,
+      'read': false,
+      Fields.createdAt: Timestamp.now(),
+    });
+  }
+  
+  Stream<QuerySnapshot> getUserNotificationsStream(String userId) {
+    return _firestore
+        .collection(Collections.notifications)
+        .doc(userId)
+        .collection(Subcollections.items)
+        .orderBy(Fields.createdAt, descending: true)
+        .limit(50)
+        .snapshots();
+  }
+  
+  Future<void> markNotificationRead(String userId, String notificationId) async {
+    await _firestore
+        .collection(Collections.notifications)
+        .doc(userId)
+        .collection(Subcollections.items)
+        .doc(notificationId)
+        .update({'read': true, 'readAt': Timestamp.now()});
+  }
+
+  // ============================================================
+  // LEGACY COMPATIBILITY METHODS (deprecated)
+  // ============================================================
+  
+  @Deprecated('Use createDonation instead')
+  Future<void> createFoodDonation(String donationId, Map<String, dynamic> donationData) async {
+    await createDonation(donationId, donationData);
+  }
+
+  @Deprecated('Use getDonationsByStatus instead')
+  Future<QuerySnapshot> getFoodDonationsByStatus(String status) async {
+    return await getDonationsByStatus(status);
+  }
+
+  @Deprecated('Use getUserDonations instead')
+  Future<QuerySnapshot> getUserFoodDonations(String userId) async {
+    return await getUserDonations(userId);
+  }
+
+  @Deprecated('Use createVerification instead')
+  Future<void> createVerificationSubmission(String submissionId, Map<String, dynamic> submissionData) async {
+    await createVerification(submissionId, submissionData);
+  }
+
+  @Deprecated('Profile data is now embedded in users collection')
+  Future<void> createDonorProfile(String userId, Map<String, dynamic> profileData) async {
+    await updateUserProfile(userId, profileData);
+  }
+
+  @Deprecated('Use createOrganization instead')
+  Future<void> createNGOProfile(String userId, Map<String, dynamic> profileData) async {
+    profileData[Fields.ownerId] = userId;
+    await createOrganization(userId, profileData);
+  }
+
+  @Deprecated('Profile data is now embedded in users collection')
+  Future<void> createVolunteerProfile(String userId, Map<String, dynamic> profileData) async {
+    await updateUserProfile(userId, profileData);
+  }
+
+  @Deprecated('Profile data is now embedded in users collection')
+  Future<void> createAdminProfile(String userId, Map<String, dynamic> profileData) async {
+    await updateUserProfile(userId, profileData);
+  }
+
+  @Deprecated('Use createSecurityEvent instead')
+  Future<void> createSecurityLog(String emailHash, Map<String, dynamic> securityData) async {
+    securityData['emailHash'] = emailHash;
+    await createSecurityEvent(securityData);
+  }
+
+  @Deprecated('Use createSecurityEvent instead')
+  Future<void> updateSecurityLog(String emailHash, Map<String, dynamic> updates) async {
+    updates['emailHash'] = emailHash;
+    await createSecurityEvent(updates);
+  }
+
+  @Deprecated('Session data should be managed via Firebase Auth')
   Future<void> createUserSession(String sessionId, Map<String, dynamic> sessionData) async {
-    await create(FirestoreCollections.userSessions, sessionId, sessionData);
+    await create('sessions', sessionId, sessionData);
   }
 
+  @Deprecated('Session data should be managed via Firebase Auth')
   Future<QuerySnapshot> getUserActiveSessions(String userId) async {
-    return await query(FirestoreCollections.userSessions, 
+    return await query('sessions', 
       where: {'userId': userId, 'isActive': true}, 
-      orderBy: 'createdAt', 
+      orderBy: Fields.createdAt, 
       isDescending: true
     );
   }
 
-  // Notification Operations
-  Future<void> sendNotification(String userId, Map<String, dynamic> notificationData) async {
-    // Add to main notifications collection
-    await _firestore.collection(FirestoreCollections.notifications).add({
-      'userId': userId,
-      ...notificationData,
-      'createdAt': Timestamp.now(),
-    });
-    
-    // Add to user's subcollection for easier querying
-    await _firestore
-        .collection(FirestoreCollections.users)
-        .doc(userId)
-        .collection(FirestoreCollections.userNotifications)
-        .add({
-      ...notificationData,
-      'createdAt': Timestamp.now(),
-    });
-  }
-
   Future<QuerySnapshot> getUserNotifications(String userId, {int limit = 50}) async {
     return await _firestore
-        .collection(FirestoreCollections.users)
+        .collection(Collections.notifications)
         .doc(userId)
-        .collection(FirestoreCollections.userNotifications)
-        .orderBy('createdAt', descending: true)
+        .collection(Subcollections.items)
+        .orderBy(Fields.createdAt, descending: true)
         .limit(limit)
         .get();
   }
@@ -211,7 +407,7 @@ class FirestoreService {
   // Donation Tracking
   Future<void> createDonationTracking(Map<String, dynamic> trackingData) async {
     trackingData['timestamp'] = Timestamp.now();
-    await _firestore.collection(FirestoreCollections.donationTracking).add(trackingData);
+    await _firestore.collection(Collections.tracking).add(trackingData);
   }
 
   // Batch Operations
@@ -226,12 +422,12 @@ class FirestoreService {
   // Statistics and Analytics
   Future<Map<String, dynamic>> getUserStatistics() async {
     try {
-      final totalUsers = await _firestore.collection(FirestoreCollections.users).get();
+      final totalUsers = await _firestore.collection(Collections.users).get();
       
-      final donors = await query(FirestoreCollections.users, where: {'role': 'donor'});
-      final ngos = await query(FirestoreCollections.users, where: {'role': 'ngo'});
-      final volunteers = await query(FirestoreCollections.users, where: {'role': 'volunteer'});
-      final verified = await query(FirestoreCollections.users, where: {'status': 'verified'});
+      final donors = await query(Collections.users, where: {'role': 'donor'});
+      final ngos = await query(Collections.users, where: {'role': 'ngo'});
+      final volunteers = await query(Collections.users, where: {'role': 'volunteer'});
+      final verified = await query(Collections.users, where: {'status': 'verified'});
       
       return {
         'totalUsers': totalUsers.docs.length,
@@ -249,9 +445,9 @@ class FirestoreService {
 
   Future<Map<String, dynamic>> getDonationStatistics() async {
     try {
-      final total = await _firestore.collection(FirestoreCollections.foodDonations).get();
-      final available = await query(FirestoreCollections.foodDonations, where: {'status': 'available'});
-      final completed = await query(FirestoreCollections.foodDonations, where: {'status': 'completed'});
+      final total = await _firestore.collection(Collections.donations).get();
+      final available = await query(Collections.donations, where: {'status': 'available'});
+      final completed = await query(Collections.donations, where: {'status': 'completed'});
       
       return {
         'total': total.docs.length,
@@ -270,7 +466,7 @@ class FirestoreService {
     try {
       final cutoffTime = DateTime.now().subtract(const Duration(hours: 24));
       final expiredSessions = await _firestore
-          .collection(FirestoreCollections.userSessions)
+          .collection(Collections.security)
           .where('expiresAt', isLessThan: Timestamp.fromDate(cutoffTime))
           .get();
       
@@ -292,7 +488,7 @@ class FirestoreService {
     try {
       final cutoffDate = DateTime.now().subtract(Duration(days: retentionDays));
       final oldLogs = await _firestore
-          .collection(FirestoreCollections.auditLogs)
+          .collection(Collections.audit)
           .where('timestamp', isLessThan: Timestamp.fromDate(cutoffDate))
           .limit(500)
           .get();

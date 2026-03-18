@@ -1,8 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'enums.dart';
+import '../config/firebase_schema.dart';
 import 'location.dart';
 
 export 'enums.dart';
+
+/// Food Donation model
+/// Stored in /donations collection (new schema v2.0)
 
 class FoodDonation {
   final String id;

@@ -2,15 +2,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'dart:io';
-import 'firestore_service.dart';
-import '../config/firestore_schema.dart';
 import '../models/enums.dart';
+import '../config/firebase_schema.dart';
 
 export '../models/enums.dart' show AuditEventType, AuditRiskLevel;
 
 class AuditService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirestoreService _firestoreService = FirestoreService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   
   static final AuditService _instance = AuditService._internal();
@@ -47,7 +45,7 @@ class AuditService {
         'additionalData': additionalData ?? {},
       };
       
-      await _firestore.collection('audit_logs').add(auditLog);
+      await _firestore.collection(Collections.audit).add(auditLog);
       
       // If high or critical risk, create alert
       if (riskLevel == AuditRiskLevel.high || riskLevel == AuditRiskLevel.critical) {
@@ -196,7 +194,7 @@ class AuditService {
     int limit = 50,
   }) async {
     try {
-      Query query = _firestore.collection('audit_logs');
+      Query query = _firestore.collection(Collections.audit);
       
       if (userId != null) {
         query = query.where('userId', isEqualTo: userId);
@@ -252,7 +250,7 @@ class AuditService {
       final end = endDate ?? DateTime.now();
       
       final query = await _firestore
-          .collection('audit_logs')
+          .collection(Collections.audit)
           .where('timestamp', isGreaterThanOrEqualTo: Timestamp.fromDate(start))
           .where('timestamp', isLessThanOrEqualTo: Timestamp.fromDate(end))
           .get();
@@ -293,7 +291,7 @@ class AuditService {
   // Create security alert for high-risk events
   Future<void> _createSecurityAlert(Map<String, dynamic> auditLog) async {
     try {
-      await _firestore.collection('security_alerts').add({
+      await _firestore.collection(Collections.security).add({
         'auditLogId': auditLog['id'],
         'eventType': auditLog['eventType'],
         'riskLevel': auditLog['riskLevel'],
@@ -361,7 +359,7 @@ class AuditService {
       final cutoffDate = DateTime.now().subtract(Duration(days: retentionDays));
       
       final oldLogsQuery = await _firestore
-          .collection('audit_logs')
+          .collection(Collections.audit)
           .where('timestamp', isLessThan: Timestamp.fromDate(cutoffDate))
           .limit(500) // Process in batches
           .get();

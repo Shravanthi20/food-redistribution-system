@@ -1,16 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:geolocator/geolocator.dart';
 import 'dart:math' as math;
 import '../models/food_donation.dart';
 import '../models/food_request.dart';
 import '../models/ngo_profile.dart';
-import '../models/volunteer_profile.dart';
 import '../models/matching.dart';
 import '../models/enums.dart';
 import '../services/firestore_service.dart';
 import '../services/location_service.dart';
 import '../services/notification_service.dart';
 import '../services/audit_service.dart';
+import '../config/firebase_schema.dart';
 
 class FoodDonationMatchingService {
   final FirestoreService _firestoreService;
@@ -719,7 +718,7 @@ class EnhancedMatchingService {
       
       // Update donation
       batch.update(
-        FirebaseFirestore.instance.collection('food_donations').doc(donationId),
+        FirebaseFirestore.instance.collection(Collections.donations).doc(donationId),
         {
           'status': DonationStatus.matched.name,
           'matchedRequestId': requestId,
@@ -731,7 +730,7 @@ class EnhancedMatchingService {
       
       // Update request
       batch.update(
-        FirebaseFirestore.instance.collection('food_requests').doc(requestId),
+        FirebaseFirestore.instance.collection(Collections.requests).doc(requestId),
         {
           'status': RequestStatus.matched.name,
           'matchedDonationId': donationId,
@@ -942,7 +941,7 @@ class EnhancedMatchingService {
   /// Get compatible requests for a donation
   Future<List<FoodRequest>> _getCompatibleRequests(FoodDonation donation) async {
     final snapshot = await FirebaseFirestore.instance
-        .collection('food_requests')
+        .collection(Collections.requests)
         .where('status', isEqualTo: RequestStatus.pending.name)
         .get();
     
@@ -963,7 +962,7 @@ class EnhancedMatchingService {
   /// Get compatible donations for a request
   Future<List<FoodDonation>> _getCompatibleDonations(FoodRequest request) async {
     final snapshot = await FirebaseFirestore.instance
-        .collection('food_donations')
+        .collection(Collections.donations)
         .where('status', isEqualTo: DonationStatus.listed.name)
         .get();
     
@@ -1196,8 +1195,8 @@ class EnhancedMatchingService {
 
   Future<void> _notifyBidirectionalMatch(String donationId, String requestId) async {
     try {
-      final donationDoc = await FirebaseFirestore.instance.collection('food_donations').doc(donationId).get();
-      final requestDoc = await FirebaseFirestore.instance.collection('food_requests').doc(requestId).get();
+      final donationDoc = await FirebaseFirestore.instance.collection(Collections.donations).doc(donationId).get();
+      final requestDoc = await FirebaseFirestore.instance.collection(Collections.requests).doc(requestId).get();
       
       if (!donationDoc.exists || !requestDoc.exists) return;
       

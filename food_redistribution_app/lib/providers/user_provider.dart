@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../services/user_service.dart';
-import '../models/user.dart';
 
 class UserProvider extends ChangeNotifier {
   final UserService _userService = UserService();

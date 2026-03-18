@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/food_request.dart';
 import '../models/food_donation.dart';
-import '../models/ngo_profile.dart';
 import '../models/query.dart' as query_model;
 import '../services/food_request_service.dart';
 import '../services/food_donation_service.dart';
@@ -66,14 +65,18 @@ class NGOProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
+      // Load requests and donations first (in parallel)
       await Future.wait([
         _loadMyRequests(ngoId),
         _loadAvailableDonations(),
-        _loadDashboardStats(ngoId),
         _loadMyQueries(ngoId),
       ]);
+      
+      // Then calculate dashboard stats (depends on _myRequests being loaded)
+      await _loadDashboardStats(ngoId);
     } catch (e) {
       _errorMessage = 'Failed to load NGO data: $e';
+      print('NGO Provider Error: $e');
     } finally {
       _isLoading = false;
       notifyListeners();

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/tracking/location_tracking_model.dart';
 import '../models/enums.dart';
-import '../services/tracking/offline_tracking_service.dart';
 import '../services/tracking/notification_handler.dart';
 import '../services/tracking/delay_detection_service.dart';
 import '../services/tracking/analytics_aggregation_service.dart';

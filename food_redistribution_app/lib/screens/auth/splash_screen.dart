@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../utils/app_router.dart';
+import '../../utils/app_theme.dart';
 import '../../models/user.dart';
+import '../../widgets/gradient_scaffold.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -53,6 +55,12 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void _navigateBasedOnUserState(AppUser user) {
+    // Admin users bypass all verification/onboarding - go directly to dashboard
+    if (user.role == UserRole.admin) {
+      Navigator.pushReplacementNamed(context, AppRouter.adminDashboard);
+      return;
+    }
+    
     if (user.role == UserRole.ngo) {
        switch(user.onboardingState) {
          case OnboardingState.registered:
@@ -112,55 +120,91 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.primary,
+    return GradientScaffold(
+      showAnimatedBackground: true,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // App Icon
-            Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(60),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
+            // Animated App Icon with glow
+            TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0.8, end: 1.0),
+              duration: const Duration(milliseconds: 1500),
+              curve: Curves.easeInOut,
+              builder: (context, value, child) {
+                return Transform.scale(
+                  scale: value,
+                  child: Container(
+                    width: 130,
+                    height: 130,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          AppTheme.accentTeal.withOpacity(0.2),
+                          AppTheme.accentCyan.withOpacity(0.1),
+                        ],
+                      ),
+                      border: Border.all(
+                        color: AppTheme.accentTeal.withOpacity(0.4),
+                        width: 2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppTheme.accentTeal.withOpacity(0.3 * value),
+                          blurRadius: 40 * value,
+                          spreadRadius: 10 * value,
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      Icons.restaurant_menu_rounded,
+                      size: 60,
+                      color: AppTheme.accentTeal,
+                    ),
                   ),
-                ],
-              ),
-              child: Icon(
-                Icons.restaurant,
-                size: 60,
-                color: Theme.of(context).colorScheme.primary,
-              ),
+                );
+              },
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 40),
 
-            // App Title
-            Text(
-              'Food Redistribution',
-              style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
+            // Animated App Title with gradient
+            ShaderMask(
+              shaderCallback: (bounds) => const LinearGradient(
+                colors: [AppTheme.textPrimary, AppTheme.accentCyanSoft],
+              ).createShader(bounds),
+              child: const Text(
+                'Food Redistribution',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  letterSpacing: -0.5,
+                ),
+              ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             Text(
               'Reducing waste, feeding hope',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.white70,
-                  ),
+              style: TextStyle(
+                fontSize: 16,
+                color: AppTheme.textSecondary,
+                letterSpacing: 0.5,
+              ),
             ),
-            const SizedBox(height: 50),
+            const SizedBox(height: 60),
 
-            // Loading indicator
-            const CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            // Elegant loading indicator
+            SizedBox(
+              width: 32,
+              height: 32,
+              child: CircularProgressIndicator(
+                strokeWidth: 3,
+                valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.accentTeal),
+                backgroundColor: AppTheme.surfaceGlassDark,
+              ),
             ),
           ],
         ),

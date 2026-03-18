@@ -1,4 +1,4 @@
-const functions = require("firebase-functions");
+﻿const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const geofire = require("geofire-common");
 
@@ -9,6 +9,25 @@ const db = admin.firestore();
 const ASSIGNMENT_TIMEOUT_MINS = 30;
 const MAX_SEARCH_RADIUS_KM = 20;
 const MAX_REASSIGNMENT_ATTEMPTS = 5;
+
+// Firebase Schema v2.0 Collection Names
+const Collections = {
+    users: "users",
+    organizations: "organizations",
+    donations: "donations",
+    deliveries: "deliveries",
+    requests: "requests",
+    assignments: "assignments",
+    tracking: "tracking",
+    notifications: "notifications",
+    verifications: "verifications",
+    audit: "audit",
+    security: "security",
+    analytics: "analytics",
+    matching: "matching",
+    adminTasks: "admin_tasks",
+    system: "system",
+};
 
 const WEIGHTS = {
     DISTANCE: 0.4,
@@ -22,7 +41,7 @@ const WEIGHTS = {
  * Goal: Find best NGO candidates and soft-lock the top one.
  */
 exports.onDonationCreated = functions.firestore
-    .document("food_donations/{donationId}")
+    .document("donations/{donationId}")
     .onCreate(async (snap, context) => {
         const donation = snap.data();
         const donationId = context.params.donationId;
@@ -66,28 +85,32 @@ exports.onDonationCreated = functions.firestore
     });
 
 /**
- * Trigger: When an NGO accepts the donation.
+ * Trigger: When an NGO accepts the donation (assignment created and accepted).
  * Goal: Find best Volunteer.
  */
 exports.onDonationAccepted = functions.firestore
-    .document("donation_acceptances/{acceptanceId}")
+    .document("assignments/{assignmentId}")
     .onCreate(async (snap, context) => {
-        const acceptance = snap.data();
-        const { donationId, ngoId } = acceptance;
+        const assignment = snap.data();
+        
+        // Only process when this is an NGO acceptance type
+        if (assignment.type !== "NGO_OFFER" || assignment.status !== "accepted") return null;
+        
+        const { donationId, assigneeId: ngoId } = assignment;
 
         try {
-            // Fetch full donation and NGO details
-            const donationSnap = await db.collection("food_donations").doc(donationId).get();
+            // Fetch full donation and organization details
+            const donationSnap = await db.collection(Collections.donations).doc(donationId).get();
             const donation = donationSnap.data();
-            const ngoSnap = await db.collection("ngo_profiles").doc(ngoId).get();
-            const ngo = ngoSnap.data();
+            const orgSnap = await db.collection(Collections.organizations).doc(ngoId).get();
+            const ngo = orgSnap.data();
 
             // Volunteer Matching Logic
             const volunteers = await findBestVolunteers(donation, ngo);
 
             if (volunteers.length === 0) {
                 console.log(`No volunteers found for donation ${donationId}`);
-                await db.collection("food_donations").doc(donationId).update({ matchingStatus: "pending_volunteer_manual" });
+                await db.collection(Collections.donations).doc(donationId).update({ matchingStatus: "pending_volunteer_manual" });
                 return null;
             }
 
@@ -106,7 +129,7 @@ exports.onDonationAccepted = functions.firestore
  * Implements Self-Healing Loop.
  */
 exports.onAssignmentUpdate = functions.firestore
-    .document("donation_assignments/{assignmentId}")
+    .document("assignments/{assignmentId}")
     .onUpdate(async (change, context) => {
         const newData = change.after.data();
         const previousData = change.before.data();
@@ -156,7 +179,7 @@ async function findBestNGOCandidates(donation, urgencyScore) {
     // 2. Parallel Queries
     const promises = [];
     for (const b of bounds) {
-        const q = db.collection("ngo_profiles")
+        const q = db.collection(Collections.organizations)
             .where("isVerified", "==", true)
             .orderBy("location.geohash")
             .startAt(b[0])
@@ -221,30 +244,37 @@ async function findBestNGOCandidates(donation, urgencyScore) {
 const MAX_BATCH_SIZE = 3;
 
 async function findBestVolunteers(donation, ngo) {
-    // 1. Fetch Candidates (Verified)
-    // Optimization: In prod, use Geohash but also index active/idle status.
-    const volSnapshot = await db.collection("volunteer_profiles")
-        .where("isVerified", "==", true)
+    // 1. Fetch Volunteer Candidates (role=volunteer, status=active)
+    // Volunteers now have embedded profiles in users collection
+    const volSnapshot = await db.collection(Collections.users)
+        .where("role", "==", "volunteer")
+        .where("status", "==", "active")
         .get();
 
     const candidates = [];
 
     for (const doc of volSnapshot.docs) {
-        const vol = doc.data();
-        vol.id = doc.id;
+        const user = doc.data();
+        const vol = { id: doc.id, ...user, ...user.profile }; // Merge profile data
 
-        if (!isValidLocation(vol.location)) continue;
+        // Check location (can be in profile or root)
+        const location = vol.profile?.location || vol.location;
+        if (!isValidLocation(location)) continue;
+        vol.location = location;
 
-        // Hard Constraint: Vehicle
-        if (donation.quantity > 20 && !vol.hasVehicle) continue;
-        if (donation.requiresRefrigeration && vol.vehicleType !== "refrigerated_truck" && vol.vehicleType !== "car") continue;
+        // Hard Constraint: Vehicle (from embedded profile)
+        const hasVehicle = vol.profile?.hasVehicle || vol.hasVehicle;
+        const vehicleType = vol.profile?.vehicleType || vol.vehicleType;
+        
+        if (donation.quantity > 20 && !hasVehicle) continue;
+        if (donation.requiresRefrigeration && vehicleType !== "refrigerated_truck" && vehicleType !== "car") continue;
 
         // [NEW] Hard Constraint: Time Availability
         if (!isVolunteerAvailableNow(vol)) continue;
 
         // BATCHING / VRP Logic
         // Determine active tasks (Is this person busy?)
-        const activeTasksSnap = await db.collection("donation_assignments")
+        const activeTasksSnap = await db.collection(Collections.assignments)
             .where("assigneeId", "==", vol.id)
             .where("status", "in", ["pending", "accepted", "picked_up"])
             .get();
@@ -303,7 +333,7 @@ async function createAssignment(donationId, candidate, type) {
     const expiresAt = new Date();
     expiresAt.setMinutes(expiresAt.getMinutes() + ASSIGNMENT_TIMEOUT_MINS);
 
-    await db.collection("donation_assignments").add({
+    await db.collection(Collections.assignments).add({
         donationId,
         assigneeId: candidate.id,
         type,
@@ -313,7 +343,7 @@ async function createAssignment(donationId, candidate, type) {
         expiresAt: admin.firestore.Timestamp.fromDate(expiresAt)
     });
 
-    await db.collection("food_donations").doc(donationId).update({
+    await db.collection(Collections.donations).doc(donationId).update({
         matchingStatus: type === "NGO_OFFER" ? "pending_ngo" : "pending_volunteer"
     });
 
@@ -337,11 +367,11 @@ async function createAssignment(donationId, candidate, type) {
 }
 
 async function reassignNGO(donationId) {
-    const donationSnap = await db.collection("food_donations").doc(donationId).get();
+    const donationSnap = await db.collection(Collections.donations).doc(donationId).get();
     const donation = donationSnap.data();
 
     // 1. Retry Limit Check
-    const assignmentsSnap = await db.collection("donation_assignments")
+    const assignmentsSnap = await db.collection(Collections.assignments)
         .where("donationId", "==", donationId)
         .where("type", "==", "NGO_OFFER")
         .get();
@@ -350,7 +380,7 @@ async function reassignNGO(donationId) {
 
     if (attempts >= MAX_REASSIGNMENT_ATTEMPTS) {
         console.log(`Max Reassignment Attempts (${attempts}) reached for ${donationId}. Stopping.`);
-        await db.collection("food_donations").doc(donationId).update({
+        await db.collection(Collections.donations).doc(donationId).update({
             matchingStatus: "failed_max_retries",
             manualReviewRequired: true
         });
@@ -371,7 +401,7 @@ async function reassignNGO(donationId) {
         console.log(`Reassigned ${donationId} to next NGO ${nextCandidate.id} (Attempt ${attempts + 1})`);
     } else {
         console.log(`No more NGO candidates for ${donationId}.`);
-        await db.collection("food_donations").doc(donationId).update({ matchingStatus: "failed_no_candidates" });
+        await db.collection(Collections.donations).doc(donationId).update({ matchingStatus: "failed_no_candidates" });
     }
 }
 
@@ -409,7 +439,7 @@ function toRad(value) {
 }
 
 async function getActiveTaskCount(volunteerId) {
-    const snap = await db.collection("donation_assignments")
+    const snap = await db.collection(Collections.assignments)
         .where("assigneeId", "==", volunteerId)
         .where("status", "in", ["pending", "accepted"])
         .get();
@@ -417,7 +447,9 @@ async function getActiveTaskCount(volunteerId) {
 }
 
 function isVolunteerAvailableNow(vol) {
-    if (!vol.availabilityHours || vol.availabilityHours.length === 0) return true; // Assume available if not set
+    // Check embedded profile or direct field
+    const availabilityHours = vol.profile?.availabilityHours || vol.availabilityHours;
+    if (!availabilityHours || availabilityHours.length === 0) return true; // Assume available if not set
 
     const now = new Date();
     const currentHour = now.getHours();
@@ -425,14 +457,15 @@ function isVolunteerAvailableNow(vol) {
 
     // Check Weekends
     const isWeekend = (day === 0 || day === 6);
-    if (vol.availabilityHours.includes("Weekends") && isWeekend) return true;
+    if (availabilityHours.includes("Weekends") && isWeekend) return true;
 
     // Check Time Slots
     // "Morning (6AM-12PM)", "Afternoon (12PM-5PM)", "Evening (5PM-10PM)"
 
-    if (vol.availabilityHours.includes("Morning (6AM-12PM)") && (currentHour >= 6 && currentHour < 12)) return true;
-    if (vol.availabilityHours.includes("Afternoon (12PM-5PM)") && (currentHour >= 12 && currentHour < 17)) return true;
-    if (vol.availabilityHours.includes("Evening (5PM-10PM)") && (currentHour >= 17 && currentHour < 22)) return true;
+    if (availabilityHours.includes("Morning (6AM-12PM)") && (currentHour >= 6 && currentHour < 12)) return true;
+    if (availabilityHours.includes("Afternoon (12PM-5PM)") && (currentHour >= 12 && currentHour < 17)) return true;
+    if (availabilityHours.includes("Evening (5PM-10PM)") && (currentHour >= 17 && currentHour < 22)) return true;
 
     return false;
 }
+
