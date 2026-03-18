@@ -14,7 +14,7 @@ class ClarifyRequestScreen extends StatefulWidget {
 }
 
 class _ClarifyRequestScreenState extends State<ClarifyRequestScreen> {
-  final GlobalKey&lt;FormState&gt; _formKey = GlobalKey&lt;FormState&gt;();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _clarificationController = TextEditingController();
   final FoodDonationService _donationService = FoodDonationService();
   bool _isSubmitting = false;
@@ -260,7 +260,7 @@ class _ClarifyRequestScreenState extends State<ClarifyRequestScreen> {
     );
   }
 
-  Future&lt;void&gt; _submitClarificationRequest() async {
+  Future<void> _submitClarificationRequest() async {
     if (!_formKey.currentState!.validate()) return;
 
 setState(() => _isSubmitting = true);

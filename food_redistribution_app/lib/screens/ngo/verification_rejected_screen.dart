@@ -11,7 +11,7 @@ class VerificationRejectedScreen extends StatefulWidget {
 }
 
 class _VerificationRejectedScreenState extends State<VerificationRejectedScreen> {
-  Map&lt;String, dynamic&gt;? _rejectionDetails;
+  Map<String, dynamic>? _rejectionDetails;
   bool _isLoading = true;
 
   @override
@@ -20,9 +20,9 @@ class _VerificationRejectedScreenState extends State<VerificationRejectedScreen>
     _loadRejectionDetails();
   }
 
-  Future&lt;void&gt; _loadRejectionDetails() async {
+  Future<void> _loadRejectionDetails() async {
     try {
-      final authProvider = Provider.of&lt;AuthProvider&gt;(context, listen: false);
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
       // In a real app, you'd load the rejection details from the service
       // For now, we'll simulate the data structure
       await Future.delayed(const Duration(seconds: 1));
@@ -212,8 +212,8 @@ class _VerificationRejectedScreenState extends State<VerificationRejectedScreen>
                     ),
                     const SizedBox(height: 12),
                     
-                    ...(_rejectionDetails?['feedback'] as List&lt;String&gt;? ?? [])
-                        .map((feedback) =&gt; _buildFeedbackItem(feedback))
+                    ...(_rejectionDetails?['feedback'] as List<String>? ?? [])
+                        .map((feedback) => _buildFeedbackItem(feedback))
                         .toList(),
                   ],
                 ),
@@ -252,10 +252,10 @@ class _VerificationRejectedScreenState extends State<VerificationRejectedScreen>
                     ),
                     const SizedBox(height: 16),
                     
-                    ...(_rejectionDetails?['nextSteps'] as List&lt;String&gt;? ?? [])
+                    ...(_rejectionDetails?['nextSteps'] as List<String>? ?? [])
                         .asMap()
                         .entries
-                        .map((entry) =&gt; _buildNextStepItem(entry.key + 1, entry.value))
+                        .map((entry) => _buildNextStepItem(entry.key + 1, entry.value))
                         .toList(),
                   ],
                 ),
@@ -483,9 +483,9 @@ class _VerificationRejectedScreenState extends State<VerificationRejectedScreen>
     final now = DateTime.now();
     final difference = now.difference(dateTime);
     
-    if (difference.inMinutes &lt; 60) {
+    if (difference.inMinutes < 60) {
       return '${difference.inMinutes}m ago';
-    } else if (difference.inHours &lt; 24) {
+    } else if (difference.inHours < 24) {
       return '${difference.inHours}h ago';
     } else {
       return '${difference.inDays}d ago';
@@ -543,7 +543,7 @@ class _VerificationRejectedScreenState extends State<VerificationRejectedScreen>
           actions: [
             TextButton(
               child: const Text('Close'),
-              onPressed: () =&gt; Navigator.pop(context),
+              onPressed: () => Navigator.pop(context),
             ),
             ElevatedButton.icon(
               icon: const Icon(Icons.email),

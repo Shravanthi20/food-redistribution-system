@@ -1,137 +1,107 @@
-# Miscellaneous
-*.class
-*.log
-*.pyc
-*.swp
-.DS_Store
-.atom/
-.buildlog/
-.history
-.svn/
-migrate_working_dir/
-# Node
-node_modules/
-functions/node_modules/
+# ============================================================
+# ROOT .gitignore - Strong rules so "git pull" never causes
+# conflicts. App lives in food_redistribution_app/; this applies
+# to the whole repo.
+# ============================================================
 
-# Firebase
-.firebase/
-.env
+# ---- Documentation ----
+*.md
 
-# IntelliJ related
-*.iml
-*.ipr
-*.iws
-.idea/
+# ---- Generated / log .txt ----
+analysis*.txt
+analysis_log*.txt
+build_error.txt
+flutter_logs.txt
 
-# Visual Studio Code related
-.vscode/
-*.code-workspace
-
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
+# ---- Build and caches ----
+**/build/
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
 .packages
 .pub-cache/
 .pub/
-/build/
-
-# Symbolication related
-app.*.symbols
-
-# Obfuscation related
-app.*.map.json
-
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
-
-# Build outputs
-**/build/
-**/android/build/
-**/ios/build/
-**/web/build/
-**/windows/build/
-**/linux/build/
-**/macos/build/
-
-# Generated files and dependencies
-pubspec.lock
-.flutter-plugins-dependencies
-.dart_tool/
-.packages
 .metadata
-analysis_options.yaml
+**/node_modules/
+**/functions/node_modules/
 
-# IDE and Editor files
-.vscode/
+# ---- Firebase / env (machine or env specific) ----
+**/firebase_options.dart
+**/google-services.json
+**/GoogleService-Info.plist
+.firebase/
+.env
+.env.*
+!.env.example
+**/local.properties
+
+# ---- IDE (major conflict source) ----
 .idea/
-*.swp
-*.swo
-*~
+**/.idea/
+.vscode/
+**/.vscode/
+*.iml
+*.ipr
+*.iws
+*.code-workspace
 .project
 .settings/
 .classpath
 
-# Firebase
-firebase_options.dart
-google-services.json
-GoogleService-Info.plist
+# ---- Android (conflict-prone) ----
+**/android/app/debug/
+**/android/app/profile/
+**/android/app/release/
+**/android/build/
+**/android/.gradle/
+**/android/.cxx/
+**/android/captures/
+**/android/gradle/wrapper/gradle-wrapper.jar
+**/android/app/build/
+**/android/.externalNativeBuild/
+**/*.keystore
+**/*.jks
+**/key.properties
 
-# Environment specific
-.env
-.env.local
-.env.production
-local.properties
+# ---- iOS ----
+**/ios/build/
+**/ios/Pods/
+**/ios/Flutter/.last_build_id
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/ephemeral/
+**/ios/**/xcuserdata/
+**/ios/**/DerivedData/
 
-# Gradle build cache
-.gradle/
-gradle/wrapper/gradle-wrapper.jar
-
-# Analysis and logs
-analysis*.txt  
-analysis_log*.txt
-build_error.txt
-flutter_logs.txt
-
-# Platform specific generated files
+# ---- Web / Windows / Linux / macOS ----
+**/web/build/
+**/windows/build/
+**/linux/build/
+**/macos/build/
 **/windows/flutter/ephemeral/
 **/linux/flutter/ephemeral/
 **/macos/Flutter/ephemeral/
+**/macos/**/xcuserdata/
 
-# Xcode related
-**/ios/Runner.xcworkspace/xcuserdata/
-**/ios/Runner.xcodeproj/xcuserdata/
-**/macos/Runner.xcworkspace/xcuserdata/
-**/macos/Runner.xcodeproj/xcuserdata/
-
-# Coverage
-coverage/
-lcov.info
-
-# Testing
-test_driver/screenshots/
-
-# Temporary files
+# ---- Symbols / temp ----
+app.*.symbols
+app.*.map.json
+*.class
+*.log
+*.pyc
+*.swp
+*.swo
+*~
+.DS_Store
 *.tmp
 *.temp
 temp/
 tmp/
+coverage/
+lcov.info
+**/test_driver/screenshots/
 
-# Documentation that might have merge conflicts
-API_DOCUMENTATION.md
-DEPLOYMENT.md
-DEVELOPMENT.md
-DEVELOPMENT_GUIDE.md
-FIREBASE_IMPLEMENTATION.md
-FIREBASE_SETUP.md
-PHASE_1_2_COMPLETE.md
-PROJECT_STATUS.md
-TESTING.md
-
-# Scripts that might be environment specific
+# ---- Scripts (optional / local) ----
 dev-workflow.sh
 dev-workflow.bat
+**/_archive/

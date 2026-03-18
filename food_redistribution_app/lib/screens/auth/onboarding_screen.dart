@@ -36,8 +36,29 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    // IMMEDIATE FIX: Donors and Volunteers do not need verification. Redirect immediately.
-    if (user.role == UserRole.donor || user.role == UserRole.volunteer) {
+    // Check user role for verification flow
+    if (user.role == UserRole.donor) {
+      // Donors need verification - check if documents submitted
+      if (user.onboardingState == OnboardingState.documentSubmitted) {
+        return _buildUnderReviewScreen(context);
+      } else if (user.onboardingState == OnboardingState.verified || 
+                 user.onboardingState == OnboardingState.active) {
+        // Verified donor - navigate to dashboard
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _navigateToDashboard(context, user.role);
+        });
+        return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      } else {
+        // Need to submit verification documents
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Navigator.pushReplacementNamed(context, AppRouter.donorVerification);
+        });
+        return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      }
+    }
+    
+    // Volunteers do not need verification - redirect immediately
+    if (user.role == UserRole.volunteer) {
        WidgetsBinding.instance.addPostFrameCallback((_) {
           _navigateToDashboard(context, user.role);
        });

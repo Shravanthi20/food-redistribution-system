@@ -454,4 +454,75 @@ class VerificationService {
       ...data,
     });
   }
+
+  // Submit donor verification with file uploads
+  Future<String> submitDonorVerification(String userId, Map<String, dynamic> submissionData) async {
+    try {
+      print('Submitting donor verification for user: $userId');
+      
+      final submissionId = _firestore.collection('verification_submissions').doc().id;
+      
+      // Convert submission data to document format
+      List<Map<String, dynamic>> submittedDocs = [];
+      submissionData.forEach((docType, data) {
+        submittedDocs.add({
+          'type': docType,
+          'fileUrl': data['fileUrl'] ?? '',
+          'additionalInfo': data['additionalInfo'] ?? '',
+          'submittedAt': Timestamp.now(),
+        });
+      });
+
+      // Create verification submission
+      await _firestore.collection('verification_submissions').doc(submissionId).set({
+        'userId': userId,
+        'userRole': UserRole.donor.name,
+        'documentInfo': submittedDocs,
+        'status': VerificationStatus.pending.name,
+        'submittedAt': Timestamp.now(),
+        'priority': _getPriority(UserRole.donor),
+      });
+
+      // Update user's onboarding state
+      await _firestore.collection('users').doc(userId).update({
+        'onboardingState': OnboardingState.documentSubmitted.name,
+        'updatedAt': Timestamp.now(),
+      });
+
+      // Notify admins
+      await _notifyAdminsOfSubmission(submissionId, UserRole.donor);
+
+      // Log the event
+      await _logVerificationEvent('donor_verification_submitted', userId, {
+        'submissionId': submissionId,
+        'documentCount': submittedDocs.length,
+      });
+
+      print('Donor verification submitted successfully with ID: $submissionId');
+      return submissionId;
+    } catch (e) {
+      print('Error submitting donor verification: $e');
+      rethrow;
+    }
+  }
+
+  // Check verification status for user
+  Future<Map<String, dynamic>?> checkVerificationStatus(String userId) async {
+    try {
+      final query = await _firestore
+          .collection('verification_submissions')
+          .where('userId', isEqualTo: userId)
+          .orderBy('submittedAt', descending: true)
+          .limit(1)
+          .get();
+
+      if (query.docs.isNotEmpty) {
+        return query.docs.first.data();
+      }
+      return null;
+    } catch (e) {
+      print('Error checking verification status: $e');
+      return null;
+    }
+  }
 }

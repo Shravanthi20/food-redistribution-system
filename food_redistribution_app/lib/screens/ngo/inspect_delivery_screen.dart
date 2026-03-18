@@ -14,13 +14,13 @@ class InspectDeliveryScreen extends StatefulWidget {
 }
 
 class _InspectDeliveryScreenState extends State<InspectDeliveryScreen> {
-  final GlobalKey&lt;FormState&gt; _formKey = GlobalKey&lt;FormState&gt;();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _notesController = TextEditingController();
   final FoodDonationService _donationService = FoodDonationService();
   bool _isSubmitting = false;
   
   // Hygiene Checklist
-  final Map&lt;String, bool&gt; _hygieneChecklist = {
+  final Map<String, bool> _hygieneChecklist = {
     'Temperature appropriate': false,
     'Packaging intact': false,
     'No unusual smell': false,
@@ -95,7 +95,7 @@ class _InspectDeliveryScreenState extends State<InspectDeliveryScreen> {
                       const SizedBox(height: 16),
                       _buildInfoRow('Food Item', widget.donation.title),
                       _buildInfoRow('Expected Quantity', '${widget.donation.quantity} ${widget.donation.unit}'),
-                      _buildInfoRow('Food Type', widget.donation.foodType.name.toUpperCase()),
+                      _buildInfoRow('Food Type', widget.donation.foodTypes.map((e) => e.name.toUpperCase()).join(', ')),
                       _buildInfoRow('Expiry Date', widget.donation.expiryDateTime.toString().split(' ')[0]),
                       _buildInfoRow('Description', widget.donation.description),
                     ],
@@ -193,7 +193,7 @@ class _InspectDeliveryScreenState extends State<InspectDeliveryScreen> {
                       ),
                       const SizedBox(height: 16),
                       
-                      RadioListTile&lt;bool&gt;(
+                      RadioListTile<bool>(
                         title: const Text('Accept Delivery'),
                         subtitle: Text(
                           'Food meets safety standards and can be distributed',
@@ -212,7 +212,7 @@ class _InspectDeliveryScreenState extends State<InspectDeliveryScreen> {
                         activeColor: Colors.green.shade700,
                       ),
                       
-                      RadioListTile&lt;bool&gt;(
+                      RadioListTile<bool>(
                         title: const Text('Reject Delivery'),
                         subtitle: Text(
                           'Food does not meet safety standards',
@@ -417,13 +417,13 @@ final totalChecked = _hygieneChecklist.values.where((v) => v == true).length;
     }
   }
 
-  Future&lt;void&gt; _submitInspection() async {
+  Future<void> _submitInspection() async {
     if (!_formKey.currentState!.validate()) return;
 
 setState(() => _isSubmitting = true);
 
     try {
-      final authProvider = Provider.of&lt;AuthProvider&gt;(context, listen: false);
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
       
       String? reason;
       if (_overallApproval == false) {

@@ -12,18 +12,18 @@ class DocumentSubmissionScreen extends StatefulWidget {
 }
 
 class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
-  final GlobalKey&lt;FormState&gt; _formKey = GlobalKey&lt;FormState&gt;();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final VerificationService _verificationService = VerificationService();
   
   bool _isSubmitting = false;
   UserRole? _userRole;
   
   // Document form data
-  final Map&lt;String, TextEditingController&gt; _documentControllers = {};
-  final Map&lt;String, String&gt; _documentInfo = {};
+  final Map<String, TextEditingController> _documentControllers = {};
+  final Map<String, String> _documentInfo = {};
   
   // Document requirements by role
-  final Map&lt;UserRole, List&lt;Map&lt;String, String&gt;&gt;&gt; _documentRequirements = {
+  final Map<UserRole, List<Map<String, String>>> _documentRequirements = {
     UserRole.ngo: [
       {
         'type': 'NGO Registration Certificate',
@@ -106,8 +106,8 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
   }
 
   void _initializeUserRole() {
-    final authProvider = Provider.of&lt;AuthProvider&gt;(context, listen: false);
-    _userRole = authProvider.userRole;
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    _userRole = authProvider.appUser?.role;
     
     if (_userRole != null && _documentRequirements.containsKey(_userRole)) {
       for (final doc in _documentRequirements[_userRole]!) {
@@ -257,7 +257,7 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
               
               const SizedBox(height: 16),
               
-              ...documents.map((doc) =&gt; _buildDocumentCard(doc)).toList(),
+              ...documents.map((doc) => _buildDocumentCard(doc)).toList(),
               
               const SizedBox(height: 32),
               
@@ -282,6 +282,11 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
                           hintText: 'Any additional information that might help with verification...',
                           border: OutlineInputBorder(),
                         ),
+                        onSaved: (value) {
+                          if (value != null && value.trim().isNotEmpty) {
+                            _documentInfo['additional_info'] = value.trim();
+                          }
+                        },
                         onChanged: (value) {
                           _documentInfo['additional_info'] = value;
                         },
@@ -335,7 +340,7 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton(
-                  onPressed: _isSubmitting ? null : () =&gt; Navigator.pop(context),
+                  onPressed: _isSubmitting ? null : () => Navigator.pop(context),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.grey[700],
                     padding: const EdgeInsets.symmetric(vertical: 16),
@@ -356,7 +361,7 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
     );
   }
 
-  Widget _buildDocumentCard(Map&lt;String, String&gt; doc) {
+  Widget _buildDocumentCard(Map<String, String> doc) {
     final type = doc['type']!;
     final description = doc['description']!;
     final hint = doc['hint']!;
@@ -414,10 +419,15 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
                   if (value == null || value.trim().isEmpty) {
                     return 'This document information is required';
                   }
-                  if (value.trim().length &lt; 5) {
+                  if (value.trim().length < 5) {
                     return 'Please provide more detailed information';
                   }
                   return null;
+                },
+                onSaved: (value) {
+                  if (value != null && value.trim().isNotEmpty) {
+                    _documentInfo[type] = value.trim();
+                  }
                 },
                 onChanged: (value) {
                   _documentInfo[type] = value.trim();
@@ -430,31 +440,61 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
     );
   }
 
-  Future&lt;void&gt; _submitDocuments() async {
+  Future<void> _submitDocuments() async {
     if (!_formKey.currentState!.validate()) return;
+    
+    // Save form state to ensure all data is captured
+    _formKey.currentState!.save();
+    
+    // Capture current text from controllers as fallback
+    for (final doc in _documentRequirements[_userRole] ?? []) {
+      final type = doc['type']!;
+      final controller = _documentControllers[type];
+      if (controller != null && controller.text.trim().isNotEmpty) {
+        _documentInfo[type] = controller.text.trim();
+      }
+    }
     
     // Check if all required documents have information
     final documents = _documentRequirements[_userRole] ?? [];
+    List<String> missingDocs = [];
+    
     for (final doc in documents) {
       final type = doc['type']!;
-      if (!_documentInfo.containsKey(type) || _documentInfo[type]!.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Please fill out information for: $type')),
-        );
-        return;
+      if (!_documentInfo.containsKey(type) || _documentInfo[type]!.trim().isEmpty) {
+        missingDocs.add(type);
       }
     }
+    
+    if (missingDocs.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Please fill out information for: ${missingDocs.join(", ")}'),
+          backgroundColor: Colors.orange,
+          duration: const Duration(seconds: 4),
+        ),
+      );
+      return;
+    }
 
-    setState(() =&gt; _isSubmitting = true);
+    setState(() => _isSubmitting = true);
 
     try {
-      final authProvider = Provider.of&lt;AuthProvider&gt;(context, listen: false);
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      
+      if (authProvider.firebaseUser?.uid == null) {
+        throw Exception('User not authenticated. Please login again.');
+      }
+      
+      print('Submitting verification with data: $_documentInfo'); // Debug log
       
       final submissionId = await _verificationService.submitVerificationInfo(
         userId: authProvider.firebaseUser!.uid,
         userRole: _userRole!,
-        documentInfo: Map&lt;String, String&gt;.from(_documentInfo),
+        documentInfo: Map<String, String>.from(_documentInfo),
       );
+
+      print ('Submission successful with ID: $submissionId'); // Debug log
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -469,17 +509,19 @@ class _DocumentSubmissionScreenState extends State<DocumentSubmissionScreen> {
         Navigator.pushReplacementNamed(context, '/verification-pending');
       }
     } catch (e) {
+      print('Error submitting documents: $e'); // Debug log
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error submitting documents: $e'),
+            content: Text('Error submitting documents: ${e.toString()}'),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
           ),
         );
       }
     } finally {
       if (mounted) {
-        setState(() =&gt; _isSubmitting = false);
+        setState(() => _isSubmitting = false);
       }
     }
   }

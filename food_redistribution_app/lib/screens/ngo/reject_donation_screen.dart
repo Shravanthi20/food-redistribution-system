@@ -14,13 +14,13 @@ class RejectDonationScreen extends StatefulWidget {
 }
 
 class _RejectDonationScreenState extends State<RejectDonationScreen> {
-  final GlobalKey&lt;FormState&gt; _formKey = GlobalKey&lt;FormState&gt;();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _reasonController = TextEditingController();
   final FoodDonationService _donationService = FoodDonationService();
   bool _isSubmitting = false;
   String? _selectedReason;
 
-  final List&lt;String&gt; _commonReasons = [
+  final List<String> _commonReasons = [
     'Food safety concerns',
     'Inappropriate food type for our beneficiaries',
     'Insufficient quantity',
@@ -119,7 +119,7 @@ class _RejectDonationScreenState extends State<RejectDonationScreen> {
                       _buildInfoRow('Title', widget.donation!.title),
                       _buildInfoRow('Description', widget.donation!.description),
                       _buildInfoRow('Quantity', '${widget.donation!.quantity} ${widget.donation!.unit}'),
-                      _buildInfoRow('Food Type', widget.donation!.foodType.name.toUpperCase()),
+                      _buildInfoRow('Food Type', widget.donation!.foodTypes.map((e) => e.name.toUpperCase()).join(', ')),
                       _buildInfoRow('Expiry', widget.donation!.expiryDateTime.toString().split(' ')[0]),
                     ],
                   ),
@@ -148,7 +148,7 @@ class _RejectDonationScreenState extends State<RejectDonationScreen> {
               // Common Reasons
               Column(
                 children: _commonReasons.map((reason) {
-                  return RadioListTile&lt;String&gt;(
+                  return RadioListTile<String>(
                     title: Text(
                       reason,
                       style: const TextStyle(fontSize: 14),
@@ -297,7 +297,7 @@ class _RejectDonationScreenState extends State<RejectDonationScreen> {
     );
   }
 
-  Future&lt;void&gt; _submitRejection() async {
+  Future<void> _submitRejection() async {
     if (!_formKey.currentState!.validate()) return;
 
 setState(() => _isSubmitting = true);

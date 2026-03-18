@@ -1,0 +1,17 @@
+================================================================================
+SOFTWARE_EVAL - Open only the Flutter app folder
+================================================================================
+
+  food_redistribution_app/   <-- OPEN THIS FOLDER in VS Code / Android Studio
+
+  All code, assets, and config live inside food_redistribution_app.
+  No other folders at this root are needed.
+
+  First time:
+    cd food_redistribution_app
+    flutter pub get
+    flutter run
+
+  Read:  food_redistribution_app/docs/README_FIRST.txt
+
+================================================================================

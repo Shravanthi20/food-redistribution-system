@@ -1,9 +1,9 @@
 import 'package:mockito/mockito.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:food_redistribution/services/firestore_service.dart';
-import 'package:food_redistribution/services/location_service.dart';
-import 'package:food_redistribution/services/real_time_tracking_service.dart';
-import 'package:food_redistribution/services/tracking_service.dart';
+import 'package:food_redistribution_app/services/firestore_service.dart';
+import 'package:food_redistribution_app/services/location_service.dart';
+import 'package:food_redistribution_app/services/real_time_tracking_service.dart';
+import 'package:food_redistribution_app/services/tracking_service.dart';
 
 // Mock classes for testing
 class MockFirestoreService extends Mock implements FirestoreService {}
@@ -147,19 +147,12 @@ class TestDataBuilder {
 
 // Test scenario builder for common flows
 class TrackingTestScenarios {
-  // Scenario: Complete delivery from pickup to delivery
   static Map<String, dynamic> completeDeliveryScenario() {
     return {
       'volunteerId': 'scenario_volunteer_001',
       'taskId': 'scenario_task_001',
-      'pickupLocation': {
-        'latitude': 28.6139,
-        'longitude': 77.2090,
-      },
-      'deliveryLocation': {
-        'latitude': 28.5355,
-        'longitude': 77.3910,
-      },
+      'pickupLocation': {'latitude': 28.6139, 'longitude': 77.2090},
+      'deliveryLocation': {'latitude': 28.5355, 'longitude': 77.3910},
       'estimatedDurationMinutes': 60,
       'events': [
         {'type': 'assignment', 'timeMinute': 0},
@@ -172,31 +165,20 @@ class TrackingTestScenarios {
     };
   }
 
-  // Scenario: Delayed delivery (SLA breach)
   static Map<String, dynamic> delayedDeliveryScenario() {
     return {
       'volunteerId': 'scenario_volunteer_delay',
       'taskId': 'scenario_task_delay',
-      'pickupLocation': {
-        'latitude': 28.6139,
-        'longitude': 77.2090,
-      },
-      'deliveryLocation': {
-        'latitude': 28.5355,
-        'longitude': 77.3910,
-      },
+      'pickupLocation': {'latitude': 28.6139, 'longitude': 77.2090},
+      'deliveryLocation': {'latitude': 28.5355, 'longitude': 77.3910},
       'pickupSLA': 60,
       'deliverySLA': 120,
-      'actualPickupTime': 75, // 15 minutes late
-      'actualDeliveryTime': 135, // 15 minutes late
-      'delayReasons': [
-        'Heavy traffic',
-        'Volunteer got stuck in traffic',
-      ],
+      'actualPickupTime': 75,
+      'actualDeliveryTime': 135,
+      'delayReasons': ['Heavy traffic', 'Volunteer got stuck in traffic'],
     };
   }
 
-  // Scenario: Offline and sync
   static Map<String, dynamic> offlineSyncScenario() {
     return {
       'volunteerId': 'scenario_volunteer_offline',
@@ -208,7 +190,6 @@ class TrackingTestScenarios {
     };
   }
 
-  // Scenario: Multiple concurrent deliveries
   static Map<String, dynamic> multipleConcurrentDeliveriesScenario() {
     return {
       'volunteerId': 'scenario_volunteer_multi',
@@ -242,13 +223,11 @@ extension TrackingAssertions on dynamic {
   void expectValidLocationUpdate() {
     assert(this is Map<String, dynamic>);
     final map = this as Map<String, dynamic>;
-    
     assert(map.containsKey('id'));
     assert(map.containsKey('volunteerId'));
     assert(map.containsKey('latitude'));
     assert(map.containsKey('longitude'));
     assert(map.containsKey('timestamp'));
-    
     final lat = map['latitude'] as double;
     final lng = map['longitude'] as double;
     assert(lat >= -90 && lat <= 90, 'Invalid latitude');
@@ -258,12 +237,10 @@ extension TrackingAssertions on dynamic {
   void expectValidDelayAlert() {
     assert(this is Map<String, dynamic>);
     final map = this as Map<String, dynamic>;
-    
     assert(map.containsKey('id'));
     assert(map.containsKey('taskId'));
     assert(map.containsKey('delayType'));
     assert(map.containsKey('severity'));
-    
     final severity = map['severity'] as String;
     assert(
       ['low', 'medium', 'high', 'critical'].contains(severity),
@@ -274,14 +251,12 @@ extension TrackingAssertions on dynamic {
   void expectValidGeofenceEvent() {
     assert(this is Map<String, dynamic>);
     final map = this as Map<String, dynamic>;
-    
     assert(map.containsKey('id'));
     assert(map.containsKey('volunteerId'));
     assert(map.containsKey('latitude'));
     assert(map.containsKey('longitude'));
     assert(map.containsKey('radius'));
     assert(map.containsKey('eventType'));
-    
     final eventType = map['eventType'] as String;
     assert(['entry', 'exit'].contains(eventType), 'Invalid event type');
   }
