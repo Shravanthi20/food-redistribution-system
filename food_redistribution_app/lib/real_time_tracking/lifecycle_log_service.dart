@@ -18,13 +18,15 @@ class LifecycleLogService {
   final List<LifecycleLogEntry> _entries = [];
 
   void add(String deliveryId, String from, String to, String message) {
-    _entries.add(LifecycleLogEntry(
-      deliveryId: deliveryId,
-      from: from,
-      to: to,
-      timestamp: DateTime.now(),
-      message: message,
-    ));
+    _entries.add(
+      LifecycleLogEntry(
+        deliveryId: deliveryId,
+        from: from,
+        to: to,
+        timestamp: DateTime.now(),
+        message: message,
+      ),
+    );
   }
 
   List<LifecycleLogEntry> getEntriesFor(String deliveryId) {

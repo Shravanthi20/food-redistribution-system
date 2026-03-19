@@ -46,7 +46,9 @@ class AppTheme {
 
   // Legacy aliases for backwards compatibility
   static const Color primaryGreen = accentTeal;
+  static const Color primaryEmerald = accentTeal;
   static const Color secondaryOrange = accentCyan;
+  static const Color slate200 = Color(0xFFE2E8F0);
   static const Color backgroundLight = gradientStart;
   static const Color backgroundDark = primaryNavy;
   static const Color cardLight = surfaceGlass;
