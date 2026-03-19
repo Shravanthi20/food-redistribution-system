@@ -6,6 +6,8 @@
 
 # ---- Documentation ----
 *.md
+!README.md
+!food_redistribution_app/README.md
 
 # ---- Generated / log .txt ----
 analysis*.txt
